@@ -9,14 +9,15 @@ Secciones normativas eliminadas: ninguna. Se corrigen avisos de fuentes ausentes
 Plantilla activa resuelta con resolve-template.ps1 constitution-template -Json.
 No se modificaron plantillas ni documentos históricos. No existe extensions.yml.
 Resueltos: TODO(MASTER_DOCUMENT), TODO(RUBRIC_SOURCE); DOCX v2.0 y RUBRICA.png leídos.
-Pendientes: TODO(RATIFICATION_DATE), TODO(DOCUMENTATION_LAYOUT), ADR complementarias,
+Ratificación: versión 1.1.0 adoptada mediante aprobación humana el 2026-11-10.
+Pendientes: TODO(DOCUMENTATION_LAYOUT), ADR complementarias,
 planes y parámetros operativos por aprobar; no equivalen a fuentes ausentes.
 No se ejecutaron commits, despliegues ni otras funcionalidades de Spec Kit.
 -->
 
 # FarmaFind Constitution
 
-Estado: propuesta oficial para revisión humana, pendiente de ratificación.
+Estado: Constitución oficial ratificada mediante aprobación humana el 2026-11-10.
 Redacción: 2026-11-10, según la fecha del usuario en America/Lima.
 DEBE y NO DEBE expresan obligaciones verificables.
 
@@ -467,7 +468,9 @@ La versión DEBE seguir MAJOR.MINOR.PATCH: MAJOR para eliminaciones o redefinici
 incompatibles; MINOR para principios o secciones nuevas y ampliaciones normativas;
 PATCH para aclaraciones sin cambio normativo. 1.0.0 fue la propuesta inicial; 1.1.0 amplía
 las reglas AWS, RLS, IA y la trazabilidad con fuentes ahora leídas, sin retirar principios
-ni afirmar una ratificación anterior. Sigue pendiente de adopción humana.
+ni afirmar una ratificación anterior. La versión 1.1.0 fue ratificada mediante
+aprobación humana el 2026-11-10; las redacciones previas conservan su condición
+histórica de propuestas.
 
 Cada plan y pull request DEBE revisar principios aplicables, continuidad documental,
 aprobaciones y evidencias. Un incumplimiento DEBE corregirse antes de integrar; si exige
@@ -475,7 +478,7 @@ cambiar una regla, DEBE tramitarse como enmienda humana y no como excepción tá
 Las actualizaciones de otros artefactos DEBEN autorizarse por separado; esta revisión
 solo autoriza escribir .specify/memory/constitution.md.
 
-TODO(RATIFICATION_DATE): registrar la fecha ISO efectiva de aprobación humana;
-la fecha de redacción no constituye adopción ni aprobación retroactiva.
+Ratificación registrada mediante aprobación humana expresa en esta conversación
+el 2026-11-10, sin atribuir adopción retroactiva a las versiones propuestas.
 
-**Version**: 1.1.0 | **Ratified**: pendiente, TODO(RATIFICATION_DATE) | **Last Amended**: 2026-11-10
+**Version**: 1.1.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-10
