@@ -1,0 +1,5 @@
+:root { font-family: system-ui, sans-serif; color: #153329; background: #f4f8f5; }
+body { margin: 0; }
+.bootstrap { max-width: 45rem; margin: 10vh auto; padding: 2.5rem; background: white; border: 1px solid #dce6df; border-radius: 1rem; }
+.eyebrow { color: #356e55; font-weight: 700; }
+h1 { line-height: 1.1; }

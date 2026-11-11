@@ -1,9 +1,9 @@
 ﻿# F00 — Guía corregida de desarrollo Windows 10 y aceptación pendiente
 
-Estado: guía complementaria aprobada expresamente con el plan, 2026-11-10; registro en
-[plan.md](plan.md). **No existen todavía las
-aplicaciones, manifests, lockfile o scripts aquí descritos.** Los comandos son interfaces
-previstas de una implementación posterior aprobada; no se ejecutan en esta corrección.
+Estado: guía complementaria aprobada con el plan, 2026-11-10; registro en
+[plan.md](plan.md). El incremento técnico local ya contiene manifiestos, lockfile,
+aplicaciones bootstrap y comandos verificables. Los controles Playwright y las dos
+preparaciones completas A/B permanecen pendientes de entorno compatible.
 
 Decisión aprobada: desarrollar en Windows 10 con VS Code, Codex, Spec Kit, Node.js y npm.
 No instalar Ubuntu/WSL, actualizar Windows o añadir Docker para continuar F00.
@@ -21,7 +21,7 @@ es la referencia de los reportes; estas son correcciones documentales, no prueba
 
 | Ámbito | Entorno | Comprobaciones previstas | Alcance del resultado |
 |---|---|---|---|
-| Desarrollo y controles locales sin navegador | Windows 10 actual; PowerShell 5.1, Node 24.17.0/npm 11.13.0 | Configuración válida/ausente/inválida, sintaxis/tipos/imports, compilación frontend/backend/Notificaciones, contratos y endpoints HTTP, colisión de puertos, separación de procesos y limpieza. | Éxito o fallo local parcial, cuando exista implementación; no acredita UI React visible ni aceptación global. |
+| Desarrollo y controles locales sin navegador | Windows 10 actual; PowerShell 5.1, Node 24.17.0/npm 11.13.0 | Configuración válida/ausente/inválida, sintaxis/tipos/imports, compilación frontend/backend/Notificaciones, contratos y endpoints HTTP, colisión de puertos, separación de procesos y limpieza. | Éxito o fallo local parcial; no acredita UI React visible ni aceptación global. |
 | Navegador y aceptación completa | Windows oficialmente compatible con Playwright, por ejemplo equipo Windows 11 x64 disponible posteriormente | Pantalla React/Vite bootstrap cargada, negativos y recursos UI, separación de los tres componentes con resultados observables, más todos los controles locales. | Pendiente de entorno y ejecución; requiere dos preparaciones limpias independientes de la misma revisión para cerrar aceptación. |
 
 No se declara soporte oficial de Playwright en Windows 10. Su [documentación oficial](https://playwright.dev/docs/intro#system-requirements)
@@ -30,10 +30,10 @@ pendiente, no permiso para actualizar el equipo actual ni para sustituir pruebas
 capturas manuales, HTTP estático o procesos activos. No se habilita un servicio externo
 como dependencia de las comprobaciones.
 
-## Prerrequisitos de desarrollo y controles locales futuros
+## Prerrequisitos de desarrollo y controles locales
 
-- Especificación y plan corregido aprobados; fase de implementación/ejecución pendiente
-  de autorización separada. La aprobación documental no permite ejecutar esta guía.
+- Especificación y plan corregido aprobados; la implementación y verificación local F00
+  fueron autorizadas expresamente. La aceptación completa conserva sus propios requisitos.
 - Windows 10 y herramientas locales ya indicadas; no se exige otro SO o shell adicional.
 - Fuente/snapshot inmutable de la futura implementación, tres workspaces y lockfile raíz
   revisado. npm workspaces, React/Vite y Express/TypeScript se conservan.
@@ -46,8 +46,8 @@ como dependencia de las comprobaciones.
   sin navegador. La ausencia de navegador no convierte sus controles en fallidos por sí sola;
   deja explícitamente pendiente la aceptación UI/global.
 
-La comprobación de Node/npm observada durante planificación no acredita que dependencias,
-compilación o endpoints funcionen: aún no existe código. Si falla un prerrequisito local,
+La comprobación de Node/npm por sí sola no acredita que dependencias,
+compilación o endpoints funcionen. Si falla un prerrequisito local,
 registrarlo y detener el control afectado sin ocultarlo ni cambiar versiones silenciosamente.
 
 ## Preparaciones limpias A y B
@@ -64,9 +64,9 @@ Compartir herramientas instaladas y caché de descargas no equivale a reutilizar
 preparado. Para cada preparación registrar comandos, directorios, versiones, expectativas,
 resultados obtenidos y errores, o ausencia explícita de errores cuando corresponda.
 
-### Preparación local A — comandos previstos, no ejecutados
+### Preparación local A — comandos para copia limpia futura
 
-Solo después de implementar y autorizar la ejecución:
+Desde una copia limpia preparada bajo la autorización F00 vigente:
 
 ```powershell
 Set-Location -LiteralPath 'C:\FarmaFindValidacion\A'
@@ -93,9 +93,8 @@ npm.cmd run build
 npm.cmd run verify:local -- --preparation A
 ```
 
-verify:local es una propuesta descrita también en contracts/local-configuration.md,
-no un comando existente. Los documentos ya están armonizados; su implementación requiere
-autorizar la fase correspondiente; el plan ya está aprobado. No ejecutarlo ahora.
+`verify:local` existe y utiliza Vite preview en 4173 para controles Windows 10 sin Playwright. El reporte de una
+ejecución en el árbol de trabajo actual no sustituye la preparación limpia A descrita aquí.
 
 Los controles locales se ejecutarán automáticamente sin importar o lanzar Playwright.
 El supervisor podrá iniciar procesos propios, verificar HTTP 200 e identidad correcta

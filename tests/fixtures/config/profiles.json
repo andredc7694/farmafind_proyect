@@ -1,0 +1,6 @@
+{
+  "fixture": "fictitious-bootstrap-configuration",
+  "api": { "APP_MODE": "bootstrap", "HOST": "127.0.0.1", "PORT": "3000" },
+  "notifications": { "APP_MODE": "bootstrap", "HOST": "127.0.0.1", "PORT": "3001" },
+  "frontend": { "VITE_APP_MODE": "bootstrap" }
+}

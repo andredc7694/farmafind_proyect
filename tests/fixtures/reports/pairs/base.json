@@ -1,0 +1,6 @@
+{
+  "fixture": "synthetic-not-execution-evidence",
+  "sourceHash": "same-revision",
+  "lockfileHash": "same-lock",
+  "workingDirectories": { "A": "copy-A", "B": "copy-B" }
+}

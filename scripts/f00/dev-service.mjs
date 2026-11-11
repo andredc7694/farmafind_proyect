@@ -1,0 +1,12 @@
+import { spawnSync, spawn } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root = fileURLToPath(new URL('../../', import.meta.url));
+const workspace = process.argv[2];
+if (!['backend', 'notifications'].includes(workspace)) throw new Error('Componente inválido');
+const build = spawnSync(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'), '-p', path.join(root, workspace, 'tsconfig.json')], { cwd: root, stdio: 'inherit' });
+if (build.status !== 0) process.exit(build.status ?? 1);
+const child = spawn(process.execPath, [path.join(root, workspace, 'dist/main.js')], { cwd: root, stdio: 'inherit', windowsHide: true });
+process.on('SIGINT', () => child.kill('SIGTERM'));
+process.on('SIGTERM', () => child.kill('SIGTERM'));
+child.on('exit', code => { process.exitCode = code ?? 1; });

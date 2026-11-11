@@ -1,0 +1,37 @@
+{
+  "name": "farmafind",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.13.0",
+  "engines": {
+    "node": "24.17.0",
+    "npm": "11.13.0"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "notifications"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace @farmafind/frontend",
+    "dev:api": "node scripts/f00/dev-service.mjs backend",
+    "dev:notifications": "node scripts/f00/dev-service.mjs notifications",
+    "build": "node scripts/f00/build.mjs",
+    "check": "node scripts/f00/check.mjs",
+    "check:config": "node scripts/f00/check-config.mjs",
+    "test:base": "node node_modules/vitest/vitest.mjs run",
+    "verify:local": "node scripts/f00/verify-local.mjs",
+    "browser:install": "node scripts/f00/browser-install.mjs",
+    "verify:bootstrap": "node scripts/f00/verify-bootstrap.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "supertest": "7.1.4",
+    "typescript": "5.9.3",
+    "vitest": "4.1.12",
+    "@types/node": "24.19.2",
+    "@types/express": "5.0.6",
+    "@types/supertest": "6.0.3"
+  }
+}

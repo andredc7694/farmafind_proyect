@@ -1,0 +1,154 @@
+{
+  "timestamp": "2026-11-10T21:29:51.872Z",
+  "source": "https://registry.npmjs.org",
+  "node": "v24.17.0",
+  "direct": {
+    "@playwright/test": [
+      "1.65.0"
+    ],
+    "supertest": [
+      "7.1.4"
+    ],
+    "typescript": [
+      "5.9.3"
+    ],
+    "vitest": [
+      "4.0.18"
+    ],
+    "@types/node": [
+      "24.19.2"
+    ],
+    "@types/express": [
+      "5.0.6"
+    ],
+    "@types/supertest": [
+      "6.0.3"
+    ],
+    "react": [
+      "19.2.7"
+    ],
+    "react-dom": [
+      "19.2.7"
+    ],
+    "@vitejs/plugin-react": [
+      "5.0.4"
+    ],
+    "vite": [
+      "7.3.6"
+    ],
+    "express": [
+      "5.2.1"
+    ]
+  },
+  "types": {
+    "@types/node": "24.19.2",
+    "@types/express": "5.0.6",
+    "@types/supertest": "6.0.3"
+  },
+  "advisories": {
+    "vitest": [
+      {
+        "id": 1139529,
+        "url": "https://github.com/advisories/GHSA-5xrq-8626-4rwp",
+        "title": "When Vitest UI server is listening, arbitrary file can be read and executed",
+        "severity": "critical",
+        "vulnerable_versions": ">=4.0.0 <4.1.0",
+        "cwe": [
+          "CWE-22",
+          "CWE-862"
+        ],
+        "cvss": {
+          "score": 9.8,
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+        }
+      },
+      {
+        "id": 1193683,
+        "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+        "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+        "severity": "moderate",
+        "vulnerable_versions": ">=2.1.0 <4.1.11",
+        "cwe": [
+          "CWE-22"
+        ],
+        "cvss": {
+          "score": 5.9,
+          "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+        }
+      }
+    ],
+    "vite": [
+      {
+        "id": 1242725,
+        "url": "https://github.com/advisories/GHSA-9jrq-w75r-8gcw",
+        "title": "Vite: Cross origin script execution through Vite custom middleware",
+        "severity": "low",
+        "vulnerable_versions": ">=7.0.0 <=7.3.6",
+        "cwe": [
+          "CWE-80"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        }
+      },
+      {
+        "id": 1242731,
+        "url": "https://github.com/advisories/GHSA-rq7h-c2jc-7f22",
+        "title": "Vite: Files outside `server.fs.allow` could be served when project paths match system paths on non-Windows machine",
+        "severity": "moderate",
+        "vulnerable_versions": ">=7.0.0 <=7.3.6",
+        "cwe": [
+          "CWE-22",
+          "CWE-284"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        }
+      },
+      {
+        "id": 1242659,
+        "url": "https://github.com/advisories/GHSA-587h-7wmj-h5pm",
+        "title": "launch-editor: `fs.existsSync()` existence check can be bypassed on Windows",
+        "severity": "high",
+        "vulnerable_versions": ">=7.0.0 <=7.3.6",
+        "cwe": [
+          "CWE-77"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        }
+      },
+      {
+        "id": 1242623,
+        "url": "https://github.com/advisories/GHSA-698v-4r3x-3vcv",
+        "title": "launch-editor: escapeCmdArgs() omits % escaping on Windows",
+        "severity": "moderate",
+        "vulnerable_versions": ">=7.0.0 <=7.3.6",
+        "cwe": [
+          "CWE-78"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        }
+      },
+      {
+        "id": 1242652,
+        "url": "https://github.com/advisories/GHSA-r825-w8mm-5pxw",
+        "title": "launch-editor: Editor CLI flag misinterpretation causing arbitrary command execution for some editors",
+        "severity": "moderate",
+        "vulnerable_versions": ">=7.0.0 <=7.3.6",
+        "cwe": [
+          "CWE-88"
+        ],
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "fixture": "synthetic-not-execution-evidence",
+  "localSuccess": { "local": "passed", "overall": "pending", "acceptance": "pending" },
+  "localFailure": { "local": "failed", "overall": "failed", "acceptance": "pending" }
+}
