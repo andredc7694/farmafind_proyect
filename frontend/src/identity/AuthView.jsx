@@ -10,17 +10,20 @@ function submitCredentials(event, action) {
 }
 
 /** Presentation only; session, CSRF and authorization remain server responsibilities. */
-export function AuthView({ status = 'anonymous', error = false, onRegister, onLogin, onLogout }) {
+export function AuthView({ status = 'anonymous', error = false, notice = null, profile = null,
+  onRegister, onLogin, onLogout }) {
   if (status === 'authenticated') {
     return <section aria-labelledby="identity-title">
       <h2 id="identity-title">Sesión activa</h2>
+      {profile?.email && <p>Correo de tu perfil: <strong>{profile.email}</strong></p>}
       <button type="button" onClick={onLogout}>Cerrar sesión</button>
     </section>;
   }
 
   return <section aria-labelledby="identity-title">
     <h2 id="identity-title">Acceso a FarmaFind</h2>
-    {status === 'expired' && <p role="status">Tu sesión expiró. Inicia sesión nuevamente.</p>}
+    {status === 'expired' && <p role="status">Tu sesión terminó o expiró. Inicia sesión nuevamente.</p>}
+    {notice && <p role="status">{notice}</p>}
     {error && <p role="alert">No se pudo completar la solicitud. Revisa los datos e inténtalo de nuevo.</p>}
     <form onSubmit={event => submitCredentials(event, onRegister)}>
       <h3>Crear cuenta</h3>

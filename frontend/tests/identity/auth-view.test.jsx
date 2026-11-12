@@ -24,9 +24,18 @@ describe('vista aislada de identidad F01', () => {
   });
 
   it('muestra sesión activa y salida sin conservar formularios de credenciales', () => {
-    const html = markup({ status: 'authenticated' });
+    const html = markup({ status: 'authenticated', profile: { email: 'cliente@example.test' } });
     expect(html).toContain('Sesión activa');
+    expect(html).toContain('cliente@example.test');
     expect(html).toContain('Cerrar sesión');
     expect(html).not.toContain('type="password"');
+  });
+
+  it('confirma la solicitud sin afirmar que existe una cuenta y muestra sesión terminada', () => {
+    const notice = 'Solicitud recibida. Si corresponde, ya puedes iniciar sesión.';
+    expect(markup({ notice })).toContain(notice);
+    const expired = markup({ status: 'expired' });
+    expect(expired).toContain('Tu sesión terminó o expiró');
+    expect(expired).not.toContain('cliente@example.test');
   });
 });
