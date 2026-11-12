@@ -8,6 +8,8 @@
     "dev": "node dist/main.js"
   },
   "dependencies": {
-    "express": "5.2.1"
+    "argon2": "0.45.2",
+    "express": "5.2.1",
+    "pg": "8.23.1"
   }
 }

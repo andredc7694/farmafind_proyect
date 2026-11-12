@@ -1,0 +1,31 @@
+name: farmafind-f01-postgres
+
+services:
+  postgres:
+    image: postgres:18.6-bookworm
+    restart: "no"
+    environment:
+      POSTGRES_DB: farmafind_f01_test
+      POSTGRES_USER: f01_migrator
+      POSTGRES_PASSWORD_FILE: /run/secrets/f01_postgres_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    secrets:
+      - f01_postgres_password
+    ports:
+      - "127.0.0.1:55431:5432"
+    volumes:
+      - f01_pgdata:/var/lib/postgresql
+    shm_size: 128mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U f01_migrator -d farmafind_f01_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+
+secrets:
+  f01_postgres_password:
+    file: ./.cache/f01-docker/postgres-password.txt
+
+volumes:
+  f01_pgdata:

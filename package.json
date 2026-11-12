@@ -16,22 +16,28 @@
   "scripts": {
     "dev:web": "npm run dev --workspace @farmafind/frontend",
     "dev:api": "node scripts/f00/dev-service.mjs backend",
+    "dev:identity": "npm run build --workspace @farmafind/backend && node scripts/f01/start.mjs",
     "dev:notifications": "node scripts/f00/dev-service.mjs notifications",
     "build": "node scripts/f00/build.mjs",
     "check": "node scripts/f00/check.mjs",
     "check:config": "node scripts/f00/check-config.mjs",
     "test:base": "node node_modules/vitest/vitest.mjs run",
+    "test:f01:unit": "node scripts/f01/check.mjs unit",
+    "test:f01:api": "node scripts/f01/check.mjs api",
+    "test:f01:rls": "node scripts/f01/check.mjs rls",
+    "migrate:f01:test": "node scripts/f01/migrate.mjs",
     "verify:local": "node scripts/f00/verify-local.mjs",
     "browser:install": "node scripts/f00/browser-install.mjs",
     "verify:bootstrap": "node scripts/f00/verify-bootstrap.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.65.0",
+    "@types/express": "5.0.6",
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "@types/supertest": "6.0.3",
     "supertest": "7.1.4",
     "typescript": "5.9.3",
-    "vitest": "4.1.12",
-    "@types/node": "24.19.2",
-    "@types/express": "5.0.6",
-    "@types/supertest": "6.0.3"
+    "vitest": "4.1.12"
   }
 }

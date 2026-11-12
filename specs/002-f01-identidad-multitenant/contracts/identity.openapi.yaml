@@ -1,0 +1,315 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F01 Identity API (propuesta)
+  version: 0.1.0-draft
+  description: >-
+    Contrato F01. Identidad y administración local exclusiva de TRABAJADOR tienen
+    implementación y pruebas locales con PostgreSQL ficticio. Conocer pharmacyId
+    no concede acceso. EXC-01 y ROL-01 limitan la operación a la farmacia propia
+    con permiso explícito. GLO-01 y BOOT-01 no autorizan concesión global ni alta
+    privilegiada real; F01 aún no tiene aceptación completa.
+servers:
+  - url: /api/v1
+tags:
+  - name: Authentication
+  - name: Memberships
+paths:
+  /auth/csrf:
+    get:
+      tags: [Authentication]
+      summary: Solicitar token CSRF para mutaciones de identidad
+      responses:
+        '200':
+          description: Token no autenticador ligado a pre-sesión o sesión
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [csrfToken]
+                properties:
+                  csrfToken: { type: string, minLength: 1 }
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Registrar identidad ordinaria de cliente sin membresía
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, maxLength: 254 }
+                password: { type: string, minLength: 1 }
+      responses:
+        '202': { description: Solicitud procesada sin revelar si el correo ya existe }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Iniciar sesión mediante correo y contraseña
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Sesión activa; cookie HttpOnly con atributos de entorno
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionView' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Revocar sesión actual y limpiar cookie
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '204': { description: Sesión revocada; repetición segura sin reactivarla }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /auth/session:
+    get:
+      tags: [Authentication]
+      summary: Consultar identidad y contexto vigentes sin secretos
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Vista mínima de sesión
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionView' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+  /me/memberships:
+    get:
+      tags: [Memberships]
+      summary: Listar solo membresías propias vigentes y visibles
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Membresías propias sin credenciales ni auditoría
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MembershipView' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+  /me/active-pharmacy:
+    put:
+      tags: [Memberships]
+      summary: Seleccionar una farmacia activa autorizada
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [pharmacyId]
+              properties:
+                pharmacyId: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Contexto seleccionado y revalidado en posteriores operaciones
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivePharmacyView' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+  /pharmacies/{pharmacyId}/memberships:
+    parameters:
+      - $ref: '#/components/parameters/PharmacyId'
+    get:
+      tags: [Memberships]
+      summary: Consultar miembros de farmacia propia con permiso local
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Vista mínima de miembros de la farmacia autorizada
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MembershipView' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+    post:
+      tags: [Memberships]
+      summary: Conceder TRABAJADOR a otra persona dentro de la farmacia autorizada
+      x-f01-decisions-approved: [EXC-01, ROL-01]
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MembershipMutation' }
+      responses:
+        '201':
+          description: Membresía creada y auditada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipView' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /pharmacies/{pharmacyId}/memberships/{membershipId}:
+    parameters:
+      - $ref: '#/components/parameters/PharmacyId'
+      - name: membershipId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Memberships]
+      summary: Revocar TRABAJADOR de otra persona dentro de la farmacia autorizada
+      x-f01-decisions-approved: [EXC-01, ROL-01]
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status]
+              properties:
+                status: { type: string, enum: [REVOCADA] }
+      responses:
+        '200':
+          description: Membresía TRABAJADOR revocada y auditada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipView' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: ff_session
+      description: Nombre provisional; cookie opaca HttpOnly, nunca valor en JSON.
+  parameters:
+    CsrfToken:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      schema: { type: string, minLength: 1 }
+    PharmacyId:
+      name: pharmacyId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: Identificador solicitado, no prueba de autorización.
+  schemas:
+    SessionView:
+      type: object
+      additionalProperties: false
+      required: [userId, email, activePharmacyId]
+      properties:
+        userId: { type: string, format: uuid }
+        email: { type: string, format: email }
+        activePharmacyId: { type: [string, 'null'], format: uuid }
+    ActivePharmacyView:
+      type: object
+      additionalProperties: false
+      required: [pharmacyId, role]
+      properties:
+        pharmacyId: { type: string, format: uuid }
+        role: { type: string }
+        delegations:
+          type: array
+          items: { type: string }
+    MembershipView:
+      type: object
+      additionalProperties: false
+      required: [id, userId, pharmacyId, role, status]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        pharmacyId: { type: string, format: uuid }
+        role: { type: string }
+        status: { type: string, enum: [ACTIVA, SUSPENDIDA, REVOCADA] }
+        delegations:
+          type: array
+          items: { type: string }
+    MembershipMutation:
+      type: object
+      additionalProperties: false
+      required: [userId, role]
+      properties:
+        userId: { type: string, format: uuid }
+        role: { type: string, enum: [TRABAJADOR] }
+    Error:
+      type: object
+      additionalProperties: false
+      required: [code, message, correlationId]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        correlationId: { type: string }
+  responses:
+    BadRequest:
+      description: Entrada inválida sin eco de secretos
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthenticated:
+      description: Sesión ausente, vencida o revocada
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Acción denegada sin datos privados
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotVisible:
+      description: Recurso no visible, sin confirmar existencia ajena
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Conflicto de estado o unicidad sin revelar fila ajena
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Intentos limitados sin distinguir cuentas existentes
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
