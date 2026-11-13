@@ -8,8 +8,14 @@
     "dev": "node dist/main.js"
   },
   "dependencies": {
+    "@excel.js/exceljs": "0.15.0",
     "argon2": "0.45.2",
+    "busboy": "1.6.0",
+    "csv-parse": "7.0.3",
     "express": "5.2.1",
     "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/busboy": "1.5.5"
   }
 }
