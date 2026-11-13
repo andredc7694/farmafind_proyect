@@ -26,9 +26,9 @@ Los siete F03-SC-001–007 tienen verificación automatizada registrada. La acep
 | 7 | Pantalla React `/search` en español. | Evidencia F03; rediseño profesional fuera de alcance. |
 | 8 | Sin despliegue ni recurso AWS. | Pendiente transversal. |
 | 9 | Migraciones, índices y proyección PostgreSQL. | Evidencia F03. |
-| 10 | Sin integración operativa de Notificaciones. | Pendiente transversal. |
+| 10 | F03 no configura dominio, DNS ni CDN. | Pendiente transversal; no existe evidencia F03 de despliegue, HTTPS, CloudFront u OAC. |
 | 11 | Cache-Aside real, TTL, hit/miss y fallback. | Evidencia F03. |
-| 12 | Sin operación AWS/S3/CloudFront/Lightsail. | Pendiente transversal. |
+| 12 | F03 no añade ni ejecuta un pipeline CI/CD. | Pendiente transversal; las verificaciones registradas fueron locales. |
 | 13 | k6 con Redis y fallback; p95/error documentados. | Evidencia F03. |
 | 14 | Código, migraciones y fixtures ficticios. | Evidencia F03. |
 | 15 | Evidencia y quickstart actualizados. | Evidencia F03. |
