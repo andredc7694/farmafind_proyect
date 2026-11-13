@@ -3,3 +3,13 @@ body { margin: 0; }
 .bootstrap { max-width: 45rem; margin: 10vh auto; padding: 2.5rem; background: white; border: 1px solid #dce6df; border-radius: 1rem; }
 .eyebrow { color: #356e55; font-weight: 700; }
 h1 { line-height: 1.1; }
+.search { max-width: 64rem; margin-top: 4vh; }
+.search-form { display: grid; gap: .75rem; }
+.search-form input, .search-form select, .search-form button { font: inherit; padding: .7rem; border: 1px solid #aebfb5; border-radius: .45rem; }
+.search-form button { background: #176b52; color: white; border: 0; cursor: pointer; }
+.search-filters { display: grid; grid-template-columns: repeat(auto-fit,minmax(12rem,1fr)); gap: .75rem; }
+.search-filters label { display: grid; gap: .3rem; }
+.notice { padding: .75rem; background: #e4f4ed; border-radius: .5rem; }
+.offer-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit,minmax(15rem,1fr)); gap: 1rem; }
+.offer { padding: 1rem; background: #fff; border: 1px solid #dce6df; border-radius: .75rem; }
+.offer h2, .offer h3 { margin-bottom: .25rem; }

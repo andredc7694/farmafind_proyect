@@ -51,3 +51,7 @@ export interface InventoryUnitOfWork {
   run<T>(sessionSecret: string, pharmacyId: string, capability: InventoryCapability,
     work: (ports: InventoryOperationPorts, context: AuthorizedInventoryContext) => Promise<T>): Promise<T>;
 }
+
+/** Consumer-owned post-commit port; F02 remains independent from Redis/F03. */
+export interface InventorySearchInvalidator { invalidate(): Promise<void>; }
+export const NO_INVENTORY_SEARCH_INVALIDATOR: InventorySearchInvalidator = { invalidate: async () => undefined };

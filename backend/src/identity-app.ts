@@ -17,6 +17,15 @@ import { createInventoryRouter } from './modules/inventario/presentation/invento
 import { PreviewImport } from './modules/inventario/application/preview-import.js';
 import { ConfirmImport } from './modules/inventario/application/confirm-import.js';
 import { createImportRouter } from './modules/inventario/presentation/import-router.js';
+import { createClient, type RedisClientType } from 'redis';
+import type { SearchRuntimeConfig } from './config/search.js';
+import { PgPublicOfferRepository } from './modules/busqueda/infrastructure/public-offer-repository.js';
+import { RedisSearchCache } from './modules/busqueda/infrastructure/redis-search-cache.js';
+import { RedisSearchInvalidator } from './modules/busqueda/infrastructure/search-invalidator.js';
+import { SearchPublicOffers } from './modules/busqueda/application/search-public-offers.js';
+import { createPublicSearchRouter } from './modules/busqueda/presentation/public-search-router.js';
+import { createPublicPharmacyRouter } from './modules/busqueda/presentation/public-pharmacy-router.js';
+import { InMemorySearchMetrics } from './modules/busqueda/infrastructure/in-memory-search-metrics.js';
 
 export interface LocalIdentityRuntimeConfig {
   authDatabaseUrl: string;
@@ -25,6 +34,7 @@ export interface LocalIdentityRuntimeConfig {
   abuseKey: Buffer;
   allowedOrigin: string;
   cookieSecure: false;
+  search?: SearchRuntimeConfig;
 }
 
 interface SqlClient {
@@ -54,6 +64,7 @@ async function verifyPool(pool: SqlPool, required: 'f01_auth' | 'f01_runtime', f
 export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig, createPool: (url: string) => SqlPool) {
   const authPool = createPool(config.authDatabaseUrl);
   const tenantPool = createPool(config.tenantDatabaseUrl);
+  let redisClient: RedisClientType | null = null;
   try {
     await verifyPool(authPool, 'f01_auth', 'f01_runtime');
     await verifyPool(tenantPool, 'f01_runtime', 'f01_auth');
@@ -69,14 +80,31 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     app.use('/api/v1', createAdminMembershipRouter(identity, management, http));
     app.use('/api/v1', createCatalogRouter(new ListCatalog(new AuthorizedCatalogReader(tenantTransactions)), http));
     const inventoryTransactions = new PgInventoryTenantRunner(tenantTransactions);
-    app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions), http));
+    let invalidator = undefined;
+    if (config.search) {
+      redisClient = createClient({ url: config.search.redisUrl, socket: { connectTimeout: config.search.cacheTimeoutMs,
+        reconnectStrategy: false } });
+      redisClient.on('error', () => undefined);
+      const repository = new PgPublicOfferRepository(tenantPool);
+      const cache = new RedisSearchCache(redisClient, config.search.cacheTimeoutMs);
+      invalidator = new RedisSearchInvalidator(redisClient);
+      const search = new SearchPublicOffers(repository, cache, { ttlSeconds: config.search.cacheTtlSeconds,
+        candidateLimit: config.search.candidateLimit }, new InMemorySearchMetrics());
+      app.use('/api/v1', createPublicSearchRouter(search));
+      app.use('/api/v1', createPublicPharmacyRouter(repository));
+    }
+    app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));
     app.use('/api/v1', createImportRouter(new PreviewImport(inventoryTransactions),
-      new ConfirmImport(inventoryTransactions), http));
+      new ConfirmImport(inventoryTransactions, invalidator), http));
     return {
       app,
-      close: async () => { await Promise.all([authPool.end(), tenantPool.end()]); },
+      close: async () => {
+        if (redisClient?.isOpen) await redisClient.quit();
+        await Promise.all([authPool.end(), tenantPool.end()]);
+      },
     };
   } catch {
+    if (redisClient?.isOpen) await redisClient.quit();
     await Promise.all([authPool.end(), tenantPool.end()]);
     throw new Error('F01: no se pudo iniciar la composición local; revisar configuración y roles');
   }

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+.git/
+.cache/
+.env*
+*.log*
+playwright-report/
+test-results/
+docs/referencias/

@@ -1,5 +1,5 @@
 import { assessConfirmation, type ReconciledImportRow } from '../domain/importacion.js';
-import type { InventoryUnitOfWork, ImportRecord } from './ports.js';
+import { NO_INVENTORY_SEARCH_INVALIDATOR, type InventorySearchInvalidator, type InventoryUnitOfWork, type ImportRecord } from './ports.js';
 
 export class ImportConflictError extends Error {}
 class ApplyConflictError extends Error {}
@@ -26,7 +26,8 @@ function isApplyConflict(error: unknown): boolean {
 }
 
 export class ConfirmImport {
-  constructor(private readonly transactions: InventoryUnitOfWork) {}
+  constructor(private readonly transactions: InventoryUnitOfWork,
+    private readonly searchInvalidator: InventorySearchInvalidator = NO_INVENTORY_SEARCH_INVALIDATOR) {}
 
   async confirm(secret: string, pharmacyId: string, importId: string): Promise<PublicImport> {
     let outcome: ImportRecord;
@@ -85,6 +86,7 @@ export class ConfirmImport {
       throw new ImportConflictError('Importación no confirmable');
     }
     if (outcome.state !== 'CONFIRMADA') throw new ImportConflictError('Importación no confirmable');
+    await this.searchInvalidator.invalidate();
     return publicRecord(outcome);
   }
 
