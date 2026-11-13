@@ -4,12 +4,12 @@ import type { Delegation, Membership, PharmacyReference } from '../../domain/ide
 import { createHash } from 'node:crypto';
 import { PgMembershipRepository } from '../membership-repository.js';
 
-interface SqlClient {
+export interface SqlClient {
   query(sql: string, values?: unknown[]): Promise<{ rows: Array<Record<string, unknown>> }>;
   release(discard?: boolean): void;
 }
 
-interface SqlPool {
+export interface SqlPool {
   connect(): Promise<SqlClient>;
 }
 
@@ -104,7 +104,13 @@ class PgIdentityTransaction implements AdminMembershipTransaction {
 export class PgIdentityUnitOfWork implements IdentityUnitOfWork, AdminMembershipUnitOfWork {
   constructor(private readonly pool: SqlPool) {}
 
-  async run<T>(sessionSecret: string, work: (transaction: IdentityTransaction, actorUserId: string) => Promise<T>): Promise<T> {
+  run<T>(sessionSecret: string, work: (transaction: IdentityTransaction, actorUserId: string) => Promise<T>): Promise<T> {
+    return this.runWithClient(sessionSecret, (transaction, _client, actorUserId) => work(transaction, actorUserId));
+  }
+
+  /** Infrastructure-only extension: reuse the verified F01 transaction for other modules. */
+  async runWithClient<T>(sessionSecret: string,
+    work: (transaction: IdentityTransaction, client: SqlClient, actorUserId: string) => Promise<T>): Promise<T> {
     if (!/^[a-f0-9]{64}$/i.test(sessionSecret)) throw new Error('No autorizado');
     const fingerprint = createHash('sha256').update(Buffer.from(sessionSecret, 'hex')).digest();
     const fingerprintHex = fingerprint.toString('hex');
@@ -134,7 +140,7 @@ export class PgIdentityUnitOfWork implements IdentityUnitOfWork, AdminMembership
       if (active.rows.length !== 1 || !validId(String(active.rows[0].id))) throw new Error('No autorizado');
       const actorUserId = String(active.rows[0].id);
       await client.query("SELECT set_config('app.actor_user_id',$1,true)", [actorUserId]);
-      const result = await work(new PgIdentityTransaction(client, actorUserId), actorUserId);
+      const result = await work(new PgIdentityTransaction(client, actorUserId), client, actorUserId);
       await client.query('COMMIT');
       inTransaction = false;
       return result;

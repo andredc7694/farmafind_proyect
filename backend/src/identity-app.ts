@@ -8,6 +8,15 @@ import { ManageMemberships } from './modules/usuarios/application/manage-members
 import { createIdentityRouter } from './modules/usuarios/presentation/auth-router.js';
 import { createMembershipRouter } from './modules/usuarios/presentation/membership-router.js';
 import { createAdminMembershipRouter } from './modules/usuarios/presentation/admin-memberships-router.js';
+import { ListCatalog } from './modules/medicamentos/application/list-catalog.js';
+import { createCatalogRouter } from './modules/medicamentos/presentation/catalog-router.js';
+import { AuthorizedCatalogReader } from './modules/medicamentos/infrastructure/authorized-catalog.js';
+import { PgInventoryTenantRunner } from './modules/inventario/infrastructure/tenant-unit-of-work.js';
+import { ManualInventory } from './modules/inventario/application/manual-review.js';
+import { createInventoryRouter } from './modules/inventario/presentation/inventory-router.js';
+import { PreviewImport } from './modules/inventario/application/preview-import.js';
+import { ConfirmImport } from './modules/inventario/application/confirm-import.js';
+import { createImportRouter } from './modules/inventario/presentation/import-router.js';
 
 export interface LocalIdentityRuntimeConfig {
   authDatabaseUrl: string;
@@ -58,6 +67,11 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     const http = { allowedOrigin: config.allowedOrigin, csrfKey: config.csrfKey, cookieSecure: config.cookieSecure };
     const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http));
     app.use('/api/v1', createAdminMembershipRouter(identity, management, http));
+    app.use('/api/v1', createCatalogRouter(new ListCatalog(new AuthorizedCatalogReader(tenantTransactions)), http));
+    const inventoryTransactions = new PgInventoryTenantRunner(tenantTransactions);
+    app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions), http));
+    app.use('/api/v1', createImportRouter(new PreviewImport(inventoryTransactions),
+      new ConfirmImport(inventoryTransactions), http));
     return {
       app,
       close: async () => { await Promise.all([authPool.end(), tenantPool.end()]); },
