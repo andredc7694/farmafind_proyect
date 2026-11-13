@@ -1,0 +1,8 @@
+import {spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';import {readFileSync} from 'node:fs';import path from 'node:path';
+const root=fileURLToPath(new URL('../../',import.meta.url)),mode=process.argv[2];if(!['unit','api','rls'].includes(mode))throw new Error('Uso: node scripts/f04/check.mjs unit|api|rls');
+const unit=['backend/tests/reservations/reservation-domain.test.ts','backend/tests/reservations/pickup-window.test.ts','backend/tests/reservations/reservation-config.test.ts'];
+unit.push('backend/tests/reservations/create-reservation.test.ts','backend/tests/reservations/pharmacy-authorization.test.ts','backend/tests/reservations/deliver-reservation.test.ts','backend/tests/reservations/expire-reservations.test.ts','frontend/tests/reservations/reservations.test.jsx');
+const api=['backend/tests/reservations/customer-reservations.http.test.ts','backend/tests/reservations/pharmacy-reservations.http.test.ts'];
+const rls=['backend/tests/reservations/migrations.test.ts','backend/tests/reservations/reservations.rls.test.ts'];
+const env={...process.env};if(mode==='rls'&&!env.F01_TEST_DATABASE_URL){const secret=readFileSync(path.join(root,'.cache/f01-docker/postgres-password.txt'),'utf8').trim();if(!/^[a-f0-9]{64}$/i.test(secret))throw new Error('Secreto PostgreSQL local invalido');env.F01_TEST_DATABASE_URL=`postgresql://f01_migrator:${secret}@127.0.0.1:55431/farmafind_f01_test`;}
+const result=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',...(mode==='unit'?unit:mode==='api'?api:rls)],{cwd:root,env,stdio:'inherit'});process.exitCode=result.status??1;

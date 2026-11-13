@@ -1,0 +1,2 @@
+import React from 'react';
+export function OwnReservations({items,onCancel,busy}){return <section><h3>Mis reservas</h3>{items.length===0?<p>No tienes reservas.</p>:<ul>{items.map(item=><li key={item.id}><strong>{item.state}</strong> — {item.quantity} unidad(es){item.pickupExpiresAt&&<> — vence {new Date(item.pickupExpiresAt).toLocaleString('es-PE')}</>}{['PENDIENTE','CONFIRMADA'].includes(item.state)&&<button disabled={busy} onClick={()=>onCancel(item.id)}>Cancelar</button>}</li>)}</ul>}</section>}

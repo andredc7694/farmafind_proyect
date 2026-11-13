@@ -4,10 +4,11 @@ import { PharmacySelector } from './PharmacySelector.jsx';
 import { MembershipAdmin } from './MembershipAdmin.jsx';
 import { createSessionClient } from './session-client.js';
 import { InventoryView } from '../inventory/InventoryView.jsx';
+import { ReservationsView } from '../reservations/ReservationsView.jsx';
 
 const identity = createSessionClient();
 
-export function IdentityApp({ inventoryMode = false }) {
+export function IdentityApp({ inventoryMode = false, reservationsMode = false }) {
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -136,14 +137,15 @@ export function IdentityApp({ inventoryMode = false }) {
   }
 
   return <main className="bootstrap">
-    <h1>{inventoryMode ? 'FarmaFind — Inventario' : 'FarmaFind — Identidad'}</h1>
+    <h1>{inventoryMode ? 'FarmaFind — Inventario' : reservationsMode ? 'FarmaFind — Reservas' : 'FarmaFind — Identidad'}</h1>
     <AuthView status={status} error={error} notice={notice} profile={profile}
       onRegister={register} onLogin={login} onLogout={logout} />
     {status === 'authenticated' && <PharmacySelector pharmacies={pharmacies}
       activePharmacyId={activePharmacyId} selectingPharmacyId={selectingPharmacyId}
       status={pharmacyStatus} onSelect={selectPharmacy} />}
     {status === 'authenticated' && activePharmacyId && (inventoryMode
-      ? <InventoryView pharmacyId={activePharmacyId} />
+      ? <InventoryView pharmacyId={activePharmacyId} /> : reservationsMode
+      ? <ReservationsView pharmacyId={activePharmacyId} />
       : <MembershipAdmin pharmacyId={activePharmacyId} />)}
   </main>;
 }

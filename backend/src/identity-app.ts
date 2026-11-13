@@ -26,6 +26,17 @@ import { SearchPublicOffers } from './modules/busqueda/application/search-public
 import { createPublicSearchRouter } from './modules/busqueda/presentation/public-search-router.js';
 import { createPublicPharmacyRouter } from './modules/busqueda/presentation/public-pharmacy-router.js';
 import { InMemorySearchMetrics } from './modules/busqueda/infrastructure/in-memory-search-metrics.js';
+import { PgReservationUnitOfWork } from './modules/reservas/infrastructure/reservation-unit-of-work.js';
+import { CreateReservation } from './modules/reservas/application/create-reservation.js';
+import { ListOwnReservations } from './modules/reservas/application/list-own-reservations.js';
+import { CancelReservation } from './modules/reservas/application/cancel-reservation.js';
+import { ManagePickupWindow } from './modules/reservas/application/manage-pickup-window.js';
+import { ConfirmReservation } from './modules/reservas/application/confirm-reservation.js';
+import { ReportPhysicalShortage } from './modules/reservas/application/report-physical-shortage.js';
+import { DeliverReservation } from './modules/reservas/application/deliver-reservation.js';
+import { createCustomerReservationsRouter } from './modules/reservas/presentation/customer-reservations-router.js';
+import { createPharmacyReservationsRouter } from './modules/reservas/presentation/pharmacy-reservations-router.js';
+import type { ReservationRuntimeConfig } from './config/reservations.js';
 
 export interface LocalIdentityRuntimeConfig {
   authDatabaseUrl: string;
@@ -35,6 +46,7 @@ export interface LocalIdentityRuntimeConfig {
   allowedOrigin: string;
   cookieSecure: false;
   search?: SearchRuntimeConfig;
+  reservations?: ReservationRuntimeConfig;
 }
 
 interface SqlClient {
@@ -96,6 +108,19 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));
     app.use('/api/v1', createImportRouter(new PreviewImport(inventoryTransactions),
       new ConfirmImport(inventoryTransactions, invalidator), http));
+    if (config.reservations) {
+      const reservationTransactions = new PgReservationUnitOfWork(tenantTransactions);
+      const clock = { now: () => new Date() };
+      const create = new CreateReservation(reservationTransactions, clock, config.reservations.pendingMinutes);
+      const own = new ListOwnReservations(reservationTransactions);
+      const cancel = new CancelReservation(reservationTransactions, clock);
+      const settings = new ManagePickupWindow(reservationTransactions);
+      const confirm = new ConfirmReservation(reservationTransactions, clock);
+      const shortage = new ReportPhysicalShortage(reservationTransactions, clock);
+      const deliver = new DeliverReservation(reservationTransactions, clock);
+      app.use('/api/v1', createCustomerReservationsRouter({ create, own, cancel }, http));
+      app.use('/api/v1', createPharmacyReservationsRouter({ confirm, settings, shortage, deliver }, http));
+    }
     return {
       app,
       close: async () => {
