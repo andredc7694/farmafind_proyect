@@ -14,6 +14,7 @@ npm.cmd run test:f04:unit
 npm.cmd run test:f04:api
 npm.cmd run test:f04:rls
 npm.cmd run test:f04:load
+npm.cmd run test:f04:e2e:linux
 npm.cmd run check:f04
 npm.cmd run build
 npm.cmd run test:base
@@ -32,5 +33,8 @@ URLs ficticias locales. Con frontend activo, abrir `http://127.0.0.1:5173/reserv
 
 ## Aceptacion pendiente
 
-`frontend/tests/reservations/f04.spec.js` debe ejecutarse con Playwright en Linux oficialmente
-compatible. Hasta entonces F04 esta implementada y validada localmente, con aceptacion final pendiente.
+`npm.cmd run test:f04:e2e:linux` se ejecuta dentro de la imagen oficial
+`mcr.microsoft.com/playwright:v1.65.0-noble`, con el frontend Vite disponible en
+`http://127.0.0.1:5173`. El recorrido usa una API simulada con datos ficticios para comprobar la
+interfaz; las reglas de autorizacion, persistencia y RLS se comprueban por separado con las suites
+API y PostgreSQL reales. F04 conserva la aceptacion final pendiente de revision humana.

@@ -10,7 +10,7 @@
 | F04-FR-023–024 | unitarias, HTTP, PostgreSQL/RLS y AC05 10/100 |
 | F04-FR-025 | sin pagos, F05 operativo, AWS, GLO-01 ni BOOT-01 |
 | F04-SC-001–006,008–009 | suites, build, regresion y auditoria npm |
-| F04-SC-007 | E2E creado; Playwright pendiente en Linux compatible |
+| F04-SC-007 | Playwright Linux: recorrido React cliente/farmacia satisfactorio con API ficticia; autorizacion y aislamiento cubiertos por pruebas API/PostgreSQL reales |
 
 ## Rubrica docente (16 criterios)
 
@@ -27,6 +27,6 @@
 11. Integridad: UoW reserva/inventario/Outbox.
 12. Pruebas: unitarias, API, RLS, carga y regresion.
 13. Rendimiento: p95/p99 local, sin extrapolar a produccion.
-14. UX/accesibilidad: estados/vencimiento visibles; E2E pendiente.
+14. UX/accesibilidad: estados/vencimiento visibles y recorrido Playwright Linux satisfactorio.
 15. Despliegue: compatibilidad futura; cero recursos AWS creados.
 16. Evidencias: comandos/resultados reales; revision humana pendiente.

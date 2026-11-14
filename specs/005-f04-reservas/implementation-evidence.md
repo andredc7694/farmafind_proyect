@@ -7,7 +7,7 @@
 - F05 solo recibe Outbox futuro; no se publican notificaciones.
 - GLO-01, BOOT-01, pagos, AWS e IA siguen fuera del incremento.
 
-## Resultados reales — 2026-11-13
+## Resultados reales — 2026-11-13 y 2026-11-14
 
 | Control | Resultado |
 |---|---|
@@ -18,6 +18,7 @@
 | `npm run build` | Backend, frontend y Notificaciones compilan; Vite transformo 46 modulos. |
 | `npm run test:base` | 57 archivos y 228 pruebas pasaron; 13 archivos/76 pruebas condicionadas se omitieron. |
 | `npm audit --audit-level=low` | 0 vulnerabilidades. |
+| `npm run test:f04:e2e:linux` | Playwright 1.65.0 en `mcr.microsoft.com/playwright:v1.65.0-noble`: 1 recorrido, 1 satisfactorio, 4.5 s (2026-11-14). |
 
 Las pruebas PostgreSQL crean una base TEST aislada con sufijo aleatorio, aplican F01/F02/F04,
 usan login runtime sin SUPERUSER/BYPASSRLS y la eliminan al terminar. La base persistente no se modifica.
@@ -32,8 +33,9 @@ usan login runtime sin SUPERUSER/BYPASSRLS y la eliminan al terminar. La base pe
 - Carreras de cancelacion/expiracion dejan una unica transicion terminal.
 - Worker NOLOGIN/NOSUPERUSER/NOBYPASSRLS solo expira lotes vencidos y no configura farmacias.
 - Cambiar 4→8 no altera CONFIRMADAS existentes.
+- El recorrido Linux verifica en React creacion, consulta, confirmacion, vencimiento visible, entrega y cancelacion con API simulada y datos ficticios. No sustituye las 16 pruebas PostgreSQL/RLS reales que verifican autoridad, persistencia y aislamiento.
 
 ## Pendiente obligatorio
 
-- T059: Playwright en Linux oficialmente compatible y revision humana final.
+- Revision humana final de F04.
 - El resultado local no equivale a aceptacion definitiva de F04.

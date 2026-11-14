@@ -2,7 +2,7 @@
 
 **Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/) y [quickstart.md](quickstart.md).
 
-**Status**: 64/65 tareas verificadas localmente. T059 y la aceptación definitiva permanecen pendientes de Playwright en Linux compatible y revisión humana.
+**Status**: 65/65 tareas verificadas. La aceptación definitiva permanece pendiente de revisión humana.
 
 **Tests**: obligatorios por F04-FR-023/024 y Constitution XIII. TDD: cada bloque de pruebas debe fallar por ausencia de implementación antes de escribir el código correspondiente.
 
@@ -97,7 +97,7 @@
 - [x] T056 Conectar /reservations y vistas cliente/farmacia a selección autorizada en frontend/src/main.jsx y frontend/src/identity/IdentityApp.jsx
 - [x] T057 Ejecutar AC05 con 100 solicitudes independientes/10 unidades y registrar exactamente éxitos, compromisos, Outbox, p95/p99 y errores mediante scripts/f04/load.mjs
 - [x] T058 [P] Crear E2E cliente crear/consultar/cancelar y farmacia confirmar/entregar/vencimiento visible en frontend/tests/reservations/f04.spec.js
-- [ ] T059 Ejecutar Playwright en entorno Linux oficial y registrar resultados reales en specs/005-f04-reservas/implementation-evidence.md
+- [x] T059 Ejecutar Playwright en entorno Linux oficial y registrar resultados reales en specs/005-f04-reservas/implementation-evidence.md
 - [x] T060 Ejecutar check, build, unitarias, API, PostgreSQL/RLS, seguridad, AC05 y npm audit sin --force y registrar resultados en specs/005-f04-reservas/implementation-evidence.md
 - [x] T061 Ejecutar regresión F00–F03 y registrar omisiones condicionadas sin declararlas aprobadas en specs/005-f04-reservas/implementation-evidence.md
 - [x] T062 Verificar ausencia de pagos, publicación F05, GLO-01, BOOT-01, AWS, IA y secretos en specs/005-f04-reservas/implementation-evidence.md
@@ -125,7 +125,7 @@
 
 ## Implementation strategy
 
-Primero fundación y US1; luego propiedad/cancelación, confirmación/configuración, entrega y expiración. Cada historia se valida antes de continuar. El incremento no se considera aceptado por marcar tareas: T059–T065 y revisión humana siguen obligatorios.
+Primero fundación y US1; luego propiedad/cancelación, confirmación/configuración, entrega y expiración. Cada historia se valida antes de continuar. El incremento no se considera aceptado por marcar tareas: la revisión humana sigue siendo obligatoria.
 
 ## Exact requirements and outcomes mapping
 

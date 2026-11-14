@@ -40,6 +40,7 @@
     "test:f04:api": "node scripts/f04/check.mjs api",
     "test:f04:rls": "node scripts/f04/check.mjs rls",
     "test:f04:load": "node scripts/f04/load.mjs",
+    "test:f04:e2e:linux": "node scripts/f04/run-browser-linux.mjs",
     "check:f04": "node scripts/f04/check-project.mjs",
     "expire:f04": "node scripts/f04/expire.mjs",
     "migrate:f01:test": "node scripts/f01/migrate.mjs",
