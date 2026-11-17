@@ -1,24 +1,8 @@
-﻿<!--
-Sync Impact Report — material temporal de revisión; retirar antes de un futuro commit.
-Versión: 1.0.0 propuesta → 1.1.0 propuesta, ampliación normativa basada en fuentes leídas.
-Principios ampliados sin renombrar: III (IA híbrida), VIII (RLS), IX (alcance Redis),
-XI (AWS definitivo como destino), XIII (herramientas), XIV (rúbrica), XV (drivers e historia).
-Secciones ampliadas: Restricciones y continuidad documental; Flujo de desarrollo y evidencias;
-Governance (estado y versión). Se añaden matriz de 16 criterios y clasificación documental.
-Secciones normativas eliminadas: ninguna. Se corrigen avisos de fuentes ausentes.
-Plantilla activa resuelta con resolve-template.ps1 constitution-template -Json.
-No se modificaron plantillas ni documentos históricos. No existe extensions.yml.
-Resueltos: TODO(MASTER_DOCUMENT), TODO(RUBRIC_SOURCE); DOCX v2.0 y RUBRICA.png leídos.
-Ratificación: versión 1.1.0 adoptada mediante aprobación humana el 2026-11-10.
-Pendientes: TODO(DOCUMENTATION_LAYOUT), ADR complementarias,
-planes y parámetros operativos por aprobar; no equivalen a fuentes ausentes.
-No se ejecutaron commits, despliegues ni otras funcionalidades de Spec Kit.
--->
+﻿# FarmaFind Constitution
 
-# FarmaFind Constitution
-
-Estado: Constitución oficial ratificada mediante aprobación humana el 2026-11-10.
-Redacción: 2026-11-10, según la fecha del usuario en America/Lima.
+Estado: Constitución oficial ratificada el 2026-11-10 y enmendada por aprobación
+humana expresa el 2026-11-17.
+Redacción inicial: 2026-11-10; última enmienda: 2026-11-17 (America/Lima).
 DEBE y NO DEBE expresan obligaciones verificables.
 
 ## Core Principles
@@ -45,6 +29,13 @@ identificables y datos autorizados, señalar información ausente o desactualiza
 permitir continuar con la búsqueda convencional si falla. NO DEBE asumir autoridad
 sobre inventario ni alterar las reglas de reservas. Su implementación exige especificación
 y plan aprobados y DEBE respetar los límites clínicos del principio XIX.
+
+F06.1 amplía el alcance futuro con conversación informativa y descripciones educativas
+de clases de medicamentos y opciones de uso habitual asociadas a molestias comunes.
+Cada afirmación farmacológica DEBE fundarse en fuentes verificadas, autorizadas y
+revisadas por un profesional competente antes de exponerse a usuarios reales. Esta
+ampliación NO equivale a diagnóstico, prescripción ni selección de un tratamiento
+individual; NO se declara implementada ni aceptada por esta enmienda.
 
 Según los capítulos 9, 18, 33 y 36 del maestro, DEBE adoptar una arquitectura híbrida:
 búsqueda determinista como fuente de hechos, MockAIProvider predeterminado y determinista
@@ -147,8 +138,9 @@ Una falla de Notificaciones NO DEBE impedir registrar reservas.
 
 ### XI. Arquitectura AWS propuesta
 
-La arquitectura objetivo definitiva del maestro v2.0, capítulos 25–36, DEBE conservar
-S3 privado + CloudFront para la SPA compilada y Lightsail Linux con Docker Compose para
+La arquitectura objetivo de la Parte A del maestro v3.0, compatible con los capítulos
+25–36 históricos del v2.0, DEBE conservar S3 privado + CloudFront para la SPA compilada
+y Lightsail Linux con Docker Compose para
 API sin estado, Notificaciones como proceso separado, PostgreSQL y Redis privados.
 S3 DEBE usar Block Public Access y origen regional estándar con CloudFront Origin Access
 Control (OAC), HTTPS y resolución de rutas SPA. Los assets DEBEN versionarse y index.html
@@ -164,6 +156,10 @@ Se DEBEN conservar Docker, Docker Compose, migraciones, seeds ficticios y observ
 El CI/CD objetivo DEBE usar GitHub Actions con checks de PR, entornos protegidos y revisión
 humana; para AWS DEBE preferir OIDC con IAM acotado a repositorio, rama y entorno o
 credenciales temporales mínimas. Un merge NO autoriza por sí solo despliegues facturables.
+Para F09, GitHub Actions PUEDE validar y producir artefactos, pero NO DEBE crear
+infraestructura ni desplegar automáticamente. El despliegue AWS DEBE ejecutarse
+manualmente por el responsable, con autorización humana previa y específica para
+cada recurso, configuración, costo y operación que pueda generar gastos.
 Cada release DEBE identificar revisión, artefactos, salud y rollback; se DEBEN ejecutar
 smoke de HTTPS, autenticación y aislamiento después de un despliegue autorizado y
 detener la promoción si fallan las comprobaciones.
@@ -176,10 +172,12 @@ documentado, todavía no evidencia de despliegue ni autorización de recursos.
 
 ### XII. Autorización previa de recursos AWS facturables
 
-Está prohibido crear recursos AWS facturables sin autorización humana explícita previa.
+Está prohibido crear o modificar recursos AWS, o ejecutar operaciones facturables,
+sin autorización humana explícita y específica previa para cada acción.
 Antes de solicitarla, se DEBEN presentar recursos concretos, propósito, región, costos
-estimados, duración y procedimiento de eliminación. La autorización DEBE registrarse con
-su alcance. Disponer de cuenta o de una oferta gratuita NO equivale a autorización.
+estimados, configuración, duración y procedimiento de eliminación. La autorización
+DEBE registrarse con su alcance. Disponer de cuenta o de una oferta gratuita NO
+equivale a autorización.
 Las validaciones sin recursos aprobados DEBEN realizarse localmente o por simulación,
 identificando el entorno real utilizado.
 
@@ -221,12 +219,22 @@ Se DEBEN conservar identificadores y contenido aplicable de HU01–HU06, RF01–
 AC01–AC09, RC01–RC11, DA01–DA09 y ADR-01–ADR-12 consultados. Los planes DEBEN verificar compatibilidad
 con sus fuentes. Un conflicto DEBE registrarse con referencias, impacto y resolución
 humana mediante una decisión trazable o enmienda; NO DEBE eliminarse ni reescribirse
-el antecedente. AWS, RLS y FarmaFind AI están documentados en el maestro v2.0; las nuevas
+el antecedente. La Parte A del Documento Maestro v3.0 consolidado DEBE ser la referencia
+funcional y arquitectónica principal para incrementos futuros en todo lo compatible
+con esta Constitución. El documento maestro v2.0 DEBE conservarse íntegro como fuente
+histórica; su texto también consta en la Parte B del v3.0. AWS, RLS y FarmaFind AI
+están documentados en el maestro v2.0; las nuevas
 decisiones DEBEN registrarse en ADR complementarias sobre despliegue AWS económico con
 evolución, modelo multi-tenant/RLS y agente informativo con presupuesto controlado.
-Estas ADR y sus especificaciones requieren aprobación; esta revisión NO las crea.
-Los capítulos 25–36 prevalecen sobre recomendaciones anteriores de AWS y multitenencia;
-NO autorizan renumerar ni sustituir los requisitos o ADR históricos.
+Estas ADR y sus especificaciones requieren aprobación. Los capítulos 25–36 del v2.0
+conservan las decisiones compatibles sobre AWS y multitenencia; la Parte A del v3.0
+establece el roadmap futuro F06.1 → F07 geolocalización → F08 frontend profesional
+→ F09 AWS manual → F10 escalabilidad y evidencias. F00–F06 conservan sus IDs y
+aceptaciones históricas. El antiguo F07 AWS DEBE identificarse en trazabilidad como
+F07-LEGACY-AWS y el antiguo F08 escalabilidad como F08-LEGACY-SCALE, sin renombrar
+retroactivamente ramas, commits, archivos, requisitos o ADR. Los prefijos numéricos
+de directorios Spec Kit NO DEBEN confundirse con IDs funcionales. Ninguna nueva
+denominación autoriza por sí sola implementar el incremento correspondiente.
 
 ### XVI. Protección de main
 
@@ -254,11 +262,21 @@ por silencio, tiempo transcurrido o disponibilidad de herramientas.
 ### XIX. Límites clínicos y veracidad de la IA
 
 FarmaFind AI y los agentes de IA del proyecto NO DEBEN diagnosticar, prescribir,
-recomendar dosis ni inventar información de inventario, precios o disponibilidad.
+recomendar dosis ni inventar medicamentos, información de inventario, precios o
+disponibilidad.
 Las comparaciones DEBEN limitarse a información verificable y NO DEBEN presentarse
 como equivalencia terapéutica, sustitución de medicamentos o consejo clínico personalizado.
-Ante una consulta clínica, DEBEN expresar el límite y remitir a un profesional de salud;
-ante falta de datos, DEBEN declarar esa ausencia. NO DEBEN confirmar existencia física
+Como ampliación normativa exclusiva de F06.1, SE PERMITEN descripciones educativas
+de clases de medicamentos y opciones de uso habitual asociadas a molestias comunes,
+siempre que cada afirmación pertinente esté respaldada por fuentes farmacéuticas
+verificadas y por revisión profesional previa a su exposición a usuarios reales.
+Esta excepción limitada a la prohibición de recomendar tratamientos del capítulo 9
+histórico del maestro v2.0 NO permite diagnosticar, prescribir, recomendar dosis,
+elegir un producto o tratamiento para una persona, afirmar seguridad clínica sin
+respaldo ni usar información médica personal para decidir qué debe tomar un usuario.
+La información DEBE presentarse como educativa, no como indicación clínica individual.
+Ante una consulta clínica individual, DEBEN expresar el límite y remitir a un profesional
+de salud; ante falta de datos, DEBEN declarar esa ausencia. NO DEBEN confirmar existencia física
 ni alterar inventario por inferencias. Las evaluaciones DEBEN incluir consultas clínicas
 y solicitudes para las que no existan datos verificables.
 
@@ -310,13 +328,14 @@ Las especificaciones afectadas DEBEN conservar estas reglas históricas:
   implementarlos. Si se aprueban pagos futuros, DEBE utilizarse una pasarela externa
   sin almacenar datos sensibles de tarjetas.
 
-Fuentes consultadas y límites de la revisión, al 2026-11-10:
+Fuentes consultadas y límites de las revisiones al 2026-11-17:
 
 | Fuente | Alcance verificado |
 |---|---|
-| Solicitudes del usuario | Los 20 principios originales y esta revisión limitada a constitution; no autorizan código, commits, cambios históricos ni despliegues. |
+| Solicitudes del usuario | Principios originales ratificados el 2026-11-10 y aprobación humana expresa del 2026-11-17 para v3.0, nueva numeración, AWS manual y ampliación informativa F06.1. No autorizan implementar incrementos, APIs pagadas ni desplegar. |
 | Plantilla activa de Spec Kit y constitución 1.0.0 propuesta | Plantilla resuelta por resolve-template.ps1; se conserva su jerarquía y los 20 principios, ampliados con fuentes ahora disponibles. |
 | docs/referencias/FarmaFind_Documento_Maestro_Definitivo_AWS_Multitenant_SDD.docx | Versión interna 2.0, noviembre de 2026. Leídos todos los capítulos 0–36, incluidos 25–36, tablas, encabezado y pie. Extracción XML de 929 párrafos en orden documental; sin imágenes embebidas. No se ejecutaron instrucciones ni ejemplos incluidos en el Word. |
+| docs/referencias/FarmaFind_Documento_Maestro_v3_0_Consolidado.docx | Parte A, A1–A12, leída completa; Parte B contrastada textualmente con los 927 párrafos no vacíos del v2.0. Se leyeron 19 entradas internas del DOCX y se comprobó su integridad de lectura, sin certificar igualdad de formato o imágenes. SHA-256: CD93097E4378056FDB81E55D41265900947CE66806F58C49A303779C7540E997. |
 | docs/referencias/RUBRICA.png | Imagen inspeccionada visualmente: 16 criterios, columna Puntaje vacía. Contrastada con capítulos 18 y 35 del maestro. Los nombres de la matriz inferior siguen la imagen. |
 | andredc7694/PROYEC_FARMAFIND, documentación histórica | Releídos mediante GitHub docs/01-analisis-de-sistema/02-historias-de-usuario.md, 03-requisitos-funcionales.md, 04-atributos-de-calidad.md, 05-restricciones.md, 06-drivers-arquitectonicos.md y 07-decisiones-arquitectonicas.md. La búsqueda sigue mostrando la revisión 56d3ef9d334a96df400a29d1e0c52e8a6cd696f0 como referencia; no se afirma que no existan otras ramas. |
 | Arquitectura y diseño históricos revisados en la primera redacción | README.md, docs/02-arquitectura/estilo-arquitectonico.md, docs/03-diseño-de-software/diseño-interno/patrones-de-diseño.md y docs/04-modelo-c4/Nivel4-DiagramadeCodigo.md. Sus imágenes enlazadas no se inspeccionaron; no se certifica su sincronización visual. |
@@ -332,6 +351,7 @@ y HU 979dfebc7a257a03f80be78720d5792535726adf, según las respuestas GitHub cons
 Integridad SHA-256 de las fuentes locales leídas:
 
 - Documento maestro: 761e59cf403c0d153c8fcbbe535f48f991bdd3789e8f2eca0e20dd76cf3faf05.
+- Documento maestro v3.0: cd93097e4378056fdb81e55d41265900947ce66806f58c49a303779c7540e997.
 - Rúbrica: 184f2fef8446fd69d62b63c41396b998261d10126801f5606a3b86066ac51f41.
 
 Los drivers DEBEN conservar su sentido y trazarse sin renumeración: DA01 confiabilidad
@@ -343,9 +363,10 @@ ninguno sustituye esos drivers.
 
 La clasificación documental DEBE distinguir:
 
-- **Base documentada:** requisitos y ADR históricos, los 16 criterios de la imagen y las
-  decisiones destino AWS/RLS del maestro v2.0. Documentado NO significa implementado,
-  ratificado como constitución, contratado ni validado mediante pruebas.
+- **Base documentada:** requisitos y ADR históricos, los 16 criterios de la imagen, las
+  decisiones compatibles AWS/RLS del v2.0 y la Parte A del maestro v3.0 adoptada para
+  incrementos futuros. Documentado NO significa implementado, contratado ni validado
+  mediante pruebas; la enmienda vigente se limita a las decisiones aprobadas aquí.
 - **Propuesta de implementación:** Prisma, Tailwind, proveedor/modelo LLM, capacidad
   Lightsail, carpetas, rutas API orientativas y parámetros operativos. Requieren planes
   y decisiones aprobados; los ejemplos SQL del maestro NO son migraciones finales.
@@ -359,9 +380,14 @@ Inconsistencias y decisiones que DEBEN permanecer visibles hasta revisión human
   único/referencia histórica; el usuario identifica farmafind_proyect como desarrollo
   y PROYEC_FARMAFIND como histórico. Se DEBE aprobar la relación y trazabilidad entre
   ambos sin cambiar los antecedentes. Esta revisión no migra ni modifica documentos.
-- Los capítulos 10 y 33 proponen numeraciones F00–F08 diferentes; el 33 es la referencia
-  actualizada para AWS/tenancy. Su secuencia DEBE ratificarse al planificar; NO se deben
-  mezclar IDs, abrir features ni generar tareas en esta revisión constitucional.
+- La numeración de los capítulos 10 y 33 del v2.0 se conserva como antecedente.
+  La Parte A, A3 y A10, del v3.0 define la secuencia futura F06.1–F10 indicada en XV;
+  F07-LEGACY-AWS y F08-LEGACY-SCALE DEBEN desambiguarse en toda nueva trazabilidad.
+  Cada nueva feature conserva las aprobaciones SDD y la regla de una funcionalidad a la vez.
+- La ampliación informativa de F06.1 aprobada en XIX exige fuentes farmacéuticas
+  verificadas, revisión profesional y pruebas clínicas y de privacidad antes de
+  exponerla a usuarios reales. Ninguna fuente, proveedor o contenido se considera
+  aprobado por esta enmienda, ni se afirma implementación o aceptación de F06.1.
 - Los capítulos 11 y 25 muestran estructuras de carpetas alternativas. Ninguna DEBE
   declararse existente o aprobada sin un plan revisado. El proveedor LLM y el ORM tampoco
   quedan elegidos por aparecer como candidatos.
@@ -471,14 +497,20 @@ las reglas AWS, RLS, IA y la trazabilidad con fuentes ahora leídas, sin retirar
 ni afirmar una ratificación anterior. La versión 1.1.0 fue ratificada mediante
 aprobación humana el 2026-11-10; las redacciones previas conservan su condición
 histórica de propuestas.
+La versión 1.2.0 amplía la precedencia documental, la numeración futura, el control
+manual de AWS y la información farmacológica educativa de F06.1 sin retirar los
+límites de seguridad. Fue aprobada por el responsable mediante declaración humana
+expresa en esta conversación el 2026-11-17. No aprueba especificaciones, planes,
+proveedores, contenidos farmacéuticos concretos, implementaciones ni despliegues.
 
 Cada plan y pull request DEBE revisar principios aplicables, continuidad documental,
 aprobaciones y evidencias. Un incumplimiento DEBE corregirse antes de integrar; si exige
 cambiar una regla, DEBE tramitarse como enmienda humana y no como excepción tácita.
-Las actualizaciones de otros artefactos DEBEN autorizarse por separado; esta revisión
-solo autoriza escribir .specify/memory/constitution.md.
+Las actualizaciones de otros artefactos DEBEN autorizarse por separado y conservar
+la trazabilidad de esta enmienda.
 
-Ratificación registrada mediante aprobación humana expresa en esta conversación
-el 2026-11-10, sin atribuir adopción retroactiva a las versiones propuestas.
+Ratificación original registrada mediante aprobación humana expresa el 2026-11-10.
+Enmienda 1.2.0 aprobada expresamente por el responsable el 2026-11-17, sin atribuir
+adopción retroactiva a las versiones propuestas ni aceptación a F06.1–F10.
 
-**Version**: 1.1.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-10
+**Version**: 1.2.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-17
