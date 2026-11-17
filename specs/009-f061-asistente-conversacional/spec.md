@@ -42,7 +42,23 @@ Una persona que pide diagnóstico, tratamiento, dosis, sustitución o una decisi
 
 ---
 
-### User Story 3 - Buscar ofertas públicas (Priority: P2)
+### User Story 3 - Consultar categorías educativas para molestias comunes (Priority: P1)
+
+Una persona solicita información general sobre clases farmacológicas asociadas a una molestia común. Recibe únicamente descripciones educativas previamente revisadas por un profesional y sustentadas en fuentes farmacéuticas verificables, sin que el asistente elija qué debe tomar.
+
+**Why this priority**: Es la ampliación normativa específica de F06.1 y requiere una barrera de publicación distinta de la búsqueda pública existente.
+
+**Independent Test**: Consultar una molestia general con material ficticio autorizado y revisado, verificar procedencia de cada afirmación y repetir con fuente ausente, caducada, contradictoria o sin revisión profesional; en estos casos el asistente se abstiene.
+
+**Acceptance Scenarios**:
+
+1. **Given** contenido general vigente, autorizado y revisado profesionalmente, **When** se pregunta por clases de uso habitual para una molestia común, **Then** se describen solo categorías documentadas, con fuente, fecha y finalidad educativa, sin seleccionar un producto para la persona.
+2. **Given** una pregunta que añade edad, embarazo, condiciones médicas, tratamientos actuales o «¿cuál tomo yo?», **When** se responde, **Then** no se usa esa información para elegir categoría, medicamento o dosis y se remite a evaluación profesional.
+3. **Given** contenido sin permiso de uso comprobado, revisión profesional o vigencia, **When** se pregunta por una molestia, **Then** no se presenta como orientación validada ni se inventa una alternativa.
+
+---
+
+### User Story 4 - Buscar ofertas públicas (Priority: P2)
 
 Una persona encuentra y compara únicamente ofertas públicas verificables de farmacias participantes, con carácter referencial y fecha de actualización.
 
@@ -58,7 +74,7 @@ Una persona encuentra y compara únicamente ofertas públicas verificables de fa
 
 ---
 
-### User Story 4 - Continuidad y salida segura (Priority: P2)
+### User Story 5 - Continuidad y salida segura (Priority: P2)
 
 La persona puede continuar una conversación breve, ver la procedencia de los datos y entender cuándo un servicio o fuente no está disponible.
 
@@ -71,6 +87,7 @@ La persona puede continuar una conversación breve, ver la procedencia de los da
 1. **Given** una conversación activa, **When** vence o supera el límite de contexto, **Then** se informa y no se atribuyen recuerdos anteriores.
 2. **Given** indisponibilidad de la generación conversacional, **When** se consulta, **Then** se ofrece la búsqueda pública existente sin respuesta fabricada.
 3. **Given** que se alcanzó una cuota, **When** llega otra solicitud, **Then** se rechaza con mensaje claro y sin consultas adicionales.
+4. **Given** que la persona elimina la conversación, **When** formula una nueva pregunta de seguimiento, **Then** el asistente no usa el referente eliminado.
 
 ### Edge Cases
 
@@ -108,6 +125,10 @@ La persona puede continuar una conversación breve, ver la procedencia de los da
 - **F061-FR-022**: DEBE exigir revisión profesional documentada de contenidos farmacéuticos y casos límite antes de exponerlos a usuarios reales.
 - **F061-FR-023**: DEBE tener pruebas positivas y negativas de conversación, fuentes, privacidad, inyección, abuso, límites clínicos, fallos y regresión F03/F06.
 - **F061-FR-024**: DEBE preservar autorización por farmacia y aislamiento de datos privados, incluida la defensa RLS existente.
+- **F061-FR-025**: DEBE permitir eliminar el contexto de conversación y dejar de utilizarlo inmediatamente; la expiración, la retención mínima y el límite de turnos DEBEN quedar definidos y probados antes de implementar un proveedor real. No se presume un historial sanitario permanente.
+- **F061-FR-026**: Cada fuente farmacéutica candidata DEBE registrar autoridad, jurisdicción, identificador o URL, versión o fecha de revisión, vigencia, permiso de reutilización y responsable de revisión profesional. Una fuente sin permiso verificable NO DEBE incorporarse al corpus expuesto a usuarios.
+- **F061-FR-027**: La revisión profesional DEBE aprobar explícitamente el contenido educativo sobre molestias y sus casos límite antes de habilitarlo para usuarios reales; la retirada o caducidad de la fuente DEBE impedir nuevas respuestas basadas en ella.
+- **F061-FR-028**: Los límites de consumo, la política de consentimiento, la minimización de registros y el tratamiento de datos enviados a terceros DEBEN someterse a aprobación antes de activar un proveedor externo; hasta entonces el modo determinista no enviará consultas a terceros.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -130,6 +151,8 @@ La persona puede continuar una conversación breve, ver la procedencia de los da
 - **F061-SC-007**: En todos los casos de indisponibilidad simulada del generador se ofrece aviso y búsqueda pública alternativa.
 - **F061-SC-008**: Una revisión profesional documentada aprueba corpus y casos límite antes de exposición a usuarios reales; hasta entonces el estado es TEST/DEMO.
 - **F061-SC-009**: La ampliación supera la regresión aplicable a F03 y F06 sin degradar sus criterios aprobados.
+- **F061-SC-010**: El 100 % de respuestas educativas sobre molestias en la batería de aceptación cita contenido autorizado, vigente y aprobado por revisión profesional; sin alguna de esas condiciones se abstiene, y ninguna respuesta selecciona tratamiento individual.
+- **F061-SC-011**: El 100 % de pruebas de eliminación y expiración del contexto impide reutilizar turnos anteriores; los ensayos de privacidad no exponen texto clínico personal en registros ni a terceros no autorizados.
 
 ## Assumptions
 
@@ -137,6 +160,22 @@ La persona puede continuar una conversación breve, ver la procedencia de los da
 - La continuidad inicial es temporal y limitada; no se presume historial permanente de salud.
 - La búsqueda pública y la modalidad determinista existentes permanecen disponibles.
 - Los umbrales numéricos son criterios propuestos, no resultados de pruebas ejecutadas.
+- Los límites concretos de turnos, tiempo de expiración y cuota no quedan aprobados por esta especificación preliminar; deben concretarse y revisarse antes del plan, manteniendo al menos los límites de protección vigentes en F06.
+
+## Trazabilidad de IA31 (Documento Maestro v3.0, Parte A, A5)
+
+| Requisito maestro | Requisitos F06.1 | Escenario o criterio de verificación |
+| --- | --- | --- |
+| IA31-01 — español, contexto limitado y eliminación | F061-FR-001, 002, 015, 025 | Historias 1 y 5; F061-SC-001, 011 |
+| IA31-02 — fichas autorizadas y citas vigentes | F061-FR-004, 005, 022, 026 | Historia 1; F061-SC-002 |
+| IA31-03 — molestias con finalidad educativa | F061-FR-009, 027 | Historia 3; F061-SC-010 |
+| IA31-04 — límites clínicos | F061-FR-007, 008 | Historias 2 y 3; F061-SC-003, 010 |
+| IA31-05 — herramientas F03 públicas de solo lectura | F061-FR-010, 011, 012, 024 | Historia 4; F061-SC-004, 005 |
+| IA31-06 — abstención ante fuentes insuficientes | F061-FR-006, 026, 027 | Historias 1 y 3; F061-SC-002, 010 |
+| IA31-07 — privacidad, abuso y consentimiento | F061-FR-013–016, 019, 023, 025, 028 | Historias 2 y 5; F061-SC-005, 006, 011 |
+| IA31-08 — proveedor externo solo aprobado | F061-FR-014, 021, 028 | Historia 5; F061-SC-007, 011 |
+| IA31-09 — modo mock y fallback | F061-FR-017, 021 | Historia 5; F061-SC-007, 009 |
+| IA31-10 — revisión profesional y seguridad clínica | F061-FR-009, 022, 023, 027 | Historias 2 y 3; F061-SC-003, 008, 010 |
 
 ## Source Traceability and Pending Decision
 

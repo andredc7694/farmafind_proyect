@@ -6,7 +6,7 @@
 
 - Fuente nueva: `docs/referencias/FarmaFind_Documento_Maestro_v3_0_Consolidado.docx`, SHA-256 `CD93097E4378056FDB81E55D41265900947CE66806F58C49A303779C7540E997`. El DOCX se abrió como archivo Office válido; se leyeron sus 19 entradas ZIP y 1 258 párrafos no vacíos. La Parte A contiene las secciones A1–A12 y la Parte B, el antecedente v2.0.
 - Fuente histórica preservada sin cambios: `docs/referencias/FarmaFind_Documento_Maestro_Definitivo_AWS_Multitenant_SDD.docx`, SHA-256 `761E59CF403C0D153C8FCBBE535F48F991BDD3789E8F2ECA0E20DD76CF3FAF05`. El texto no vacío de la Parte B del v3.0 coincide línea a línea con los 927 párrafos no vacíos extraídos del v2.0. Esta comparación textual no reemplaza una comparación de formato o contenido multimedia.
-- Ambos DOCX están bajo `docs/referencias/`, ruta excluida por `.gitignore`; esta nota versionable registra sus huellas y ubicación local, pero el repositorio remoto no contendrá los archivos fuente salvo decisión posterior de publicación segura. No forzar su inclusión sin revisar derechos y privacidad.
+- Ambos DOCX están bajo `docs/referencias/`, ruta excluida por `.gitignore`. La aprobación humana de consolidación autoriza versionar **exclusivamente** el DOCX v3.0 identificado por su SHA-256, tras revisar su contenido y metadatos. El v2.0 permanece como referencia histórica local y no se incorpora al commit.
 - Precedencia: Constitution v1.2.0 ratificada → decisiones humanas específicas y enmiendas aprobadas → v3.0 Parte A en lo compatible → v2.0 como antecedente histórico. La Parte B preserva el contexto; sus etiquetas F07/F08 se desambiguan mediante la matriz siguiente.
 
 ## Equivalencias y regla de identificadores
@@ -20,7 +20,7 @@
 | F07 — AWS deploy | F09 — Despliegue manual AWS | Conservar referencias históricas como `F07-LEGACY-AWS`; no renombrar rama, commit ni spec existente. |
 | F08 — Escalabilidad/evidencias | F10 — Escalabilidad y evidencias finales | Conservar referencias históricas como `F08-LEGACY-SCALE`. |
 
-Los prefijos secuenciales de carpeta de Spec Kit (`008-`, `009-`, etc.) son identificadores de directorio y **no equivalen** a F08/F09. `specs/008-f07-aws-deploy/` ya existe localmente sin seguimiento de Git al efectuar esta revisión; se conserva intacto y se interpreta como documentación del antiguo F07 AWS, no como la nueva geolocalización. `specs/009-f061-asistente-conversacional/` es el borrador activo F06.1. No crear ni renombrar rutas nuevas F07–F10 hasta iniciar cada incremento con su aprobación SDD y una convención sin colisiones.
+Los prefijos secuenciales de carpeta de Spec Kit (`008-`, `009-`, etc.) son identificadores de directorio y **no equivalen** a F08/F09. `specs/008-f07-aws-deploy/` se preserva como borrador histórico sin aprobación del antiguo F07 AWS; véase su [nota de equivalencia](../specs/008-f07-aws-deploy/LEGACY-NUMBERING.md). No representa la nueva geolocalización. `specs/009-f061-asistente-conversacional/` es el borrador activo F06.1. No crear ni renombrar rutas nuevas F07–F10 hasta iniciar cada incremento con su aprobación SDD y una convención sin colisiones.
 
 ## Compatibilidad normativa y puertas pendientes
 
@@ -40,4 +40,4 @@ Los prefijos secuenciales de carpeta de Spec Kit (`008-`, `009-`, etc.) son iden
 3. Aclarar y aprobar la especificación F06.1 antes de elaborar su plan; ninguna aprobación de v3.0 equivale a aprobación de esa spec.
 4. Crear nuevas specs F07/F08/F09/F10 únicamente al iniciar cada incremento conforme a Constitution XVII y los puntos de control SDD, usando identificadores sin colisión.
 5. Mantener sin despliegue AWS, proveedores de IA pagos, migraciones persistentes ni cambios a `main` hasta autorizaciones específicas.
-6. Resolver cómo conservar una copia accesible y aprobada de v3.0 para revisores del repositorio, pues `docs/referencias/` permanece fuera de Git; no publicar automáticamente los DOCX privados.
+6. Versionar únicamente el DOCX v3.0 aprobado mediante inclusión explícita de su ruta, después de comprobar integridad, metadatos y ausencia de datos privados; conservar fuera de Git el v2.0 y los demás archivos de `docs/referencias/`.

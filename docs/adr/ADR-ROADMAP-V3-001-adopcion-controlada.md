@@ -15,7 +15,7 @@ El responsable aprobó adoptar v3.0 como referencia funcional y arquitectónica 
 3. La secuencia nueva F06.1 → F07 → F08 → F09 → F10 rige para el desarrollo futuro según la Constitution v1.2.0; no altera la numeración de artefactos históricos.
 4. IA31-03 queda **permitido normativamente como información educativa acotada**: descripciones de clases y opciones de uso habitual asociadas a molestias comunes, con fuentes verificadas y revisión profesional. No permite diagnóstico, prescripción, dosis, tratamiento individual ni usar datos personales para decidir qué debe tomar una persona. Su especificación, plan, contenido y ejecución aún requieren controles y aprobaciones separados.
 5. Para F09, conservar la arquitectura AWS prevista y aplicar el control más estricto de A8: preparación técnica documental; ejecución manual por el responsable y autorización individual previa por recurso y costo. Esta ADR no autoriza despliegue, credenciales, facturación ni proveedores.
-6. Los prefijos secuenciales de carpetas Spec Kit no equivalen al número funcional: `specs/008-f07-aws-deploy/` es antecedente local del antiguo F07; `specs/009-f061-asistente-conversacional/` es el borrador actual F06.1. Evitar nuevas rutas ambiguas.
+6. Los prefijos secuenciales de carpetas Spec Kit no equivalen al número funcional: `specs/008-f07-aws-deploy/` conserva el borrador histórico del antiguo F07 AWS como antecedente de F09 y documenta su equivalencia en `LEGACY-NUMBERING.md`; `specs/009-f061-asistente-conversacional/` es el borrador actual F06.1. Evitar nuevas rutas ambiguas.
 
 ## Consecuencias y restricciones
 

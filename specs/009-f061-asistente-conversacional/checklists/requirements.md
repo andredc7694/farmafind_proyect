@@ -19,11 +19,13 @@
 
 ## Feature Readiness
 
-- [x] Los 24 requisitos tienen conducta observable o condición de prueba.
-- [x] Los escenarios cubren información, seguridad clínica, catálogo público y continuidad.
+- [x] Los 28 requisitos tienen conducta observable o condición de prueba.
+- [x] Las cinco historias cubren información, molestias comunes, seguridad clínica, catálogo público y continuidad.
+- [x] La trazabilidad IA31-01–IA31-10 enlaza requisitos y escenarios o criterios de éxito.
+- [ ] Precisar límites de contexto y retención, y política de consentimiento antes del plan; no se han aprobado parámetros nuevos ni un proveedor externo.
 - [ ] Lista para plan: requiere aprobación humana expresa de la especificación completa según Constitution v1.2.0; la enmienda normativa no sustituye esa aprobación.
 
 ## Notes
 
 - La excepción educativa para molestias comunes fue aprobada normativamente el 2026-11-17; el capítulo 9 histórico conserva su texto y la Constitution v1.2.0 delimita la excepción. La revisión profesional y las fuentes concretas siguen pendientes.
-- No se generaron plan, ADR, contratos ni tareas; tampoco se ejecutaron pruebas.
+- Esta revisión documenta 28 requisitos y 11 criterios de éxito propuestos; ninguno se considera probado. No se generaron plan, ADR técnica, contratos ni tareas de F06.1; tampoco se ejecutaron pruebas.
