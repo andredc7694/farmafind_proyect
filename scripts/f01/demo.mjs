@@ -227,12 +227,24 @@ async function start() {
   process.on('SIGTERM', stop);
 }
 
+async function cleanupE2E() {
+  const value = state();
+  assert.match(value.database, databasePattern, 'La limpieza solo admite la base DEMO aislada');
+  const demo = await connect(adminUrl(value.database));
+  try {
+    const removed = await demo.query(`DELETE FROM f01.usuario
+      WHERE email_canonico LIKE 'f01-e2e-%@example.test' RETURNING id`);
+    console.log(`F01 TEST/DEMO: limpieza E2E completada; cuentas ficticias eliminadas=${removed.rowCount}.`);
+  } finally { await demo.end(); }
+}
+
 try {
   const mode = process.argv[2];
   if (mode === 'prepare') await prepare();
   else if (mode === 'verify') await verify();
   else if (mode === 'start') await start();
-  else throw new Error('Uso: node scripts/f01/demo.mjs <prepare|verify|start>');
+  else if (mode === 'cleanup-e2e') await cleanupE2E();
+  else throw new Error('Uso: node scripts/f01/demo.mjs <prepare|verify|start|cleanup-e2e>');
 } catch (error) {
   console.error(`F01 TEST/DEMO: ${error instanceof Error ? error.message : 'fallo'}`);
   process.exitCode = 1;

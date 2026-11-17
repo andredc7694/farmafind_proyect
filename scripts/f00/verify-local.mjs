@@ -44,7 +44,7 @@ try {
   for (const workspace of ['frontend', 'backend', 'notifications']) {
     if (!existsSync(path.join(root, workspace, '.env.local'))) throw new Error(`${workspace}/.env.local ausente; copiar ejemplo ficticio propio`);
   }
-  run('check', ['scripts/f00/check.mjs']);
+  run('check', ['scripts/f00/check.mjs', '--integrated']);
   run('check:config', ['scripts/f00/check-config.mjs']);
   run('test:base', ['node_modules/vitest/vitest.mjs', 'run']);
   run('build', ['scripts/f00/build.mjs']);

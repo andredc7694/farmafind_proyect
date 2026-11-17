@@ -15,6 +15,17 @@ const specs = {
 
 export const test = base.extend({
   services: async ({}, use) => {
+    if (process.env.F00_E2E_CONTAINER === '1') {
+      await healthCheck(specs.api.url, specs.api.service);
+      await healthCheck(specs.notifications.url, specs.notifications.service);
+      await use({
+        url: name => specs[name].url,
+        start: async () => { throw new Error('El contenedor no administra procesos host'); },
+        stop: async () => { throw new Error('El contenedor no administra procesos host'); },
+        health: name => healthCheck(specs[name].url, specs[name].service),
+      });
+      return;
+    }
     const logDir = mkdtempSync(path.join(tmpdir(), 'farmafind browser '));
     const active = new Map();
     async function start(name) {

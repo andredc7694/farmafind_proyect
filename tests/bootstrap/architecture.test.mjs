@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { inspectArchitecture } from '../../scripts/f00/check-architecture.mjs';
 const scenarios = JSON.parse(readFileSync(new URL('../fixtures/architecture/scenarios.json', import.meta.url), 'utf8'));
 
-function fixture(files, assertion) {
+function fixture(files, assertion, options = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'farmafind architecture '));
   try {
     for (const [relative, content] of Object.entries(files)) {
@@ -13,7 +13,7 @@ function fixture(files, assertion) {
       mkdirSync(path.dirname(target), { recursive: true });
       writeFileSync(target, content);
     }
-    return assertion(inspectArchitecture(root));
+    return assertion(inspectArchitecture(root, options));
   } finally {
     if (!root.startsWith(path.join(tmpdir(), 'farmafind architecture '))) throw new Error('Unsafe cleanup target');
     rmSync(root, { recursive: true, force: true });
@@ -37,4 +37,8 @@ describe('límites F00 de arquitectura', () => {
   it('rechaza rutas de negocio añadidas al bootstrap', () => fixture({
     'backend/src/app.ts': scenarios.businessRoute,
   }, issues => expect(issues.join(' ')).toContain('ruta de negocio')));
+  it('acepta rutas e integraciones aprobadas en el perfil acumulado', () => fixture({
+    'backend/src/modules/busqueda/infrastructure/cache.ts': "import { createClient } from 'redis'; export const cache = createClient;",
+    'backend/src/modules/busqueda/presentation/router.ts': "router.get('/busqueda', handler);",
+  }, issues => expect(issues).toEqual([]), { integrated: true }));
 });

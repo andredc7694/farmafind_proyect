@@ -69,7 +69,7 @@ test('cliente y farmacia recorren los estados autorizados de una reserva', async
     const reservation = reservations.find(item => item.id === reservationId);
     if (reservation && pathname.endsWith('/confirmar') && method === 'POST') {
       reservation.state = 'CONFIRMADA';
-      reservation.pickupExpiresAt = '2026-11-14T20:00:00.000Z';
+      reservation.pickupExpiresAt = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString();
       return json(reservation);
     }
     if (reservation && pathname.endsWith('/entregar') && method === 'POST') {

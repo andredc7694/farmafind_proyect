@@ -26,6 +26,8 @@ for (const workspace of ['backend', 'notifications']) {
   const src = readFileSync(path.join(base, workspace, 'src/app.ts'), 'utf8');
   if (/\b(from|require)\s*\(?['"](?:pg|redis|ioredis|@aws-sdk)/.test(src)) throw new Error(`Integración operativa imprevista en ${workspace}`);
 }
-const architecture = spawnSync(process.execPath, [path.join(base, 'scripts/f00/check-architecture.mjs')], { cwd: base, stdio: 'inherit' });
+const architectureArgs = [path.join(base, 'scripts/f00/check-architecture.mjs')];
+if (process.argv.includes('--integrated')) architectureArgs.push('--integrated');
+const architecture = spawnSync(process.execPath, architectureArgs, { cwd: base, stdio: 'inherit' });
 if (architecture.status !== 0) process.exit(architecture.status ?? 1);
 console.log(`check: ${files.length} archivos JS, TypeScript estricto y imports iniciales correctos`);

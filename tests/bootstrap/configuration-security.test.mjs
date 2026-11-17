@@ -22,6 +22,13 @@ it('errores de perfiles no exponen valores privados ficticios', () => {
   }
 });
 
+it('acepta solo la ruta pública F03 aprobada y rechaza variables Vite privadas', () => {
+  expect(validateFrontend({ VITE_APP_MODE: 'bootstrap', VITE_PUBLIC_SEARCH_PATH: '/api/v1/busquedas' }))
+    .toEqual({ VITE_APP_MODE: 'bootstrap', VITE_PUBLIC_SEARCH_PATH: '/api/v1/busquedas' });
+  expect(() => validateFrontend({ VITE_APP_MODE: 'bootstrap', VITE_PUBLIC_SEARCH_PATH: 'https://example.invalid' })).toThrow('ruta pública');
+  expect(() => validateFrontend({ VITE_APP_MODE: 'bootstrap', VITE_DATABASE_URL: 'fictional' })).toThrow('no permitido');
+});
+
 it('integraciones futuras no activan clientes ni aparecen en el bundle fuente', () => {
   const profile = { APP_MODE: 'bootstrap', HOST: '127.0.0.1', PORT: '3000', DATABASE_URL: secret, REDIS_URL: secret, AI_API_KEY: secret, AWS_ACCESS_KEY_ID: secret };
   expect(api(profile)).toEqual(api({ APP_MODE: 'bootstrap', HOST: '127.0.0.1', PORT: '3000' }));

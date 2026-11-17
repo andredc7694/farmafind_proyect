@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { browserEnvironment } from './browser-environment.mjs';
@@ -13,6 +13,7 @@ import { chromium } from '@playwright/test';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const index = process.argv.indexOf('--preparation');
 const preparationId = index >= 0 ? process.argv[index + 1] : 'A';
+const linuxContainer = process.argv.includes('--linux-container');
 if (!['A', 'B'].includes(preparationId)) throw new Error('--preparation debe ser A o B');
 const source = sourceManifest(root);
 const report = createReport({ preparationId, scope: 'complete', source, requirementIds: ['F00-FR-001', 'F00-FR-013', 'F00-FR-018', 'F00-SC-001', 'F00-SC-002', 'F00-SC-007', 'RUBRICA-05', 'RUBRICA-06', 'RUBRICA-07'] });
@@ -22,9 +23,13 @@ report.expected = ['grupo local passed', 'Playwright con DOM visible y separaci√
 const logDir = path.join(root, 'artifacts', 'f00', report.runId);
 mkdirSync(logDir, { recursive: true });
 const environment = browserEnvironment();
-report.actual.push({ component: 'platform', result: `Windows build ${environment.windowsBuild}; compatible=${environment.compatible}; browserPrepared=${environment.browserPrepared}`, durationMs: 0 });
+const compatible = linuxContainer || environment.compatible;
+const browserPrepared = linuxContainer || environment.browserPrepared;
+report.actual.push({ component: 'platform', result: linuxContainer
+  ? 'Playwright Linux oficial en contenedor versionado; host Windows 10'
+  : `Windows build ${environment.windowsBuild}; compatible=${environment.compatible}; browserPrepared=${environment.browserPrepared}`, durationMs: 0 });
 const controls = [];
-if (!environment.compatible || !environment.browserPrepared) {
+if (!compatible || !browserPrepared) {
   controls.push({ id: 'platform', group: 'local', state: 'pending' }, { id: 'playwright-ui', group: 'complete', state: 'pending' });
   report.errors.push('Prerrequisito de navegador o plataforma pendiente; no se ejecutaron controles completos.');
 } else {
@@ -38,11 +43,16 @@ if (!environment.compatible || !environment.browserPrepared) {
   controls.push({ id: 'local-controls', group: 'local', state: localExit === 0 ? 'passed' : 'failed' });
   if (localExit !== 0) report.errors.push('Controles locales fallaron; navegador no ejecutado.');
   else {
-    const browserExit = run('playwright', ['node_modules/@playwright/test/cli.js', 'test', '--config', 'playwright.config.js']);
+    const browserExit = linuxContainer
+      ? run('playwright-linux-container', ['scripts/f00/run-browser-linux.mjs'])
+      : run('playwright', ['node_modules/@playwright/test/cli.js', 'test', '--config', 'playwright.config.js']);
     controls.push({ id: 'playwright-ui', group: 'complete', state: browserExit === 0 ? 'passed' : 'failed' });
     if (browserExit !== 0) report.errors.push('Pruebas Playwright fallaron.');
     else {
-      const browserVersion = spawnSync(chromium.executablePath(), ['--version'], { cwd: root, encoding: 'utf8', windowsHide: true });
+      const containerVersion = path.join(root, 'test-results', 'browser-version.txt');
+      const browserVersion = linuxContainer
+        ? { status: existsSync(containerVersion) ? 0 : 1, stdout: existsSync(containerVersion) ? readFileSync(containerVersion, 'utf8') : '' }
+        : spawnSync(chromium.executablePath(), ['--version'], { cwd: root, encoding: 'utf8', windowsHide: true });
       if (browserVersion.status === 0) report.versions.browser = browserVersion.stdout.trim();
       else { controls.push({ id: 'browser-version', group: 'complete', state: 'failed' }); report.errors.push('Versi√≥n de navegador no verificable.'); }
       function findCapture(directory) {
@@ -63,8 +73,8 @@ if (!environment.compatible || !environment.browserPrepared) {
     }
   }
 }
-report.cleanup = environment.compatible && environment.browserPrepared ? 'passed' : 'pending';
-if (environment.compatible && environment.browserPrepared) {
+report.cleanup = compatible && browserPrepared ? 'passed' : 'pending';
+if (compatible && browserPrepared) {
   for (const port of [4173, 3000, 3001]) {
     try { await ensureFree(port); }
     catch { report.cleanup = 'failed'; report.errors.push(`Puerto ${port} ocupado tras controles completos`); }

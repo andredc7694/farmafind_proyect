@@ -29,6 +29,7 @@ async function bridge(port) {
 try {
   await bridge(3000);
   await bridge(5173);
+  await bridge(55431);
   const args = [resolve('node_modules/@playwright/test/cli.js'), 'test',
     'frontend/tests/inventory/f02.spec.js', '--output=/tmp/f02-playwright-results'];
   const child = spawn(process.execPath, args, {

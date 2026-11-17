@@ -1,7 +1,7 @@
 # Tasks: F01 — Identidad y seguridad multi-tenant
 
 **Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [authorization-decisions.md](authorization-decisions.md), [contracts/](contracts/) y [quickstart.md](quickstart.md).
-**Status**: Plan F01 aprobado; T042–T049 verificadas localmente con PostgreSQL real para conceder/revocar exclusivamente TRABAJADOR en la farmacia propia. GLO-01 y BOOT-01 mantienen bloqueadas T050–T051. Playwright T062 y revisión humana T067 pendientes; F01 no está aceptada.
+**Status**: Plan F01 aprobado; 66/69 tareas verificadas. T042–T049 permiten exclusivamente TRABAJADOR local y T062 fue verificada con Playwright Linux oficial y fixture DEMO aislado. GLO-01 y BOOT-01 mantienen bloqueadas T050–T051; revisión humana T067 pendiente. F01 no está aceptada.
 **Tests**: Obligatorios por F01-FR-018 y Constitución XIII: unitarias, HTTP, PostgreSQL RLS real, seguridad negativa/positiva y E2E en entorno oficialmente compatible.
 **Organization**: Cuatro historias P1 independientes en su criterio de prueba, con dependencias técnicas explícitas. `[P]` solo indica archivos distintos y ausencia de dependencia inmediata.
 
@@ -137,7 +137,7 @@ Cada tarea usa `- [ ] T### [P?] [US#?]` y una ruta exacta. `BLOQUEADA (gate)` si
 
 ## Phase 7: Polish & cross-cutting
 
-- [ ] T062 [P] Añadir suite E2E F01 de registro, login, selector A/B, denegación y logout en `frontend/tests/identity/f01.spec.js`; ejecutar solo en entorno oficialmente compatible y no declarar Windows 10 oficialmente soportado. [F01-FR-018, F01-SC-001–004]
+- [X] T062 [P] Añadir suite E2E F01 de registro, login, selector A/B, denegación y logout en `frontend/tests/identity/f01.spec.js`; ejecutar solo en entorno oficialmente compatible y no declarar Windows 10 oficialmente soportado. [F01-FR-018, F01-SC-001–004]
 - [X] T063 [P] Revisar límites de módulos, Notificaciones independiente y ausencia de negocio ajeno en `backend/src/modules/README.md` y `specs/002-f01-identidad-multitenant/implementation-evidence.md`. [F01-FR-020, F01-SC-007]
 - [X] T064 Ejecutar controles `check`, `build`, unitarias, HTTP, PostgreSQL y seguridad, además de `npm audit` sin `--force`, y registrar resultados reales en `specs/002-f01-identidad-multitenant/implementation-evidence.md`; no atribuir pruebas no ejecutadas. [F01-FR-018, F01-SC-001–007]
 - [X] T065 Vincular cada F01-FR-001–020, escenario de US1–US4 y F01-SC-001–007 con evidencias reales y 16 criterios docentes sin inventar puntajes en `specs/002-f01-identidad-multitenant/evidence-traceability.md`. [F01-FR-018, F01-SC-001–007]

@@ -28,9 +28,10 @@ test('revisión manual, vista previa, confirmación e historial F02', async ({ p
   await page.getByLabel('Medicamento').selectOption({ index: 1 });
   await page.getByLabel('Precio referencial (S/)').fill('12.50');
   await page.getByLabel('Cantidad física revisada').fill('9');
-  await page.getByLabel('Motivo de revisión').fill('Conteo ficticio en navegador');
+  const reason = `Conteo ficticio ${randomUUID()}`;
+  await page.getByLabel('Motivo de revisión').fill(reason);
   await page.getByRole('button', { name: 'Guardar revisión' }).click();
-  await expect(page.getByText('Conteo ficticio en navegador')).toBeVisible();
+  await expect(page.getByText(reason, { exact: false })).toBeVisible();
 
   const csv = 'nombre,concentracion,presentacion,clasificacion,precio,cantidad,nonce\n' +
     `producto ficticio,10 mg,tabletas,venta libre,13.00,10,${randomUUID()}\n`;
@@ -40,7 +41,7 @@ test('revisión manual, vista previa, confirmación e historial F02', async ({ p
   await page.getByRole('button', { name: 'Preparar vista previa' }).click();
   await expect(page.getByText('Vista previa: VISTA_PREVIA')).toBeVisible();
   await page.getByRole('button', { name: 'Confirmar archivo completo' }).click();
-  await expect(page.getByText(/CONFIRMADA/)).toBeVisible();
+  await expect(page.getByText(/CONFIRMADA/).first()).toBeVisible();
 });
 
 test('archivo inválido no habilita confirmación y Beta no revela inventario', async ({ page }) => {
