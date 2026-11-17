@@ -1,6 +1,6 @@
 # Investigación técnica F06.1 — decisiones propuestas
 
-**Fecha:** 2026-11-17. **Estado:** diseño documental, pendiente de aprobación del plan. Fuente principal: Documento Maestro v3.0, Parte A, A5, IA31-01–IA31-10; Constitution v1.2.0, III/XIX; F06 aprobado.
+**Fecha:** 2026-11-17. **Estado:** diseño documental aprobado con el plan por el responsable mediante «sí, apruebo todo»; sin implementación autorizada en este bloque. Fuente principal: Documento Maestro v3.0, Parte A, A5, IA31-01–IA31-10; Constitution v1.2.0, III/XIX; F06 aprobado.
 
 ## Continuidad conversacional
 
@@ -32,8 +32,8 @@
 
 **Razón:** conserva F01/RLS y los límites F06. **Alternativas:** confiar en instrucciones del proveedor, descartado porque no constituyen control verificable.
 
-## Preguntas para aprobar el plan
+## Decisiones del plan y puertas independientes
 
-1. Ratificar o ajustar 6 turnos y 15 minutos de inactividad para el modo local. Son parámetros propuestos, no aceptados por aprobar la spec.
+1. Se ratificaron 6 turnos y 15 minutos de inactividad para el modo local al aprobar expresamente el plan el 2026-11-17; aprobar la spec por sí sola no los fijaba.
 2. El uso de fichas oficiales concretas requiere verificar licencia y revisión profesional; ninguna se considera aprobada por este plan.
 3. Proveedor externo, política de consentimiento, retención en un eventual despliegue distribuido y presupuesto necesitan autorización separada antes de activación.

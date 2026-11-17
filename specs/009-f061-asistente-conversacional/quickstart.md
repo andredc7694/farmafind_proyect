@@ -1,6 +1,6 @@
 # Guía de validación propuesta — F06.1
 
-**Estado:** plan documental; los comandos F06.1 no existen todavía y ninguna prueba F06.1 se ha ejecutado. Esta guía describe las comprobaciones que deberá permitir la implementación tras aprobación del plan.
+**Estado:** plan documental aprobado; los comandos F06.1 no existen todavía y ninguna prueba F06.1 se ha ejecutado. Esta guía describe las comprobaciones que deberá permitir la implementación dentro de un alcance de código autorizado.
 
 ## Prerrequisitos
 
@@ -20,4 +20,4 @@
 
 ## Criterio de salida documental
 
-El plan aprobado permite preparar tareas; las aprobaciones de spec y plan son necesarias antes de generar código. La aceptación técnica requiere evidencias reales para los 11 criterios de éxito. La exposición a usuarios reales exige además corpus autorizado, revisión profesional y decisiones separadas sobre proveedor externo/privacidad si se pretende activarlo.
+El plan aprobado permite preparar tareas. El código aún requiere una instrucción de implementación dentro del alcance aprobado. La aceptación técnica requiere evidencias reales para los 11 criterios de éxito. La exposición a usuarios reales exige además corpus autorizado, revisión profesional y decisiones separadas sobre proveedor externo/privacidad si se pretende activarlo.

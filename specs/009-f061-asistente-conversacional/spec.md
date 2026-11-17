@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-17
 
-**Status**: Especificación aprobada por el responsable el 2026-11-17 mediante respuesta «sí» a la solicitud explícita de aprobación de F06.1 en esta conversación. Plan e implementación pendientes de aprobaciones propias.
+**Status**: Especificación aprobada por el responsable el 2026-11-17 mediante respuesta «sí» a la solicitud explícita de aprobación de F06.1 en esta conversación. Plan aprobado después mediante «sí, apruebo todo»; F06.1 sigue sin implementación ni aceptación.
 
 **Input**: Ampliar F06 con conversación en español, información farmacéutica documentada y consultas públicas de FarmaFind, preservando los límites clínicos vigentes.
 

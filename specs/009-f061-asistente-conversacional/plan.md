@@ -2,7 +2,7 @@
 
 **Branch**: `feat/f06-1-asistente-conversacional` | **Date**: 2026-11-17 | **Spec**: [spec.md](spec.md)
 
-**Status**: propuesta técnica para aprobación humana; no autoriza generar código.
+**Status**: plan aprobado por el responsable el 2026-11-17 mediante «sí, apruebo todo» en respuesta a la solicitud explícita de aprobación del plan, incluidos 6 turnos y 15 minutos. La implementación F06.1 continúa fuera del alcance de este bloque documental.
 
 ## Summary
 
@@ -17,7 +17,7 @@ Ampliar F06 mediante un caso de uso conversacional separado, de contexto efímer
 **Target Platform**: desarrollo Windows 10; despliegue futuro separado.
 **Project Type**: módulo del monolito modular, API pública y SPA React.
 **Performance Goals**: mantener los límites F06; medir latencia y consumo con mock, sin afirmar SLO de producción.
-**Constraints**: máximo 500 caracteres por consulta, 4 KiB por cuerpo, 30 solicitudes/minuto/origen, hasta 3 herramientas y 20 ofertas; proponer 6 turnos y 15 minutos de inactividad para contexto efímero. Las cifras de contexto son propuestas sujetas a aprobación del plan.
+**Constraints**: máximo 500 caracteres por consulta, 4 KiB por cuerpo, 30 solicitudes/minuto/origen, hasta 3 herramientas y 20 ofertas; 6 turnos y 15 minutos de inactividad para contexto efímero, aprobados con este plan para alcance local.
 **Scale/Scope**: una ampliación F06.1, sin inventario privado, transacciones ni proveedores externos activos.
 
 ## Constitution Check
@@ -32,7 +32,7 @@ Ampliar F06 mediante un caso de uso conversacional separado, de contexto efímer
 | XV — historia | Documento Maestro v3.0 principal; v2.0 y F06 preservados; F07 AWS histórico etiquetado `F07-LEGACY-AWS`. |
 | XX — datos y secretos | Contexto volátil, sin texto en logs, fixtures ficticios, proveedor externo desactivado. |
 
-**Reevaluación tras diseño**: las mismas puertas siguen satisfechas documentalmente. No hay excepción constitucional nueva. La aprobación del plan, de corpus profesional y de proveedor externo son puertas independientes.
+**Reevaluación tras diseño**: las mismas puertas siguen satisfechas documentalmente. No hay excepción constitucional nueva. El plan fue aprobado por el responsable; el corpus profesional y cualquier proveedor externo conservan puertas de aprobación independientes.
 
 ## Project Structure
 
@@ -74,11 +74,11 @@ La separación dentro de `asistente-ia` reutiliza el módulo aprobado F06. La ru
 6. Registrar únicamente métricas de categoría, duración y resultado; nunca prompt, respuesta, PII o identificador completo.
 7. Ante error, devolver estado seguro y acceso a búsqueda F03 convencional. El mock sigue disponible sin red externa.
 
-## Límites y decisiones propuestas
+## Límites y decisiones del plan aprobado
 
 | Asunto | Propuesta | Condición |
 | --- | --- | --- |
-| Contexto local | 6 turnos, 15 minutos de inactividad, eliminación inmediata; memoria por proceso con límite de entradas y limpieza por expiración. | Aprobar con este plan; no equivale a sesión autenticada ni historial sanitario. |
+| Contexto local | 6 turnos, 15 minutos de inactividad, eliminación inmediata; memoria por proceso con límite de entradas y limpieza por expiración. | Aprobado con este plan para alcance local; no equivale a sesión autenticada ni historial sanitario. |
 | Consumo | Mantener límites F06: 500 caracteres, 4 KiB, 30/min/origen, 3 herramientas, 20 resultados. | No reducir protección existente; pruebas de 413/429 y cero herramientas al rechazar. |
 | Proveedor | `MockAIProvider` existente como único activo; interfaz para adaptadores posteriores, incluido Gemini como candidato. | Ningún SDK, clave, red externa o facturación ahora; aprobación separada para selección y activación. |
 | Contenido farmacéutico | Catálogo de fichas revisadas con fuente, fecha, licencia y aprobación profesional; sin contenido real hasta verificar permisos. | DIGEMID y otras fuentes oficiales son candidatas, no corpus autorizado automáticamente. |
@@ -105,7 +105,7 @@ La separación dentro de `asistente-ia` reutiliza el módulo aprobado F06. La ru
 | Memoria local no compartida | Alcance TEST/DEMO de un proceso; diseño distribuido requiere plan futuro. |
 | Identificador opaco reutilizado o filtrado | Alta entropía, vínculo al origen, TTL, no URL ni logs, borrado y límite por origen. |
 | Proveedor externo | No activo; evaluación de términos, privacidad, costos, consentimiento y aprobación humana independiente. |
-| Tareas de F06.1 antes del plan aprobado | Se pueden documentar después de la revisión del plan; código solo con ambas aprobaciones vigentes. |
+| Implementación fuera del bloque documental actual | Las tareas se pueden generar y analizar ahora; código solo cuando el alcance de implementación quede expresamente autorizado. |
 
 ## Complexity Tracking
 

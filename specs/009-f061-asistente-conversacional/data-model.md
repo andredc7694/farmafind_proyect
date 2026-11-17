@@ -1,4 +1,4 @@
-# Modelo de información F06.1 — propuesto
+# Modelo de información F06.1 — plan aprobado
 
 No se propone migración ni persistencia nueva. PostgreSQL conserva los datos oficiales de F03/F01; Redis conserva exclusivamente su papel F03. El modelo siguiente describe valores efímeros y contenido revisado, no tablas implementadas.
 
@@ -13,4 +13,4 @@ No se propone migración ni persistencia nueva. PostgreSQL conserva los datos of
 
 **Transiciones de conversación:** nueva → activa → expirada o eliminada. Expirada/eliminada son terminales para ese identificador; no se reactivan. Si se excede el límite de turnos, se indica reinicio de contexto, sin reutilizar turnos previos. La gestión de contexto no modifica sesiones F01 ni políticas RLS.
 
-**Validación pendiente de aprobación técnica:** 6 turnos/15 minutos son propuestas del plan. Los límites de 500 caracteres, 4 KiB, 30/min/origen, 3 herramientas y 20 ofertas proceden del F06 aprobado.
+**Validación pendiente de ejecución:** 6 turnos/15 minutos fueron aprobados con el plan el 2026-11-17; no se han implementado ni probado. Los límites de 500 caracteres, 4 KiB, 30/min/origen, 3 herramientas y 20 ofertas proceden del F06 aprobado.

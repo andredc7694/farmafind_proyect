@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: FarmaFind F06.1 Conversation API (propuesta)
+  title: FarmaFind F06.1 Conversation API (plan aprobado)
   version: 0.1.0
   description: >-
-    Contrato documental pendiente de aprobación del plan. Mantiene intacto el contrato
+    Contrato documental aprobado con el plan el 2026-11-17. Mantiene intacto el contrato
     F06 POST /api/v1/asistente/consultar. No activa proveedores externos ni contenido clínico.
 paths:
   /api/v1/asistente/conversaciones:
