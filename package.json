@@ -61,6 +61,7 @@
     "verify:f06:integration": "npm run build --workspace @farmafind/backend && node scripts/f06/smoke.mjs",
     "verify:contracts": "node scripts/integration/check-openapi-routes.mjs",
     "migrate:f01:test": "node scripts/f01/migrate.mjs",
+    "bootstrap:f01:test": "node scripts/f01/bootstrap.mjs",
     "verify:local": "node scripts/f00/verify-local.mjs",
     "browser:install": "node scripts/f00/browser-install.mjs",
     "verify:bootstrap": "node scripts/f00/verify-bootstrap.mjs"

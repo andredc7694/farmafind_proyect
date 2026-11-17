@@ -1,6 +1,6 @@
 # F01 — Contrato de autorización, sesión y límites de datos
 
-**Estado actualizado 2026-11-12:** endpoints de identidad/membresías propias, sesiones y políticas base se implementaron y probaron localmente con PostgreSQL ficticio; la concesión/revocación local de `TRABAJADOR` está aprobada por EXC-01/ROL-01 e implementada y probada en PostgreSQL local ficticio; F01 no está aceptada. GLO-01 bloquea la concesión global y BOOT-01 solo permite diseño. La evidencia real consta en [implementation-evidence.md](../implementation-evidence.md). Rige [spec.md](../spec.md) FR005–019 y Constitución VII–VIII, XIII, XX.
+**Estado actualizado 2026-11-17:** identidad, membresías propias, sesiones, administración local de `TRABAJADOR` y autorización global acotada se implementaron y probaron con PostgreSQL ficticio. EXC-01/ROL-01 y GLO-01/BOOT-01 rigen con los límites de [authorization-decisions.md](../authorization-decisions.md): las operaciones globales exigen aprobación humana previa de un uso y BOOT-01 solo puede ejecutarse offline en una base efímera TEST. F01 no está aceptada; T067 conserva la revisión humana final. La evidencia real consta en [implementation-evidence.md](../implementation-evidence.md). Rige [spec.md](../spec.md) FR005–019 y Constitución VII–VIII, XIII, XX.
 
 ## Matriz mínima de decisiones
 
@@ -11,10 +11,11 @@
 | Personal con membresía activa A | Seleccionar A, consultar sus permisos efectivos | Permitido según rol; sin `membership.manage` no concede roles/delegaciones. |
 | Dueño de A con permiso local explícito | Conceder/revocar `TRABAJADOR` a **otra persona** en A | EXC-01/ROL-01 aprobadas; operación local verificada con HTTP y RLS reales. Nunca sobre B, sí mismo, dueño/admin, delegaciones de negocio o privilegios globales. |
 | Administrador autorizado de A con permiso local explícito | Conceder/revocar `TRABAJADOR` a **otra persona** en A | Exige membresía activa A y permiso local; operación local verificada con HTTP y RLS reales. No concede roles iguales/superiores ni actúa sobre B o sí mismo. |
-| Admin plataforma con permiso global específico | Ninguna concesión global en este incremento | GLO-01 no autoriza una ruta global; BOOT-01 solo permite diseñar el alta inicial. El título no da acceso a inventario ni a todas las membresías. |
+| Admin plataforma activo con permiso global específico y aprobación vigente de un uso | Consultar, conceder o revocar únicamente el rol global fijo autorizado | Permitido por GLO-01 mediante rutas específicas, actor distinto, catálogo cerrado, auditoría y protección del último administrador. No hereda acceso tenant, inventario ni membresías. |
+| Operador BOOT-01 autorizado fuera de HTTP | Alta inicial indicada por expediente aprobado en base efímera `farmafind_f01_test_*` | Permitido solo offline en TEST, con integridad, expiración, idempotencia y auditoría. Se rechazan base persistente, host remoto, duplicado incompatible y registro público privilegiado. |
 | Sesión expirada/revocada, membresía suspendida/revocada o farmacia inactiva | Cualquier operación privada dependiente de ella | Denegada aunque el navegador conserve un valor anterior. |
 
-Los nombres de capacidades son **propuestas técnicas**, no nuevas autoridades históricas. EXC-01 y el catálogo ROL-01 (`TRABAJADOR` únicamente) fueron aprobados expresamente el 2026-11-12; la frase histórica del maestro capítulo 27 permanece intacta y trazada en [authorization-decisions.md](../authorization-decisions.md). GLO-01 mantiene bloqueada toda concesión global, y BOOT-01 no autoriza ejecutar un alta real. Ningún flujo público crea privilegios iniciales. La delegación futura de aceptación de reserva no implementa reservas en F01.
+Los nombres de capacidades son **decisiones F01 posteriores y trazadas**, no autoridades históricas atribuidas al maestro. EXC-01 y ROL-01 (`TRABAJADOR` únicamente) fueron aprobados expresamente el 2026-11-12; la frase histórica del capítulo 27 permanece intacta. GLO-01 y BOOT-01 fueron ratificados el 2026-11-17 con catálogo cerrado, aprobación de un uso y ejecución exclusiva en bases efímeras TEST. Ningún flujo público crea privilegios iniciales y ninguna operación ratificada autoriza la base persistente o producción.
 
 ## Secuencia y barreras
 

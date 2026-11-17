@@ -8,6 +8,9 @@ import { ManageMemberships } from './modules/usuarios/application/manage-members
 import { createIdentityRouter } from './modules/usuarios/presentation/auth-router.js';
 import { createMembershipRouter } from './modules/usuarios/presentation/membership-router.js';
 import { createAdminMembershipRouter } from './modules/usuarios/presentation/admin-memberships-router.js';
+import { ManagePlatformAuthorizations } from './modules/usuarios/application/manage-platform-authorizations.js';
+import { PgPlatformAuthorizationUnitOfWork } from './modules/usuarios/infrastructure/platform-authorization-repository.js';
+import { createPlatformAuthorizationRouter } from './modules/usuarios/presentation/platform-authorization-router.js';
 import { ListCatalog } from './modules/medicamentos/application/list-catalog.js';
 import { createCatalogRouter } from './modules/medicamentos/presentation/catalog-router.js';
 import { AuthorizedCatalogReader } from './modules/medicamentos/infrastructure/authorized-catalog.js';
@@ -96,6 +99,8 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     const http = { allowedOrigin: config.allowedOrigin, csrfKey: config.csrfKey, cookieSecure: config.cookieSecure };
     const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http));
     app.use('/api/v1', createAdminMembershipRouter(identity, management, http));
+    const platformManagement = new ManagePlatformAuthorizations(new PgPlatformAuthorizationUnitOfWork(tenantTransactions));
+    app.use('/api/v1', createPlatformAuthorizationRouter(identity, platformManagement, http));
     app.use('/api/v1', createCatalogRouter(new ListCatalog(new AuthorizedCatalogReader(tenantTransactions)), http));
     const inventoryTransactions = new PgInventoryTenantRunner(tenantTransactions);
     let invalidator = undefined;

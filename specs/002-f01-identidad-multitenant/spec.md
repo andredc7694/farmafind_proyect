@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f01-identidad-multitenant`
 **Created**: 2026-11-10
-**Status**: Especificación aprobada; implementación F01 parcial en rama de trabajo. EXC-01/ROL-01 ratificadas el 2026-11-12 para gestión local limitada a `TRABAJADOR`; GLO-01 y ejecución de BOOT-01 siguen bloqueadas. Aceptación completa pendiente.
+**Status**: Especificación aprobada; implementación F01 verificada en TEST salvo revisión humana T067. EXC-01/ROL-01 limitan la gestión local a `TRABAJADOR`; GLO-01/BOOT-01 fueron ratificadas el 2026-11-17 con ejecución BOOT prohibida sobre la base persistente. Aceptación completa pendiente.
 **Input**: Solicitud de especificar F01 mediante GitHub Spec Kit, sin generar código ni avanzar al plan.
 
 ## Clarifications
@@ -18,7 +18,11 @@ La administración delegada se restringe a membresías de trabajadores y roles d
 
 ### Ratificación limitada 2026-11-12, posterior a la aprobación de la especificación
 
-**EXC-01** ratifica expresamente como decisión nueva de F01 la excepción limitada frente a la frase histórica del capítulo 27: dueño o administrador autorizado puede gestionar membresías de trabajadores de otras personas solo en su farmacia y con permiso explícito. **ROL-01** fija `TRABAJADOR` como único rol delegable inicial para concesión/revocación local; no autoriza conceder dueño, administrador, privilegios globales, capacidades de negocio ni permisos propios. La identidad, membresía activa, contexto, recurso, acción, auditoría y RLS siguen obligatorios. **GLO-01** no autoriza concesión global en este incremento. **BOOT-01** permite diseñar, pero no ejecutar, un procedimiento separado y auditado de alta inicial. Los escenarios de delegaciones y concesión global de US3 siguen pendientes donde excedan este catálogo; no se consideran aprobados ni probados por esta ratificación.
+**EXC-01** ratifica expresamente como decisión nueva de F01 la excepción limitada frente a la frase histórica del capítulo 27: dueño o administrador autorizado puede gestionar membresías de trabajadores de otras personas solo en su farmacia y con permiso explícito. **ROL-01** fija `TRABAJADOR` como único rol delegable inicial para concesión/revocación local; no autoriza conceder dueño, administrador, privilegios globales, capacidades de negocio ni permisos propios. La identidad, membresía activa, contexto, recurso, acción, auditoría y RLS siguen obligatorios. La ratificación posterior de **GLO-01/BOOT-01** se limita al catálogo y procedimiento descritos a continuación; no amplía EXC-01/ROL-01 ni habilita operaciones persistentes.
+
+### Ratificación de GLO-01 y BOOT-01 — 2026-11-17
+
+Se aprueba un único rol `ADMINISTRADOR_PLATAFORMA` con permisos F01 cerrados y explícitos; ninguna asignación global concede membresía ni acceso tenant. Concesión y revocación requieren permiso `PLATFORM_GLOBAL_AUTH_MANAGE`, objetivo distinto, aprobación humana de uso único y auditoría. Se aprueba BOOT-01 como comando offline idempotente, sin endpoint público, para `INITIAL_PLATFORM_ADMIN` una sola vez y `INITIAL_PHARMACY_OWNER` una sola vez por farmacia. Esta última operación se registra como excepción nueva y limitada al capítulo 27. Implementación y pruebas quedan autorizadas solo en bases TEST efímeras; la base persistente y cualquier ejecución privilegiada real siguen fuera del alcance.
 
 ## User Scenarios & Testing *(mandatory)*
 

@@ -51,4 +51,4 @@ Una ejecución diagnóstica inicial con 5 VU y pausas de 200 ms superó el lími
 - La carga describe un fixture local pequeño y no predice capacidad productiva.
 - El limitador es por proceso; una estrategia distribuida requiere una decisión posterior compatible con la Constitución.
 - No se crearon recursos AWS, reservas, pagos, notificaciones de negocio ni FarmaFind AI.
-- GLO-01 y BOOT-01 permanecen bloqueados y no fueron ejecutados.
+- F03 no depende de GLO-01 ni BOOT-01 y no ejecutó operaciones privilegiadas. Su ratificación y verificación posterior pertenecen exclusivamente al cierre F01 en bases efímeras TEST.

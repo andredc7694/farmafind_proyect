@@ -13,6 +13,7 @@ servers:
 tags:
   - name: Authentication
   - name: Memberships
+  - name: PlatformAuthorization
 paths:
   /auth/csrf:
     get:
@@ -216,6 +217,65 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotVisible' }
         '409': { $ref: '#/components/responses/Conflict' }
+  /platform/role-assignments:
+    get:
+      tags: [PlatformAuthorization]
+      summary: Consultar asignaciones globales con permiso explícito
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Asignaciones globales mínimas, sin membresías ni datos tenant
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/PlatformRoleAssignment' } }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [PlatformAuthorization]
+      summary: Conceder el rol global fijo mediante aprobación humana de uso único
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlatformRoleMutation' }
+      responses:
+        '201': { description: Asignación global creada y auditada }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /platform/role-assignments/{assignmentId}:
+    patch:
+      tags: [PlatformAuthorization]
+      summary: Revocar una asignación global mediante aprobación humana de uso único
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+        - name: assignmentId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status, approvalId]
+              properties:
+                status: { type: string, enum: [REVOCADA] }
+                approvalId: { type: string, format: uuid }
+      responses:
+        '200': { description: Asignación revocada, sesiones invalidadas y auditoría registrada }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
 components:
   securitySchemes:
     sessionCookie:
@@ -236,6 +296,23 @@ components:
       schema: { type: string, format: uuid }
       description: Identificador solicitado, no prueba de autorización.
   schemas:
+    PlatformRoleAssignment:
+      type: object
+      additionalProperties: false
+      required: [id, userId, role, status]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        role: { type: string, enum: [ADMINISTRADOR_PLATAFORMA] }
+        status: { type: string, enum: [ACTIVA, REVOCADA] }
+    PlatformRoleMutation:
+      type: object
+      additionalProperties: false
+      required: [userId, role, approvalId]
+      properties:
+        userId: { type: string, format: uuid }
+        role: { type: string, enum: [ADMINISTRADOR_PLATAFORMA] }
+        approvalId: { type: string, format: uuid }
     SessionView:
       type: object
       additionalProperties: false

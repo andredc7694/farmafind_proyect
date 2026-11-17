@@ -1,7 +1,7 @@
 # Tasks: F01 — Identidad y seguridad multi-tenant
 
 **Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [authorization-decisions.md](authorization-decisions.md), [contracts/](contracts/) y [quickstart.md](quickstart.md).
-**Status**: Plan F01 aprobado; 66/69 tareas verificadas. T042–T049 permiten exclusivamente TRABAJADOR local y T062 fue verificada con Playwright Linux oficial y fixture DEMO aislado. GLO-01 y BOOT-01 mantienen bloqueadas T050–T051; revisión humana T067 pendiente. F01 no está aceptada.
+**Status**: Plan F01 aprobado; 76/77 tareas verificadas tras implementar y comprobar GLO-01/BOOT-01 el 2026-11-17 exclusivamente en bases efímeras TEST. T042–T049 conservan `TRABAJADOR` local. T067 mantiene la revisión humana final; F01 no está aceptada.
 **Tests**: Obligatorios por F01-FR-018 y Constitución XIII: unitarias, HTTP, PostgreSQL RLS real, seguridad negativa/positiva y E2E en entorno oficialmente compatible.
 **Organization**: Cuatro historias P1 independientes en su criterio de prueba, con dependencias técnicas explícitas. `[P]` solo indica archivos distintos y ausencia de dependencia inmediata.
 
@@ -92,7 +92,7 @@ Cada tarea usa `- [ ] T### [P?] [US#?]` y una ruta exacta. `BLOQUEADA (gate)` si
 
 **Goal**: Gestionar roles/membresías de terceros solo dentro del ámbito autorizado y sin autoelevación.
 **Independent Test**: Tras ratificar puertas, dueño/admin de A con permiso modifica un trabajador de A y deja auditoría; trabajador, cliente, actor sobre sí mismo y admin de A sobre B quedan denegados sin cambio de fila.
-**Puertas vigentes**: EXC-01 y ROL-01 aprobadas; T042–T049 completadas con pruebas locales de autorización, HTTP, RLS y UI. GLO-01 prohíbe concesiones globales y BOOT-01 permite solo diseño; T050–T051 siguen bloqueadas.
+**Puertas vigentes**: EXC-01 y ROL-01 aprobadas; T042–T049 completadas con pruebas locales de autorización, HTTP, RLS y UI. GLO-01 y BOOT-01 fueron aprobadas el 2026-11-17 con catálogo fijo, aprobación de un uso y ejecución BOOT únicamente offline en TEST. La base persistente sigue prohibida sin autorización separada.
 
 ### Gates y tests para US3
 
@@ -109,10 +109,10 @@ Cada tarea usa `- [ ] T### [P?] [US#?]` y una ruta exacta. `BLOQUEADA (gate)` si
 - [X] T047 [US3] Tras T042–T046, implementar casos de uso de concesión/revocación de `TRABAJADOR` de otras personas y auditoría atómica en `backend/src/modules/usuarios/application/manage-memberships.ts`; cualquier cambio a dueño/admin o capacidad de negocio se deniega. [F01-FR-008–009, F01-FR-014]
 - [X] T048 [US3] Tras T043/T047, exponer solo rutas locales de `TRABAJADOR` del contrato revisado, con denegación cruzada y sin aceptar rol arbitrario, en `backend/src/modules/usuarios/presentation/admin-memberships-router.ts`. [F01-FR-008–009, F01-FR-019]
 - [X] T049 [P] [US3] Tras contratos y pruebas locales, preparar vista React de gestión de `TRABAJADOR` restringida a la farmacia propia, sin decidir permisos en cliente, en `frontend/src/identity/MembershipAdmin.jsx`. [F01-FR-008–009]
-- [ ] T050 [US3] BLOQUEADA (GLO-01): definir y obtener aprobación separada de catálogo de acciones globales, autoridad otorgante y procedimiento aplicable; BOOT-01 permite solo diseñar el alta inicial de dueños/admins, sin ejecutarlo. Registrar diseño y autorizaciones pendientes en `specs/002-f01-identidad-multitenant/authorization-decisions.md`; no crear ruta global universal ni fixtures privilegiados fuera de BD ficticia. [F01-FR-008, F01-FR-011]
-- [ ] T051 [US3] BLOQUEADA (GLO-01; ejecución BOOT-01 no autorizada): solo tras T050 y nuevo plan/contrato global aprobados, especificar y comprobar autorización global acotada y auditoría sin heredar membresías locales en `backend/tests/identity/global-authorization.test.ts`; no implementar concesión global en este incremento. [F01-FR-008, F01-FR-011, F01-SC-006]
+- [X] T050 [US3] Definir y obtener aprobación separada del catálogo GLO-01, autoridad otorgante y procedimiento BOOT-01 en `authorization-decisions.md`, preservando la discrepancia del capítulo 27 y prohibiendo ejecución persistente. Aprobado el 2026-11-17. [F01-FR-008, F01-FR-011]
+- [X] T051 [US3] Especificar y comprobar autorización global acotada, auditoría, denegación tenant y bootstrap idempotente en `backend/tests/identity/global-authorization.test.ts` y `backend/tests/identity/bootstrap-authorization.rls.test.ts`; no ejecutar bootstrap sobre la base persistente. [F01-FR-008, F01-FR-011, F01-SC-006]
 
-**Checkpoint**: T042–T049 verificadas para el alcance local TRABAJADOR. T050–T051 siguen bloqueadas y US3/F01-SC-006 no tienen aceptación completa mientras falten operaciones globales aprobadas, Playwright y revisión humana.
+**Checkpoint**: T042–T049 verificadas para `TRABAJADOR` local y T050–T051 para autorización global acotada/BOOT offline. Playwright T062 está verificada; F01-SC-006 conserva revisión humana en T067.
 
 ## Phase 6: User Story 4 — RLS, datos públicos y trazabilidad (P1)
 
@@ -149,13 +149,13 @@ Cada tarea usa `- [ ] T### [P?] [US#?]` y una ruta exacta. `BLOQUEADA (gate)` si
 - El presente `tasks.md` fue borrador anticipado y se revalidó frente al plan aprobado antes de código o instalación. La aprobación humana del 2026-11-11 limitó el primer incremento a T001–T006; la instrucción posterior autorizó T007–T016. La instrucción más reciente permite continuar F01 dentro del alcance aprobado, salvo decisiones expresamente pendientes. T001 registra la puerta, no la concede. El umbral, ventana y ámbito del control de abuso deben quedar aprobados antes de T020/T024. T002 es condición de T003, T018 y T021; si `argon2` falla, detenerse sin cambiar algoritmo.
 - Setup T001–T006 precede Foundational T007–T016. T007 precede migraciones T008–T011; T012 precede T013. La fundación necesaria precede US1, US2 y US4.
 - US1 T017–T029 prueba identidad/sesión de forma autónoma. US2 requiere sesión US1 y RLS de lectura propia, pero su criterio independiente es el cambio A/B. US4 requiere transacción y tablas privadas F01; sus pruebas no acreditan las mutaciones US3 bloqueadas.
-- **Puertas documentales resueltas:** T040/T041 acreditan EXC-01/ROL-01; T042–T049 acreditan únicamente la operación local TRABAJADOR con pruebas reales. T050–T051 siguen bloqueadas por GLO-01/BOOT-01; T062 y T067 pendientes.
-- T062 requiere entorno de navegador oficialmente compatible. T067 requiere evidencia de siete SC y revisión humana; F00 conserva sus propios pendientes.
+- **Puertas documentales resueltas:** T040/T041 acreditan EXC-01/ROL-01; T042–T049 acreditan la operación local TRABAJADOR. T050–T051 y T070–T077 acreditan GLO-01/BOOT-01 en TEST; ninguna tarea autoriza la base persistente.
+- T062 fue ejecutada en Linux oficialmente compatible. T067 requiere revisión humana de los siete SC; F00 conserva sus propios pendientes.
 
 ### Parallel Opportunities
 
 - T004 y T006 usan archivos distintos; T014/T015 y T030/T031 o T052/T053 solo pueden realizarse en paralelo después de sus prerrequisitos. T026 y T028 afectan frontend y backend separados.
-- T042/T043 se prepararon en archivos distintos; T044 verificó los controles de base antes de T046. T045–T049 se cerraron tras sus pruebas correspondientes. T050–T051 no pueden ejecutarse como operaciones globales o alta inicial real en este incremento.
+- T042/T043 se prepararon en archivos distintos; T044 verificó los controles de base antes de T046. T045–T049 se cerraron tras sus pruebas. T050–T051/T070–T077 solo permiten operaciones globales y bootstrap en bases efímeras TEST; la base persistente permanece fuera de alcance.
 
 ### Independent Test Criteria
 
@@ -177,32 +177,43 @@ Cada tarea usa `- [ ] T### [P?] [US#?]` y una ruta exacta. `BLOQUEADA (gate)` si
 | F01-FR-005 | T010, T014–T015, T030, T033–T034, T045 | T045 verificada con matriz de autorización local; resto no afectado. |
 | F01-FR-006 | T010, T030–T031, T033–T037 | US2. |
 | F01-FR-007 | T010, T014, T030–T034 | US2. |
-| F01-FR-008 | T040–T051 | T040/T041 documentales; T042–T049 verificadas localmente para TRABAJADOR; T050/T051 bloqueadas. |
-| F01-FR-009 | T040–T049 | Gestión local TRABAJADOR verificada con PostgreSQL y HTTP; globales bloqueadas. |
+| F01-FR-008 | T040–T051, T070–T077 | Administración local TRABAJADOR y autorización global acotada verificadas con HTTP/PostgreSQL; BOOT solo offline y TEST. |
+| F01-FR-009 | T040–T049, T071–T076 | Gestión local TRABAJADOR y separación global verificadas; autoelevación y acceso cruzado denegados. |
 | F01-FR-010 | T034, T042, T045, T052 | T042/T045 verificadas localmente. |
-| F01-FR-011 | T011, T050–T051 | Denegación global por defecto; concesión global prohibida en este incremento. Requiere decisión, contrato y plan adicionales antes de implementación. |
+| F01-FR-011 | T011, T050–T051, T070–T077 | Catálogo global fijo, aprobación humana de un uso, auditoría, revocación y bootstrap offline verificados en TEST. |
 | F01-FR-012 | T025, T053, T056, T060 | US1/US4. |
 | F01-FR-013 | T002, T004, T016, T018–T024, T027 | Depende de ARG-01 satisfactorio para hashing. |
 | F01-FR-014 | T010, T015, T028, T047, T057 | T047 verificada con auditoría atómica y rollback negativo. |
 | F01-FR-015 | T003, T007–T010, T022, T046 | T046 aplicada y verificada en PostgreSQL local ficticio. |
 | F01-FR-016 | T011, T032, T044, T052, T055, T059 | T044 verificada en PostgreSQL real. |
 | F01-FR-017 | T011–T013, T038, T044, T046, T052, T054–T055, T059 | T044/T046 verificadas en PostgreSQL local. |
-| F01-FR-018 | T005, T012, T029, T032, T038, T044, T052–T054, T058, T062, T064–T066 | Aceptación completa pendiente de alcance global bloqueado, navegador compatible y revisión humana. |
+| F01-FR-018 | T005, T012, T029, T032, T038, T044, T052–T054, T058, T062, T064–T066, T075–T077 | Suites unitarias, HTTP, PostgreSQL y Playwright ejecutadas; aceptación completa pendiente solo de T067. |
 | F01-FR-019 | T020, T025, T031, T035, T043, T048 | T043/T048 verificadas con rutas locales limitadas. |
 | F01-FR-020 | T001, T004, T006, T010, T016, T056, T063 | Alcance F01. |
 | F01-SC-001 | T017, T020, T029, T062, T065 | Evidencia futura. |
 | F01-SC-002 | T019–T020, T029, T062, T065 | Evidencia futura. |
 | F01-SC-003 | T032, T038, T054, T062, T065 | Evidencia futura. |
-| F01-SC-004 | T032, T038, T044, T052, T054, T058–T059, T061–T062, T065 | Parte global de US3 bloqueada; operación local verificada. |
+| F01-SC-004 | T032, T038, T044, T052, T054, T058–T059, T061–T062, T065, T075–T076 | Aislamiento tenant y ausencia de herencia por rol global verificados; revisión humana pendiente. |
 | F01-SC-005 | T028, T053, T057, T060, T065 | Evidencia futura. |
-| F01-SC-006 | T042–T044, T047, T050–T051, T065 | Operación local TRABAJADOR verificada; globales bloqueadas. No hay aceptación completa. |
+| F01-SC-006 | T042–T044, T047, T050–T051, T065, T070–T077 | Operaciones local/global verificadas con denegaciones, aprobación y auditoría; T067 pendiente. |
 | F01-SC-007 | T006, T063, T065 | Revisión futura. |
 
 ## Implementation Strategy
 
-T001–T049 y T052–T061, junto con T063–T066 y T068–T069, tienen evidencia de incrementos locales; T050–T051 siguen bloqueadas. T062 requiere navegador oficialmente compatible y T067 revisión humana. Esta estrategia no autoriza despliegue ni aceptación completa.
+T001–T066 y T068–T077 tienen evidencia real; T067 requiere revisión humana. Esta estrategia no autoriza despliegue, bootstrap persistente ni aceptación automática.
 
 ## Phase 8: Convergence
 
 - [X] T068 Conectar las rutas de identidad y membresías propias ya implementadas a un proceso API F01 local mediante composición explícita de casos de uso y dos pools PostgreSQL no privilegiados y separados (auth/tenant); validar configuración y claves solo en servidor, preservar `/health` y el modo F00, y no habilitar mutaciones delegadas bloqueadas. [F01-FR-001–007, F01-FR-013, F01-FR-016–017, plan: integración API local] (missing)
 - [X] T069 Ejecutar una comprobación reproducible con PostgreSQL ficticio y el proceso F01 compuesto: registro, login, perfil, membresías propias, cambio A/B permitido, denegación cruzada y logout; registrar comandos, versiones, resultados reales y límites sin secretos en `specs/002-f01-identidad-multitenant/implementation-evidence.md` y actualizar la guía local. [F01-FR-018–019, F01-SC-001–004, plan: verificación local] (partial)
+
+## Phase 9: GLO-01 y BOOT-01 ratificados
+
+- [X] T070 Crear migración aditiva `backend/migrations/f01/010_platform_authorization.sql` con catálogo F01 inmutable, asignaciones, aprobaciones de uso único, auditoría global, idempotencia de bootstrap, grants mínimos y roles sin `SUPERUSER`/`BYPASSRLS`. [F01-FR-008, F01-FR-011, F01-FR-015–017]
+- [X] T071 Implementar política y casos de uso globales en dominio/aplicación, con rol fijo, actor distinto, permiso explícito, aprobación vigente, protección del último administrador, revocación de sesiones y cero herencia tenant. [F01-FR-005, F01-FR-008–011, F01-FR-014]
+- [X] T072 Implementar repositorio/transacción PostgreSQL para consulta, concesión y revocación global auditadas, sin grants generales ni contexto de farmacia. [F01-FR-008, F01-FR-011, F01-FR-014–017]
+- [X] T073 Añadir contrato y router específico `/api/v1/platform/role-assignments`, con sesión, CSRF, errores mínimos y sin aceptar permisos arbitrarios; conservar BOOT-01 fuera de HTTP. [F01-FR-011, F01-FR-019]
+- [X] T074 Implementar comando BOOT-01 offline limitado a bases `farmafind_f01_test_*`, expediente local ignorado, `INITIAL_PLATFORM_ADMIN`/`INITIAL_PHARMACY_OWNER`, transacción e idempotencia; rechazar la base persistente. [F01-FR-001, F01-FR-008, F01-FR-011, F01-FR-020]
+- [X] T075 Ejecutar pruebas unitarias, HTTP y PostgreSQL real de GLO-01: positivos, autoelevación, rol/permiso arbitrario, administrador local, farmacia A/B, revocación, último administrador, aprobación consumida y concurrencia. [F01-FR-018, F01-SC-004, F01-SC-006]
+- [X] T076 Ejecutar BOOT-01 únicamente en una base efímera: éxito único, duplicado, aprobación vencida/manipulada, ámbito incorrecto, rollback, auditoría y ausencia de privilegio en registro público. [F01-FR-018, F01-SC-001, F01-SC-006]
+- [X] T077 Actualizar evidencias y trazabilidad con resultados reales, confirmar base persistente intacta y preparar T067 sin autoaprobar F01. [F01-FR-018, F01-SC-001–007]

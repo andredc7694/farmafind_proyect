@@ -19,6 +19,7 @@ const routeFiles=[
   ['backend/src/modules/usuarios/presentation/auth-router.ts','/api/v1'],
   ['backend/src/modules/usuarios/presentation/membership-router.ts','/api/v1'],
   ['backend/src/modules/usuarios/presentation/admin-memberships-router.ts','/api/v1'],
+  ['backend/src/modules/usuarios/presentation/platform-authorization-router.ts','/api/v1'],
   ['backend/src/modules/medicamentos/presentation/catalog-router.ts','/api/v1'],
   ['backend/src/modules/inventario/presentation/inventory-router.ts','/api/v1'],
   ['backend/src/modules/inventario/presentation/import-router.ts','/api/v1'],
@@ -63,5 +64,5 @@ const documented=new Set(contracts.flatMap(([file,prefix])=>contractOperations(f
 const implemented=new Set(routeFiles.flatMap(([file,prefix])=>implementedOperations(file,prefix)));
 const missing=[...documented].filter(operation=>!implemented.has(operation));
 assert.deepEqual(missing,[],`Operaciones OpenAPI sin ruta Express: ${missing.join(', ')}`);
-assert.equal(documented.size,33,'El inventario F00-F06 cambió; revisar contrato y validador');
+assert.equal(documented.size,36,'El inventario F00-F06 cambió; revisar contrato y validador');
 console.log(`Contratos OpenAPI F00-F06: ${documented.size} operaciones documentadas con ruta Express.`);

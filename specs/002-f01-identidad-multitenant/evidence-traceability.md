@@ -1,6 +1,6 @@
 # F01 — Trazabilidad de requisitos y evidencia
 
-**Fecha de revisión:** 2026-11-12. **Estado:** parcial; ninguna fila equivale por sí sola a aceptación de F01 ni a puntaje de la rúbrica. Fuente normativa: [spec.md](spec.md), [plan.md](plan.md), [Constitution v1.1.0](../../.specify/memory/constitution.md) y la rúbrica `docs/referencias/RUBRICA.png`. Los comandos y resultados reales se registran en [implementation-evidence.md](implementation-evidence.md). EXC-01/ROL-01 fueron ratificadas para `TRABAJADOR` local; GLO-01 mantiene bloqueadas concesiones globales y BOOT-01 solo permite diseño, según [authorization-decisions.md](authorization-decisions.md).
+**Fecha de revisión:** 2026-11-17. **Estado:** 76/77 tareas verificadas; ninguna fila equivale por sí sola a aceptación de F01 ni a puntaje de la rúbrica. Fuente normativa: [spec.md](spec.md), [plan.md](plan.md), [Constitution v1.1.0](../../.specify/memory/constitution.md) y la rúbrica `docs/referencias/RUBRICA.png`. Los comandos y resultados reales se registran en [implementation-evidence.md](implementation-evidence.md). EXC-01/ROL-01 y GLO-01/BOOT-01 fueron ratificadas; BOOT permanece limitado a bases efímeras TEST y T067 exige revisión humana.
 
 Las referencias `unit`, `http` y `rls` identifican archivos de prueba bajo `backend/tests/identity/`; `ui` refiere a `frontend/tests/identity/`. **Ejecutado** significa que existe una ejecución real registrada, no que el requisito de aceptación completo esté cumplido. **Parcial** indica escenarios obligatorios aún faltantes. **Bloqueado** indica una puerta humana expresa.
 
@@ -12,21 +12,21 @@ Las referencias `unit`, `http` y `rls` identifican archivos de prueba bajo `back
 | F01-FR-002 login y abuso | US1.2, US1.4; SC002 | T020–T025; `identity-use-cases.unit.test.ts`, `abuse.unit.test.ts`, `auth.http.test.ts`, `identity-repository.rls.test.ts` | Parcial: T020/T024 y navegador pendientes. |
 | F01-FR-003 sesión, expiración y revocación | US1.3–4; SC002 | T019, T022–T027; `session.unit.test.ts`, `identity-repository.rls.test.ts`, `auth.http.test.ts` | Parcial: composición ejecutable y E2E pendientes. |
 | F01-FR-004 perfil propio y salida pública | US1.2, US1.5; SC002, SC005 | T023, T025, T053, T056; `auth.http.test.ts`, `data-minimization.test.ts` | Parcial: consulta pública de producto pertenece a otra fase. |
-| F01-FR-005 identidad, rol y membresía distintos | US2.1–5; SC003 | T014–T015, T030, T033–T034; `membership.unit.test.ts`, `membership.rls.test.ts` | Parcial: derechos administrativos bloqueados. |
+| F01-FR-005 identidad, rol y membresía distintos | US2.1–5; SC003 | T014–T015, T030, T033–T034, T071; suites de membresía/global | Identidad, membresía tenant y asignación global permanecen separadas; T067 pendiente. |
 | F01-FR-006 listado y selección propia | US2.1–5; SC003 | T031–T038, T062; `membership.http.test.ts`, `membership-isolation.test.ts`, `membership.rls.test.ts`, `f01.spec.js` | Verificado por HTTP, PostgreSQL RLS y Playwright Linux oficial con selector Alfa/Beta y denegación cruzada. |
 | F01-FR-007 estados de membresía | US2.3–4; SC003–004 | T010, T014, T030–T034, T038; `membership.rls.test.ts`, `membership-isolation.test.ts` | Parcial: casos completos de aceptación pendientes. |
-| F01-FR-008 gestión restringida y auditada | US3.1, US3.4–5; SC006 | T040–T051 | EXC-01/ROL-01 documentadas; operación local `TRABAJADOR` T042–T049 implementada y verificada con autorización, HTTP y PostgreSQL RLS; global T050–T051 bloqueada. |
+| F01-FR-008 gestión restringida y auditada | US3.1, US3.4–5; SC006 | T040–T051, T070–T077 | Operación local `TRABAJADOR` y rol global fijo verificados con autorización, HTTP, PostgreSQL y auditoría. |
 | F01-FR-009 no autoelevación ni acceso ajeno | US3.2, US3.5; SC004, SC006 | T040–T049; `authorization.unit.test.ts`, `admin-memberships.http.test.ts`, `admin-memberships.rls.test.ts` | Verificado para la operación local `TRABAJADOR`: autoasignación, roles distintos y farmacia ajena se deniegan; privilegios globales continúan fuera del alcance. |
-| F01-FR-010 autorización por acción/recurso | US3.1–5, US4.1–2; SC004 | T034, T038, T042–T049; `membership-isolation.test.ts`, `admin-memberships.rls.test.ts` | Matriz local `TRABAJADOR` verificada con identidad, membresía, capacidad, recurso y tenant; la concesión global sigue bloqueada. |
-| F01-FR-011 permiso global explícito | US3.4; SC006 | T050–T051 | Bloqueado: GLO-01/BOOT-01. |
+| F01-FR-010 autorización por acción/recurso | US3.1–5, US4.1–2; SC004 | T034, T038, T042–T049, T071–T076 | Matriz local y global verificadas por acción, recurso, sesión, aprobación y contexto; sin herencia tenant. |
+| F01-FR-011 permiso global explícito | US3.4; SC006 | T050–T051, T070–T077 | Verificado en TEST: permiso explícito, aprobación de un uso, auditoría, revocación y BOOT offline; persistente no autorizada. |
 | F01-FR-012 privacidad y proyección | US1.5, US4.5; SC005 | T025, T053, T056; `data-minimization.test.ts` | Parcial: inspección global de respuestas pendiente. |
 | F01-FR-013 contraseñas, sesión y abuso | US1.1–4; SC001–002 | T002, T018–T024, T027; `password.unit.test.ts`, `session.unit.test.ts`, `identity-repository.rls.test.ts` | Parcial: T020/T024 y E2E pendientes. |
 | F01-FR-014 auditoría minimizada | US1.1–4, US3.1–5, US4.2; SC005–006 | T028, T053, T057; `identity-repository.rls.test.ts`, `data-minimization.test.ts` | Parcial: denegaciones US4/US3 y correlación HTTP pendientes. |
-| F01-FR-015 PostgreSQL oficial | US1.1–4, US2.1–5; SC001–004 | T007–T011, T022, T038; `migrations.test.ts`, `identity-repository.rls.test.ts` | Parcial: mutaciones bloqueadas. |
+| F01-FR-015 PostgreSQL oficial | US1.1–4, US2.1–5; SC001–004 | T007–T011, T022, T038, T070, T075–T076 | Migraciones 001–010 y operaciones autorizadas verificadas en PostgreSQL real efímero. |
 | F01-FR-016 RLS pooled | US2.2–5, US4.1–4; SC003–004 | T011, T032, T038, T052, T055, T059; `rls-direct.test.ts`, `membership-isolation.test.ts` | Parcial: AC04 completo pendiente. |
 | F01-FR-017 contexto local transaccional | US2.1–5, US4.1–4; SC003–004 | T012–T013, T038, T054–T055; `tenant-transaction.test.ts`, `pool-isolation.test.ts` | Parcial: pruebas AC04 finales pendientes. |
-| F01-FR-018 pruebas positivas y negativas | US1–US4; SC001–007 | T005, T029, T038, T052–T065; suites unit/http/rls/E2E ejecutadas | Parcial: Playwright Linux T062 pasó 3/3 con API y DEMO reales; la parte global de US3 sigue bloqueada por GLO-01/BOOT-01. |
-| F01-FR-019 contratos protegidos | US1.2–4, US2.1–5, US3.1–5; SC002–006 | T020, T025, T031, T035, T043, T048; `auth.http.test.ts`, `membership.http.test.ts`, `admin-memberships.http.test.ts` | Contratos de identidad y administración local verificados; no existe contrato de concesión global porque GLO-01/BOOT-01 permanecen bloqueados. |
+| F01-FR-018 pruebas positivas y negativas | US1–US4; SC001–007 | T005, T029, T038, T052–T065, T075–T077; suites unit/http/rls/E2E ejecutadas | Playwright Linux T062 pasó 3/3; GLO/BOOT pasó unitarias, HTTP y PostgreSQL real. Revisión humana T067 pendiente. |
+| F01-FR-019 contratos protegidos | US1.2–4, US2.1–5, US3.1–5; SC002–006 | T020, T025, T031, T035, T043, T048, T073; suites HTTP y OpenAPI | 36 operaciones OpenAPI F00–F06 tienen ruta; contrato global restringido verificado y BOOT permanece fuera de HTTP. |
 | F01-FR-020 límite de alcance | US1–US4; SC007 | T001, T006, T063; `backend/src/modules/README.md` y revisión del árbol | Parcial hasta revisión final humana. |
 
 ## Escenarios de aceptación aprobados
@@ -44,10 +44,10 @@ Las referencias `unit`, `http` y `rls` identifican archivos de prueba bajo `back
 | US2 | 4 cambio posterior de permiso | `membership-isolation.test.ts` prueba revocación en siguiente operación; mutación autorizada bloqueada. |
 | US2 | 5 concurrencia A/B | `membership-isolation.test.ts` con pool de una conexión y `Promise.all`; E2E pendiente. |
 | US3 | 1 gestión local autorizada | EXC-01/ROL-01 ratificadas para `TRABAJADOR`; pruebas e implementación pendientes. |
-| US3 | 2 autoelevación | Negativa de rutas ausentes parcial; mutación y matriz bloqueadas. |
+| US3 | 2 autoelevación | Negativas local/global verificadas en dominio, HTTP y PostgreSQL; el registro público no crea privilegios. |
 | US3 | 3 delegación para reservas | Evaluación de delegación propia parcial; reserva corresponde a F04 y mutación bloqueada. |
-| US3 | 4 administración global | Bloqueado: GLO-01/BOOT-01. |
-| US3 | 5 gestión de B por A | Negativa básica parcial; operación administrativa bloqueada. |
+| US3 | 4 administración global | GLO-01/BOOT-01 verificados en bases efímeras con catálogo fijo, aprobación de un uso, auditoría, revocación y negativas; revisión T067 pendiente. |
+| US3 | 5 gestión de B por A | Administración local cruzada denegada y rol global sin acceso tenant por defecto, verificados con RLS. |
 | US4 | 1 acceso positivo A | `rls-direct.test.ts`, `membership.rls.test.ts`, `membership-isolation.test.ts`; AC04 completa pendiente. |
 | US4 | 2 lectura/escritura B denegadas | `rls-direct.test.ts` y HTTP US2; mutación de terceros bloqueada, auditoría de denegación pendiente. |
 | US4 | 3 falta de contexto | `rls-direct.test.ts`, `tenant-transaction.test.ts`; batería final pendiente. |
@@ -61,9 +61,9 @@ Las referencias `unit`, `http` y `rls` identifican archivos de prueba bajo `back
 | F01-SC-001 | Registro/duplicado con PostgreSQL sintético y HTTP; pruebas unitarias | Parcial, batería de aceptación/E2E pendiente. |
 | F01-SC-002 | Sesión/revocación/expiración con PostgreSQL y HTTP | Parcial, proceso F01 y E2E pendientes. |
 | F01-SC-003 | A/B y pool concurrente en `membership-isolation.test.ts` | Parcial, E2E pendiente. |
-| F01-SC-004 | SQL directo, RLS y HTTP propio negativo | Parcial: AC04 completa y US3 bloqueada. |
+| F01-SC-004 | SQL directo, RLS y HTTP propio negativo | Aislamiento A/B, contexto ausente/reutilizado y ausencia de herencia global verificados; revisión T067 pendiente. |
 | F01-SC-005 | DTO, respuesta y auditoría de identidad minimizados | Parcial: denegaciones US4 y revisión total pendientes. |
-| F01-SC-006 | No existen mutaciones de terceros habilitadas | Bloqueado: no se afirma cumplimiento positivo. |
+| F01-SC-006 | Operaciones administrativas acotadas | Administración local y global verificada con autoelevación, acceso cruzado, rol arbitrario, aprobación consumida y aislamiento; aceptación humana pendiente. |
 | F01-SC-007 | Revisión de límites del módulo Usuarios y roles | Parcial hasta revisión humana final. |
 
 ## Los 16 criterios de la rúbrica docente

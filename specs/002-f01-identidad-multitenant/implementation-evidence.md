@@ -328,3 +328,31 @@ Sin servicios, `npm.cmd run check`, `npm.cmd run build`, `npm.cmd run test:f01:u
 La autorización de integración permitió ejecutar Playwright 1.65.0 en la imagen oficial Linux `mcr.microsoft.com/playwright:v1.65.0-noble`, sin atribuir soporte a Windows 10. `npm run test:f01:e2e:linux` inició temporalmente la API DEMO y Vite en loopback, pasó credenciales ficticias mediante `.cache/f01-e2e/vars.local.env` ignorado por Git y ejecutó **3/3 pruebas satisfactorias**: registro con confirmación genérica; login, perfil, selector Alfa/Beta y logout; denegación HTTP 404 al seleccionar Beta con una membresía únicamente Alfa; y error genérico ante credenciales incorrectas.
 
 El recorrido usó la API real y la base DEMO aislada con RLS. La cuenta temporal `f01-e2e-*` creada por la prueba se eliminó después mediante un comando exclusivo del fixture, nunca mediante una ruta de producción. Una repetición completa volvió a pasar 3/3 y `node scripts/f01/demo.mjs verify` confirmó después exactamente 3 usuarios ficticios, 2 farmacias y 4 membresías `TRABAJADOR`, con aislamiento A/B y runtime sin privilegios. La base persistente no fue escrita. T062 queda verificada; T050/T051 continúan bloqueadas por GLO-01/BOOT-01 y T067 requiere revisión humana, por lo que F01 permanece **66/69** y no aceptada.
+
+## GLO-01 y BOOT-01 en TEST — 2026-11-17
+
+La aprobación humana del 2026-11-17 fijó un único rol global `ADMINISTRADOR_PLATAFORMA`, cinco permisos inmutables y un procedimiento BOOT offline. La migración aditiva `010_platform_authorization.sql` conserva las tablas globales fuera del acceso directo de `f01_runtime`, utiliza aprobaciones de un solo uso y crea `f01_bootstrap_executor` como `NOLOGIN NOSUPERUSER NOBYPASSRLS`. Las rutas HTTP solo gestionan asignaciones globales con sesión y CSRF; BOOT-01 no tiene endpoint público. El comando `scripts/f01/bootstrap.mjs` rechaza la base persistente, hosts remotos, expedientes vencidos/manipulados y roles o ámbitos distintos de los aprobados.
+
+Todas las operaciones PostgreSQL de este bloque se ejecutaron en bases efímeras `farmafind_f01_test_*`, creadas y eliminadas por las pruebas. No se ejecutó BOOT-01 en `farmafind_f01_test`. Una consulta `BEGIN READ ONLY` a esa base antes del cierre confirmó **3 usuarios, 3 sesiones, 0 farmacias, 0 membresías y 9 migraciones**, los mismos datos previos al incremento; la migración 010 solo se aplicó en bases efímeras.
+
+| Comprobación | Resultado real |
+|---|---|
+| `npm run build --workspace @farmafind/backend` | Salida 0, TypeScript estricto. |
+| `npm run test:f01:unit` | **11 archivos, 57 pruebas** satisfactorias; incluye validación offline de integridad, expiración, ámbito y rechazo de base persistente. |
+| `npm run test:f01:api` | **5 archivos, 26 pruebas** satisfactorias; contrato global, CSRF, autoelevación, rol/cuerpo arbitrario y minimización de errores. |
+| `npm run test:f01:rls` | **10 archivos, 52 pruebas** satisfactorias con PostgreSQL saludable. Un intento posterior al primer apagado produjo `ECONNREFUSED` y 52 casos omitidos; se reinició solo PostgreSQL, la repetición válida pasó 52/52 y el contenedor volvió a quedar detenido. |
+| `bootstrap-authorization.rls.test.ts` | **1 archivo, 7 pruebas** satisfactorias: roles sin privilegios, alta inicial global única, comando offline de dueño ejecutado dos veces con resultado idempotente, concesión/revocación, revocación de sesiones, aprobación concurrente de un uso, expiración, no herencia tenant, rollback y ámbito inválido. |
+| `npm run verify:contracts` | **36 operaciones OpenAPI F00–F06** con ruta Express. |
+| `npm run build` | Salida 0 fuera del sandbox requerido por esbuild; frontend 48 módulos y backend/notificaciones compilados. |
+| `npm audit --omit=dev` | **0 vulnerabilidades**. |
+| Regresión independiente | F02 unitarias 15/15; F03 unitarias 25/25; F04 unitarias/API 23/23; F05 unitarias/API 13/13; F06 32/32. Redis F03 no se inició y su integración no se atribuye a este bloque. |
+
+T050, T051 y T070–T077 quedan verificadas. El estado es **76/77 tareas**; T067 conserva la revisión humana final. Este cierre técnico no autoriza BOOT sobre una base persistente, despliegue, `main` ni aceptación automática de F01.
+
+El inventario final mostró tres bases aisladas preexistentes con sufijo de prueba, incluida la DEMO documentada; se conservaron sin borrado conforme a la restricción de no eliminar bases o volúmenes. Las bases efímeras creadas por la suite actual se eliminaron en sus `afterAll` y no se alteraron esos entornos preexistentes.
+
+## Regresión de la candidata integrada — 2026-11-17
+
+Sobre `integration/f00-f06` se repitieron únicamente los controles afectados por GLO-01/BOOT-01 y sus regresiones dependientes. PostgreSQL y Redis locales se iniciaron de forma temporal, con secretos leídos solo desde `.cache` ignorada, y se detuvieron al finalizar. La ejecución válida obtuvo: F01 unitarias **57**, API **26** y PostgreSQL/RLS **52**; F02 unitarias/RLS **15/14**; F03 unitarias/Redis/RLS **25/3/4**; F04 unitarias/API/RLS **17/6/16**; F05 unitarias/API/RLS/recuperación **8/5/4/1**; F06 **32**. Total: **290 pruebas satisfactorias**.
+
+También pasaron `npm run check` sobre 111 archivos JS/TypeScript y límites modulares, `npm run build` con 48 módulos frontend y `npm run verify:contracts` con 36 operaciones OpenAPI. Las pruebas de navegador y carga no se repitieron porque este cambio no modificó sus superficies; permanecen vinculadas a sus ejecuciones registradas. T067 continúa abierta y esta regresión no constituye aceptación humana.
