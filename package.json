@@ -16,6 +16,8 @@
   "scripts": {
     "dev:web": "npm run dev --workspace @farmafind/frontend",
     "dev:api": "node scripts/f00/dev-service.mjs backend",
+    "prepare:local": "npm run build --workspace @farmafind/backend && node scripts/integration/local-api.mjs prepare",
+    "dev:local": "npm run build --workspace @farmafind/backend && node scripts/integration/local-api.mjs start",
     "dev:identity": "npm run build --workspace @farmafind/backend && node scripts/f01/start.mjs",
     "dev:f02": "npm run build --workspace @farmafind/backend && node scripts/f02/start.mjs",
     "dev:f03": "npm run build --workspace @farmafind/backend && node scripts/f03/start.mjs",

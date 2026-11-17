@@ -53,6 +53,7 @@ export function PublicSearch() {
           <h2>{offer.medicamento.nombreComercial}</h2><p>{offer.medicamento.principioActivo} · {offer.medicamento.concentracion}</p>
           <p>{offer.medicamento.presentacion}</p><h3>{offer.farmacia.nombre}</h3><p>{offer.farmacia.direccion}</p>
           <strong>S/ {(offer.precioReferencialCentavos / 100).toFixed(2)}</strong>
+          <p><a href={`/reservations?pharmacyId=${encodeURIComponent(offer.farmacia.id)}&medicationId=${encodeURIComponent(offer.medicamento.id)}`}>Solicitar reserva</a></p>
           <p>Disponible · revisado {new Date(offer.ultimaRevision).toLocaleString('es-PE')}</p>
           {offer.distanciaKm !== null && <p>A {offer.distanciaKm.toFixed(2)} km aproximadamente</p>}
         </li>)}</ul>}

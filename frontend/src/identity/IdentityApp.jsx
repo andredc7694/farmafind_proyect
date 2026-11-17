@@ -143,9 +143,9 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false })
     {status === 'authenticated' && <PharmacySelector pharmacies={pharmacies}
       activePharmacyId={activePharmacyId} selectingPharmacyId={selectingPharmacyId}
       status={pharmacyStatus} onSelect={selectPharmacy} />}
-    {status === 'authenticated' && activePharmacyId && (inventoryMode
-      ? <InventoryView pharmacyId={activePharmacyId} /> : reservationsMode
-      ? <ReservationsView pharmacyId={activePharmacyId} />
+    {status === 'authenticated' && reservationsMode && <ReservationsView pharmacyId={activePharmacyId} />}
+    {status === 'authenticated' && activePharmacyId && !reservationsMode && (inventoryMode
+      ? <InventoryView pharmacyId={activePharmacyId} />
       : <MembershipAdmin pharmacyId={activePharmacyId} />)}
   </main>;
 }
