@@ -39,3 +39,12 @@ usan login runtime sin SUPERUSER/BYPASSRLS y la eliminan al terminar. La base pe
 
 - Revision humana final de F04.
 - El resultado local no equivale a aceptacion definitiva de F04.
+
+## Aceptación humana final — 2026-11-17
+
+El responsable del proyecto FarmaFind aprobó expresamente F04 en esta conversación,
+mensaje «FARMAFIND — APROBACIÓN HUMANA FORMAL Y CIERRE F00–F06», secciones
+1 y 2. La decisión cubre flujo de reservas, concurrencia, vencimiento
+configurable aprobado, idempotencia y Transactional Outbox dentro del alcance
+local demostrado. El apartado «Pendiente obligatorio» anterior refleja el
+estado previo a esta decisión. No se aceptan pagos ni canales externos de F05.

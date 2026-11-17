@@ -1,7 +1,7 @@
 # Tasks: F06 — Asistente IA informativo
 
 **Input:** spec, plan, research, ADR/C4, data-model, contrato y quickstart.
-**Status:** 52/52 verificadas; cierre técnico provisional, aceptación humana pendiente.
+**Status:** 52/52 verificadas; aceptación humana formal registrada el 2026-11-17 para MockAIProvider determinista, sin proveedor externo.
 **Tests:** obligatorios por F06-FR-022 y Constitution XIII.
 
 ## Phase 1: Approval and setup

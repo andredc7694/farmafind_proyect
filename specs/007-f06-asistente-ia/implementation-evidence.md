@@ -29,3 +29,12 @@
 La primera ejecución de fallback contra `farmafind_f01_test` falló porque esa base persistente no contiene el esquema F03. Se corrigió la configuración de la prueba para usar el fixture F03 aislado; no se migró ni modificó la base persistente.
 
 La convergencia revisó 24 requisitos, 8 criterios de éxito, cuatro historias, las decisiones del plan y los principios constitucionales aplicables. No detectó trabajo construible faltante, contradicciones ni ampliaciones fuera de alcance; no añadió tareas.
+
+## Aceptación humana final — 2026-11-17
+
+El responsable del proyecto FarmaFind aprobó expresamente F06 en esta conversación,
+mensaje «FARMAFIND — APROBACIÓN HUMANA FORMAL Y CIERRE F00–F06», secciones
+1 y 2. La decisión cubre el `MockAIProvider` determinista, respuestas
+fundamentadas y controles de seguridad dentro del alcance demostrado. No
+autoriza IA generativa externa, datos privados sin permiso ni consejo clínico.
+La matriz integrada conserva las pruebas y el riesgo residual de dependencias.

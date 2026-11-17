@@ -356,3 +356,19 @@ El inventario final mostró tres bases aisladas preexistentes con sufijo de prue
 Sobre `integration/f00-f06` se repitieron únicamente los controles afectados por GLO-01/BOOT-01 y sus regresiones dependientes. PostgreSQL y Redis locales se iniciaron de forma temporal, con secretos leídos solo desde `.cache` ignorada, y se detuvieron al finalizar. La ejecución válida obtuvo: F01 unitarias **57**, API **26** y PostgreSQL/RLS **52**; F02 unitarias/RLS **15/14**; F03 unitarias/Redis/RLS **25/3/4**; F04 unitarias/API/RLS **17/6/16**; F05 unitarias/API/RLS/recuperación **8/5/4/1**; F06 **32**. Total: **290 pruebas satisfactorias**.
 
 También pasaron `npm run check` sobre 111 archivos JS/TypeScript y límites modulares, `npm run build` con 48 módulos frontend y `npm run verify:contracts` con 36 operaciones OpenAPI. Las pruebas de navegador y carga no se repitieron porque este cambio no modificó sus superficies; permanecen vinculadas a sus ejecuciones registradas. T067 continúa abierta y esta regresión no constituye aceptación humana.
+
+## Revisión humana final de F01 — 2026-11-17
+
+El responsable del proyecto FarmaFind aprobó expresamente en esta conversación,
+mediante el mensaje «FARMAFIND — APROBACIÓN HUMANA FORMAL Y CIERRE F00–F06»,
+secciones 1 y 2, los 20 requisitos y siete criterios de éxito F01. La revisión
+incluye el plan, EXC-01/ROL-01 y las decisiones GLO-01/BOOT-01, el contrato de
+autorización y las limitaciones de las evidencias técnicas integradas. T067 se
+cierra después de la revisión final, sin alterar las cifras ni resultados de
+pruebas históricos.
+
+La aceptación se limita a TEST/DEMO y al alcance demostrado. GLO-01 y BOOT-01
+siguen restringidos exclusivamente a bases efímeras TEST; no se autoriza
+bootstrap privilegiado, permisos globales ni creación de dueños en bases
+persistentes o producción. Permanecen obligatorios PostgreSQL RLS, la
+denegación entre farmacias y la excepción documental EXC-01 limitada.

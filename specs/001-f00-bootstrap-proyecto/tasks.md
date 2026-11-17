@@ -1,5 +1,5 @@
 ---
-description: "Seguimiento de F00 — incremento técnico local, aceptación completa pendiente"
+description: "Seguimiento de F00 — incremento técnico local aceptado por responsable"
 ---
 
 # Tasks: F00 — Bootstrap del proyecto FarmaFind
@@ -7,9 +7,10 @@ description: "Seguimiento de F00 — incremento técnico local, aceptación comp
 **Input**: documentos de `specs/001-f00-bootstrap-proyecto/`.
 **Prerequisites**: [spec.md](spec.md) aclarada y aprobada; [plan.md](plan.md) corregido y
 complementarios aprobados expresamente el 2026-11-10; Constitution v1.1.0 ratificada.
-**Created**: 2026-11-10. **Status**: implementación técnica local parcial autorizada;
-57 tareas implementadas o verificadas según su redacción y 1 pendiente (T058).
-Se conservan los 58 identificadores; ninguna marca acredita aceptación completa.
+**Created**: 2026-11-10. **Status**: 58/58 tareas completadas; aceptación humana
+formal registrada el 2026-11-17 en `docs/evidencias/f00/human-review.md`, limitada
+al alcance local demostrado. Se conservan los 58 identificadores y la evidencia
+de la candidata técnica anterior al registro de aprobación.
 La invocación inicial de speckit-tasks autorizó únicamente este documento. Posteriormente,
 el usuario autorizó expresamente speckit-implement solo para T001, T002 y la parte de T004
 independiente de T003. No autorizó instalaciones, navegadores, servidores, pruebas de
@@ -205,11 +206,11 @@ Escenarios US4.1–US4.3; FR013/014/016–020; SC001/006/007 y revisión de todo
 **Checkpoint**: ruta de evidencia y consolidación definidas y verificables con fixtures;
 ningún caso sintético satisface las dos preparaciones reales o aprueba el checklist humano.
 
-## Phase 7: Polish & Cross-Cutting Concerns — ejecución y aceptación futuras
+## Phase 7: Polish & Cross-Cutting Concerns — ejecución y aceptación registradas
 
-**Purpose**: fijar la revisión candidata, ejecutar reproducibilidad local y conservar un
-bloqueo explícito de aceptación completa. Todas estas tareas permanecen sin ejecutar.
-Completar trabajo local no permite cerrar tareas bloqueadas o eliminar pruebas.
+**Purpose**: fijar la revisión candidata, ejecutar reproducibilidad local y
+registrar la decisión humana final. T050–T058 quedaron completadas sobre la
+candidata técnica y la aprobación documentadas; ninguna prueba fue eliminada.
 
 - [X] T050 Verificar la utilidad `scripts/f00/source-manifest.mjs` creada en T011 mediante los casos de T007 y las comprobaciones de evidencia de T044. Después de US1–US4, congelar una revisión candidata común y registrarla en `docs/evidencias/f00/candidate.md`, con hashes reproducibles de fuente, instrucciones, manifests y lockfile y las exclusiones establecidas en T011. No inventar SHA ni crear commits. Si cambia código/lockfile/instrucciones, identificar nueva candidata y repetir A/B antes de aceptación. Depende de US1–US4, T011 y T044.
 - [X] T051 Preparar A limpia e independiente en Windows 10 desde la candidata de T050, generar `.env.local` propios desde ejemplos, instalar mediante npm ci solo con autorización de preparación y ejecutar verify:local bajo autorización de pruebas; guardar registros completos A en `artifacts/f00/<run-id-A-local>/`. No requerir Docker/PostgreSQL/Redis/AWS/IA/Chromium; no marcar UI ni aceptación completas como passed. Depende de T050 y correcciones locales necesarias concluidas.
@@ -219,7 +220,11 @@ Completar trabajo local no permite cerrar tareas bloqueadas o eliminar pruebas.
 - [X] T055 Tras T054 y autorización expresa de ejecución, preparar A completa desde copia limpia de la candidata común, sin reciclar el reporte local; preparar navegador solo durante la preparación autorizada y ejecutar verify:bootstrap con todas las aserciones UI/HTTP/config/negativos/separación/limpieza. Guardar su registro independiente en `artifacts/f00/<run-id-A-complete>/`, con overall real y acceptance individual pending. Depende de T050, trabajo US1–US4 y T054.
 - [X] T056 Tras liberar puertos propios de A, preparar B completa limpia de la misma candidata y repetir toda la preparación/suite sin compartir estado de A; registrar comandos, versiones de herramientas/navegador, expectativas, resultados, errores/none y limpieza en `artifacts/f00/<run-id-B-complete>/`. Depende de T055 y de la misma autorización de ejecución; un cambio de candidata exige repetir ambas, no sumar reportes entre revisiones.
 - [X] T057 Ejecutar el comparador T045 sobre las dos preparaciones completas y revisar los siete SC, los 20 FR y E-F00-01–09 en `docs/evidencias/f00/acceptance-review.md`; el resumen separado conserva fallos/pendientes y referencias inmutables. Solo proponer satisfacción técnica con ambos overall passed y evidencia completa, sin declarar cumplimiento integral de los 16 criterios del producto.
-- [ ] T058 Realizar la revisión humana en dos momentos. **Seguimiento provisional:** si T054–T057 están bloqueadas o pendientes, presentar `docs/evidencias/f00/local-review.md` cuando exista y el estado verificable de esas tareas; registrar la decisión expresa en `docs/evidencias/f00/human-review.md` como revisión parcial, sin exigir `acceptance-review.md`, inventar resultados o completar T058. **Revisión final:** después de T057, presentar `docs/evidencias/f00/acceptance-review.md` y añadir la decisión expresa al mismo historial, conservando el seguimiento provisional. T058 solo puede completarse tras registrar la revisión final; ello no sustituye las comprobaciones obligatorias ni convierte un rechazo o pendiente en aceptación. Conservar revisión/versiones, pendientes RC04/ADR y trazabilidad histórica. No marcar automáticamente `specs/001-f00-bootstrap-proyecto/checklists/document-quality.md`, no crear commits/PR/despliegues ni iniciar otra funcionalidad. Si falta una comprobación obligatoria, documentar aceptación pendiente, nunca cierre completo.
+- [X] T058 Realizar la revisión humana en dos momentos. **Seguimiento provisional:** si T054–T057 están bloqueadas o pendientes, presentar `docs/evidencias/f00/local-review.md` cuando exista y el estado verificable de esas tareas; registrar la decisión expresa en `docs/evidencias/f00/human-review.md` como revisión parcial, sin exigir `acceptance-review.md`, inventar resultados o completar T058. **Revisión final:** después de T057, presentar `docs/evidencias/f00/acceptance-review.md` y añadir la decisión expresa al mismo historial, conservando el seguimiento provisional. T058 solo puede completarse tras registrar la revisión final; ello no sustituye las comprobaciones obligatorias ni convierte un rechazo o pendiente en aceptación. Conservar revisión/versiones, pendientes RC04/ADR y trazabilidad histórica. No marcar automáticamente `specs/001-f00-bootstrap-proyecto/checklists/document-quality.md`, no crear commits/PR/despliegues ni iniciar otra funcionalidad. Si falta una comprobación obligatoria, documentar aceptación pendiente, nunca cierre completo.
+
+La revisión final expresa del 2026-11-17 está en
+`docs/evidencias/f00/human-review.md`. El commit documental de cierre fue
+autorizado posteriormente por el responsable y no es un resultado de T058.
 
 ## Dependencies & Execution Order
 
@@ -346,7 +351,11 @@ Las 16 filas docentes se conservan en evidence-traceability.md, con sus aportes 
 T047 revisa cada fila y T057/T058 registran lo realmente demostrable para F00. Ninguna
 tarea crea criterio 17, nota académica, evidencia E01–E18 ficticia o cumplimiento integral.
 
-## Implementation Strategy
+## Implementation Strategy — historial del plan de ejecución
+
+Los apartados siguientes describen el orden y los límites previstos antes de
+las ejecuciones completas. El estado final vigente es 58/58 y la aceptación
+humana documentada al inicio de este archivo.
 
 ### MVP First — incremento local US1
 

@@ -52,3 +52,12 @@ Una ejecución diagnóstica inicial con 5 VU y pausas de 200 ms superó el lími
 - El limitador es por proceso; una estrategia distribuida requiere una decisión posterior compatible con la Constitución.
 - No se crearon recursos AWS, reservas, pagos, notificaciones de negocio ni FarmaFind AI.
 - F03 no depende de GLO-01 ni BOOT-01 y no ejecutó operaciones privilegiadas. Su ratificación y verificación posterior pertenecen exclusivamente al cierre F01 en bases efímeras TEST.
+
+## Aceptación humana final — 2026-11-17
+
+El responsable del proyecto FarmaFind aprobó expresamente F03 en esta conversación,
+mensaje «FARMAFIND — APROBACIÓN HUMANA FORMAL Y CIERRE F00–F06», secciones
+1 y 2. La decisión cubre búsqueda pública, comparaciones, Redis Cache-Aside,
+invalidación y fallback PostgreSQL dentro del alcance local demostrado. La
+matriz integrada `docs/evidencias/integration/f00-f06-acceptance.md` conserva
+las pruebas y sus límites. La carga local no acredita capacidad productiva.

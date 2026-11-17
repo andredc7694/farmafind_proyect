@@ -11,7 +11,10 @@
 | F03-FR-016 | SC-005 | k6: 45 solicitudes con Redis y 45 en fallback, p95 < 34 ms y 0 % errores en ambos escenarios finales. |
 | F03-FR-017–018 | Límites F01/F02/F03 | Regresión base, F01/F02 RLS y chequeo modular; sin funciones fuera de alcance. |
 
-Los siete F03-SC-001–007 tienen verificación automatizada registrada. La aceptación humana sigue pendiente y no se infiere de estos resultados.
+Los siete F03-SC-001–007 tienen verificación automatizada registrada. La
+aceptación humana expresa del 2026-11-17 consta en
+[implementation-evidence.md](implementation-evidence.md) y se limita al
+alcance local demostrado; no se infiere de las pruebas ni acredita producción.
 
 ## Rúbrica docente (16 criterios)
 

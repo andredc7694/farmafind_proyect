@@ -1,8 +1,14 @@
 # F00 — Verificaciones y trazabilidad
 
-Estado: matriz aprobada documentalmente con el plan, 2026-11-10. Esta actualización
-registra el incremento local verificado; no acredita aceptación completa. Especificación
-y plan aprobados; registro de aprobación y límites en [plan.md](plan.md).
+Estado final del 2026-11-17: F00 aceptada por decisión humana expresa dentro
+del alcance local demostrado; 58/58 tareas cerradas. La candidata técnica,
+sus preparaciones A/B y la decisión están en
+[acceptance-review.md](../../docs/evidencias/f00/acceptance-review.md) y
+[human-review.md](../../docs/evidencias/f00/human-review.md). Las filas de
+evidencia futura y referencias a pruebas pendientes que siguen debajo son la
+matriz documental del incremento local inicial de 2026-11-10, conservada como
+historial; no describen el estado final. Especificación y plan aprobados;
+registro de aprobación y límites en [plan.md](plan.md).
 
 Windows 10 es el entorno principal de desarrollo aprobado, con Node.js 24.17.0 y
 npm 11.13.0 como referencias observadas. Los controles locales automáticos de configuración,

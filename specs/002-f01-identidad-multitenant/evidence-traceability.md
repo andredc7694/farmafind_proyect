@@ -1,6 +1,15 @@
 # F01 — Trazabilidad de requisitos y evidencia
 
-**Fecha de revisión:** 2026-11-17. **Estado:** 76/77 tareas verificadas; ninguna fila equivale por sí sola a aceptación de F01 ni a puntaje de la rúbrica. Fuente normativa: [spec.md](spec.md), [plan.md](plan.md), [Constitution v1.1.0](../../.specify/memory/constitution.md) y la rúbrica `docs/referencias/RUBRICA.png`. Los comandos y resultados reales se registran en [implementation-evidence.md](implementation-evidence.md). EXC-01/ROL-01 y GLO-01/BOOT-01 fueron ratificadas; BOOT permanece limitado a bases efímeras TEST y T067 exige revisión humana.
+**Fecha de revisión final:** 2026-11-17. **Estado final:** 77/77 tareas
+verificadas; F01 aceptada expresamente en TEST/DEMO por el responsable del
+proyecto, con T067 cerrada. Ninguna fila equivale a puntaje de la rúbrica.
+Fuente normativa: [spec.md](spec.md), [plan.md](plan.md),
+[Constitution v1.1.0](../../.specify/memory/constitution.md) y la rúbrica
+`docs/referencias/RUBRICA.png`. Los resultados y la decisión constan en
+[implementation-evidence.md](implementation-evidence.md). EXC-01/ROL-01
+permanecen limitadas; GLO-01/BOOT-01 solo se autorizaron para bases efímeras
+TEST. Las filas de estado parcial y pendiente debajo conservan fotografías
+documentales anteriores y no expresan el estado final.
 
 Las referencias `unit`, `http` y `rls` identifican archivos de prueba bajo `backend/tests/identity/`; `ui` refiere a `frontend/tests/identity/`. **Ejecutado** significa que existe una ejecución real registrada, no que el requisito de aceptación completo esté cumplido. **Parcial** indica escenarios obligatorios aún faltantes. **Bloqueado** indica una puerta humana expresa.
 

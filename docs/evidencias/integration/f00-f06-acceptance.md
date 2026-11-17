@@ -1,22 +1,32 @@
-# FarmaFind — matriz técnica de integración F00–F06
+# FarmaFind — cierre técnico y aceptación humana F00–F06
 
 **Fecha:** 2026-11-17
 **Rama candidata:** `integration/f00-f06`
-**Alcance:** integración local; no constituye aceptación humana, despliegue ni autorización para F07.
+**Alcance:** integración local y TEST/DEMO demostrada; aprobación humana formal
+del 2026-11-17. No constituye aptitud productiva ni autorización de despliegue.
+
+**Responsable y referencia:** responsable del proyecto FarmaFind, mediante su
+mensaje expreso en esta conversación «FARMAFIND — APROBACIÓN HUMANA FORMAL Y
+CIERRE F00–F06», secciones 1–3. La decisión se registra sobre la candidata
+técnica `b160c6a381a60386311911053347b407a2833def` y sus evidencias;
+el commit documental posterior solo registra la aceptación.
 
 ## Estado por incremento
 
-| Incremento | Tareas | Verificación técnica integrada | Decisión humana pendiente |
+| Incremento | Tareas | Verificación técnica integrada | Decisión humana |
 |---|---:|---|---|
-| F00 Bootstrap | 57/58 | Candidata `b160c6a`: dos preparaciones limpias A/B, 284 pruebas base por copia, build, procesos separados y Playwright Linux oficial satisfactorios. | T058, revisión final humana. |
-| F01 Identidad | 76/77 | Identidad, selector A/B, administración local `TRABAJADOR`, GLO-01/BOOT-01 limitados a TEST, PostgreSQL RLS y Playwright 3/3 satisfactorios. | T067, revisión final humana; BOOT persistente/productivo continúa prohibido. |
-| F02 Catálogo e inventario | 44/44 | API, RLS, aislamiento e interfaz Playwright 3/3 satisfactorios. | Aceptación formal ya registrada en su historial. |
-| F03 Búsqueda pública | 58/58 | PostgreSQL, Redis Cache-Aside/fallback, Playwright 2/2 y carga k6 satisfactorios. | Revisión humana del incremento. |
-| F04 Reservas | 65/65 | Estados, idempotencia, concurrencia, Outbox, RLS y Playwright 1/1 satisfactorios. | Revisión humana del incremento. |
-| F05 Notificaciones | 48/48 | Servicio independiente, firma, reintento, recuperación, deduplicación y RLS satisfactorios; sin canales externos. | Revisión humana del incremento. |
-| F06 Asistente IA | 52/52 | `MockAIProvider`, grounding público, rechazo clínico, cuota, fallback y carga satisfactorios. | Revisión humana del incremento. |
+| F00 Bootstrap | 58/58 | Candidata `b160c6a`: dos preparaciones limpias A/B, 284 pruebas base por copia, build, procesos separados y Playwright Linux oficial satisfactorios. | Aprobado; T058 cerrada. |
+| F01 Identidad | 77/77 | Identidad, selector A/B, administración local `TRABAJADOR`, GLO-01/BOOT-01 limitados a TEST, PostgreSQL RLS y Playwright 3/3 satisfactorios. | Aprobado en TEST/DEMO; T067 cerrada. BOOT persistente/productivo continúa prohibido. |
+| F02 Catálogo e inventario | 44/44 | API, RLS, aislamiento e interfaz Playwright 3/3 satisfactorios. | Aceptación TEST/DEMO histórica ratificada. |
+| F03 Búsqueda pública | 58/58 | PostgreSQL, Redis Cache-Aside/fallback, Playwright 2/2 y carga k6 satisfactorios. | Aprobado dentro del alcance demostrado. |
+| F04 Reservas | 65/65 | Estados, idempotencia, concurrencia, Outbox, RLS y Playwright 1/1 satisfactorios. | Aprobado dentro del alcance demostrado. |
+| F05 Notificaciones | 48/48 | Servicio independiente, firma, reintento, recuperación, deduplicación y RLS satisfactorios; sin canales externos. | Aprobado solo para entrega local. |
+| F06 Asistente IA | 52/52 | `MockAIProvider`, grounding público, rechazo clínico, cuota, fallback y carga satisfactorios. | Aprobado solo con proveedor mock. |
 
-Total verificable: **400/402 tareas**. Las dos abiertas son F00 T058 y F01 T067, ambas revisiones humanas. GLO-01 y BOOT-01 se ejecutaron solo en bases efímeras TEST; no se ejecutaron sobre la base persistente ni producción.
+Total verificable: **402/402 tareas**. F00 T058 y F01 T067 se cerraron
+únicamente tras la aprobación humana expresa. GLO-01 y BOOT-01 se ejecutaron
+solo en bases efímeras TEST; no se ejecutaron sobre la base persistente ni
+producción.
 
 ## Controles ejecutados sobre la candidata
 
@@ -41,39 +51,43 @@ Las pruebas con PostgreSQL escribieron únicamente en bases efímeras identifica
 
 El recorrido acumulado queda cubierto por composición real de API/PostgreSQL en las suites de identidad, inventario, búsqueda, reservas y Outbox, más el servicio independiente F05 y F06 fundamentado en F03. No se creó una ruta privilegiada de producción para fabricar dueños o permisos globales. Los recorridos Playwright usan fixtures TEST aislados y datos ficticios.
 
-No se ejecutaron correo, SMS, proveedores de IA externos ni AWS. GLO-01 y BOOT-01 se verificaron en TEST bajo aprobación, sin bootstrap persistente ni privilegios heredados entre farmacias. F05 conserva entrega local verificable; F06 declara explícitamente `MockAIProvider`. Las aceptaciones humanas abiertas deben registrar una decisión expresa y no se deducen de esta matriz.
+No se ejecutaron correo, SMS, push, proveedores de IA externos ni despliegues.
+GLO-01 y BOOT-01 se verificaron en TEST bajo aprobación, sin bootstrap
+persistente ni privilegios heredados entre farmacias. F05 conserva entrega
+local verificable; F06 declara explícitamente `MockAIProvider`. Las
+aceptaciones humanas se registraron por decisión expresa del responsable,
+sin inferirlas de las pruebas.
 
 ## Matriz de aceptación y evidencia
 
 | Incremento | Requisitos y criterios | Evidencia principal | Pruebas omitidas o límites | Estado |
 |---|---|---|---|---|
-| F00 | 20 requisitos, 7 criterios de éxito | `docs/evidencias/f00/acceptance-review.md`; A `F00-A-2026-11-17T18-51-19.916Z`, B `F00-B-2026-11-17T18-53-12.890Z`, comparación `passed` | Ninguna comprobación técnica obligatoria pendiente; el soporte oficial no se atribuye a Windows 10 | Técnica satisfecha; T058 pendiente de decisión humana |
-| F01 | 20 requisitos, 7 criterios de éxito | `implementation-evidence.md`, trazabilidad, 57 unitarias, 26 API y 52 PostgreSQL/RLS en la repetición final | BOOT persistente/productivo y permisos fuera del catálogo siguen fuera de alcance | Técnica satisfecha en TEST; T067 pendiente de decisión humana |
-| F02 | Requisitos y criterios de `spec.md` | `implementation-evidence.md`, API/RLS/Playwright | No acredita operación productiva | Aceptación TEST/DEMO registrada en su historial |
-| F03 | 58 tareas y criterios de `spec.md` | PostgreSQL/RLS, Redis Cache-Aside y fallback, Playwright y k6 | La carga local no predice capacidad productiva | Técnica satisfecha; aceptación humana final pendiente |
-| F04 | 65 tareas y criterios de `spec.md` | Estados/transiciones, concurrencia, idempotencia, Outbox, RLS, Playwright y carga | No incluye pagos ni entrega de notificaciones externas | Técnica satisfecha; aceptación humana final pendiente |
-| F05 | 48 tareas y criterios de `spec.md` | Servicio independiente, deduplicación, reintento, recuperación, firma y RLS | Solo canal local; correo/SMS/proveedores externos no autorizados | Técnica satisfecha; aceptación humana final pendiente |
-| F06 | 24 requisitos, 8 criterios de éxito | 32 pruebas F06, grounding público, clínica, privacidad, cuota, fallback y carga | Solo `MockAIProvider`; ningún proveedor externo autorizado | Técnica satisfecha; aceptación humana final pendiente |
+| F00 | 20 requisitos, 7 criterios de éxito | `docs/evidencias/f00/acceptance-review.md`, `human-review.md`; A `F00-A-2026-11-17T18-51-19.916Z`, B `F00-B-2026-11-17T18-53-12.890Z`, comparación `passed` | Ninguna comprobación técnica obligatoria pendiente; el soporte oficial no se atribuye a Windows 10 | Aprobado en alcance local; T058 cerrada |
+| F01 | 20 requisitos, 7 criterios de éxito | `specs/002-f01-identidad-multitenant/implementation-evidence.md`, trazabilidad, 57 unitarias, 26 API y 52 PostgreSQL/RLS | BOOT persistente/productivo y permisos fuera del catálogo siguen fuera de alcance | Aprobado en TEST/DEMO; T067 cerrada |
+| F02 | Requisitos y criterios de `spec.md` | `implementation-evidence.md`, API/RLS/Playwright | No acredita operación productiva | Aceptación TEST/DEMO histórica ratificada |
+| F03 | 58 tareas y criterios de `spec.md` | PostgreSQL/RLS, Redis Cache-Aside y fallback, Playwright y k6 | La carga local no predice capacidad productiva | Aprobado en alcance demostrado |
+| F04 | 65 tareas y criterios de `spec.md` | Estados/transiciones, concurrencia, idempotencia, Outbox, RLS, Playwright y carga | No incluye pagos ni entrega de notificaciones externas | Aprobado en alcance demostrado |
+| F05 | 48 tareas y criterios de `spec.md` | Servicio independiente, deduplicación, reintento, recuperación, firma y RLS | Solo canal local; correo/SMS/push/proveedores externos no autorizados | Aprobado en alcance local |
+| F06 | 24 requisitos, 8 criterios de éxito | 32 pruebas F06, grounding público, rechazo clínico, privacidad, cuota, fallback y carga | Solo `MockAIProvider`; ningún proveedor externo autorizado | Aprobado en alcance mock |
 
 La repetición final ejecutó **290 pruebas satisfactorias**: F01 unit/API/RLS (57/26/52), F02 unit/RLS (15/14), F03 unit/Redis/RLS (25/3/4), F04 unit/API/RLS (17/6/16), F05 unit/API/RLS/recuperación (8/5/4/1) y F06 (32). También pasaron build, TypeScript/límites modulares, los 36 contratos OpenAPI, Playwright F00–F04, carga F03, concurrencia F04 y carga/fallback F06. Las omisiones de `test:base` corresponden a suites condicionadas que fueron ejecutadas por separado con sus servicios locales.
 
-## Decisiones humanas pendientes
+## Decisión formal y restricciones vigentes
 
-1. F00 T058: aprobar o rechazar la revisión final usando `docs/evidencias/f00/acceptance-review.md`.
-2. F01 T067: aprobar o rechazar los siete criterios, confirmando que GLO-01/BOOT-01 quedan limitados a TEST y que BOOT persistente/productivo continúa prohibido.
-3. F03, F04, F05 y F06: registrar por separado la aceptación humana final de cada incremento sobre sus evidencias existentes.
+La aprobación expresa del responsable el 2026-11-17 cerró F00 T058 y F01 T067,
+ratificó la aceptación TEST/DEMO histórica de F02 y aprobó F03–F06 en sus
+alcances demostrados. No queda una aceptación humana pendiente para F00–F06
+dentro de esos alcances. Los registros individuales constan en
+`docs/evidencias/f00/human-review.md` y en las evidencias de implementación
+de F01, F03, F04, F05 y F06. Las secciones históricas anteriores de esos
+documentos conservan el estado que tenían antes de esta decisión.
 
-## Bloque único para decisión humana
-
-La persona responsable puede aprobar o rechazar expresamente cada punto sin repetir las ejecuciones documentadas:
-
-1. **F00 / T058:** aceptar los 20 requisitos y 7 criterios de éxito sobre el par A/B actual.
-2. **F01 / T067:** aceptar los 20 requisitos y 7 criterios de éxito, manteniendo GLO-01 y BOOT-01 limitados a TEST, sin bootstrap persistente o productivo.
-3. **F03:** aceptar búsqueda pública, Redis Cache-Aside/fallback, aislamiento y carga local dentro de sus límites documentados.
-4. **F04:** aceptar reservas, transiciones, vencimiento, concurrencia, idempotencia y Transactional Outbox, sin pagos ni notificación externa.
-5. **F05:** aceptar el servicio independiente con entrega local, reintento, deduplicación y recuperación; canales externos siguen fuera de alcance.
-6. **F06:** aceptar el asistente informativo con `MockAIProvider`, grounding público y rechazo clínico; proveedores externos siguen fuera de alcance.
-
-Esta lista no registra ninguna aprobación por sí sola. F02 conserva su aceptación TEST/DEMO histórica.
-
-F02 ya conserva aceptación humana para TEST/DEMO. Esta matriz no asigna puntaje a los 16 criterios docentes ni autoriza F07. La candidata queda funcionalmente verificada y puede versionarse bajo SEC-EXC-DEV-2026-001; F07 exige autorización específica de alcance y costos.
+Se mantienen PostgreSQL RLS y el aislamiento multi-tenant. BOOT-01 y GLO-01
+no quedan autorizados para bases persistentes ni producción. La aprobación
+no incluye proveedores externos, datos personales reales, gastos, recursos
+remotos, rediseño visual ni aptitud productiva. La excepción temporal
+[SEC-EXC-DEV-2026-001](security-exception-dev-dependencies.md) sigue
+activa: cinco nodos altos de desarrollo por `picomatch@4.0.7`, revisión a
+más tardar el 2026-12-17; el árbol de producción reportó cero
+vulnerabilidades en `npm audit --omit=dev`. No se atribuye puntaje docente
+a los 16 criterios de la rúbrica.

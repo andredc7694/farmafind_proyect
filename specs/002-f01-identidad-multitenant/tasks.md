@@ -1,7 +1,7 @@
 # Tasks: F01 — Identidad y seguridad multi-tenant
 
 **Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [authorization-decisions.md](authorization-decisions.md), [contracts/](contracts/) y [quickstart.md](quickstart.md).
-**Status**: Plan F01 aprobado; 76/77 tareas verificadas tras implementar y comprobar GLO-01/BOOT-01 el 2026-11-17 exclusivamente en bases efímeras TEST. T042–T049 conservan `TRABAJADOR` local. T067 mantiene la revisión humana final; F01 no está aceptada.
+**Status**: 77/77 tareas verificadas y aceptación humana formal registrada el 2026-11-17, limitada al alcance TEST/DEMO demostrado. GLO-01/BOOT-01 permanecen restringidos a bases efímeras TEST; T042–T049 conservan `TRABAJADOR` local. No se autoriza bootstrap privilegiado persistente ni productivo.
 **Tests**: Obligatorios por F01-FR-018 y Constitución XIII: unitarias, HTTP, PostgreSQL RLS real, seguridad negativa/positiva y E2E en entorno oficialmente compatible.
 **Organization**: Cuatro historias P1 independientes en su criterio de prueba, con dependencias técnicas explícitas. `[P]` solo indica archivos distintos y ausencia de dependencia inmediata.
 
@@ -142,7 +142,7 @@ Cada tarea usa `- [ ] T### [P?] [US#?]` y una ruta exacta. `BLOQUEADA (gate)` si
 - [X] T064 Ejecutar controles `check`, `build`, unitarias, HTTP, PostgreSQL y seguridad, además de `npm audit` sin `--force`, y registrar resultados reales en `specs/002-f01-identidad-multitenant/implementation-evidence.md`; no atribuir pruebas no ejecutadas. [F01-FR-018, F01-SC-001–007]
 - [X] T065 Vincular cada F01-FR-001–020, escenario de US1–US4 y F01-SC-001–007 con evidencias reales y 16 criterios docentes sin inventar puntajes en `specs/002-f01-identidad-multitenant/evidence-traceability.md`. [F01-FR-018, F01-SC-001–007]
 - [X] T066 Revisar `quickstart.md` con comandos que realmente existan, prerequisitos Windows 10, PostgreSQL real y Playwright pendiente si no hay entorno compatible en `specs/002-f01-identidad-multitenant/quickstart.md`. [F01-FR-018]
-- [ ] T067 Preparar revisión humana final de plan, puertas EXC-01/GLO-01/ROL-01/BOOT-01, siete SC y limitaciones de aceptación en `specs/002-f01-identidad-multitenant/implementation-evidence.md`; no declarar F01 aceptada por tareas parciales. [F01-SC-001–007]
+- [X] T067 Preparar revisión humana final de plan, puertas EXC-01/GLO-01/ROL-01/BOOT-01, siete SC y limitaciones de aceptación en `specs/002-f01-identidad-multitenant/implementation-evidence.md`; no declarar F01 aceptada por tareas parciales. [F01-SC-001–007]
 
 ## Dependencies & Execution Order
 
@@ -150,7 +150,7 @@ Cada tarea usa `- [ ] T### [P?] [US#?]` y una ruta exacta. `BLOQUEADA (gate)` si
 - Setup T001–T006 precede Foundational T007–T016. T007 precede migraciones T008–T011; T012 precede T013. La fundación necesaria precede US1, US2 y US4.
 - US1 T017–T029 prueba identidad/sesión de forma autónoma. US2 requiere sesión US1 y RLS de lectura propia, pero su criterio independiente es el cambio A/B. US4 requiere transacción y tablas privadas F01; sus pruebas no acreditan las mutaciones US3 bloqueadas.
 - **Puertas documentales resueltas:** T040/T041 acreditan EXC-01/ROL-01; T042–T049 acreditan la operación local TRABAJADOR. T050–T051 y T070–T077 acreditan GLO-01/BOOT-01 en TEST; ninguna tarea autoriza la base persistente.
-- T062 fue ejecutada en Linux oficialmente compatible. T067 requiere revisión humana de los siete SC; F00 conserva sus propios pendientes.
+- T062 fue ejecutada en Linux oficialmente compatible. T067 recibió revisión humana expresa de los siete SC el 2026-11-17; F00 T058 recibió aprobación expresa por separado.
 
 ### Parallel Opportunities
 
@@ -187,20 +187,20 @@ Cada tarea usa `- [ ] T### [P?] [US#?]` y una ruta exacta. `BLOQUEADA (gate)` si
 | F01-FR-015 | T003, T007–T010, T022, T046 | T046 aplicada y verificada en PostgreSQL local ficticio. |
 | F01-FR-016 | T011, T032, T044, T052, T055, T059 | T044 verificada en PostgreSQL real. |
 | F01-FR-017 | T011–T013, T038, T044, T046, T052, T054–T055, T059 | T044/T046 verificadas en PostgreSQL local. |
-| F01-FR-018 | T005, T012, T029, T032, T038, T044, T052–T054, T058, T062, T064–T066, T075–T077 | Suites unitarias, HTTP, PostgreSQL y Playwright ejecutadas; aceptación completa pendiente solo de T067. |
+| F01-FR-018 | T005, T012, T029, T032, T038, T044, T052–T054, T058, T062, T064–T066, T075–T077 | Suites unitarias, HTTP, PostgreSQL y Playwright ejecutadas; T067 aprobada expresamente en alcance TEST/DEMO. |
 | F01-FR-019 | T020, T025, T031, T035, T043, T048 | T043/T048 verificadas con rutas locales limitadas. |
 | F01-FR-020 | T001, T004, T006, T010, T016, T056, T063 | Alcance F01. |
-| F01-SC-001 | T017, T020, T029, T062, T065 | Evidencia futura. |
-| F01-SC-002 | T019–T020, T029, T062, T065 | Evidencia futura. |
-| F01-SC-003 | T032, T038, T054, T062, T065 | Evidencia futura. |
-| F01-SC-004 | T032, T038, T044, T052, T054, T058–T059, T061–T062, T065, T075–T076 | Aislamiento tenant y ausencia de herencia por rol global verificados; revisión humana pendiente. |
-| F01-SC-005 | T028, T053, T057, T060, T065 | Evidencia futura. |
-| F01-SC-006 | T042–T044, T047, T050–T051, T065, T070–T077 | Operaciones local/global verificadas con denegaciones, aprobación y auditoría; T067 pendiente. |
-| F01-SC-007 | T006, T063, T065 | Revisión futura. |
+| F01-SC-001 | T017, T020, T029, T062, T065 | Registro ordinario, login y Playwright verificados; aceptación humana expresa. |
+| F01-SC-002 | T019–T020, T029, T062, T065 | Sesiones opacas, expiración, revocación y logout verificados; aceptación humana expresa. |
+| F01-SC-003 | T032, T038, T054, T062, T065 | Selector A/B, contexto transaccional y conexiones reutilizadas verificados; aceptación humana expresa. |
+| F01-SC-004 | T032, T038, T044, T052, T054, T058–T059, T061–T062, T065, T075–T076 | Aislamiento tenant y ausencia de herencia por rol global verificados; aceptación humana expresa. |
+| F01-SC-005 | T028, T053, T057, T060, T065 | Minimización de respuestas, errores y auditoría sin secretos verificada; aceptación humana expresa. |
+| F01-SC-006 | T042–T044, T047, T050–T051, T065, T070–T077 | Operaciones local/global verificadas con denegaciones, aprobación y auditoría; aceptación humana expresa solo en TEST/DEMO. |
+| F01-SC-007 | T006, T063, T065 | Límites modulares y ausencia de negocio ajeno verificados; aceptación humana expresa. |
 
 ## Implementation Strategy
 
-T001–T066 y T068–T077 tienen evidencia real; T067 requiere revisión humana. Esta estrategia no autoriza despliegue, bootstrap persistente ni aceptación automática.
+T001–T066 y T068–T077 tienen evidencia real; T067 recibió revisión humana expresa el 2026-11-17. Esta estrategia no autoriza despliegue ni bootstrap persistente.
 
 ## Phase 8: Convergence
 

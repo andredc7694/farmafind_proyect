@@ -1,7 +1,9 @@
 # F00 — Revisión técnica de aceptación
 
 **Fecha:** 2026-11-17
-**Estado:** satisfacción técnica propuesta; revisión humana T058 pendiente.
+**Estado:** satisfacción técnica demostrada sobre la candidata indicada;
+aprobación humana formal del 2026-11-17 registrada en
+[human-review.md](human-review.md). T058 cerrada dentro del alcance local.
 
 ## Par reproducible
 
@@ -36,4 +38,4 @@ El comparador produjo `acceptance=passed`, sin razones pendientes, y confirmó d
 | F00-SC-006 | 20 FR y 16 criterios mantienen trazabilidad sin puntajes inventados: satisfecho documentalmente. |
 | F00-SC-007 | Comandos, versiones, expectativas, resultados, errores y limpieza registrados: satisfecho técnicamente. |
 
-La evidencia E-F00-01–09 queda representada por los manifiestos, reportes A/B, capturas, resultados HTTP, controles de configuración, build, separación de procesos y comparación consolidada. Esto no otorga puntaje docente ni constituye aprobación humana. T058 permanece abierta hasta registrar la decisión final del responsable.
+La evidencia E-F00-01–09 queda representada por los manifiestos, reportes A/B, capturas, resultados HTTP, controles de configuración, build, separación de procesos y comparación consolidada. No otorga puntaje docente. La aprobación humana expresa se registra por separado en [human-review.md](human-review.md) y cierra T058, sin ampliar el alcance técnico demostrado.

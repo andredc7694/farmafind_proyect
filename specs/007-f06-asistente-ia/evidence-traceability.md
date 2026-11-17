@@ -1,6 +1,8 @@
 # F06 — Trazabilidad de implementación
 
-**Estado:** cierre técnico provisional del 2026-11-16; aceptación humana pendiente.
+**Estado:** cierre técnico verificado y aceptación humana expresa del
+2026-11-17 para `MockAIProvider` dentro del alcance demostrado. Las pruebas
+y la decisión constan en [implementation-evidence.md](implementation-evidence.md).
 
 | Requisito | Evidencia real |
 |---|---|

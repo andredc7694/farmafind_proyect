@@ -4,7 +4,7 @@
 
 **Tests**: obligatorios por F03-FR-015/016, los siete criterios F03-SC y la Constitution.
 
-**Estado actual**: 58/58 tareas completadas con comprobación real; aceptación humana final pendiente.
+**Estado actual**: 58/58 tareas completadas con comprobación real; aceptación humana formal registrada el 2026-11-17 para el alcance local demostrado.
 
 ## Phase 1: Setup
 

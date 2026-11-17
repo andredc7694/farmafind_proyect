@@ -1,7 +1,7 @@
 # Tasks: F05 — Notificaciones mediante Transactional Outbox
 
 **Input:** spec.md, plan.md, research.md, data-model.md, contracts/ y quickstart.md.
-**Status:** 48/48 tareas verificadas; cierre técnico provisional, revisión humana pendiente.
+**Status:** 48/48 tareas verificadas; aceptación humana formal registrada el 2026-11-17 para notificaciones locales, sin canales externos.
 **Tests:** TDD obligatorio por F05-FR-019 y Constitution XIII.
 
 ## Phase 1: Setup

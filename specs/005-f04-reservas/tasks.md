@@ -2,7 +2,7 @@
 
 **Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/) y [quickstart.md](quickstart.md).
 
-**Status**: 65/65 tareas verificadas. La aceptación definitiva permanece pendiente de revisión humana.
+**Status**: 65/65 tareas verificadas. Aceptación humana formal registrada el 2026-11-17 para el alcance local demostrado.
 
 **Tests**: obligatorios por F04-FR-023/024 y Constitution XIII. TDD: cada bloque de pruebas debe fallar por ausencia de implementación antes de escribir el código correspondiente.
 

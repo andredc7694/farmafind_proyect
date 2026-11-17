@@ -54,3 +54,12 @@ no reclaman dos veces el mismo conjunto y un lease abandonado vuelve a ser visib
 No se desplegó HTTPS, AWS ni un proveedor. HTTPS interno sigue siendo obligación para el
 despliegue futuro. No se ejecutó una entrega a personas. F04 y F05 conservan revisión humana
 pendiente; este documento no cambia el estado de aceptación de F00–F04 ni asigna puntajes.
+
+## Aceptación humana final — 2026-11-17
+
+El responsable del proyecto FarmaFind aprobó expresamente F05 en esta conversación,
+mensaje «FARMAFIND — APROBACIÓN HUMANA FORMAL Y CIERRE F00–F06», secciones
+1 y 2. La decisión cubre el servicio independiente de notificaciones locales
+con las verificaciones registradas. La referencia anterior a revisión pendiente
+es histórica. Correo, SMS, push y proveedores externos siguen fuera del
+alcance aceptado; no se acreditan entregas reales a personas.
