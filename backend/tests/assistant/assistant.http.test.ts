@@ -1,0 +1,13 @@
+import express from 'express';import request from 'supertest';import {describe,expect,it,vi} from 'vitest';
+import {createAssistantRouter} from '../../src/modules/asistente-ia/presentation/assistant-router.js';
+import {QueryAssistant} from '../../src/modules/asistente-ia/application/query-assistant.js';
+import {InMemoryAssistantRateLimit} from '../../src/modules/asistente-ia/presentation/rate-limit.js';
+import {AssistantError} from '../../src/modules/asistente-ia/domain/assistant-contract.js';
+const tools={search:vi.fn().mockResolvedValue({consulta:'x',ofertas:[],paginacion:{pagina:1,tamano:20,total:0,totalPaginas:0},aviso:'Precio y disponibilidad referenciales; confirma existencias con la farmacia.'}),compare:vi.fn(),pharmacy:vi.fn()};
+function app(limit=new InMemoryAssistantRateLimit()){const app=express();app.use('/api/v1',createAssistantRouter(new QueryAssistant({classify:async()=>({intent:'BUSQUEDA',term:'demo'})},tools),limit));return app;}
+describe('HTTP F06',()=>{
+ it('es público, no-store y devuelve contrato',async()=>{const r=await request(app()).post('/api/v1/asistente/consultar').send({consulta:'busca demo'}).expect(200);expect(r.headers['cache-control']).toBe('no-store');expect(r.body).toMatchObject({intencion:'BUSQUEDA',proveedor:'mock',correlationId:expect.any(String)});});
+ it('rechaza campos extra, JSON inválido y cuerpo grande',async()=>{await request(app()).post('/api/v1/asistente/consultar').send({consulta:'x',extra:true}).expect(400);await request(app()).post('/api/v1/asistente/consultar').set('Content-Type','application/json').send('{').expect(400);await request(app()).post('/api/v1/asistente/consultar').send({consulta:'x'.repeat(5000)}).expect(413);});
+ it('aplica cuota antes del proveedor',async()=>{const limited=app(new InMemoryAssistantRateLimit(1));await request(limited).post('/api/v1/asistente/consultar').send({consulta:'demo'}).expect(200);const r=await request(limited).post('/api/v1/asistente/consultar').send({consulta:'demo'}).expect(429);expect(r.headers['retry-after']).toBeDefined();});
+ it('minimiza intención inválida e indisponibilidad',async()=>{for(const [error,status] of [[new AssistantError('INVALID_INTENT','Intención inválida.'),422],[new AssistantError('SOURCE_UNAVAILABLE','Fuente no disponible.'),503]] as const){const local=express();local.use('/api/v1',createAssistantRouter({execute:vi.fn().mockRejectedValue(error)} as never));const r=await request(local).post('/api/v1/asistente/consultar').send({consulta:'demo'}).expect(status);expect(r.body).toEqual({code:error.code,message:error.message,correlationId:expect.any(String)});}});
+});

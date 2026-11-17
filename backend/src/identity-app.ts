@@ -37,6 +37,12 @@ import { DeliverReservation } from './modules/reservas/application/deliver-reser
 import { createCustomerReservationsRouter } from './modules/reservas/presentation/customer-reservations-router.js';
 import { createPharmacyReservationsRouter } from './modules/reservas/presentation/pharmacy-reservations-router.js';
 import type { ReservationRuntimeConfig } from './config/reservations.js';
+import { MockAIProvider } from './modules/asistente-ia/infrastructure/mock-ai-provider.js';
+import { F03PublicKnowledgeTools } from './modules/asistente-ia/infrastructure/public-knowledge-tools.js';
+import { InMemoryAssistantMetrics } from './modules/asistente-ia/infrastructure/assistant-metrics.js';
+import { QueryAssistant } from './modules/asistente-ia/application/query-assistant.js';
+import { createAssistantRouter } from './modules/asistente-ia/presentation/assistant-router.js';
+import { F03PublicAssistantGateway } from './modules/busqueda/infrastructure/public-assistant-gateway.js';
 
 export interface LocalIdentityRuntimeConfig {
   authDatabaseUrl: string;
@@ -104,6 +110,9 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
         candidateLimit: config.search.candidateLimit }, new InMemorySearchMetrics());
       app.use('/api/v1', createPublicSearchRouter(search));
       app.use('/api/v1', createPublicPharmacyRouter(repository));
+      const assistant = new QueryAssistant(new MockAIProvider(), new F03PublicKnowledgeTools(new F03PublicAssistantGateway(search, repository)),
+        new InMemoryAssistantMetrics());
+      app.use('/api/v1', createAssistantRouter(assistant));
     }
     app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));
     app.use('/api/v1', createImportRouter(new PreviewImport(inventoryTransactions),

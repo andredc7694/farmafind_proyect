@@ -1,0 +1,2 @@
+import {describe,expect,it} from 'vitest';import {InMemoryAssistantMetrics} from '../../src/modules/asistente-ia/infrastructure/assistant-metrics.js';
+describe('privacidad F06',()=>it('métricas solo guardan categorías, tiempos, intención y conteo',()=>{const m=new InMemoryAssistantMetrics();m.record({event:'success',durationMs:4,intent:'BUSQUEDA',toolCount:1});expect(m.snapshot()).toEqual({counts:{success:1,clinical_refusal:0,provider_error:0,source_error:0},samples:1,intents:{BUSQUEDA:1},toolCounts:{1:1}});expect(JSON.stringify(m)).not.toContain('@');}));
