@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-17
 
-**Status**: Borrador; pendiente de aclaración y aprobación humana. Sin implementación autorizada.
+**Status**: Especificación aprobada por el responsable el 2026-11-17 mediante respuesta «sí» a la solicitud explícita de aprobación de F06.1 en esta conversación. Plan e implementación pendientes de aprobaciones propias.
 
 **Input**: Ampliar F06 con conversación en español, información farmacéutica documentada y consultas públicas de FarmaFind, preservando los límites clínicos vigentes.
 
@@ -160,7 +160,7 @@ La persona puede continuar una conversación breve, ver la procedencia de los da
 - La continuidad inicial es temporal y limitada; no se presume historial permanente de salud.
 - La búsqueda pública y la modalidad determinista existentes permanecen disponibles.
 - Los umbrales numéricos son criterios propuestos, no resultados de pruebas ejecutadas.
-- Los límites concretos de turnos, tiempo de expiración y cuota no quedan aprobados por esta especificación preliminar; deben concretarse y revisarse antes del plan, manteniendo al menos los límites de protección vigentes en F06.
+- Los límites concretos de turnos, tiempo de expiración y cuota se definirán como propuestas técnicas en la investigación del plan y requerirán aprobación con el plan; deben mantener al menos los límites de protección vigentes en F06.
 
 ## Trazabilidad de IA31 (Documento Maestro v3.0, Parte A, A5)
 
@@ -184,7 +184,7 @@ La persona puede continuar una conversación breve, ver la procedencia de los da
 | Constitution v1.2.0, III y XIX | IA informativa; excepción educativa limitada para molestias comunes con fuentes y revisión profesional; permanecen prohibidos diagnóstico, prescripción, dosis y tratamiento individual. | F061-FR-004, 007–009, 010–014, 021–024. |
 | Documento Maestro v2.0, capítulo 9 | Antecedente histórico: permite orientar búsquedas y derivar preguntas clínicas; prohíbe recomendar tratamiento, dosis, sustituciones, diagnóstico o consumo. | F061-FR-007–009; la excepción futura aprobada consta explícitamente en Constitution v1.2.0, sin reescribir el antecedente. |
 | Documento Maestro v2.0, capítulos 28, 33 y 36 | RLS, proyecciones públicas, ampliación IA informativa y trazabilidad. | F061-FR-010–014, 020, 024. |
-| Documento Maestro v3.0, Parte A, A2 y A5 (adopción ratificada) | Propone IA31-01–IA31-10, conversación y fuentes farmacéuticas; IA31-03 sobre molestias exige revisión profesional antes de activarse. | F061-FR-001–024 amplían el alcance; F061-FR-009 tiene autorización normativa, con implementación pendiente. Véase [matriz de adopción](../../docs/roadmap-v3-adoption.md). |
+| Documento Maestro v3.0, Parte A, A2 y A5 (adopción ratificada) | Propone IA31-01–IA31-10, conversación y fuentes farmacéuticas; IA31-03 sobre molestias exige revisión profesional antes de activarse. | F061-FR-001–028 amplían el alcance; F061-FR-009 tiene autorización normativa, con implementación pendiente. Véase [matriz de adopción](../../docs/roadmap-v3-adoption.md). |
 | F06 aprobado, IA-RF01 y AC-IA01/02 | Búsqueda pública fundamentada, MockAIProvider y rechazo clínico. | F06.1 amplía conversación y fuentes sin modificar la aceptación de F06. |
 
-**Decisión normativa registrada**: la aprobación humana expresa del 2026-11-17 y la Constitution v1.2.0 resuelven F061-FR-009 como ampliación educativa limitada. La especificación completa sigue en borrador hasta revisión y aprobación humana; las fuentes, licencia, revisión profesional, proveedor real, privacidad, consentimiento y presupuesto requieren verificaciones o decisiones propias antes de cualquier activación. Ningún criterio de éxito se considera demostrado.
+**Decisión normativa y de especificación registradas**: la aprobación humana expresa del 2026-11-17 y la Constitution v1.2.0 resuelven F061-FR-009 como ampliación educativa limitada. El responsable aprobó después esta especificación mediante «sí» en la conversación, para avanzar a contratos, plan y tareas según los puntos de control SDD. Las fuentes, licencia, revisión profesional, proveedor real, privacidad, consentimiento y presupuesto requieren verificaciones o decisiones propias antes de cualquier activación. Ningún criterio de éxito se considera demostrado.
