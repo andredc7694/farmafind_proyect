@@ -1,17 +1,17 @@
 # Evidencias F00
 
-Este índice conserva la trazabilidad del bootstrap y distingue documento, fixture sintético y ejecución real. Los reportes completos de ejecución permanecen en `artifacts/f00/<run-id>/`, ignorado por Git; solo se publica un resumen redactado tras revisión. No copiar rutas personales, perfiles `.env.local`, tokens ni logs crudos a este directorio.
+Este índice conserva la trazabilidad del bootstrap y distingue evidencia técnica de aceptación humana. Los reportes completos permanecen en `artifacts/f00/`, ignorado por Git; solo se publica el resumen redactado. No se publican perfiles `.env.local`, credenciales ni logs crudos.
 
-| ID | Contenido exigido | Estado de esta entrega |
+| ID | Contenido exigido | Estado de cierre técnico |
 |---|---|---|
-| E-F00-01 | Revisión, hashes, Windows, Node/npm y paquetes. | Evidencia local en reporte privado; par completo pendiente. |
-| E-F00-02 | Configuración válida/inválida con datos ficticios. | Tests locales; evidencia completa A/B pendiente. |
-| E-F00-03 | Build, sintaxis, tipos y arquitectura. | Controles locales; revisión final pendiente. |
-| E-F00-04 | Contrato HTTP API/Notificaciones. | Tests y HTTP locales; repetición completa pendiente. |
-| E-F00-05 | Playwright, UI real y captura técnica. | Pendiente de entorno compatible. |
-| E-F00-06 | Procesos, colisión, reinicio y limpieza. | Controles locales; separación con UI pendiente. |
-| E-F00-07 | Preparación A limpia con comandos y resultados. | Copia local independiente verificada; preparación completa con navegador pendiente. |
-| E-F00-08 | Preparación B limpia y comparación. | Copia local independiente verificada; preparación completa con navegador pendiente. |
-| E-F00-09 | Revisión humana y correspondencia histórica/docente. | Pendiente de aprobación final. |
+| E-F00-01 | Revisión, hashes, Windows, Node/npm y paquetes. | Satisfecho en A/B sobre la candidata `b160c6a`. |
+| E-F00-02 | Configuración válida/inválida con datos ficticios. | Satisfecho en ambas preparaciones. |
+| E-F00-03 | Build, sintaxis, tipos y arquitectura. | Satisfecho en ambas preparaciones. |
+| E-F00-04 | Contrato HTTP API/Notificaciones. | Satisfecho en ambas preparaciones. |
+| E-F00-05 | Playwright, UI real y captura técnica. | Satisfecho en contenedor Linux oficial, 1/1 por preparación. |
+| E-F00-06 | Procesos, colisión, reinicio y limpieza. | Satisfecho en ambas preparaciones. |
+| E-F00-07 | Preparación A limpia con comandos y resultados. | `F00-A-2026-11-17T18-51-19.916Z`, `overall=passed`. |
+| E-F00-08 | Preparación B limpia y comparación. | `F00-B-2026-11-17T18-53-12.890Z`; comparación `acceptance=passed`. |
+| E-F00-09 | Revisión humana y correspondencia histórica/docente. | Trazabilidad preparada; T058 pendiente de decisión humana. |
 
-Cada registro debe contener comando, directorio, inicio/fin y código de salida; versiones observadas; resultado esperado y obtenido; errores redactados o `none`; hashes de fuente/lockfile; limpieza de procesos; y controles pendientes con causa. Los fixtures de `tests/fixtures/` son sintéticos y no cuentan como preparación A/B. Un `local=passed` exige mantener `overall=pending` y `acceptance=pending` mientras falte Playwright. La revisión humana final se registra aparte tras las dos ejecuciones completas.
+Cada reporte contiene comandos, directorio, inicio/fin, códigos de salida, versiones, resultados, hashes y limpieza. El soporte oficial de Playwright se atribuye al contenedor Linux, no a Windows 10. Un cambio posterior en fuente o lockfile obliga a repetir A/B antes de reutilizar esta evidencia.

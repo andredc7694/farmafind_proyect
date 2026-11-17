@@ -7,12 +7,13 @@
 
 | Campo | Preparación A | Preparación B |
 |---|---|---|
-| Run completo | `F00-A-2026-11-17T13-17-52.485Z` | `F00-B-2026-11-17T13-20-27.925Z` |
-| Source hash | `4cfa699e583ad86df9de1d7a0e4815224ab05f807b0ec17d23b3d363b6e9bec5` | mismo |
-| Lockfile hash | `12303f176da6ce2c18604eb422e71ba1d7de5fd08f6499ca1c52a4262f267757` | mismo |
+| Run completo | `F00-A-2026-11-17T18-51-19.916Z` | `F00-B-2026-11-17T18-53-12.890Z` |
+| Commit candidato | `b160c6a381a60386311911053347b407a2833def` | mismo |
+| Source hash | `619accd73a89f48e5967df2a57294312d2f1df16927cf617628684f87554df2c` | mismo |
+| Lockfile hash | `e0cbfb81fc61613ac0ef9327f187d7a42554332e39d761a4d3499f7af7fa646f` | mismo |
 | Directorio | Independiente A | Independiente B |
 | Bootstrap | 35/35 | 35/35 |
-| Regresión base | 276 satisfactorias; 81 omitidas por servicios fuera del subconjunto F00 | igual |
+| Regresión base | 284 satisfactorias; 88 omitidas por servicios fuera del subconjunto F00 | igual |
 | Build | satisfactorio | satisfactorio |
 | Playwright Linux | 1/1 | 1/1 |
 | `overall` | `passed` | `passed` |

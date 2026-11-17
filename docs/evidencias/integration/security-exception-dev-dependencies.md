@@ -37,6 +37,7 @@ La auditoría del 2026-11-17 obtuvo:
 - `npm audit --omit=dev --audit-level=high`: 0 vulnerabilidades;
 - `npm ls --omit=dev vite vitest picomatch fdir tinyglobby --all`: árbol vacío;
 - búsqueda en `dist`, `backend/dist` y `notifications/dist`: sin referencias a esos paquetes.
+- consulta actual al registro oficial npm: `picomatch` continúa en `4.0.7`; no existe versión publicada que corrija el rango vulnerable.
 
 Se evaluó el descenso sugerido por npm a Vite 6.2.7 y Vitest 3.1.4. Conservó
 `picomatch@4.0.7` y elevó el informe a siete vulnerabilidades, dos críticas. Se restauraron
