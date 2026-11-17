@@ -24,10 +24,10 @@ El enlace desde cada oferta pública lleva a una solicitud de reserva con los id
 | Proxy Vite temporal 5174 → API 38001 | `/search`, `/assistant`, `/reservations` 200; búsqueda 200; CSRF 200; reserva anónima 401; rechazo clínico 200 |
 | Chrome sin interfaz sobre TEST | Búsqueda, rechazo de dosis, registro, login, reservas propias sin membresía y creación desde oferta: correctos. La instancia temporal 5174 retransmitió solo mutaciones con `Origin: http://127.0.0.1:5173`, igual al origen normal aprobado; no se cambió la política CSRF |
 | PostgreSQL / Redis | Contenedores saludables; F03 fixture verificado antes/después; base persistente intacta; fallback PostgreSQL con Redis inalcanzable: correcto |
-| Regresión y contratos | `npm run test:base`: 285 pasadas, 88 omitidas por prerrequisitos; F03 Redis 3, F03 RLS 4, F04 RLS 16, F02 RLS 14, F05 RLS 4, F01 API 26, F06 32; OpenAPI 36 operaciones |
+| Regresión y contratos | `npm run test:base`: 285 pasadas, 88 omitidas por prerrequisitos; F03 Redis 3, F01 RLS 52, F02 RLS 14, F03 RLS 4, F04 RLS 16, F05 RLS 4, F01 API 26, F06 32; OpenAPI 36 operaciones |
 | Compilación y arquitectura | `npm run check` y `npm run build` correctos; `git diff --check` sin errores |
 
-`npm run test:f01:rls` no se ejecutó en este diagnóstico: la revisión automática rechazó usar la credencial migradora de la base persistente para esa suite hasta acreditar su efecto exacto. Las pruebas RLS de F02–F05 sí se ejecutaron con bases efímeras. La seguridad F01 también quedó cubierta por el arranque con roles separados, RLS/FORCE RLS y las pruebas API; esto no equivale a declarar repetida la suite F01 RLS.
+La primera ejecución de `npm run test:f01:rls` fue detenida por revisión automática hasta acreditar que no alteraba la base persistente. Tras inspeccionar sus diez archivos, se confirmó que el URL de `farmafind_f01_test` se usa para crear y eliminar bases TEST efímeras y roles de prueba; las escrituras y el bootstrap de prueba ocurren en esas bases aisladas. La suite se ejecutó después y pasó 52/52 pruebas. La verificación posterior del fixture volvió a confirmar que la base persistente conservó sus conteos originales.
 
 ## Uso local normal
 
