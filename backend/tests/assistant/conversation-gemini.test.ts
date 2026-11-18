@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GeminiConversationProvider } from '../../src/modules/asistente-ia/infrastructure/gemini-conversation-provider.js';
+import { FallbackConversationProvider } from '../../src/modules/asistente-ia/infrastructure/fallback-conversation-provider.js';
+import { MockConversationProvider } from '../../src/modules/asistente-ia/infrastructure/mock-conversation-provider.js';
 
 const config = { apiKey: 'TEST_ONLY_KEY', model: 'gemini-test', timeoutMs: 200, maxCalls: 1 };
 
@@ -42,5 +44,13 @@ describe('adaptador Gemini inactivo', () => {
     await expect(provider.classify('¿Qué dosis debo tomar?')).rejects.toThrow('no apta');
     await expect(provider.classify('Consulta de test@example.com')).rejects.toThrow('no apta');
     expect(transport).not.toHaveBeenCalled();
+  });
+
+  it('prepara fallback determinista ante fallo o salida externa inválida sin activar Gemini', async () => {
+    const fallback = new MockConversationProvider();
+    const failed = new FallbackConversationProvider({ classify: vi.fn().mockRejectedValue(new Error('TEST')) }, fallback);
+    expect(await failed.classify('Ayuda')).toEqual(await fallback.classify('Ayuda'));
+    const invalid = new FallbackConversationProvider({ classify: vi.fn().mockResolvedValue({ intent: 'PRESCRIBIR', term: null }) }, fallback);
+    expect(await invalid.classify('busca producto ficticio')).toEqual(await fallback.classify('busca producto ficticio'));
   });
 });

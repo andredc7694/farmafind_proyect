@@ -75,8 +75,8 @@
 - [X] T031 [P] [US4] Probar coincidencia exacta de precio, farmacia, disponibilidad y fecha con DTO F03, además de cero resultados, en `backend/tests/assistant/conversation-public-tools.test.ts` (F061-FR-010–012, 018, 024; F061-SC-004–005).
 - [X] T032 [US4] Adaptar únicamente puertos de búsqueda, comparación y farmacia públicas de F03 en `backend/src/modules/asistente-ia/infrastructure/conversation-public-tools.ts` (F061-FR-010–012, 024; F061-SC-004–005).
 - [X] T033 [US4] Construir respuestas comerciales solo desde los DTO F03 de la misma consulta en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-010–012, 018; F061-SC-004).
-- [ ] T034 [US4] Probar que no hay SQL directo, mutaciones, repositorios privados ni acceso entre farmacias con rol runtime en `backend/tests/assistant/conversation-isolation.integration.test.ts` (F061-FR-012–014, 024; F061-SC-005).
-- [ ] T035 [US4] Verificar Redis disponible y fallback PostgreSQL de F03 sin modificar su política en `backend/tests/assistant/conversation-f03-fallback.integration.test.ts` (F061-FR-010–011, 017, 020; F061-SC-004, 007, 009).
+- [X] T034 [US4] Probar que no hay SQL directo, mutaciones, repositorios privados ni acceso entre farmacias con rol runtime en `backend/tests/assistant/conversation-isolation.integration.test.ts` (F061-FR-012–014, 024; F061-SC-005).
+- [X] T035 [US4] Verificar Redis disponible y fallback PostgreSQL de F03 sin modificar su política en `backend/tests/assistant/conversation-f03-fallback.integration.test.ts` (F061-FR-010–011, 017, 020; F061-SC-004, 007, 009).
 - [X] T036 [US4] Mostrar ofertas y actualización como referenciales, sin equivalencia terapéutica, en `frontend/src/assistant/ConversationView.jsx` y `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-011, 018–019; F061-SC-004).
 
 **Checkpoint**: US4 no habilita reservas, inventario privado ni acciones administrativas.
@@ -99,8 +99,8 @@
 - [X] T043 Documentar amenaza de prompt injection, PII, menores y ausencia de envío externo en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-013–015, 028; F061-SC-005–006, 011).
 - [ ] T044 Verificar 30 diálogos, grounding, rechazo clínico y permisos de fuentes con resultados reales en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-023, 026–027; F061-SC-001–003, 008, 010).
 - [X] T045 Ejecutar `npm run check`, `npm run build`, `npm run check:f06`, `npm run verify:contracts` y suite F06.1; registrar comandos/versiones/resultados en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-020, 023; F061-SC-009).
-- [ ] T046 Ejecutar regresión F03/F06, Redis/fallback y RLS TEST Alfa/Beta sin tocar base persistente; registrar resultados en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-010, 020, 023–024; F061-SC-004–005, 007, 009).
-- [ ] T047 Verificar navegación y accesibilidad en entorno compatible; registrar prueba real u omisión justificada en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-001, 019, 023; F061-SC-001, 009).
+- [X] T046 Ejecutar regresión F03/F06, Redis/fallback y RLS TEST Alfa/Beta sin tocar base persistente; registrar resultados en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-010, 020, 023–024; F061-SC-004–005, 007, 009).
+- [X] T047 Verificar navegación y accesibilidad en entorno compatible; registrar prueba real u omisión justificada en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-001, 019, 023; F061-SC-001, 009).
 - [X] T048 Revisar `git diff --check`, secretos, datos privados y compatibilidad de la ruta F06; registrar estado sin autoaprobar criterios en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-014–015, 020; F061-SC-009, 011).
 - [X] T049 Preparar matriz de aceptación con los 28 FR, 11 SC, IA31-01–10 y 16 criterios docentes en `specs/009-f061-asistente-conversacional/evidence-traceability.md`; dejar pendientes los criterios no demostrados (F061-FR-023; F061-SC-001–011).
 
@@ -110,7 +110,7 @@
 2. US1 (T013–T020) y US2 (T021–T025) pueden avanzar tras la base; T016 aplica el filtro clínico básico antes de exponer US1 y US2 completa sus casos negativos antes de habilitar cualquier respuesta educativa de US3.
 3. US3 (T026–T030) depende de US1+US2. Su modo TEST/DEMO puede probarse con fixtures; **T030 y toda exposición real permanecen bloqueadas** hasta permisos de fuente, aprobación profesional documentada y batería clínica satisfactoria.
 4. US4 (T031–T036) depende del puerto T010 y es independiente del corpus US3. US5 (T037–T042) depende de contexto T009 y router T011; ambos pueden desarrollarse tras la base sin esperar la activación real US3.
-5. T043–T049 dependen de las historias pertinentes. T044/T049 no se completan por ejecutar pruebas parciales; aceptación exige evidencia de cada SC. Ningún proveedor externo se implementa por esta lista.
+5. T043–T049 dependen de las historias pertinentes. T044 no se completa por ejecutar pruebas parciales; T049 cierra la preparación de la matriz, no la aceptación. La aceptación exige evidencia de cada SC. Ningún proveedor externo se implementa por esta lista.
 
 ## Parallel Opportunities
 
@@ -119,4 +119,4 @@
 
 ## Implementation Strategy
 
-La base local T001–T012, las historias US1/US2 y las partes desbloqueadas de US3–US5 tienen pruebas y evidencias en `evidence-traceability.md`. La composición runtime mantiene vacío el catálogo farmacéutico; no se expone contenido real antes de la revisión profesional. T030, T034, T035, T044, T046 y T047 siguen pendientes según sus puertas específicas. No hay despliegue ni aceptación F06.1.
+La base local T001–T012, las historias US1/US2 y las partes desbloqueadas de US3–US5 tienen pruebas y evidencias en `evidence-traceability.md`. La composición runtime mantiene vacío el catálogo farmacéutico; no se expone contenido real antes de la revisión profesional. T034, T035, T046 y T047 se verificaron con PostgreSQL/Redis TEST y Playwright Linux; T030 y T044 siguen pendientes de permiso de reutilización y revisión profesional. No hay despliegue ni aceptación F06.1.

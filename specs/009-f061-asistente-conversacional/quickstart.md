@@ -21,3 +21,23 @@
 ## Criterio de salida documental
 
 La implementación TEST/DEMO está autorizada y en curso. La aceptación técnica requiere evidencias reales para los 11 criterios de éxito. La exposición a usuarios reales exige además corpus autorizado, revisión profesional y decisiones separadas sobre proveedor externo/privacidad si se pretende activarlo.
+
+## Comandos verificados para el cierre técnico local
+
+Con PostgreSQL TEST y Redis locales disponibles, y sin usar la base persistente para escrituras:
+
+```powershell
+npm run test:f061:unit
+npm run test:f061:api
+npm run test:f061:integration
+npm run test:f061:e2e:linux
+npm run check
+npm run build
+npm run verify:contracts
+```
+
+`test:f061:integration` crea y elimina exclusivamente una base TEST efímera, usando secretos locales ignorados por Git. Requiere las configuraciones locales de PostgreSQL y Redis preparadas para F01/F03; el rol runtime no usa `BYPASSRLS`. `test:f061:e2e:linux` usa la imagen oficial Playwright 1.65.0 ya disponible en Docker y procesos HTTP temporales propios. Su catálogo F03 es sintético; la integración real PostgreSQL/Redis se verifica en la suite anterior. Windows 10 nativo no se declara entorno Playwright oficialmente compatible. Los resultados observados y límites constan en [evidence-traceability.md](evidence-traceability.md).
+
+La integración de Gemini permanece **inactiva**. El adaptador opcional y su fallback se prueban únicamente con transporte simulado; la aplicación sigue usando MockAIProvider. No se debe colocar una clave en el frontend ni activar un modelo por configuración local sin aprobación expresa de modelo/API vigente, privacidad y consentimiento, cuota, costo y manejo de secretos. La compatibilidad de una llamada Gemini real aún no está demostrada. La documentación oficial actual recomienda revisar la API Interactions para proyectos nuevos antes de decidir una integración externa.
+
+T030 y T044 siguen pendientes hasta acreditar permiso de reutilización del contenido farmacéutico, revisión profesional y prueba clínica del corpus real. No basta ejecutar los comandos TEST para declarar F06.1 aceptada.

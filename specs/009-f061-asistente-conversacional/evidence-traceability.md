@@ -125,3 +125,31 @@ Los 16 criterios docentes conservan la numeración y denominación exacta de la 
 - **Contenido farmacéutico real:** bloqueado hasta comprobar permiso de reutilización, vigencia y revisión profesional documentada. Los fixtures de prueba no satisfacen esta puerta.
 - **Proveedor externo (incluido Gemini):** bloqueado hasta aprobación específica de términos, privacidad, consentimiento, cuota y costo.
 - **Aceptación F06.1:** pendiente de pruebas de los 11 criterios y revisión humana; ningún resultado se presume por el plan.
+
+## Verificación real de cierre técnico — 2026-11-17
+
+Esta sección sustituye los estados operativos anteriores de T034, T035, T046 y T047. Los resultados se obtuvieron en la rama `feat/f06-1-asistente-conversacional` con Node.js `v24.17.0`, npm `11.13.0`, PostgreSQL oficial `18.6` y Redis `8.10.3`, ambos publicados únicamente en `127.0.0.1`. Se reutilizaron contenedores locales existentes, sin recrear ni borrar volúmenes. Las pruebas de escritura usaron una base TEST efímera con nombre aleatorio derivado de `farmafind_f01_test_*`; el cierre del fixture eliminó únicamente su propia base y rol. La base persistente `farmafind_f01_test` se consultó en modo lectura antes y después: **3 usuarios, 3 sesiones, 0 farmacias, 0 membresías** en ambas consultas. Las otras bases TEST existentes no se tocaron.
+
+| Comando | Resultado observado | Alcance |
+| --- | --- | --- |
+| `npm run test:f061:unit` | 80/80 | Contexto, privacidad, seguridad, 30 diálogos sintéticos y fallback simulado del proveedor opcional. |
+| `npm run test:f061:api` | 14/14 | Contratos HTTP F06.1 y casos negativos. |
+| `npm run test:f061:integration` | 5/5 | PostgreSQL RLS real Alfa/Beta con rol runtime, DTO públicos F03, Redis hit/miss/invalidation y fallback PostgreSQL. |
+| `npm run test:f01:rls`; `npm run test:f02:rls` | 52/52; 14/14 | Aislamiento y autorización existentes en PostgreSQL real. |
+| `npm run test:f03:rls`; `npm run test:f03:integration` | 4/4; 3/3 | RLS F03 y caché Redis real. |
+| `npm run test:f061:e2e:linux` | 4/4 | Playwright 1.65.0 en imagen oficial Linux `mcr.microsoft.com/playwright:v1.65.0-noble`; navegación, teclado, móvil, expiración y ausencia de almacenamiento persistente. API y catálogo F03 sintéticos solo para esta prueba de navegador. |
+| `npm run check:f06`; `npm run test:f03:unit` | 32/32; 25/25 | Regresión F06 y F03. |
+| `npm run check`; `npm run build`; `npm run verify:contracts` | Correctos; 38/38 rutas | TypeScript, arquitectura modular, compilación y contratos estructurales F00–F06.1. |
+| `npm audit`; `npm audit --omit=dev` | 0 vulnerabilidades; 0 vulnerabilidades | Consulta al registro npm en esta ejecución. |
+
+**T034 y F061-SC-005:** el rol runtime carece de `SUPERUSER` y `BYPASSRLS`; las tablas privadas probadas tienen RLS forzado. Sin membresía, el contexto Alfa o Beta no permite leer ni modificar inventario privado. F06.1 únicamente consume el puerto público F03; los DTO públicos de ambas farmacias se comprueban por separado. No se añadió SQL ni acceso a repositorios privados en F06.1.
+
+**T035 y F061-SC-004/007:** se comprobó oferta pública desde PostgreSQL, acierto y fallo de caché, invalidación, y respuesta de PostgreSQL cuando Redis no está disponible. La prueba de navegador usa DTO ficticios en memoria y no pretende demostrar esa integración por sí sola.
+
+**T046/T047:** la regresión F01/F02/F03/F06 y las cuatro pruebas de navegador pasaron. El navegador se ejecutó dentro de Linux oficial de Playwright, no en Windows 10 nativo. Los procesos HTTP del harness fueron temporales y propios; el reloj acelerado existe solo en `scripts/f061/browser-api.mjs`, fuera del servidor de producción. La prueba cubrió seis turnos, caducidad y recuperación tras 422, cita sintética de F03, rechazo clínico, fallo genérico, navegación por teclado y pantalla móvil.
+
+**Proveedor externo:** el MockAIProvider sigue siendo el único proveedor conectado a la aplicación. El adaptador Gemini y su wrapper de fallback están inactivos y solo se probaron con transporte simulado; no se usaron claves, red del proveedor ni se aprobó un modelo o presupuesto. Antes de una activación real hacen falta decisiones humanas sobre modelo/API vigente, consentimiento, privacidad, cuota, costos y gestión de secretos. La API actual del adaptador no se declara verificada contra Gemini real.
+
+**Fuentes farmacéuticas:** se revisaron los portales oficiales de [productos DIGEMID](https://www.digemid.minsa.gob.pe/webDigemid/productos-farmaceuticos/) y [fichas técnicas de biológicos](https://www.digemid.minsa.gob.pe/webDigemid/fichas-tecnicas-de-productos-biologicos/) como candidatas. No se comprobó un permiso de reutilización para FarmaFind ni una revisión profesional documentada. No se copió contenido al catálogo runtime. Por ello **T030 y T044 siguen pendientes**; 30/30 diálogos con fixtures no equivalen a aprobación clínica ni a F061-SC-008. F06.1 no se declara aceptada ni apta para orientar con contenido farmacéutico real.
+
+**Estado corregido de la matriz:** F061-FR-001/019 y F061-SC-001/009 tienen ahora evidencia de navegador TEST; F061-FR-010/011/023/024 y F061-SC-004/005/007 tienen evidencia de PostgreSQL/Redis TEST. F061-SC-008 permanece pendiente, y SC-002/003/010 solo cuentan con corpus sintético. La trazabilidad IA31-01–10 y los 16 criterios docentes no cambian: esta evidencia verifica controles locales, sin asignar calificación ni aceptación humana. El total de tareas verificadas es **47/49**.
