@@ -5,10 +5,11 @@ import { MembershipAdmin } from './MembershipAdmin.jsx';
 import { createSessionClient } from './session-client.js';
 import { InventoryView } from '../inventory/InventoryView.jsx';
 import { ReservationsView } from '../reservations/ReservationsView.jsx';
+import { LocationAdmin } from '../geolocation/LocationAdmin.jsx';
 
 const identity = createSessionClient();
 
-export function IdentityApp({ inventoryMode = false, reservationsMode = false }) {
+export function IdentityApp({ inventoryMode = false, reservationsMode = false, locationMode = false }) {
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -137,14 +138,17 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false })
   }
 
   return <main className="bootstrap">
-    <h1>{inventoryMode ? 'FarmaFind — Inventario' : reservationsMode ? 'FarmaFind — Reservas' : 'FarmaFind — Identidad'}</h1>
+    <h1>{inventoryMode ? 'FarmaFind — Inventario' : reservationsMode ? 'FarmaFind — Reservas'
+      : locationMode ? 'FarmaFind — Ubicación' : 'FarmaFind — Identidad'}</h1>
     <AuthView status={status} error={error} notice={notice} profile={profile}
       onRegister={register} onLogin={login} onLogout={logout} />
     {status === 'authenticated' && <PharmacySelector pharmacies={pharmacies}
       activePharmacyId={activePharmacyId} selectingPharmacyId={selectingPharmacyId}
       status={pharmacyStatus} onSelect={selectPharmacy} />}
     {status === 'authenticated' && reservationsMode && <ReservationsView pharmacyId={activePharmacyId} />}
-    {status === 'authenticated' && activePharmacyId && !reservationsMode && (inventoryMode
+    {status === 'authenticated' && locationMode && <LocationAdmin pharmacyId={activePharmacyId}
+      delegationCodes={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />}
+    {status === 'authenticated' && activePharmacyId && !reservationsMode && !locationMode && (inventoryMode
       ? <InventoryView pharmacyId={activePharmacyId} />
       : <MembershipAdmin pharmacyId={activePharmacyId} />)}
   </main>;

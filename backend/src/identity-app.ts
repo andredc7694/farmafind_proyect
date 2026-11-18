@@ -52,6 +52,11 @@ import { InMemoryReviewedSourceCatalog } from './modules/asistente-ia/infrastruc
 import { InMemoryConversationStore } from './modules/asistente-ia/infrastructure/in-memory-conversation-store.js';
 import { createConversationRouter } from './modules/asistente-ia/presentation/conversation-router.js';
 import { F03ConversationPublicTools } from './modules/asistente-ia/infrastructure/conversation-public-tools.js';
+import { ListNearbyPharmacies } from './modules/busqueda/application/list-nearby-pharmacies.js';
+import { createGeolocationRouter } from './modules/busqueda/presentation/geolocation-router.js';
+import { PgLocationUnitOfWork } from './modules/farmacias/infrastructure/location-unit-of-work.js';
+import { ManagePharmacyLocation } from './modules/farmacias/application/manage-pharmacy-location.js';
+import { createLocationRouter } from './modules/farmacias/presentation/location-router.js';
 
 export interface LocalIdentityRuntimeConfig {
   authDatabaseUrl: string;
@@ -62,6 +67,8 @@ export interface LocalIdentityRuntimeConfig {
   cookieSecure: false;
   search?: SearchRuntimeConfig;
   reservations?: ReservationRuntimeConfig;
+  /** F07 is limited to isolated local TEST databases until persistent migration is authorized. */
+  geolocationTest?: true;
 }
 
 interface SqlClient {
@@ -103,7 +110,14 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     const memberships = new ActivePharmacyService(tenantTransactions);
     const management = new ManageMemberships(tenantTransactions);
     const http = { allowedOrigin: config.allowedOrigin, csrfKey: config.csrfKey, cookieSecure: config.cookieSecure };
-    const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http));
+    if (config.geolocationTest && (!config.search ||
+        !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(new URL(config.tenantDatabaseUrl).pathname) ||
+        new URL(config.authDatabaseUrl).pathname !== new URL(config.tenantDatabaseUrl).pathname)) {
+      throw new Error('F07: solo base TEST aislada con búsqueda pública F03');
+    }
+    const geoRepository=config.geolocationTest ? new PgPublicOfferRepository(tenantPool) : null;
+    const geoRouter=geoRepository ? createGeolocationRouter(new ListNearbyPharmacies(geoRepository)) : undefined;
+    const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http),geoRouter);
     app.use('/api/v1', createAdminMembershipRouter(identity, management, http));
     const platformManagement = new ManagePlatformAuthorizations(new PgPlatformAuthorizationUnitOfWork(tenantTransactions));
     app.use('/api/v1', createPlatformAuthorizationRouter(identity, platformManagement, http));
@@ -133,6 +147,10 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       }
       app.use('/api/v1', createConversationRouter(new ConverseAssistant(selectedConversation.provider,
         new InMemoryReviewedSourceCatalog([]), new F03ConversationPublicTools(publicGateway), new InMemoryConversationStore())));
+    }
+    if (config.geolocationTest) {
+      app.use('/api/v1', createLocationRouter(identity,
+        new ManagePharmacyLocation(new PgLocationUnitOfWork(tenantTransactions), invalidator), http));
     }
     app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));
     app.use('/api/v1', createImportRouter(new PreviewImport(inventoryTransactions),

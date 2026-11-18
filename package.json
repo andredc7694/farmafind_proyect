@@ -26,7 +26,7 @@
     "build": "node scripts/f00/build.mjs",
     "check": "node scripts/f03/check-project.mjs",
     "check:config": "node scripts/f00/check-config.mjs",
-    "test:base": "node node_modules/vitest/vitest.mjs run",
+    "test:base": "node scripts/integration/test-base.mjs",
     "test:f01:unit": "node scripts/f01/check.mjs unit",
     "test:f01:api": "node scripts/f01/check.mjs api",
     "test:f01:rls": "node scripts/f01/check.mjs rls",
