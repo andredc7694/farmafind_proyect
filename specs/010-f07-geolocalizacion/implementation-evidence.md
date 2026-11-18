@@ -106,3 +106,7 @@ Se corrigió el lanzador raíz `test:base`: ejecuta las suites generales sin her
 | `node scripts/f07/prepare.mjs verify`, `git diff --check` | PASS: cinco farmacias TEST, conteos persistentes sin cambios, esquema F07 ausente en base persistente y diff sin errores. |
 
 La política oficial OSMF de teselas, atribución y privacidad fue revisada de nuevo; su servicio no garantiza disponibilidad ni uso ilimitado. El mapa permanece voluntario y TEST/DEMO; cobertura y condiciones de operación productiva siguen sin demostrarse. La revisión de seguridad del árbol solo halló URLs con `secret` literal en casos negativos de prueba, no credenciales reales. La aceptación humana F07 sigue pendiente.
+
+## Ratificación humana del alcance TEST/DEMO (2026-11-18)
+
+El responsable del proyecto aprobó expresamente F07 en el mensaje «FARMAFIND — APROBACIÓN HUMANA FINAL DE F07» de esta conversación, después del cierre técnico registrado arriba. La decisión cubre los 12 requisitos, 8 criterios de éxito y 56 tareas verificadas exclusivamente en TEST/DEMO. Esta anotación actualiza el estado de aceptación de las secciones anteriores, que preservan los resultados observados en cada momento. Las capacidades GEO sobre base persistente, el proveedor de mapas para uso público/productivo, facturación, despliegue y aptitud para producción continúan sin autorización.

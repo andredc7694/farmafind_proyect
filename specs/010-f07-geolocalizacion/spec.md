@@ -2,7 +2,7 @@
 
 **Rama**: `feat/f07-geolocalizacion`
 **Fecha**: 2026-11-18
-**Estado**: Decisiones Q1/Q2, especificación y plan aprobados por respuestas humanas del 2026-11-18; implementación TEST/DEMO en verificación, aceptación F07 pendiente
+**Estado**: Especificación y plan aprobados; implementación F07 aceptada expresamente por el responsable del proyecto el 2026-11-18 solo en alcance TEST/DEMO, según [matriz de aceptación](acceptance.md). Restricciones productivas vigentes.
 **Entrada**: Continuar con el siguiente incremento del roadmap v3.0 tras el cierre técnico F06.1 TEST/DEMO.
 **Fuentes**: Constitution v1.2.0; Documento Maestro v3.0, Parte A §A3 y §A6.1–A6.4; especificaciones F01–F03; [trazabilidad v3.0](../../docs/roadmap-v3-adoption.md). El v2.0 permanece histórico. `F07-LEGACY-AWS` designa solo el borrador AWS antiguo.
 

@@ -1,6 +1,6 @@
 # F07 — Guía de validación TEST/DEMO
 
-**Estado**: Comprobaciones TEST/DEMO ejecutadas y registradas en [implementation-evidence.md](implementation-evidence.md). F07 no tiene aceptación humana ni autorización de migración sobre `farmafind_f01_test`.
+**Estado**: F07 aceptada humanamente solo para TEST/DEMO el 2026-11-18; comprobaciones registradas en [implementation-evidence.md](implementation-evidence.md) y decisión en [acceptance.md](acceptance.md). La aprobación no autoriza migraciones sobre `farmafind_f01_test` ni uso productivo.
 
 ## Prerrequisitos
 
