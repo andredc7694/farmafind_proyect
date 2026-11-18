@@ -1,0 +1,22 @@
+# Paquete de revisión farmacéutica F06.1 — pendiente
+
+**Fecha de investigación:** 2026-11-17. **Estado:** candidatos documentados; ningún extracto autorizado ni revisión profesional completada. Este paquete no habilita contenido real ni cierra T030/T044.
+
+| Candidato y entidad | URL oficial y tipo | Vigencia comprobable | Acceso y reutilización | Restricción y decisión |
+| --- | --- | --- | --- | --- |
+| DIGEMID, listado de especialidades de venta sin receta | [Listado oficial](https://www.digemid.minsa.gob.pe/webDigemid/registro-sanitario/productos-farmaceuticos/venta-sin-receta/), lista de IFA, forma y enlaces a fichas/inserto/rotulado | La página indica actualización 27/05/2026; cada anexo requiere verificar registro y fecha individual | Consulta pública; en la página examinada no consta permiso expreso para reproducir extractos en FarmaFind | No inferir licencia por acceso público. La inclusión de una clase/opción educativa requiere selección y revisión farmacéutica. |
+| DIGEMID, fichas de especialidades farmacéuticas | [Consulta oficial](https://www.digemid.minsa.gob.pe/fichasTecnicas/), fichas técnicas autorizadas desde el IV trimestre de 2017 | Cada ficha y registro deben verificarse individualmente; la portada no prueba vigencia actual | La página cita el artículo 49 del D.S. 016-2011-SA y disponibilidad para profesionales de salud; no presenta permiso de reutilización por terceros | Público objetivo profesional; no copiar texto ni convertirlo en consejo individual. |
+| DIGEMID, fichas de productos biológicos | [Consulta oficial](https://www.digemid.minsa.gob.pe/webDigemid/fichas-tecnicas-de-productos-biologicos/), fichas autorizadas | Verificar ficha, registro, revisión y retiro para cada producto | Consulta pública; no se encontró licencia de reutilización aplicable al corpus FarmaFind | No usar como fuente para molestias comunes sin justificación profesional específica. |
+| CENADIM/DIGEMID, centro de documentación | [Portal oficial](https://bvcenadim.digemid.minsa.gob.pe/), boletines y noticias fechadas | Cada publicación tiene fecha propia; una noticia vigente no sustituye ficha regulatoria del producto | Acceso público; no se acreditó permiso general de reproducción en FarmaFind | Candidato de contexto educativo, sujeto a permiso y revisión del contenido concreto. |
+
+La [consulta de registro sanitario DIGEMID](https://www.digemid.minsa.gob.pe/rsProductosFarmaceuticos/) respondió 403 a la herramienta de lectura usada; no se verificó su contenido ni se atribuye una licencia. La disponibilidad y cuotas de cada sitio pueden cambiar; antes de aprobar un extracto se comprobarán de nuevo URL, registro, fecha, titular, jurisdicción, estado y condiciones.
+
+## Expediente que debe recibir el profesional farmacéutico
+
+Para **cada** extracto propuesto, el responsable del proyecto debe adjuntar: identificador del producto o clase, URL/archivo oficial exacto, número de registro cuando aplique, entidad, jurisdicción, versión y fecha de consulta; constancia verificable del permiso de reproducción y alcance de uso; texto educativo breve redactado para FarmaFind con su cita y advertencia; evidencia de vigencia o retiro. No se adjunta aquí contenido farmacológico real.
+
+El profesional revisor debe indicar nombre y habilitación profesional verificable, fecha, versión del texto revisado y dictamen firmado o aprobado por un medio trazable. Debe revisar exactitud, población destinataria, situaciones de urgencia, menores/embarazo, contraindicaciones relevantes, riesgo de confusión con diagnóstico o prescripción, y los casos en los que la respuesta debe abstenerse. El responsable del proyecto debe registrar la autorización de publicación y un mecanismo de retirada si la fuente caduca o cambia.
+
+La batería de aceptación para T044 debe ejecutar **30 diálogos** sobre el corpus realmente aprobado, incluidos seguimiento contextual, ausencia/caducidad/contradicción de fuente, petición de dosis o diagnóstico, situación urgente, intento de inyección y comparación con ofertas públicas F03. Por cada diálogo se registrarán identificador, versión de corpus, resultado esperado/obtenido, cita exacta o abstención, evaluación del revisor y fecha. Los 30 casos sintéticos ya verificados son evidencia técnica, no reemplazan esta revisión.
+
+**Bloqueo:** sin permiso de reutilización y dictamen profesional para un extracto concreto, el catálogo runtime permanece vacío y las respuestas farmacológicas reales siguen deshabilitadas. No se marca T030 ni T044 como completada.

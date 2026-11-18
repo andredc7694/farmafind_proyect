@@ -53,4 +53,29 @@ describe('adaptador Gemini inactivo', () => {
     const invalid = new FallbackConversationProvider({ classify: vi.fn().mockResolvedValue({ intent: 'PRESCRIBIR', term: null }) }, fallback);
     expect(await invalid.classify('busca producto ficticio')).toEqual(await fallback.classify('busca producto ficticio'));
   });
+
+  it('limita concurrencia y registra solo conteos de uso, sin conservar consultas', async () => {
+    let release!: (response: Response) => void;
+    const transport = vi.fn(() => new Promise<Response>(resolve => { release = resolve; }));
+    const provider = new GeminiConversationProvider({ ...config, maxCalls: 2, maxTotalTokens: 100 }, transport as typeof fetch);
+    const first = provider.classify('Buscar producto ficticio');
+    await expect(provider.classify('Otra consulta ficticia')).rejects.toThrow('ocupado');
+    release(new Response(JSON.stringify({ usageMetadata: { totalTokenCount: 100 },
+      candidates: [{ content: { parts: [{ text: JSON.stringify({ intent: 'PUBLIC_SEARCH', term: 'ficticio' }) }] } }] })));
+    await expect(first).resolves.toEqual({ intent: 'PUBLIC_SEARCH', term: 'ficticio' });
+    expect(provider.getUsage()).toEqual({ requests: 1, totalTokens: 100 });
+    await expect(provider.classify('Nueva consulta ficticia')).rejects.toThrow('Presupuesto');
+    expect(transport).toHaveBeenCalledOnce();
+  });
+
+  it('falla cerrado si el proveedor omite los tokens consumidos bajo presupuesto estricto', async () => {
+    const transport = vi.fn(async () => new Response(JSON.stringify({ candidates: [{ content: { parts: [
+      { text: JSON.stringify({ intent: 'HELP', term: null }) },
+    ] } }] })));
+    const provider = new GeminiConversationProvider({ ...config, maxCalls: 2, maxTotalTokens: 100 }, transport as typeof fetch);
+    await expect(provider.classify('Ayuda ficticia')).rejects.toThrow('Proveedor no disponible');
+    expect(provider.getUsage()).toEqual({ requests: 1, totalTokens: 100 });
+    await expect(provider.classify('Otra ficticia')).rejects.toThrow('Presupuesto');
+    expect(transport).toHaveBeenCalledOnce();
+  });
 });

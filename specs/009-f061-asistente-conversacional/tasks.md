@@ -1,7 +1,7 @@
 # Tasks: F06.1 — Asistente conversacional farmacéutico informativo
 
 **Input**: [spec](spec.md), [plan aprobado](plan.md), [research](research.md), [modelo](data-model.md), [contrato](contracts/conversation.openapi.yaml).
-**Estado**: **43/49 tareas verificadas** en el incremento local TEST/DEMO del 2026-11-17. Las seis restantes permanecen abiertas por integración PostgreSQL/Redis, revisión profesional del contenido real y validación de navegador. F06.1 no está aceptada.
+**Estado**: **47/49 tareas verificadas** en TEST/DEMO al 2026-11-17. T030 y T044 permanecen abiertas por permiso de reutilización y revisión farmacéutica profesional del corpus real. F06.1 no está aceptada; Gemini real tampoco está activado.
 **Pruebas**: obligatorias por F061-FR-023 y F061-SC-001–011; escribirlas antes o junto a cada bloque, verificar resultados reales antes de marcar tareas.
 **Alcance**: MockAIProvider local y herramientas F03 públicas; sin SDK externo, AWS, DB nueva, cambios de RLS ni contenido farmacológico real sin licencia y revisión profesional.
 

@@ -62,6 +62,7 @@
     "test:f061:api": "node scripts/f061/check.mjs api",
     "test:f061:integration": "node scripts/f061/check.mjs integration",
     "test:f061:e2e:linux": "npm run build --workspace @farmafind/backend && node scripts/f061/run-browser-linux.mjs",
+    "test:f061:gemini:live": "npm run build --workspace @farmafind/backend && node scripts/f061/run-gemini-live.mjs",
     "test:f06:load": "npm run build --workspace @farmafind/backend && node scripts/f06/load.mjs",
     "test:f06:fallback": "npm run build --workspace @farmafind/backend && node scripts/f06/verify-fallback.mjs",
     "verify:f06:integration": "npm run build --workspace @farmafind/backend && node scripts/f06/smoke.mjs",
