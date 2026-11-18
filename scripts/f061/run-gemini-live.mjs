@@ -1,5 +1,10 @@
 /** Opt-in developer smoke only. Never imported by the application or browser. */
-import { GeminiConversationProvider } from '../../backend/dist/modules/asistente-ia/infrastructure/gemini-conversation-provider.js';
+
+// F06.1 is frozen in TEST/DEMO. Re-enabling requires a reviewed code change in a later phase.
+const LIVE_GEMINI_ENABLED_IN_THIS_RELEASE = false;
+if (!LIVE_GEMINI_ENABLED_IN_THIS_RELEASE) {
+  throw new Error('Gemini real pospuesto: F06.1 funciona solo en modo DEMO determinista');
+}
 
 const model = 'gemini-3.5-flash-lite';
 const approval = `${model}:3-requests:synthetic-only`;
@@ -10,6 +15,7 @@ if (process.env.F061_GEMINI_LIVE_APPROVAL !== approval ||
 }
 const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) throw new Error('Prueba real bloqueada: falta clave backend local');
+const { GeminiConversationProvider } = await import('../../backend/dist/modules/asistente-ia/infrastructure/gemini-conversation-provider.js');
 
 // Fixed, non-personal developer prompts. No user text, clinical context or pharmacy data is sent.
 const prompts = [

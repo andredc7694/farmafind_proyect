@@ -47,7 +47,7 @@ import { QueryAssistant } from './modules/asistente-ia/application/query-assista
 import { createAssistantRouter } from './modules/asistente-ia/presentation/assistant-router.js';
 import { F03PublicAssistantGateway } from './modules/busqueda/infrastructure/public-assistant-gateway.js';
 import { ConverseAssistant } from './modules/asistente-ia/application/converse-assistant.js';
-import { MockConversationProvider } from './modules/asistente-ia/infrastructure/mock-conversation-provider.js';
+import { selectDemoConversationProvider } from './modules/asistente-ia/infrastructure/demo-conversation-provider.js';
 import { InMemoryReviewedSourceCatalog } from './modules/asistente-ia/infrastructure/reviewed-source-catalog.js';
 import { InMemoryConversationStore } from './modules/asistente-ia/infrastructure/in-memory-conversation-store.js';
 import { createConversationRouter } from './modules/asistente-ia/presentation/conversation-router.js';
@@ -126,7 +126,12 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       const assistant = new QueryAssistant(new MockAIProvider(), publicTools, new InMemoryAssistantMetrics());
       app.use('/api/v1', createAssistantRouter(assistant));
       // Real pharmacological content is deliberately unavailable until licensed and reviewed.
-      app.use('/api/v1', createConversationRouter(new ConverseAssistant(new MockConversationProvider(),
+      const selectedConversation = selectDemoConversationProvider(process.env.FARMAFIND_AI_PROVIDER);
+      if (selectedConversation.externalSelectionRejected) {
+        // Reject an external selection locally; keep F03 and the deterministic assistant available.
+        console.warn('F06.1: proveedor externo deshabilitado; modo DEMO determinista activo');
+      }
+      app.use('/api/v1', createConversationRouter(new ConverseAssistant(selectedConversation.provider,
         new InMemoryReviewedSourceCatalog([]), new F03ConversationPublicTools(publicGateway), new InMemoryConversationStore())));
     }
     app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));

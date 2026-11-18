@@ -1,6 +1,6 @@
 # Puerta para prueba de desarrollador Gemini F06.1
 
-**Revisado:** 2026-11-17. **Estado:** preparado y bloqueado; cero solicitudes reales. El proveedor activo de FarmaFind sigue siendo `MockConversationProvider`. El adaptador Gemini y el ejecutor de prueba no están conectados a las rutas públicas.
+**Revisado:** 2026-11-18. **Estado:** Gemini real DESACTIVADO y pospuesto a la etapa final; cero solicitudes reales. El proveedor activo de FarmaFind sigue siendo `MockConversationProvider`. El adaptador Gemini no está conectado a las rutas públicas. El ejecutor de prueba tiene una barrera fija de código que impide llamadas incluso con clave y variables de habilitación.
 
 ## Modelo y términos verificados
 
@@ -11,15 +11,15 @@
 
 ## Límites implementados para la prueba aislada
 
-El script `scripts/f061/run-gemini-live.mjs` requiere aprobación literal de modelo/privacidad/límite, confirmación Free Tier y clave en el proceso backend. Envía como máximo **3 solicitudes HTTP** totales, incluso contando un reintento transitorio; ejecuta una sola consulta a la vez; cada intento expira en **5 segundos**. El adaptador limita el texto a 500 caracteres, la salida solicitada a **100 tokens**, y detiene nuevas consultas al alcanzar **1 000 tokens totales informados**. Si falta `usageMetadata` o hay error, bloquea el resto de la prueba. Un límite de respuesta no garantiza por sí solo el consumo total de entrada o pensamiento; el límite de solicitudes y la revisión posterior de tokens siguen siendo necesarios.
+El script `scripts/f061/run-gemini-live.mjs` está **desarmado** y termina antes de leer la clave o importar el adaptador. Una futura habilitación exigiría un cambio de código revisado, además de aprobación literal de modelo/privacidad/límite, confirmación Free Tier y clave backend. Si se autorizara después, el diseño limitaría la prueba a **3 solicitudes HTTP** totales, una a la vez, **5 segundos** por intento, **100 tokens** de salida solicitada y **1 000 tokens totales informados**. El adaptador conserva esos controles sin estar en uso. Un límite de respuesta no garantiza el consumo total de entrada o pensamiento.
 
 Solo se envían tres frases fijas sobre búsqueda, datos públicos y comparación; no se envían datos de usuarios, farmacias ni conversaciones reales. La pregunta farmacológica de molestias queda registrada como `blocked-no-reviewed-source` y **no sale a Gemini**. El script imprime número de solicitudes, tokens informados, estados e intenciones, nunca clave, texto de consulta ni respuesta. No almacena conversaciones. El fallback determinista se prueba con transporte simulado y permanece inactivo en las rutas públicas.
 
-## Pasos manuales necesarios, todavía no autorizados
+## Condiciones reservadas para la etapa final
 
 1. El responsable revisa los [términos](https://ai.google.dev/gemini-api/terms), confirma que acepta usar **solo tres frases sintéticas** en Free Tier y aprueba expresamente `gemini-3.5-flash-lite`, máximo tres solicitudes, 100 tokens de salida por intento, 1 000 tokens informados totales y 5 segundos por intento. Esta aprobación no autoriza activación pública ni contenido farmacológico real.
-2. En [Google AI Studio](https://aistudio.google.com/api-keys), confirma proyecto Free Tier sin facturación, comprueba cuota actual del modelo y crea una clave exclusiva de prueba. No compartas la clave en el chat. Configúrala **solo** en un archivo backend local ignorado por Git o en el entorno temporal de la terminal; comprueba que Git la ignora.
-3. Tras esa aprobación, en una terminal local configura `GEMINI_API_KEY`, `F061_GEMINI_MODEL=gemini-3.5-flash-lite`, `F061_GEMINI_FREE_TIER_CONFIRMED=1` y `F061_GEMINI_LIVE_APPROVAL=gemini-3.5-flash-lite:3-requests:synthetic-only`, sin imprimir valores. Ejecuta `npm run test:f061:gemini:live` una sola vez. No reintentes automáticamente si falla o aparece una cuota/cobro inesperado.
+2. Solo entonces, en [Google AI Studio](https://aistudio.google.com/api-keys), confirmar proyecto Free Tier sin facturación, comprobar cuota actual del modelo y crear una clave exclusiva de prueba. No compartir la clave en el chat ni en Git.
+3. Autorizar y revisar un cambio de código que retire la barrera fija del ejecutor y mantenga límites y secretos únicamente en backend. Las variables `GEMINI_API_KEY`, `F061_GEMINI_MODEL`, `F061_GEMINI_FREE_TIER_CONFIRMED` y `F061_GEMINI_LIVE_APPROVAL` **no habilitan llamadas en esta versión**. No ejecutar ahora `npm run test:f061:gemini:live` esperando una prueba real.
 4. Registra únicamente fecha, modelo, nivel Free comprobado, solicitudes, tokens reportados, intenciones, códigos/errores sin cuerpo sensible y resultado del bloqueo clínico. Revoca la clave de prueba cuando termine. Si aparece cualquier cargo o el proyecto figura como Paid, detén la prueba y solicita autorización nueva.
 
 **Decisiones humanas pendientes:** aprobación específica de modelo, tratamiento de datos Free y límite de tres solicitudes; creación/configuración privada de clave y confirmación de nivel Free. Separadamente, la activación pública requiere resolver restricciones de edad, uso de consumidor y consejo médico de los términos, además de la revisión farmacéutica T030/T044.

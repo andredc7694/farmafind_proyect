@@ -30,7 +30,7 @@ export class ConverseAssistant {
     if (!['SOURCE', 'SYMPTOM', 'PUBLIC_SEARCH', 'PUBLIC_COMPARE', 'HELP'].includes(decision?.intent) ||
         (decision.term !== null && typeof decision.term !== 'string')) throw new Error('invalid provider decision');
     let estado: ConversationResponse['estado'] = 'AYUDA';
-    let respuesta = 'Puedo consultar información pública de FarmaFind y fichas educativas revisadas disponibles.';
+    let respuesta = 'Modo DEMO: puedo consultar información pública de FarmaFind. La IA generativa externa no está habilitada; sin fichas revisadas me abstengo de dar información farmacológica.';
     let fuentes: readonly ConversationCitation[] = [];
     let referent = prior?.referent ?? null;
 
