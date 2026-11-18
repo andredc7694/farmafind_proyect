@@ -58,6 +58,8 @@
     "test:f06:security": "node scripts/f06/check.mjs security",
     "test:f06:ui": "node scripts/f06/check.mjs ui",
     "check:f06": "node scripts/f06/check.mjs all",
+    "test:f061:unit": "node scripts/f061/check.mjs unit",
+    "test:f061:api": "node scripts/f061/check.mjs api",
     "test:f06:load": "npm run build --workspace @farmafind/backend && node scripts/f06/load.mjs",
     "test:f06:fallback": "npm run build --workspace @farmafind/backend && node scripts/f06/verify-fallback.mjs",
     "verify:f06:integration": "npm run build --workspace @farmafind/backend && node scripts/f06/smoke.mjs",

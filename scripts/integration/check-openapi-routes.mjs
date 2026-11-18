@@ -12,6 +12,7 @@ const contracts=[
   ['specs/005-f04-reservas/contracts/reservations.openapi.yaml',''],
   ['specs/006-f05-notificaciones/contracts/notifications.openapi.yaml',''],
   ['specs/007-f06-asistente-ia/contracts/assistant.openapi.yaml',''],
+  ['specs/009-f061-asistente-conversacional/contracts/conversation.openapi.yaml',''],
 ];
 const routeFiles=[
   ['backend/src/bootstrap/health.ts',''],
@@ -28,6 +29,7 @@ const routeFiles=[
   ['backend/src/modules/reservas/presentation/customer-reservations-router.ts','/api/v1'],
   ['backend/src/modules/reservas/presentation/pharmacy-reservations-router.ts','/api/v1'],
   ['backend/src/modules/asistente-ia/presentation/assistant-router.ts','/api/v1'],
+  ['backend/src/modules/asistente-ia/presentation/conversation-router.ts','/api/v1'],
   ['notifications/src/events/router.ts',''],
 ];
 const normalize=value=>value.replace(/:\w+/g,'{}').replace(/\{[^}]+\}/g,'{}');
@@ -64,5 +66,5 @@ const documented=new Set(contracts.flatMap(([file,prefix])=>contractOperations(f
 const implemented=new Set(routeFiles.flatMap(([file,prefix])=>implementedOperations(file,prefix)));
 const missing=[...documented].filter(operation=>!implemented.has(operation));
 assert.deepEqual(missing,[],`Operaciones OpenAPI sin ruta Express: ${missing.join(', ')}`);
-assert.equal(documented.size,36,'El inventario F00-F06 cambió; revisar contrato y validador');
-console.log(`Contratos OpenAPI F00-F06: ${documented.size} operaciones documentadas con ruta Express.`);
+assert.equal(documented.size,38,'El inventario F00-F06/F06.1 cambió; revisar contrato y validador');
+console.log(`Contratos OpenAPI F00-F06/F06.1: ${documented.size} operaciones documentadas con ruta Express.`);

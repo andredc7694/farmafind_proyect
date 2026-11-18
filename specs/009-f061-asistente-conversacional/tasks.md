@@ -1,7 +1,7 @@
 # Tasks: F06.1 — Asistente conversacional farmacéutico informativo
 
 **Input**: [spec](spec.md), [plan aprobado](plan.md), [research](research.md), [modelo](data-model.md), [contrato](contracts/conversation.openapi.yaml).
-**Estado**: tareas documentales generadas; **0 completadas**. Este documento no autoriza ejecutar código por sí solo. F06.1 no está implementada ni aceptada.
+**Estado**: **43/49 tareas verificadas** en el incremento local TEST/DEMO del 2026-11-17. Las seis restantes permanecen abiertas por integración PostgreSQL/Redis, revisión profesional del contenido real y validación de navegador. F06.1 no está aceptada.
 **Pruebas**: obligatorias por F061-FR-023 y F061-SC-001–011; escribirlas antes o junto a cada bloque, verificar resultados reales antes de marcar tareas.
 **Alcance**: MockAIProvider local y herramientas F03 públicas; sin SDK externo, AWS, DB nueva, cambios de RLS ni contenido farmacológico real sin licencia y revisión profesional.
 
@@ -9,23 +9,23 @@
 
 **Goal**: preparar una extensión independiente del F06 existente, sin alterar su contrato.
 
-- [ ] T001 Verificar rama, Constitution v1.2.0, aprobaciones de spec/plan y ausencia de cambios ajenos a F06.1; registrar base de evidencia en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-020).
-- [ ] T002 [P] Identificar el punto de composición y preservar `POST /api/v1/asistente/consultar` al documentar rutas nuevas en `backend/src/modules/asistente-ia/README.md` (F061-FR-020).
-- [ ] T003 [P] Preparar fixtures ficticios de fuentes autorizadas/rechazadas y ofertas públicas, sin copiar fichas reales, en `backend/tests/assistant/fixtures/conversation-fixtures.ts` (F061-FR-004, 026–027).
-- [ ] T004 Registrar comandos y suites F06.1 previstas sin instalar SDK ni proveedor en `scripts/f061/check.mjs` y `package.json` (F061-FR-021, 023).
+- [X] T001 Verificar rama, Constitution v1.2.0, aprobaciones de spec/plan y ausencia de cambios ajenos a F06.1; registrar base de evidencia en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-020).
+- [X] T002 [P] Identificar el punto de composición y preservar `POST /api/v1/asistente/consultar` al documentar rutas nuevas en `backend/src/modules/asistente-ia/README.md` (F061-FR-020).
+- [X] T003 [P] Preparar fixtures ficticios de fuentes autorizadas/rechazadas y ofertas públicas, sin copiar fichas reales, en `backend/tests/assistant/fixtures/conversation-fixtures.ts` (F061-FR-004, 026–027).
+- [X] T004 Registrar comandos y suites F06.1 previstas sin instalar SDK ni proveedor en `scripts/f061/check.mjs` y `package.json` (F061-FR-021, 023).
 
 ## Phase 2: Foundational (bloquea las historias)
 
 **Goal**: imponer límites clínicos, privacidad, contexto y frontera pública antes de exponer conversación.
 
-- [ ] T005 [P] Crear prueba de contrato F06.1 para JSON exacto, consulta de 1–500 caracteres, cuerpo de 4 KiB, identificador UUID opcional y 200/400/413/422/429/503 en `backend/tests/assistant/conversation-contract.test.ts` (F061-FR-016, 019–020; F061-SC-006).
-- [ ] T006 [P] Crear pruebas de política clínica previa a proveedor/herramientas, incluidas menores, embarazo, urgencia, dosis y sustitución, en `backend/tests/assistant/conversation-clinical.test.ts` (F061-FR-003, 007–008; F061-SC-003).
-- [ ] T007 Definir tipos de turno sin consulta original persistida, fuente, cita y decisión de seguridad en `backend/src/modules/asistente-ia/domain/conversation-contract.ts` (F061-FR-004, 015, 025–027).
-- [ ] T008 Implementar política clínica conservadora reutilizando límites F06 en `backend/src/modules/asistente-ia/domain/conversation-policy.ts`, antes de proveedor/herramientas (F061-FR-003, 007–009, 013; F061-SC-003, 006).
-- [ ] T009 Implementar puerto de contexto efímero con 6 turnos, 15 min de inactividad, vínculo a origen, límite de entradas, expiración y borrado en `backend/src/modules/asistente-ia/application/conversation-ports.ts` y `backend/src/modules/asistente-ia/infrastructure/in-memory-conversation-store.ts` (F061-FR-002, 015, 025; F061-SC-011).
-- [ ] T010 Definir puertos de fuentes revisadas y consulta F03 pública de solo lectura, sin repositorios privados ni SQL directo, en `backend/src/modules/asistente-ia/application/conversation-ports.ts` (F061-FR-004, 010–012, 024, 026–027; F061-SC-005).
-- [ ] T011 Integrar validación estricta, 30 solicitudes/minuto/origen, errores minimizados y `Cache-Control: no-store` en `backend/src/modules/asistente-ia/presentation/conversation-router.ts` (F061-FR-013–016, 019; F061-SC-006).
-- [ ] T012 Ejecutar la prueba base del contrato F06 en `backend/tests/assistant/assistant.http.test.ts` y registrar el resultado previo en `specs/009-f061-asistente-conversacional/evidence-traceability.md`; no conectar todavía el router F06.1 (F061-FR-020; F061-SC-009).
+- [X] T005 [P] Crear prueba de contrato F06.1 para JSON exacto, consulta de 1–500 caracteres, cuerpo de 4 KiB, identificador UUID opcional y 200/400/413/422/429/503 en `backend/tests/assistant/conversation-contract.test.ts` (F061-FR-016, 019–020; F061-SC-006).
+- [X] T006 [P] Crear pruebas de política clínica previa a proveedor/herramientas, incluidas menores, embarazo, urgencia, dosis y sustitución, en `backend/tests/assistant/conversation-clinical.test.ts` (F061-FR-003, 007–008; F061-SC-003).
+- [X] T007 Definir tipos de turno sin consulta original persistida, fuente, cita y decisión de seguridad en `backend/src/modules/asistente-ia/domain/conversation-contract.ts` (F061-FR-004, 015, 025–027).
+- [X] T008 Implementar política clínica conservadora reutilizando límites F06 en `backend/src/modules/asistente-ia/domain/conversation-policy.ts`, antes de proveedor/herramientas (F061-FR-003, 007–009, 013; F061-SC-003, 006).
+- [X] T009 Implementar puerto de contexto efímero con 6 turnos, 15 min de inactividad, vínculo a origen, límite de entradas, expiración y borrado en `backend/src/modules/asistente-ia/application/conversation-ports.ts` y `backend/src/modules/asistente-ia/infrastructure/in-memory-conversation-store.ts` (F061-FR-002, 015, 025; F061-SC-011).
+- [X] T010 Definir puertos de fuentes revisadas y consulta F03 pública de solo lectura, sin repositorios privados ni SQL directo, en `backend/src/modules/asistente-ia/application/conversation-ports.ts` (F061-FR-004, 010–012, 024, 026–027; F061-SC-005).
+- [X] T011 Integrar validación estricta, 30 solicitudes/minuto/origen, errores minimizados y `Cache-Control: no-store` en `backend/src/modules/asistente-ia/presentation/conversation-router.ts` (F061-FR-013–016, 019; F061-SC-006).
+- [X] T012 Ejecutar la prueba base del contrato F06 en `backend/tests/assistant/assistant.http.test.ts` y registrar el resultado previo en `specs/009-f061-asistente-conversacional/evidence-traceability.md`; no conectar todavía el router F06.1 (F061-FR-020; F061-SC-009).
 
 **Checkpoint**: T005–T012 deben pasar antes de cualquier historia; los tests T005/T006 se preparan antes de la lógica dependiente.
 
@@ -33,14 +33,14 @@
 
 **Independent Test**: ficha ficticia revisada produce respuesta citada; fuente ausente/caducada/contradictoria produce abstención; una pregunta posterior conserva el referente.
 
-- [ ] T013 [P] [US1] Probar fuente autorizada con autoridad, jurisdicción, ID/URL, versión/fecha, vigencia, permiso y revisión profesional; rechazar cada campo ausente en `backend/tests/assistant/conversation-sources.test.ts` (F061-FR-004–006, 026–027; F061-SC-002).
-- [ ] T014 [P] [US1] Probar seguimiento contextual con 30 diálogos ficticios en español y objetivo ≥27 correctos en `backend/tests/assistant/conversation-context.test.ts` (F061-FR-001–002; F061-SC-001).
-- [ ] T015 [US1] Implementar registro de fichas **ficticias** con aprobación explícita y caducidad en `backend/src/modules/asistente-ia/infrastructure/reviewed-source-catalog.ts` (F061-FR-004–006, 026–027; F061-SC-002).
-- [ ] T016 [US1] Aplicar la política clínica T008 **antes** de proveedor/herramientas, componer afirmaciones solo desde citas vigentes, limitar a 3 herramientas y 20 resultados públicos, y abstenerse ante fuentes insuficientes en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-001, 004–009, 016, 018; F061-SC-002–003, 006).
-- [ ] T017 [US1] Extender el mock determinista para intención conversacional estructurada, sin texto libre clínico ni red externa, en `backend/src/modules/asistente-ia/infrastructure/mock-conversation-provider.ts` (F061-FR-003, 021; F061-SC-002).
-- [ ] T018 [US1] Conectar el caso de uso y las rutas F06.1 en `backend/src/main.ts`; verificar compilación, primera consulta, seguimiento, citas/fecha, abstención y compatibilidad F06 en `backend/tests/assistant/conversation.http.test.ts` (F061-FR-001–006, 019–020; F061-SC-001–002, 009).
-- [ ] T019 [US1] Integrar cliente y vista sencilla en español para respuesta educativa y fuentes accesibles en `frontend/src/assistant/conversation-client.js` y `frontend/src/assistant/ConversationView.jsx` (F061-FR-001, 004–006, 018–019).
-- [ ] T020 [US1] Probar interfaz de ficha, seguimiento y ausencia de fuente en `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-001–006; F061-SC-001–002).
+- [X] T013 [P] [US1] Probar fuente autorizada con autoridad, jurisdicción, ID/URL, versión/fecha, vigencia, permiso y revisión profesional; rechazar cada campo ausente en `backend/tests/assistant/conversation-sources.test.ts` (F061-FR-004–006, 026–027; F061-SC-002).
+- [X] T014 [P] [US1] Probar seguimiento contextual con 30 diálogos ficticios en español y objetivo ≥27 correctos en `backend/tests/assistant/conversation-context.test.ts` (F061-FR-001–002; F061-SC-001).
+- [X] T015 [US1] Implementar registro de fichas **ficticias** con aprobación explícita y caducidad en `backend/src/modules/asistente-ia/infrastructure/reviewed-source-catalog.ts` (F061-FR-004–006, 026–027; F061-SC-002).
+- [X] T016 [US1] Aplicar la política clínica T008 **antes** de proveedor/herramientas, componer afirmaciones solo desde citas vigentes, limitar a 3 herramientas y 20 resultados públicos, y abstenerse ante fuentes insuficientes en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-001, 004–009, 016, 018; F061-SC-002–003, 006).
+- [X] T017 [US1] Extender el mock determinista para intención conversacional estructurada, sin texto libre clínico ni red externa, en `backend/src/modules/asistente-ia/infrastructure/mock-conversation-provider.ts` (F061-FR-003, 021; F061-SC-002).
+- [X] T018 [US1] Conectar el caso de uso y las rutas F06.1 en `backend/src/identity-app.ts`, donde se monta F06 en la API integrada; verificar compilación, primera consulta, seguimiento, citas/fecha, abstención y compatibilidad F06 en `backend/tests/assistant/conversation.http.test.ts` (F061-FR-001–006, 019–020; F061-SC-001–002, 009).
+- [X] T019 [US1] Integrar cliente y vista sencilla en español para respuesta educativa y fuentes accesibles en `frontend/src/assistant/conversation-client.js` y `frontend/src/assistant/ConversationView.jsx` (F061-FR-001, 004–006, 018–019).
+- [X] T020 [US1] Probar interfaz de ficha, seguimiento y ausencia de fuente en `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-001–006; F061-SC-001–002).
 
 **Checkpoint**: US1 se valida con fixtures ficticios; no se publica información farmacéutica real sin licencia y revisión profesional.
 
@@ -48,11 +48,11 @@
 
 **Independent Test**: toda solicitud de diagnóstico, receta, dosis, sustitución o tratamiento personal se rechaza sin invocar fuente/proveedor; urgencia se deriva sin diagnosticar.
 
-- [ ] T021 [P] [US2] Ampliar batería negativa con reformulaciones, datos sensibles, menores, embarazo, urgencia e inyección en `backend/tests/assistant/conversation-clinical.test.ts` (F061-FR-007–008, 013–014; F061-SC-003, 006).
-- [ ] T022 [US2] Endurecer la política clínica ya conectada en T016 para reformulaciones, urgencia y población vulnerable, siempre antes de contexto, mock y herramientas, en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-003, 007–008, 013; F061-SC-003).
-- [ ] T023 [US2] Asegurar que los turnos clínicos rechazados no se almacenen y que las métricas excluyan texto/PII en `backend/src/modules/asistente-ia/infrastructure/in-memory-conversation-store.ts` y `backend/src/modules/asistente-ia/infrastructure/assistant-metrics.ts` (F061-FR-014–015, 025; F061-SC-011).
-- [ ] T024 [US2] Probar por HTTP denegación clínica sin llamadas a proveedor/herramientas y sin filtración interna en `backend/tests/assistant/conversation-security.http.test.ts` (F061-FR-007–008, 013–015; F061-SC-003, 006).
-- [ ] T025 [US2] Mostrar rechazo y orientación de urgencia en español sin mensaje genérico de fallo en `frontend/src/assistant/ConversationView.jsx` y `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-007–008, 019).
+- [X] T021 [P] [US2] Ampliar batería negativa con reformulaciones, datos sensibles, menores, embarazo, urgencia e inyección en `backend/tests/assistant/conversation-clinical.test.ts` (F061-FR-007–008, 013–014; F061-SC-003, 006).
+- [X] T022 [US2] Endurecer la política clínica ya conectada en T016 para reformulaciones, urgencia y población vulnerable, siempre antes de contexto, mock y herramientas, en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-003, 007–008, 013; F061-SC-003).
+- [X] T023 [US2] Asegurar que los turnos clínicos rechazados no se almacenen y que las métricas excluyan texto/PII en `backend/src/modules/asistente-ia/infrastructure/in-memory-conversation-store.ts` y `backend/src/modules/asistente-ia/infrastructure/assistant-metrics.ts` (F061-FR-014–015, 025; F061-SC-011).
+- [X] T024 [US2] Probar por HTTP denegación clínica sin llamadas a proveedor/herramientas y sin filtración interna en `backend/tests/assistant/conversation-security.http.test.ts` (F061-FR-007–008, 013–015; F061-SC-003, 006).
+- [X] T025 [US2] Mostrar rechazo y orientación de urgencia en español sin mensaje genérico de fallo en `frontend/src/assistant/ConversationView.jsx` y `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-007–008, 019).
 
 **Checkpoint**: US2 debe pasar todos los casos negativos antes de habilitar la ampliación educativa de US3.
 
@@ -60,10 +60,10 @@
 
 **Independent Test**: contenido ficticio aprobado permite solo descripción general citada; falta de fuente, permiso, vigencia o revisión produce abstención; preguntas personales se rechazan.
 
-- [ ] T026 [P] [US3] Probar con fixtures ficticios fuentes ausentes, caducadas, contradictorias y sin permiso/revisión, además de preguntas personales, en `backend/tests/assistant/conversation-symptoms.test.ts` (F061-FR-006–009, 026–027; F061-SC-010).
-- [ ] T027 [US3] Implementar estado `ABSTENCION` y descripción educativa solo desde categorías autorizadas por el catálogo de prueba en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-006, 009, 027; F061-SC-010).
-- [ ] T028 [US3] Bloquear por defecto contenido real de molestias hasta licencia comprobada y aprobación profesional de contenido y casos límite en `backend/src/modules/asistente-ia/infrastructure/reviewed-source-catalog.ts` (F061-FR-009, 022, 026–027; F061-SC-008, 010).
-- [ ] T029 [US3] Verificar que la interfaz identifica finalidad educativa, cita y abstención sin consejo personal en `frontend/src/assistant/ConversationView.jsx` y `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-009, 018–019; F061-SC-010).
+- [X] T026 [P] [US3] Probar con fixtures ficticios fuentes ausentes, caducadas, contradictorias y sin permiso/revisión, además de preguntas personales, en `backend/tests/assistant/conversation-symptoms.test.ts` (F061-FR-006–009, 026–027; F061-SC-010).
+- [X] T027 [US3] Implementar estado `ABSTENCION` y descripción educativa solo desde categorías autorizadas por el catálogo de prueba en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-006, 009, 027; F061-SC-010).
+- [X] T028 [US3] Bloquear por defecto contenido real de molestias hasta licencia comprobada y aprobación profesional de contenido y casos límite en `backend/src/modules/asistente-ia/infrastructure/reviewed-source-catalog.ts` (F061-FR-009, 022, 026–027; F061-SC-008, 010).
+- [X] T029 [US3] Verificar que la interfaz identifica finalidad educativa, cita y abstención sin consejo personal en `frontend/src/assistant/ConversationView.jsx` y `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-009, 018–019; F061-SC-010).
 - [ ] T030 [US3] Documentar fuente, licencia, profesional revisor y batería clínica **solo cuando existan realmente** en `specs/009-f061-asistente-conversacional/evidence-traceability.md`; mantener activación real BLOQUEADA hasta entonces (F061-FR-022, 026–027; F061-SC-008, 010).
 
 **Checkpoint**: T026–T029 pueden verificarse en TEST/DEMO; T030 no permite habilitar contenido para usuarios reales por documentación simulada.
@@ -72,12 +72,12 @@
 
 **Independent Test**: Alfa/Beta ficticias solo muestran DTO públicos de F03; cero ofertas significa cero afirmaciones de precio/disponibilidad; acceso privado es denegado.
 
-- [ ] T031 [P] [US4] Probar coincidencia exacta de precio, farmacia, disponibilidad y fecha con DTO F03, además de cero resultados, en `backend/tests/assistant/conversation-public-tools.test.ts` (F061-FR-010–012, 018, 024; F061-SC-004–005).
-- [ ] T032 [US4] Adaptar únicamente puertos de búsqueda, comparación y farmacia públicas de F03 en `backend/src/modules/asistente-ia/infrastructure/conversation-public-tools.ts` (F061-FR-010–012, 024; F061-SC-004–005).
-- [ ] T033 [US4] Construir respuestas comerciales solo desde los DTO F03 de la misma consulta en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-010–012, 018; F061-SC-004).
+- [X] T031 [P] [US4] Probar coincidencia exacta de precio, farmacia, disponibilidad y fecha con DTO F03, además de cero resultados, en `backend/tests/assistant/conversation-public-tools.test.ts` (F061-FR-010–012, 018, 024; F061-SC-004–005).
+- [X] T032 [US4] Adaptar únicamente puertos de búsqueda, comparación y farmacia públicas de F03 en `backend/src/modules/asistente-ia/infrastructure/conversation-public-tools.ts` (F061-FR-010–012, 024; F061-SC-004–005).
+- [X] T033 [US4] Construir respuestas comerciales solo desde los DTO F03 de la misma consulta en `backend/src/modules/asistente-ia/application/converse-assistant.ts` (F061-FR-010–012, 018; F061-SC-004).
 - [ ] T034 [US4] Probar que no hay SQL directo, mutaciones, repositorios privados ni acceso entre farmacias con rol runtime en `backend/tests/assistant/conversation-isolation.integration.test.ts` (F061-FR-012–014, 024; F061-SC-005).
 - [ ] T035 [US4] Verificar Redis disponible y fallback PostgreSQL de F03 sin modificar su política en `backend/tests/assistant/conversation-f03-fallback.integration.test.ts` (F061-FR-010–011, 017, 020; F061-SC-004, 007, 009).
-- [ ] T036 [US4] Mostrar ofertas y actualización como referenciales, sin equivalencia terapéutica, en `frontend/src/assistant/ConversationView.jsx` y `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-011, 018–019; F061-SC-004).
+- [X] T036 [US4] Mostrar ofertas y actualización como referenciales, sin equivalencia terapéutica, en `frontend/src/assistant/ConversationView.jsx` y `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-011, 018–019; F061-SC-004).
 
 **Checkpoint**: US4 no habilita reservas, inventario privado ni acciones administrativas.
 
@@ -85,24 +85,24 @@
 
 **Independent Test**: conversación de hasta 6 turnos, expiración a 15 min y descarte inmediato; falla del generador ofrece F03; cuota se rechaza antes de herramientas.
 
-- [ ] T037 [P] [US5] Probar expiración, límite de 6 turnos, borrado, ID ajeno/origen distinto, capacidad y ausencia de reactivación en `backend/tests/assistant/conversation-context.test.ts` (F061-FR-002, 015–016, 025; F061-SC-011).
-- [ ] T038 [P] [US5] Probar 429 antes de proveedor, 503 seguro, fallback, prompt injection y métricas sin texto en `backend/tests/assistant/conversation-security.http.test.ts` (F061-FR-013–017, 019, 023, 028; F061-SC-006–007, 011).
-- [ ] T039 [US5] Aplicar expiración/borrado idempotente y capacidad acotada en `backend/src/modules/asistente-ia/infrastructure/in-memory-conversation-store.ts` (F061-FR-002, 015, 025; F061-SC-011).
-- [ ] T040 [US5] Implementar `POST /api/v1/asistente/conversaciones/descartar` y estados 422/429/503 del contrato en `backend/src/modules/asistente-ia/presentation/conversation-router.ts` (F061-FR-016–017, 019, 025; F061-SC-006–007, 011).
-- [ ] T041 [US5] Ofrecer búsqueda F03 convencional cuando falle la conversación y limpiar contexto del cliente al descartar en `frontend/src/assistant/conversation-client.js` y `frontend/src/assistant/ConversationView.jsx` (F061-FR-017, 019, 025; F061-SC-007, 011).
-- [ ] T042 [US5] Probar estados de espera, error, cuota, expiración y botón de borrar en `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-002, 016–017, 019, 025; F061-SC-007, 011).
+- [X] T037 [P] [US5] Probar expiración, límite de 6 turnos, borrado, ID ajeno/origen distinto, capacidad y ausencia de reactivación en `backend/tests/assistant/conversation-context.test.ts` (F061-FR-002, 015–016, 025; F061-SC-011).
+- [X] T038 [P] [US5] Probar 429 antes de proveedor, 503 seguro, fallback, prompt injection y métricas sin texto en `backend/tests/assistant/conversation-security.http.test.ts` (F061-FR-013–017, 019, 023, 028; F061-SC-006–007, 011).
+- [X] T039 [US5] Aplicar expiración/borrado idempotente y capacidad acotada en `backend/src/modules/asistente-ia/infrastructure/in-memory-conversation-store.ts` (F061-FR-002, 015, 025; F061-SC-011).
+- [X] T040 [US5] Implementar `POST /api/v1/asistente/conversaciones/descartar` y estados 422/429/503 del contrato en `backend/src/modules/asistente-ia/presentation/conversation-router.ts` (F061-FR-016–017, 019, 025; F061-SC-006–007, 011).
+- [X] T041 [US5] Ofrecer búsqueda F03 convencional cuando falle la conversación y limpiar contexto del cliente al descartar en `frontend/src/assistant/conversation-client.js` y `frontend/src/assistant/ConversationView.jsx` (F061-FR-017, 019, 025; F061-SC-007, 011).
+- [X] T042 [US5] Probar estados de espera, error, cuota, expiración y botón de borrar en `frontend/tests/assistant/conversation-view.test.jsx` (F061-FR-002, 016–017, 019, 025; F061-SC-007, 011).
 
 **Checkpoint**: US5 pasa con mock y contexto volátil; proveedor externo y retención distribuida siguen fuera de alcance.
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T043 Documentar amenaza de prompt injection, PII, menores y ausencia de envío externo en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-013–015, 028; F061-SC-005–006, 011).
+- [X] T043 Documentar amenaza de prompt injection, PII, menores y ausencia de envío externo en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-013–015, 028; F061-SC-005–006, 011).
 - [ ] T044 Verificar 30 diálogos, grounding, rechazo clínico y permisos de fuentes con resultados reales en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-023, 026–027; F061-SC-001–003, 008, 010).
-- [ ] T045 Ejecutar `npm run check`, `npm run build`, `npm run check:f06`, `npm run verify:contracts` y suite F06.1; registrar comandos/versiones/resultados en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-020, 023; F061-SC-009).
+- [X] T045 Ejecutar `npm run check`, `npm run build`, `npm run check:f06`, `npm run verify:contracts` y suite F06.1; registrar comandos/versiones/resultados en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-020, 023; F061-SC-009).
 - [ ] T046 Ejecutar regresión F03/F06, Redis/fallback y RLS TEST Alfa/Beta sin tocar base persistente; registrar resultados en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-010, 020, 023–024; F061-SC-004–005, 007, 009).
 - [ ] T047 Verificar navegación y accesibilidad en entorno compatible; registrar prueba real u omisión justificada en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-001, 019, 023; F061-SC-001, 009).
-- [ ] T048 Revisar `git diff --check`, secretos, datos privados y compatibilidad de la ruta F06; registrar estado sin autoaprobar criterios en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-014–015, 020; F061-SC-009, 011).
-- [ ] T049 Preparar matriz de aceptación con los 28 FR, 11 SC, IA31-01–10 y 16 criterios docentes en `specs/009-f061-asistente-conversacional/evidence-traceability.md`; dejar pendientes los criterios no demostrados (F061-FR-023; F061-SC-001–011).
+- [X] T048 Revisar `git diff --check`, secretos, datos privados y compatibilidad de la ruta F06; registrar estado sin autoaprobar criterios en `specs/009-f061-asistente-conversacional/evidence-traceability.md` (F061-FR-014–015, 020; F061-SC-009, 011).
+- [X] T049 Preparar matriz de aceptación con los 28 FR, 11 SC, IA31-01–10 y 16 criterios docentes en `specs/009-f061-asistente-conversacional/evidence-traceability.md`; dejar pendientes los criterios no demostrados (F061-FR-023; F061-SC-001–011).
 
 ## Dependencies & Execution Order
 
@@ -119,4 +119,4 @@
 
 ## Implementation Strategy
 
-MVP documental propuesto: base T001–T012 y US1 T013–T020 con fuentes ficticias revisadas y filtro clínico básico, seguido de la batería negativa completa US2. No exponer US1 a usuarios reales antes de US2. US3 queda solo TEST/DEMO hasta su puerta profesional; US4 y US5 añaden consultas públicas y continuidad. No hay despliegue ni uso real por generar esta lista. Todas las casillas permanecen vacías hasta comprobar criterios y registrar evidencia.
+La base local T001–T012, las historias US1/US2 y las partes desbloqueadas de US3–US5 tienen pruebas y evidencias en `evidence-traceability.md`. La composición runtime mantiene vacío el catálogo farmacéutico; no se expone contenido real antes de la revisión profesional. T030, T034, T035, T044, T046 y T047 siguen pendientes según sus puertas específicas. No hay despliegue ni aceptación F06.1.

@@ -46,6 +46,12 @@ import { InMemoryAssistantMetrics } from './modules/asistente-ia/infrastructure/
 import { QueryAssistant } from './modules/asistente-ia/application/query-assistant.js';
 import { createAssistantRouter } from './modules/asistente-ia/presentation/assistant-router.js';
 import { F03PublicAssistantGateway } from './modules/busqueda/infrastructure/public-assistant-gateway.js';
+import { ConverseAssistant } from './modules/asistente-ia/application/converse-assistant.js';
+import { MockConversationProvider } from './modules/asistente-ia/infrastructure/mock-conversation-provider.js';
+import { InMemoryReviewedSourceCatalog } from './modules/asistente-ia/infrastructure/reviewed-source-catalog.js';
+import { InMemoryConversationStore } from './modules/asistente-ia/infrastructure/in-memory-conversation-store.js';
+import { createConversationRouter } from './modules/asistente-ia/presentation/conversation-router.js';
+import { F03ConversationPublicTools } from './modules/asistente-ia/infrastructure/conversation-public-tools.js';
 
 export interface LocalIdentityRuntimeConfig {
   authDatabaseUrl: string;
@@ -115,9 +121,13 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
         candidateLimit: config.search.candidateLimit }, new InMemorySearchMetrics());
       app.use('/api/v1', createPublicSearchRouter(search));
       app.use('/api/v1', createPublicPharmacyRouter(repository));
-      const assistant = new QueryAssistant(new MockAIProvider(), new F03PublicKnowledgeTools(new F03PublicAssistantGateway(search, repository)),
-        new InMemoryAssistantMetrics());
+      const publicGateway = new F03PublicAssistantGateway(search, repository);
+      const publicTools = new F03PublicKnowledgeTools(publicGateway);
+      const assistant = new QueryAssistant(new MockAIProvider(), publicTools, new InMemoryAssistantMetrics());
       app.use('/api/v1', createAssistantRouter(assistant));
+      // Real pharmacological content is deliberately unavailable until licensed and reviewed.
+      app.use('/api/v1', createConversationRouter(new ConverseAssistant(new MockConversationProvider(),
+        new InMemoryReviewedSourceCatalog([]), new F03ConversationPublicTools(publicGateway), new InMemoryConversationStore())));
     }
     app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));
     app.use('/api/v1', createImportRouter(new PreviewImport(inventoryTransactions),

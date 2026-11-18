@@ -12,6 +12,7 @@ export function AssistantView({client=createAssistantClient()}) {
   return <main className="bootstrap search assistant" aria-labelledby="assistant-title">
     <p className="eyebrow">FarmaFind AI</p><h1 id="assistant-title">Asistente informativo</h1>
     <p>Busca y compara información pública de FarmaFind. No brinda diagnósticos, recetas ni dosis.</p>
+    <p><a href="/assistant/conversation">Abrir el asistente conversacional</a></p>
     <form onSubmit={submit} className="search-form">
       <label htmlFor="assistant-query">¿Qué información deseas consultar?</label>
       <textarea id="assistant-query" required maxLength="500" rows="4" value={consulta} onChange={event=>setConsulta(event.target.value)} />
