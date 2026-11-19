@@ -32,7 +32,9 @@ test('cliente y farmacia recorren los estados autorizados de una reserva', async
       return json({ csrfToken: 'csrf-ficticio-e2e' });
     }
     if (pathname === '/api/v1/me/memberships' && method === 'GET') {
-      return json([{ pharmacyId, pharmacyName: 'Farmacia Alfa' }]);
+      return json([{ pharmacyId, pharmacyName: 'Farmacia Alfa', delegationCodes: [
+        'reservation.read', 'reservation.accept', 'reservation.deliver', 'reservation.settings',
+      ] }]);
     }
     if (pathname === '/api/v1/me/active-pharmacy' && method === 'PUT') {
       return json({ pharmacyId });

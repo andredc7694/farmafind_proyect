@@ -19,6 +19,7 @@ export function AssistantView({client=createAssistantClient()}) {
       <p>{consulta.length}/500 caracteres</p>
       <button type="submit" disabled={status==='loading'}>{status==='loading'?'Consultando…':'Consultar'}</button>
     </form>
+    {status==='loading'&&<p role="status">Buscando información pública autorizada…</p>}
     {message&&<p role="alert">{message}</p>}
     {result&&<section aria-live="polite" aria-labelledby="assistant-answer"><h2 id="assistant-answer">Respuesta</h2>
       <p>{result.respuesta}</p><p className="notice">{result.aviso}</p>

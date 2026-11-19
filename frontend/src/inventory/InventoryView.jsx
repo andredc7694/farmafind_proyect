@@ -5,7 +5,7 @@ import { ImportHistory } from './ImportHistory.jsx';
 
 const client = createInventoryClient();
 
-export function InventoryView({ pharmacyId }) {
+export function InventoryView({ pharmacyId, capabilities = null }) {
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
   const [catalog, setCatalog] = useState([]);
@@ -62,6 +62,11 @@ export function InventoryView({ pharmacyId }) {
 
   if (status === 'loading') return <p role="status">Cargando inventario autorizado…</p>;
   if (status === 'denied') return <p role="alert">No tienes acceso al inventario de esta farmacia.</p>;
+  if (capabilities !== null && (!access.inventory || !capabilities.includes('inventory.read'))) {
+    return <p role="alert">No tienes acceso al inventario de esta farmacia.</p>;
+  }
+  const canWrite = capabilities === null || capabilities.includes('inventory.write');
+  const canImport = capabilities === null || capabilities.includes('inventory.import.preview');
   return <section aria-labelledby="inventory-title">
     <h2 id="inventory-title">Catálogo e inventario de la farmacia</h2>
     {message && <p role="alert">{message}</p>}
@@ -73,7 +78,7 @@ export function InventoryView({ pharmacyId }) {
       <input id="catalog-query" value={query} onChange={event => setQuery(event.target.value)} maxLength={120} />
       <button type="submit" disabled={busy}>Buscar</button>
     </form>
-    <form onSubmit={event => { event.preventDefault(); void action(async () => {
+    {canWrite && <form onSubmit={event => { event.preventDefault(); void action(async () => {
       await client.review(pharmacyId, medicationId, {
         precioReferencial: Number(price), cantidadFisica: Number(quantity), motivo: reason,
       });
@@ -98,7 +103,7 @@ export function InventoryView({ pharmacyId }) {
       <input id="inventory-reason" required maxLength={240} value={reason}
         onChange={event => setReason(event.target.value)} />
       <button type="submit" disabled={busy}>Guardar revisión</button>
-    </form>
+    </form>}
     <h3>Existencias propias</h3>
     {!access.inventory && <p role="status">Consulta de existencias no disponible para esta sesión.</p>}
     {inventory.length === 0 ? <p>Sin existencias registradas.</p> : <table><thead><tr>
@@ -108,13 +113,14 @@ export function InventoryView({ pharmacyId }) {
       <td>S/ {item.precioReferencial.toFixed(2)}</td><td>{item.cantidadFisica}</td>
       <td>{item.cantidadComprometida}</td><td>{new Date(item.ultimaRevision).toLocaleString('es-PE')}</td>
     </tr>)}</tbody></table>}
-    <ImportPreview preview={preview} busy={busy}
+    {canImport && <ImportPreview preview={preview} busy={busy}
+      canConfirm={capabilities === null || capabilities.includes('inventory.import.confirm')}
       onPreview={(file, mapping) => action(async () => { setPreview(await client.preview(pharmacyId, file, mapping)); })}
-      onConfirm={importId => action(async () => { await client.confirm(pharmacyId, importId); setPreview(null); })} />
+      onConfirm={importId => action(async () => { await client.confirm(pharmacyId, importId); setPreview(null); })} />}
     {access.imports ? <ImportHistory records={imports} /> :
       <p role="status">Historial de importaciones no disponible para esta sesión.</p>}
-    <section aria-labelledby="movements-title"><h2 id="movements-title">Movimientos recientes</h2>
+    {access.movements && <section aria-labelledby="movements-title"><h2 id="movements-title">Movimientos recientes</h2>
       <ul>{movements.map(item => <li key={item.id}>{item.motivo} — {item.cantidad_antes} → {item.cantidad_despues}</li>)}</ul>
-    </section>
+    </section>}
   </section>;
 }

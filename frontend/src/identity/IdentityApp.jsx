@@ -25,9 +25,10 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
       if (current) {
         setProfile(session);
         setStatus(session ? 'authenticated' : 'anonymous');
+        window.dispatchEvent(new Event('farmafind:session-changed'));
       }
     }).catch(() => {
-      if (current) { setError(true); setStatus('anonymous'); }
+      if (current) { setError(false); setStatus('unavailable'); }
     });
     return () => { current = false; };
   }, []);
@@ -64,11 +65,13 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
       setProfile(null);
       setActivePharmacyId(null);
       setStatus('expired');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
     } catch {
       setProfile(null);
       setActivePharmacyId(null);
-      setError(true);
-      setStatus('anonymous');
+      setError(false);
+      setStatus('unavailable');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
     }
     return false;
   }
@@ -97,10 +100,12 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
       if (!session) throw new Error('Sesión no disponible');
       setProfile(session);
       setStatus('authenticated');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
     } catch {
       setProfile(null);
       setError(true);
       setStatus('anonymous');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
     }
   }
 
@@ -113,6 +118,7 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
       setProfile(null);
       setNotice('Sesión cerrada.');
       setStatus('anonymous');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
     } catch {
       if (await recheckSession()) {
         setError(true);
@@ -128,6 +134,7 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
       setActivePharmacyId(selected.pharmacyId);
       setPharmacies(await identity.memberships());
       setPharmacyStatus('ready');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
     } catch {
       setActivePharmacyId(null);
       setPharmacies([]);
@@ -140,16 +147,24 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
   return <main className="bootstrap">
     <h1>{inventoryMode ? 'FarmaFind — Inventario' : reservationsMode ? 'FarmaFind — Reservas'
       : locationMode ? 'FarmaFind — Ubicación' : 'FarmaFind — Identidad'}</h1>
+    {status === 'anonymous' && reservationsMode && <p>Inicia sesión para consultar tus reservas o solicitar una desde una oferta pública.</p>}
+    {status === 'anonymous' && (inventoryMode || locationMode) && <p>Inicia sesión con una membresía autorizada para acceder a esta área.</p>}
     <AuthView status={status} error={error} notice={notice} profile={profile}
       onRegister={register} onLogin={login} onLogout={logout} />
     {status === 'authenticated' && <PharmacySelector pharmacies={pharmacies}
       activePharmacyId={activePharmacyId} selectingPharmacyId={selectingPharmacyId}
       status={pharmacyStatus} onSelect={selectPharmacy} />}
-    {status === 'authenticated' && reservationsMode && <ReservationsView pharmacyId={activePharmacyId} />}
+    {status === 'authenticated' && reservationsMode && <ReservationsView pharmacyId={activePharmacyId}
+      capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />}
     {status === 'authenticated' && locationMode && <LocationAdmin pharmacyId={activePharmacyId}
       delegationCodes={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />}
+    {status === 'authenticated' && locationMode && activePharmacyId &&
+      !(pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? [])
+        .some(code => code === 'GEO_LOCATION_PROPOSE' || code === 'GEO_LOCATION_REVIEW') &&
+      <p role="status">No tienes permiso para administrar la ubicación de esta farmacia.</p>}
     {status === 'authenticated' && activePharmacyId && !reservationsMode && !locationMode && (inventoryMode
-      ? <InventoryView pharmacyId={activePharmacyId} />
+      ? <InventoryView pharmacyId={activePharmacyId}
+        capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />
       : <MembershipAdmin pharmacyId={activePharmacyId} />)}
   </main>;
 }

@@ -15,7 +15,7 @@ export function PharmacySelector({
   return <section aria-labelledby="pharmacy-selector-title">
     <h2 id="pharmacy-selector-title">Selecciona tu farmacia</h2>
     {pharmacies.length === 0 ? <p role="status">No tienes farmacias disponibles.</p> :
-      <ul>
+      <ul className="pharmacy-choices">
         {pharmacies.map(({ pharmacyId, pharmacyName }) => <li key={pharmacyId}>
           <button
             type="button"

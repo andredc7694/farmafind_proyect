@@ -13,19 +13,20 @@ function submitCredentials(event, action) {
 export function AuthView({ status = 'anonymous', error = false, notice = null, profile = null,
   onRegister, onLogin, onLogout }) {
   if (status === 'authenticated') {
-    return <section aria-labelledby="identity-title">
+    return <section className="account-panel" aria-labelledby="identity-title">
       <h2 id="identity-title">Sesión activa</h2>
       {profile?.email && <p>Correo de tu perfil: <strong>{profile.email}</strong></p>}
       <button type="button" onClick={onLogout}>Cerrar sesión</button>
     </section>;
   }
 
-  return <section aria-labelledby="identity-title">
+  return <section className="account-panel" aria-labelledby="identity-title">
     <h2 id="identity-title">Acceso a FarmaFind</h2>
+    {status === 'unavailable' && <p role="alert">El servicio de identidad no está disponible temporalmente. Comprueba la conexión e inténtalo de nuevo. <a href="/identity">Reintentar</a></p>}
     {status === 'expired' && <p role="status">Tu sesión terminó o expiró. Inicia sesión nuevamente.</p>}
     {notice && <p role="status">{notice}</p>}
     {error && <p role="alert">No se pudo completar la solicitud. Revisa los datos e inténtalo de nuevo.</p>}
-    <form onSubmit={event => submitCredentials(event, onRegister)}>
+    <div className="auth-forms"><form onSubmit={event => submitCredentials(event, onRegister)}>
       <h3>Crear cuenta</h3>
       <label htmlFor="register-email">Correo electrónico</label>
       <input id="register-email" name="email" type="email" autoComplete="email" required maxLength={254} />
@@ -40,6 +41,6 @@ export function AuthView({ status = 'anonymous', error = false, notice = null, p
       <label htmlFor="login-password">Contraseña</label>
       <input id="login-password" name="password" type="password" autoComplete="current-password" required />
       <button type="submit" disabled={status === 'loading'}>Iniciar sesión</button>
-    </form>
+    </form></div>
   </section>;
 }

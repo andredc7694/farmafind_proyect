@@ -1,30 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { createLocationAdminClient } from './location-admin-client.js';
 
-const client=createLocationAdminClient();
-
 /** Presentation visibility follows F01 capabilities; every write is reauthorized by F07/RLS. */
-export function LocationAdmin({pharmacyId,delegationCodes=[]}) {
+export function LocationAdmin({pharmacyId,delegationCodes=[],client=createLocationAdminClient()}) {
   const canPropose=delegationCodes.includes('GEO_LOCATION_PROPOSE');
   const canReview=delegationCodes.includes('GEO_LOCATION_REVIEW');
   const [status,setStatus]=useState('');
+  const [statusKind,setStatusKind]=useState('status');
   const [proposalId,setProposalId]=useState('');
   const [busy,setBusy]=useState(false);
-  useEffect(()=>{setProposalId('');setStatus('');},[pharmacyId]);
+  useEffect(()=>{setProposalId('');setStatus('');setStatusKind('status');},[pharmacyId]);
   if(!pharmacyId||(!canPropose&&!canReview))return null;
   async function perform(action) {
     setBusy(true);setStatus('');
-    try {const result=await action();setProposalId(result.id);setStatus(result.estado==='PENDIENTE'
+    try {const result=await action();setProposalId(result.id);setStatusKind('status');setStatus(result.estado==='PENDIENTE'
       ? 'Propuesta registrada; requiere revisión por otra persona autorizada.'
       : `Revisión registrada: ${result.estado}.`);}
-    catch(error){setStatus(error.message);}
+    catch(error){setStatusKind('alert');setStatus(error.message);}
     finally{setBusy(false);}
   }
   return <section aria-labelledby="location-admin-title">
     <h2 id="location-admin-title">Ubicación pública de la farmacia</h2>
+    <p className="notice">Operación disponible únicamente en el entorno TEST/DEMO autorizado.</p>
     <p>Los cambios requieren evidencia y revisión por otra persona autorizada de esta farmacia.</p>
-    {status&&<p role="status">{status}</p>}
-    {canPropose&&<form onSubmit={event=>{
+    {status&&<p role={statusKind}>{status}</p>}
+    {canPropose&&<form className="surface-card" onSubmit={event=>{
       event.preventDefault();const data=new FormData(event.currentTarget);
       void perform(()=>client.propose(pharmacyId,{
         direccionPublicable:String(data.get('direccionPublicable')),
@@ -42,7 +42,7 @@ export function LocationAdmin({pharmacyId,delegationCodes=[]}) {
       <label>Referencia de evidencia no sensible <input name="evidenciaReferencia" required maxLength={240} /></label>
       <button disabled={busy}>Enviar propuesta</button>
     </form>}
-    {canReview&&<form onSubmit={event=>{
+    {canReview&&<form className="surface-card" onSubmit={event=>{
       event.preventDefault();const data=new FormData(event.currentTarget);
       void perform(()=>client.review(pharmacyId,String(data.get('propuestaId')),
         {decision:String(data.get('decision')),evidenciaConfirmada:data.get('evidenciaConfirmada')==='on',

@@ -3,6 +3,7 @@ import { createGeolocationClient } from './geolocation-client.js';
 import { PharmacyMap } from './PharmacyMap.jsx';
 import { PharmacyDirections } from './PharmacyDirections.jsx';
 import { F07_MAP_SOURCE } from './map-source.js';
+import { EmptyState } from '../design/Primitives.jsx';
 
 function devicePosition() {
   return new Promise((resolve,reject)=>{
@@ -57,6 +58,7 @@ export function NearbyPharmacies({client=createGeolocationClient(),getPosition=d
 
   return <main className="bootstrap search" aria-labelledby="geo-title">
     <p className="eyebrow">FarmaFind</p><h1 id="geo-title">Farmacias cercanas</h1>
+    <p className="notice" role="status">Función de geolocalización disponible únicamente en el entorno TEST/DEMO.</p>
     <p>Busca por ciudad o comparte tu ubicación solo para esta consulta. La distancia es lineal estimada, no una ruta.</p>
     <form className="search-form" onSubmit={submit}>
       <label htmlFor="geo-city">Ciudad<input id="geo-city" value={city} onChange={event=>setCity(event.target.value)}
@@ -82,7 +84,7 @@ export function NearbyPharmacies({client=createGeolocationClient(),getPosition=d
           <button type="button" onClick={()=>setShowMap(value=>!value)}>{showMap?'Ocultar mapa':'Cargar mapa de OpenStreetMap'}</button>
         </div>}
       {showMap && <PharmacyMap pharmacies={result.farmacias} loadLeaflet={loadLeaflet} />}
-      {result.farmacias.length===0 ? <p>No hay farmacias públicas para esta consulta.</p>
+      {result.farmacias.length===0 ? <EmptyState title="Sin farmacias públicas"><span>No hay farmacias públicas para esta consulta.</span> Prueba con otra ciudad o un radio distinto.</EmptyState>
         : <ul className="offer-grid">{result.farmacias.map(pharmacy=><li className="offer" key={pharmacy.farmaciaId}>
           <h2>{pharmacy.nombre}</h2><p>{pharmacy.direccion}</p>
           {pharmacy.distanciaLinealKm!==undefined && <p>Distancia lineal estimada: {pharmacy.distanciaLinealKm.toFixed(2)} km</p>}

@@ -18,7 +18,9 @@ export function ConversationView({ client = createConversationClient() }) {
       setConversationId(result.conversacionId ?? null);
       setQuery('');
     } catch (cause) {
-      if (cause instanceof ConversationClientError && cause.status === 422) setConversationId(null);
+      if (cause instanceof ConversationClientError && cause.status === 422) {
+        setConversationId(null);
+      }
       setError(cause instanceof Error ? cause.message : 'No se pudo completar la consulta.');
     } finally { setBusy(false); }
   }
@@ -37,7 +39,7 @@ export function ConversationView({ client = createConversationClient() }) {
     <p className="eyebrow">FarmaFind AI</p><h1 id="conversation-title">Asistente conversacional informativo</h1>
     <p>Información educativa fundamentada. No ofrece diagnósticos, tratamientos personales, recetas ni dosis.</p>
     <p>Las fichas de medicamentos reales aún no están habilitadas. Puedes consultar <a href="/search">la búsqueda pública</a>.</p>
-    <div aria-live="polite">{answers.map((answer, index) => <section key={index} className="offer" aria-label={`Respuesta ${index + 1}`}>
+    <div className="conversation-log" aria-live="polite">{answers.map((answer, index) => <section key={index} className="offer conversation-answer" aria-label={`Respuesta ${index + 1}`}>
       <p>{answer.respuesta}</p><p className="notice">{answer.aviso}</p>
       {answer.fuentes?.length > 0 && <><h2>Fuentes</h2><ul>{answer.fuentes.map((source, sourceIndex) =>
         <li key={`${source.referencia}-${sourceIndex}`}>{source.titulo} · {source.referencia} · revisado {source.revisadoEl}</li>)}</ul></>}

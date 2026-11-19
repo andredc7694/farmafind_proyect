@@ -4,7 +4,7 @@ const initialMapping = { nombre: 'nombre', concentracion: 'concentracion',
   presentacion: 'presentacion', clasificacion: 'clasificacion',
   precioReferencial: 'precio', cantidadFisica: 'cantidad' };
 
-export function ImportPreview({ onPreview, onConfirm, preview, busy }) {
+export function ImportPreview({ onPreview, onConfirm, preview, busy, canConfirm = true }) {
   const [file, setFile] = useState(null);
   const [mapping, setMapping] = useState(initialMapping);
   function update(key, value) { setMapping(current => ({ ...current, [key]: value })); }
@@ -36,8 +36,9 @@ export function ImportPreview({ onPreview, onConfirm, preview, busy }) {
       <ul>{preview.filas.map(row => <li key={row.line}>
         Fila {row.line}: {row.errorCode ?? `Referencia ${row.medicationId}; cantidad ${row.physicalQuantity}; precio S/ ${(row.priceCents / 100).toFixed(2)}`}
       </li>)}</ul>
-      <button type="button" disabled={busy || preview.errores.length > 0}
+      {canConfirm && <button type="button" disabled={busy || preview.errores.length > 0}
         onClick={() => void onConfirm(preview.importacionId)}>Confirmar archivo completo</button>
+      }
     </div>}
   </section>;
 }
