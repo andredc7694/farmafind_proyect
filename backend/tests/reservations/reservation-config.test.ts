@@ -1,0 +1,2 @@
+import {describe,expect,it} from 'vitest';import {loadReservationConfig} from '../../src/config/reservations.js';
+describe('configuracion F04',()=>{it('tiene limites seguros',()=>expect(loadReservationConfig({})).toEqual({pendingMinutes:20,idempotencyKeyMin:8,idempotencyKeyMax:128,expirationBatchSize:100}));it('rechaza valores fuera de limites',()=>{expect(()=>loadReservationConfig({RESERVATION_PENDING_MINUTES:'0'})).toThrow();expect(()=>loadReservationConfig({RESERVATION_EXPIRATION_BATCH_SIZE:'501'})).toThrow();});});

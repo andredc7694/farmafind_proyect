@@ -1,0 +1,177 @@
+import React, { useEffect, useState } from 'react';
+import { AuthView } from './AuthView.jsx';
+import { PharmacySelector } from './PharmacySelector.jsx';
+import { MembershipAdmin } from './MembershipAdmin.jsx';
+import { createSessionClient } from './session-client.js';
+import { InventoryView } from '../inventory/InventoryView.jsx';
+import { ReservationsView } from '../reservations/ReservationsView.jsx';
+import { LocationAdmin } from '../geolocation/LocationAdmin.jsx';
+import { PrivatePharmacyProfile } from '../pharmacies/PrivatePharmacyProfile.jsx';
+
+const identity = createSessionClient();
+
+export function IdentityApp({ inventoryMode = false, reservationsMode = false, locationMode = false }) {
+  const returnTo = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('return') === '/farmacias/solicitar'
+      ? '/farmacias/solicitar' : null;
+  const [status, setStatus] = useState('loading');
+  const [error, setError] = useState(false);
+  const [notice, setNotice] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [pharmacies, setPharmacies] = useState([]);
+  const [pharmacyStatus, setPharmacyStatus] = useState('loading');
+  const [activePharmacyId, setActivePharmacyId] = useState(null);
+  const [selectingPharmacyId, setSelectingPharmacyId] = useState(null);
+
+  useEffect(() => {
+    let current = true;
+    identity.session().then(session => {
+      if (current) {
+        setProfile(session);
+        setStatus(session ? 'authenticated' : 'anonymous');
+        window.dispatchEvent(new Event('farmafind:session-changed'));
+      }
+    }).catch(() => {
+      if (current) { setError(false); setStatus('unavailable'); }
+    });
+    return () => { current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (status !== 'authenticated') {
+      setPharmacies([]);
+      setActivePharmacyId(null);
+      return;
+    }
+    let current = true;
+    setPharmacyStatus('loading');
+    identity.memberships().then(own => {
+      if (current) { setPharmacies(own); setPharmacyStatus('ready'); }
+    }).catch(async () => {
+      if (!current) return;
+      setPharmacies([]);
+      if (await recheckSession()) setPharmacyStatus('denied');
+    });
+    return () => { current = false; };
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return undefined;
+    const verifyOnFocus = () => { void recheckSession(); };
+    window.addEventListener('focus', verifyOnFocus);
+    return () => window.removeEventListener('focus', verifyOnFocus);
+  }, [status]);
+
+  async function recheckSession() {
+    try {
+      const session = await identity.session();
+      if (session) { setProfile(session); return true; }
+      setProfile(null);
+      setActivePharmacyId(null);
+      setStatus('expired');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
+    } catch {
+      setProfile(null);
+      setActivePharmacyId(null);
+      setError(false);
+      setStatus('unavailable');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
+    }
+    return false;
+  }
+
+  async function register(credentials) {
+    setError(false);
+    setNotice(null);
+    setStatus('loading');
+    try {
+      await identity.register(credentials);
+      setNotice('Solicitud recibida. Si corresponde, ya puedes iniciar sesión.');
+      setStatus('anonymous');
+    } catch {
+      setError(true);
+      setStatus('anonymous');
+    }
+  }
+
+  async function login(credentials) {
+    setError(false);
+    setNotice(null);
+    setStatus('loading');
+    try {
+      await identity.login(credentials);
+      const session = await identity.session();
+      if (!session) throw new Error('Sesión no disponible');
+      setProfile(session);
+      setStatus('authenticated');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
+    } catch {
+      setProfile(null);
+      setError(true);
+      setStatus('anonymous');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
+    }
+  }
+
+  async function logout() {
+    setError(false);
+    setNotice(null);
+    setStatus('loading');
+    try {
+      await identity.logout();
+      setProfile(null);
+      setNotice('Sesión cerrada.');
+      setStatus('anonymous');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
+    } catch {
+      if (await recheckSession()) {
+        setError(true);
+        setStatus('authenticated');
+      }
+    }
+  }
+
+  async function selectPharmacy(pharmacyId) {
+    setSelectingPharmacyId(pharmacyId);
+    try {
+      const selected = await identity.selectPharmacy(pharmacyId);
+      setActivePharmacyId(selected.pharmacyId);
+      setPharmacies(await identity.memberships());
+      setPharmacyStatus('ready');
+      window.dispatchEvent(new Event('farmafind:session-changed'));
+    } catch {
+      setActivePharmacyId(null);
+      setPharmacies([]);
+      if (await recheckSession()) setPharmacyStatus('denied');
+    } finally {
+      setSelectingPharmacyId(null);
+    }
+  }
+
+  return <main className="bootstrap">
+    <h1>{inventoryMode ? 'FarmaFind — Inventario' : reservationsMode ? 'FarmaFind — Reservas'
+      : locationMode ? 'FarmaFind — Ubicación' : 'FarmaFind — Identidad'}</h1>
+    {status === 'anonymous' && reservationsMode && <p>Inicia sesión para consultar tus reservas o solicitar una desde una oferta pública.</p>}
+    {status === 'anonymous' && (inventoryMode || locationMode) && <p>Inicia sesión con una membresía autorizada para acceder a esta área.</p>}
+    <AuthView status={status} error={error} notice={notice} profile={profile}
+      returnTo={returnTo}
+      onRegister={register} onLogin={login} onLogout={logout} />
+    {status === 'authenticated' && <PharmacySelector pharmacies={pharmacies}
+      activePharmacyId={activePharmacyId} selectingPharmacyId={selectingPharmacyId}
+      status={pharmacyStatus} onSelect={selectPharmacy} />}
+    {status === 'authenticated' && reservationsMode && <ReservationsView pharmacyId={activePharmacyId}
+      capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />}
+    {status === 'authenticated' && locationMode && <LocationAdmin pharmacyId={activePharmacyId}
+      delegationCodes={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />}
+    {status === 'authenticated' && locationMode && activePharmacyId &&
+      !(pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? [])
+        .some(code => code === 'GEO_LOCATION_PROPOSE' || code === 'GEO_LOCATION_REVIEW') &&
+      <p role="status">No tienes permiso para administrar la ubicación de esta farmacia.</p>}
+    {status === 'authenticated' && activePharmacyId && !reservationsMode && !locationMode && (inventoryMode
+      ? <><PrivatePharmacyProfile pharmacyId={activePharmacyId}
+          capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />
+        <InventoryView pharmacyId={activePharmacyId}
+          capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} /></>
+      : <MembershipAdmin pharmacyId={activePharmacyId} />)}
+  </main>;
+}

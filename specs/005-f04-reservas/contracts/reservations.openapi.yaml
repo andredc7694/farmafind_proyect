@@ -1,0 +1,134 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F04 Reservas
+  version: 0.1.0
+paths:
+  /api/v1/reservas:
+    get:
+      summary: Listar reservas propias
+      responses:
+        '200': { description: Reservas propias }
+        '401': { description: Sesión ausente o vencida }
+    post:
+      summary: Crear reserva PENDIENTE
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateReservation' }
+      responses:
+        '201': { description: Reserva creada }
+        '200': { description: Reintento idempotente }
+        '409': { description: Sin disponibilidad o clave reutilizada }
+        '422': { description: Entrada inválida }
+  /api/v1/reservas/{reservationId}:
+    get:
+      summary: Consultar reserva propia
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+      responses:
+        '200': { description: Reserva propia }
+        '404': { description: Ausente o no visible }
+  /api/v1/reservas/{reservationId}/cancelar:
+    post:
+      summary: Cancelar reserva propia vigente
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200': { description: CANCELADA o reintento estable }
+        '409': { description: Transición no permitida }
+  /api/v1/farmacias/{pharmacyId}/reservas:
+    get:
+      summary: Listar reservas de farmacia autorizada
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+      responses:
+        '200': { description: Cola autorizada }
+        '403': { description: Sin capacidad }
+  /api/v1/farmacias/{pharmacyId}/reservas/configuracion:
+    get:
+      summary: Consultar plazo de recogida
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+      responses:
+        '200': { description: Plazo 1–8, default 4 }
+    put:
+      summary: Cambiar plazo para confirmaciones futuras
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pickupWindowHours]
+              additionalProperties: false
+              properties:
+                pickupWindowHours: { type: integer, minimum: 1, maximum: 8, default: 4 }
+      responses:
+        '200': { description: Configuración guardada }
+        '403': { description: Sin capacidad o farmacia ajena }
+        '422': { description: Fuera de rango }
+  /api/v1/farmacias/{pharmacyId}/reservas/{reservationId}/confirmar:
+    post:
+      summary: Confirmar tras comprobación física
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/ReservationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200': { description: CONFIRMADA con vencimiento exacto }
+        '403': { description: Sin delegación }
+        '409': { description: Vencida o transición inválida }
+  /api/v1/farmacias/{pharmacyId}/reservas/{reservationId}/falta-fisica:
+    post:
+      summary: Cancelar PENDIENTE por falta física
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/ReservationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200': { description: CANCELADA con incidencia }
+        '403': { description: Sin capacidad }
+  /api/v1/farmacias/{pharmacyId}/reservas/{reservationId}/entregar:
+    post:
+      summary: Entregar CONFIRMADA vigente
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/ReservationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200': { description: ENTREGADA }
+        '403': { description: Sin capacidad }
+        '409': { description: Vencida o transición inválida }
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 128 }
+    ReservationId:
+      name: reservationId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    PharmacyId:
+      name: pharmacyId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    CreateReservation:
+      type: object
+      additionalProperties: false
+      required: [pharmacyId, medicationId, quantity]
+      properties:
+        pharmacyId: { type: string, format: uuid }
+        medicationId: { type: string, format: uuid }
+        quantity: { type: integer, minimum: 1 }

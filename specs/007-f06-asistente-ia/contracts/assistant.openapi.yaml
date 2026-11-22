@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F06 Assistant API
+  version: 1.0.0
+paths:
+  /api/v1/asistente/consultar:
+    post:
+      summary: Consulta informativa pública fundamentada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [consulta]
+              properties:
+                consulta:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+      responses:
+        '200':
+          description: Respuesta, ayuda o límite clínico seguro
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [intencion, respuesta, fuentes, aviso, proveedor, correlationId]
+                properties:
+                  intencion: { enum: [BUSQUEDA, COMPARACION, AYUDA, CLINICA_RECHAZADA] }
+                  respuesta: { type: string }
+                  fuentes: { type: array, maxItems: 20, items: { type: object } }
+                  aviso: { type: string }
+                  proveedor: { const: mock }
+                  correlationId: { type: string, format: uuid }
+        '400': { description: JSON o consulta inválidos }
+        '413': { description: Cuerpo mayor de 4 KiB }
+        '422': { description: Intención o parámetros incompatibles }
+        '429':
+          description: Cuota excedida; incluye Retry-After
+        '503': { description: Fuente pública o proveedor no disponibles de forma segura }

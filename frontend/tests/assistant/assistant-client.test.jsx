@@ -1,0 +1,2 @@
+import {describe,expect,it,vi} from 'vitest';import {createAssistantClient} from '../../src/assistant/assistant-client.js';
+describe('cliente F06',()=>it('envía solo consulta y ninguna sesión',async()=>{const fetcher=vi.fn().mockResolvedValue({ok:true,status:200,json:async()=>({})});await createAssistantClient(fetcher).query('demo');expect(fetcher).toHaveBeenCalledWith('/api/v1/asistente/consultar',{method:'POST',headers:{'Content-Type':'application/json'},body:'{"consulta":"demo"}'});}));

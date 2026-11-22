@@ -1,0 +1,2 @@
+import {describe,expect,it} from 'vitest';import {isExpired,transitionReservation} from '../../src/modules/reservas/domain/reservation.js';
+describe('entrega F04',()=>{it('solo parte de CONFIRMADA',()=>{expect(transitionReservation('CONFIRMADA','ENTREGADA')).toBe('ENTREGADA');expect(()=>transitionReservation('PENDIENTE','ENTREGADA')).toThrow();});it('una confirmada vencida se identifica antes de entregar',()=>expect(isExpired('CONFIRMADA',new Date('2026-11-13T15:00:00Z'),new Date(),new Date('2026-11-13T14:00:00Z'))).toBe(true));});

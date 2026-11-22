@@ -1,0 +1,16 @@
+# F08 — Matriz técnica final para aceptación humana
+
+**Fecha:** 2026-11-19. **Decisión humana final:** pendiente. Las 32 tareas técnicas están verificadas; esto no equivale a la aceptación de los ocho criterios de éxito. Se ejecutaron PostgreSQL RLS y Playwright en Linux compatible con datos TEST aislados; los límites de cobertura se indican abajo. Detalle de comandos y resultados: [evidence.md](evidence.md).
+
+| Alcance | Requisitos | Criterios | Evidencia disponible | Pendiente para aceptación |
+| --- | --- | --- | --- | --- |
+| Inicio, rutas y búsqueda pública | FR-001/002/006/007 | SC-001/002/006 | Home y AppShell; Playwright Linux con API F03 TEST real: tres ofertas ficticias, comparación y estado vacío; rutas públicas en 360/640/768/1280 px. | Recorridos completos de todos los estados H1–H6 con backend TEST y revisión humana. |
+| Sistema visual y accesibilidad | FR-003/004/005/017/018 | SC-004/005 | Tokens/componentes; 8/8 Playwright Linux, teclado y zoom nativo 200 % en siete rutas; axe sin violaciones críticas/serias; cuatro capturas responsive revisadas. | Lector de pantalla, revisión visual de todos los estados protegidos y aceptación humana. |
+| Geolocalización TEST | FR-008/015/016 | SC-002/003/006 | Consentimiento puntual, ciudad/manual y controles GEO por capacidad en componentes; RLS PostgreSQL Alfa/Beta TEST 9/9 tras renovar sesiones ficticias; Playwright Linux con lista pública real y cero teselas externas. | E2E de propuesta/revisión desde frontend. |
+| Identidad y farmacia | FR-009/015/016 | SC-002/003 | Estado de sesión indisponible diferenciado; Playwright Linux F02 TEST: sesión, perfil, Alfa, Beta 404, cierre; RLS F07 Alfa/Beta. | Revocación y denegaciones 401/403 específicas F01, selección múltiple y RLS de todos los flujos protegidos. |
+| Inventario e importaciones | FR-010/015/016 | SC-002/003/006 | Capacidad F01 y CSRF; HTTP F02 TEST; Playwright Linux F02 3/3 para revisión, importación, conflicto y Beta denegada. | Revisión final transversal de permisos/privacidad F08. |
+| Reservas y estados F05 permitidos | FR-011/012/013 | SC-002/003/006 | F04 E2E Linux con API real TEST 1/1: creación, confirmación, vencimiento, entrega y 401/403/409; RLS/concurrencia real 16/16; sin bandeja F05. | Revisión final transversal y aceptación humana. |
+| Asistente informativo | FR-014 | SC-002/006 | F06.1 Playwright Linux 4/4 con harness determinista: seis turnos, expiración, oferta sintética, rechazo clínico, error recuperable y teclado móvil; 17/17 componentes afectados. Gemini no activado. | Revisión transversal final de accesibilidad y alcance. |
+| Seguridad y regresión | FR-019/020 junto con FR-015/016 | SC-003/007/008 | Suite base 437 pruebas + 5 integraciones F06.1, omisiones propias declaradas; F07 API/RLS, F02 E2E, F03 Redis, F04 RLS y E2E real TEST; 72/72 componentes frontend finales, build, check, 42 operaciones OpenAPI F00–F07 y `npm audit` 0. | Revisión humana final de privacidad, alcance y criterios todavía parciales. |
+
+**Estado:** 32 tareas técnicas completas según [tasks.md](tasks.md); aceptación humana pendiente. SC-001–008 tienen evidencia parcial o técnica, sin aprobación integral automática. F07 conserva el límite TEST/DEMO; GLO-01/BOOT-01 no se amplían; Gemini real y contenido farmacológico no validado siguen desactivados.

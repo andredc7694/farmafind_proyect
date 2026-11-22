@@ -1,0 +1,127 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F06.1 Conversation API (plan aprobado)
+  version: 0.1.0
+  description: >-
+    Contrato documental aprobado con el plan el 2026-11-17. Mantiene intacto el contrato
+    F06 POST /api/v1/asistente/consultar. No activa proveedores externos ni contenido clínico.
+paths:
+  /api/v1/asistente/conversaciones:
+    post:
+      summary: Consulta conversacional informativa pública
+      description: >-
+        Sin cookie ni autenticación implícita. El identificador opaco es temporal y no
+        concede acceso a datos privados; se limita al origen técnico. La política
+        clínica se aplica antes de proveedor y herramientas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationRequest'
+      responses:
+        '200':
+          description: Respuesta fundamentada, ayuda, abstención o rechazo clínico seguro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '422': { $ref: '#/components/responses/InvalidContext' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /api/v1/asistente/conversaciones/descartar:
+    post:
+      summary: Eliminar el contexto efímero de una conversación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [conversacionId]
+              properties:
+                conversacionId: { type: string, format: uuid }
+      responses:
+        '204': { description: Contexto eliminado o ya inexistente; no revela su existencia }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+components:
+  schemas:
+    ConversationRequest:
+      type: object
+      additionalProperties: false
+      required: [consulta]
+      properties:
+        consulta: { type: string, minLength: 1, maxLength: 500 }
+        conversacionId:
+          type: string
+          format: uuid
+          description: Ausente en primera consulta; nunca se incluye en una URL.
+    Citation:
+      type: object
+      additionalProperties: false
+      required: [tipo, titulo, referencia, revisadoEl]
+      properties:
+        tipo: { type: string, enum: [FICHA, OFERTA_PUBLICA, FARMACIA_PUBLICA] }
+        titulo: { type: string }
+        referencia: { type: string, description: URL/ID oficial o identificador público F03 }
+        revisadoEl: { type: string, format: date-time }
+        vigenteHasta: { type: string, format: date-time }
+    ConversationResponse:
+      type: object
+      additionalProperties: false
+      required: [estado, respuesta, aviso, fuentes, correlationId, proveedor]
+      properties:
+        estado:
+          type: string
+          enum: [INFORMATIVA, BUSQUEDA_PUBLICA, AYUDA, ABSTENCION, CLINICA_RECHAZADA, URGENCIA]
+        respuesta: { type: string }
+        aviso: { type: string }
+        fuentes:
+          type: array
+          maxItems: 20
+          items: { $ref: '#/components/schemas/Citation' }
+        conversacionId: { type: string, format: uuid, description: Presente solo si el contexto continúa activo }
+        expiraEn: { type: string, format: date-time, description: Presente si hay conversación activa }
+        correlationId: { type: string, format: uuid }
+        proveedor: { type: string, const: mock }
+    Error:
+      type: object
+      additionalProperties: false
+      required: [code, message, correlationId]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        correlationId: { type: string, format: uuid }
+  responses:
+    BadRequest:
+      description: JSON, campo o consulta inválidos
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    PayloadTooLarge:
+      description: Cuerpo mayor de 4 KiB
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    InvalidContext:
+      description: Identificador inválido, caducado o ajeno al origen; iniciar nueva conversación
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Cuota excedida; incluye Retry-After y no ejecuta proveedor ni herramientas
+      headers:
+        Retry-After:
+          schema: { type: string }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unavailable:
+      description: Fuente o generador indisponible; ofrecer búsqueda F03 convencional
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }

@@ -1,0 +1,211 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F02 Catálogo e Inventario (propuesta de contrato)
+  version: 0.1.0-draft
+  description: >-
+    Contrato previsto para el plan F02. No implementado. Usa sesión F01 vigente,
+    CSRF en mutaciones, permiso explícito por acción y RLS. pharmacyId es una
+    solicitud de contexto, nunca prueba de autorización. CAT-01 bloquea toda
+    mutación operativa del catálogo común.
+servers:
+  - url: /api/v1
+security:
+  - sessionCookie: []
+paths:
+  /catalogo/medicamentos:
+    get:
+      summary: Consultar referencias comunes para el trabajo interno F02
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string, maxLength: 120 }
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 999999, default: 1 }
+      responses:
+        '200':
+          description: Referencias permitidas, sin inventario privado
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Medicamento' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /farmacias/{pharmacyId}/inventario:
+    get:
+      summary: Listar inventario privado de farmacia autorizada
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+      responses:
+        '200':
+          description: Inventario de la farmacia verificada
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Inventario' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /farmacias/{pharmacyId}/inventario/{medicamentoId}:
+    put:
+      summary: Registrar revisión manual de un medicamento
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - name: medicamentoId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [precioReferencial, cantidadFisica, motivo]
+              properties:
+                precioReferencial: { type: number, minimum: 0 }
+                cantidadFisica: { type: integer, minimum: 0 }
+                motivo: { type: string, minLength: 1, maxLength: 240 }
+      responses:
+        '200':
+          description: Inventario actualizado y movimiento confirmado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Inventario' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /farmacias/{pharmacyId}/inventario/movimientos:
+    get:
+      summary: Consultar movimientos propios
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+      responses:
+        '200': { description: Historial limitado a la farmacia y permiso verificados }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /farmacias/{pharmacyId}/importaciones/vista-previa:
+    post:
+      summary: Validar archivo sin cambiar inventario
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [archivo, mapeo]
+              properties:
+                archivo: { type: string, format: binary }
+                mapeo:
+                  type: object
+                  description: Correspondencia explícita entre columnas del archivo y campos requeridos
+      responses:
+        '200':
+          description: Vista previa, errores por fila y conciliación; cero cambios de inventario
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VistaPrevia' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '413': { description: Archivo excede el límite configurado }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /farmacias/{pharmacyId}/importaciones:
+    get:
+      summary: Listar historial mínimo de importaciones de la farmacia autorizada
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+      responses:
+        '200': { description: Lista limitada de estados e incidencias resumidas }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /farmacias/{pharmacyId}/importaciones/{importacionId}:
+    get:
+      summary: Consultar estado e incidencias de importación propia
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/ImportacionId'
+      responses:
+        '200': { description: Estado e incidencias minimizadas de la farmacia autorizada }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /farmacias/{pharmacyId}/importaciones/{importacionId}/confirmar:
+    post:
+      summary: Confirmar todas las filas o ninguna
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/ImportacionId'
+        - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '200': { description: Archivo confirmado una vez, movimientos y totales }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: ff-session-local
+      description: Cookie local existente en F01; despliegue seguro usa __Host-ff-session y exige revisar el contrato al aprobar topología HTTPS
+  parameters:
+    PharmacyId:
+      name: pharmacyId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ImportacionId:
+      name: importacionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    CsrfToken:
+      name: x-csrf-token
+      in: header
+      required: true
+      schema: { type: string }
+  schemas:
+    Medicamento:
+      type: object
+      additionalProperties: false
+      required: [id, nombre, concentracion, presentacion, clasificacion]
+      properties:
+        id: { type: string, format: uuid }
+        nombre: { type: string }
+        concentracion: { type: string }
+        presentacion: { type: string }
+        clasificacion: { type: string }
+    Inventario:
+      type: object
+      additionalProperties: false
+      required: [medicamentoId, precioReferencial, cantidadFisica, cantidadComprometida, ultimaRevision]
+      properties:
+        medicamentoId: { type: string, format: uuid }
+        precioReferencial: { type: number, minimum: 0 }
+        cantidadFisica: { type: integer, minimum: 0 }
+        cantidadComprometida: { type: integer, minimum: 0 }
+        ultimaRevision: { type: string, format: date-time }
+    VistaPrevia:
+      type: object
+      additionalProperties: false
+      required: [importacionId, estado, filas, errores, caducaEn]
+      properties:
+        importacionId: { type: string, format: uuid }
+        estado: { type: string, enum: [VISTA_PREVIA, RECHAZADA] }
+        filas: { type: array, items: { type: object } }
+        errores: { type: array, items: { type: object } }
+        caducaEn: { type: string, format: date-time }
+  responses:
+    BadRequest: { description: Entrada inválida sin datos internos }
+    Unauthorized: { description: Sesión ausente o inválida }
+    NotFound: { description: Recurso ausente o no autorizado, sin distinguir farmacia ajena }
+    Conflict: { description: Vista previa vencida, estado incompatible o cambio concurrente; sin escritura parcial }

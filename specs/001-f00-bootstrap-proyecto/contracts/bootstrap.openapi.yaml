@@ -1,0 +1,68 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F00 - comprobaciones técnicas locales
+  version: 0.1.0
+  description: >-
+    Contrato documental propuesto, no API implementada. F00 no incluye negocio,
+    dependencias de datos, mensajes, eventos o servicios externos. Esta versión
+    del contrato no modifica la versión 1.1.0 de la Constitución.
+servers:
+  - url: http://127.0.0.1:3000
+    description: Núcleo API local; service debe ser farmafind-api.
+  - url: http://127.0.0.1:3001
+    description: Notificaciones local; service debe ser farmafind-notifications.
+paths:
+  /health:
+    get:
+      operationId: getBootstrapHealth
+      summary: Identificar el proceso técnico disponible, sin acceder a negocio.
+      description: >-
+        HTTP local de bootstrap, sin autenticación ni datos privados. La respuesta
+        no acredita disponibilidad de PostgreSQL, RLS, Redis, Outbox, AWS o IA.
+        El verificador debe exigir el identificador de servicio correspondiente
+        al puerto y proceso que lanzó; no basta aceptar cualquiera del enum.
+      security: []
+      responses:
+        '200':
+          description: Proceso técnico identificable y respondiendo.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BootstrapHealth'
+              examples:
+                api:
+                  value:
+                    service: farmafind-api
+                    status: ok
+                    mode: bootstrap
+                notifications:
+                  value:
+                    service: farmafind-notifications
+                    status: ok
+                    mode: bootstrap
+components:
+  schemas:
+    BootstrapHealth:
+      type: object
+      additionalProperties: false
+      required:
+        - service
+        - status
+        - mode
+      properties:
+        service:
+          type: string
+          enum:
+            - farmafind-api
+            - farmafind-notifications
+        status:
+          type: string
+          const: ok
+        mode:
+          type: string
+          const: bootstrap

@@ -1,0 +1,158 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F07 Geolocalización
+  version: 0.1.0-draft
+  description: Contrato F07 implementado y verificado en TEST/DEMO local; capacidades persistentes y aceptación humana pendientes.
+servers:
+  - url: /api/v1
+paths:
+  /geolocalizacion/farmacias:
+    get:
+      summary: Listar farmacias públicas por ciudad explícita
+      operationId: listPharmaciesByCity
+      description: No requiere sesión. Rechaza latitud, longitud y parámetros desconocidos; no calcula distancia ni infiere ciudad desde direcciones heredadas.
+      parameters:
+        - { name: ciudad, in: query, required: true, schema: { type: string, minLength: 2, maxLength: 120 } }
+        - { name: q, in: query, description: Producto público opcional, schema: { type: string, minLength: 2, maxLength: 120 } }
+        - { name: precioMinCentavos, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: precioMaxCentavos, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: pagina, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: tamano, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 20 } }
+      responses:
+        '200':
+          description: Farmacias y ofertas públicas; lista vacía válida
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NearbyResponse' }
+        '400': { description: Ciudad o filtros inválidos; también coordenadas o parámetros desconocidos en URL }
+        '429': { description: Límite de consultas alcanzado }
+        '503': { description: Fuente oficial temporalmente no disponible }
+  /geolocalizacion/consultas:
+    post:
+      summary: Consultar proximidad con coordenadas efímeras en el cuerpo
+      operationId: queryNearbyPharmacies
+      description: No requiere sesión. No registra cuerpo, URL con coordenadas ni ubicación personal; no delega a la ruta GET de F03 y no almacena la solicitud.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProximityQuery' }
+      responses:
+        '200':
+          description: Farmacias públicas próximas; lista vacía válida
+          headers:
+            Cache-Control:
+              description: Impide almacenamiento HTTP de respuestas basadas en ubicación personal
+              schema: { type: string, const: no-store }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NearbyResponse' }
+        '400': { description: Coordenadas, radio o filtros inválidos }
+        '429': { description: Límite de consultas alcanzado }
+        '503': { description: Fuente oficial temporalmente no disponible }
+  /farmacias/{farmaciaId}/ubicacion/propuestas:
+    post:
+      summary: Proponer cambio de ubicación en la propia farmacia
+      operationId: proposePharmacyLocation
+      description: Sesión, membresía activa, capacidad GEO_LOCATION_PROPOSE y tenant verificados; no publica automáticamente.
+      parameters:
+        - { name: farmaciaId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LocationProposal' }
+      responses:
+        '201': { description: Propuesta pendiente creada }
+        '400': { description: Entrada inválida }
+        '401': { description: Sesión ausente o inválida }
+        '403': { description: Permiso o tenant incorrecto }
+        '409': { description: Propuesta concurrente o versión obsoleta }
+  /farmacias/{farmaciaId}/ubicacion/propuestas/{propuestaId}/revision:
+    post:
+      summary: Revisar una propuesta de la misma farmacia
+      operationId: reviewPharmacyLocation
+      description: Exige capacidad GEO_LOCATION_REVIEW, membresía activa y actor distinto del proponente; no admite privilegio global implícito.
+      parameters:
+        - { name: farmaciaId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: propuestaId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [decision, evidenciaConfirmada]
+              properties:
+                decision: { type: string, enum: [APROBAR, RECHAZAR] }
+                evidenciaConfirmada: { type: boolean, description: Debe ser true para APROBAR; RECHAZAR permite false }
+                motivo: { type: string, maxLength: 500 }
+      responses:
+        '200': { description: Revisión y auditoría confirmadas }
+        '400': { description: Entrada inválida }
+        '401': { description: Sesión ausente o inválida }
+        '403': { description: Permiso incorrecto, autoaprobación o tenant ajeno }
+        '404': { description: Propuesta no visible }
+        '409': { description: Propuesta ya decidida o versión obsoleta }
+components:
+  schemas:
+    ProximityQuery:
+      type: object
+      additionalProperties: false
+      required: [latitud, longitud]
+      properties:
+        latitud: { type: number, minimum: -90, maximum: 90 }
+        longitud: { type: number, minimum: -180, maximum: 180 }
+        radioKm: { type: number, minimum: 1, maximum: 50, default: 10 }
+        q: { type: string, minLength: 2, maxLength: 120 }
+        precioMinCentavos: { type: integer, minimum: 0 }
+        precioMaxCentavos: { type: integer, minimum: 0 }
+        pagina: { type: integer, minimum: 1, default: 1 }
+        tamano: { type: integer, minimum: 1, maximum: 50, default: 20 }
+    LocationProposal:
+      type: object
+      additionalProperties: false
+      required: [direccionPublicable, ciudad, latitud, longitud, fuente]
+      properties:
+        direccionPublicable: { type: string, minLength: 1, maxLength: 240 }
+        ciudad: { type: string, minLength: 2, maxLength: 120, description: Ciudad explícita normalizada; no se deriva de la dirección }
+        latitud: { type: number, minimum: -90, maximum: 90 }
+        longitud: { type: number, minimum: -180, maximum: 180 }
+        precisionMetros: { type: number, exclusiveMinimum: 0 }
+        fuente: { type: string, minLength: 2, maxLength: 120 }
+        evidenciaReferencia: { type: string, maxLength: 240, description: Referencia no sensible; no adjuntar datos personales }
+    NearbyResponse:
+      type: object
+      additionalProperties: false
+      required: [farmacias, pagina, aviso]
+      properties:
+        farmacias:
+          type: array
+          items: { $ref: '#/components/schemas/NearbyPharmacy' }
+        pagina: { type: integer, minimum: 1 }
+        aviso: { type: string, const: Precio y disponibilidad referenciales; confirma existencias con la farmacia. }
+    NearbyPharmacy:
+      type: object
+      additionalProperties: false
+      required: [farmaciaId, nombre, direccion, ubicacionVerificada]
+      properties:
+        farmaciaId: { type: string, format: uuid }
+        nombre: { type: string }
+        direccion: { type: string }
+        ubicacionVerificada: { type: boolean }
+        latitud: { type: number, minimum: -90, maximum: 90 }
+        longitud: { type: number, minimum: -180, maximum: 180 }
+        distanciaLinealKm: { type: number, minimum: 0 }
+        actualizadoEn: { type: string, format: date-time }
+        ofertas:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [productoId, precioCentavos, disponibilidadReferencial, revisadoEn]
+            properties:
+              productoId: { type: string, format: uuid }
+              precioCentavos: { type: integer, minimum: 0 }
+              disponibilidadReferencial: { type: boolean }
+              revisadoEn: { type: string, format: date-time }

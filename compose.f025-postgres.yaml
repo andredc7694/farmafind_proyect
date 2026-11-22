@@ -1,0 +1,32 @@
+name: farmafind-f025-postgres
+
+services:
+  postgres:
+    image: postgres:18.6-bookworm
+    restart: "no"
+    command: ["postgres", "-c", "cluster_name=farmafind-f025-test"]
+    environment:
+      POSTGRES_DB: farmafind_f025_cluster
+      POSTGRES_USER: f01_migrator
+      POSTGRES_PASSWORD_FILE: /run/secrets/f025_postgres_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    secrets:
+      - f025_postgres_password
+    ports:
+      - "127.0.0.1:55431:5432"
+    volumes:
+      - f025_pgdata:/var/lib/postgresql
+    shm_size: 128mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U f01_migrator -d farmafind_f025_cluster"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+
+secrets:
+  f025_postgres_password:
+    file: ./.cache/f025-docker/postgres-password.txt
+
+volumes:
+  f025_pgdata:

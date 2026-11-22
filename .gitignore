@@ -1,0 +1,30 @@
+# Dependencies and generated build outputs at any workspace level.
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+*.log
+
+# Private configuration; only fictitious examples may be versioned.
+.env*
+!.env.example
+.aws/
+
+# Private validation reports and local caches.
+/artifacts/f00/
+/docs/referencias/
+playwright-report/
+test-results/
+blob-report/
+.cache/
+.npm/
+
+# Local editor and operating-system artifacts.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.swp

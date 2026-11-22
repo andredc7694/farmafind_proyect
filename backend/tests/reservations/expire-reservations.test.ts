@@ -1,0 +1,2 @@
+import {describe,expect,it,vi} from 'vitest';import {ExpireReservations} from '../../src/modules/reservas/application/expire-reservations.js';
+describe('expiracion F04',()=>{it('delega lote y reloj exactos',async()=>{const repository={expireBatch:vi.fn().mockResolvedValue(3)};const result=await new ExpireReservations(repository as never,{now:()=>new Date('2026-11-13T10:00:00Z')},100).execute();expect(result).toBe(3);expect(repository.expireBatch).toHaveBeenCalledWith(new Date('2026-11-13T10:00:00Z'),100);});});

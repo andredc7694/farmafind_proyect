@@ -1,0 +1,7 @@
+{
+  "fixture": "synthetic-not-application-code",
+  "domainExternal": "import express from 'express'; import { db } from '../infrastructure/db.js';",
+  "privateImport": "import { x } from '../../usuarios/domain/private.js';",
+  "notificationsCoupling": "import { createApp } from '../../backend/src/app.js'; import redis from 'redis';",
+  "businessRoute": "app.post('/reservas', handler);"
+}

@@ -1,0 +1,5 @@
+import{spawnSync}from'node:child_process';import{fileURLToPath}from'node:url';
+const root=fileURLToPath(new URL('../../',import.meta.url)),mode=process.argv[2]??'all';
+const groups={unit:['backend/tests/assistant/assistant-contract.test.ts','backend/tests/assistant/clinical-policy.test.ts','backend/tests/assistant/mock-provider.test.ts','backend/tests/assistant/assistant-core.test.ts','backend/tests/assistant/public-tools.integration.test.ts'],api:['backend/tests/assistant/assistant.http.test.ts'],security:['backend/tests/assistant/clinical-policy.test.ts','backend/tests/assistant/privacy.test.ts','backend/tests/assistant/assistant-core.test.ts'],ui:['frontend/tests/assistant/assistant-client.test.jsx','frontend/tests/assistant/assistant-view.test.jsx']};
+const files=mode==='all'?[...new Set(Object.values(groups).flat())]:groups[mode];if(!files)throw new Error('F06 modo inválido');
+const result=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',...files],{cwd:root,stdio:'inherit'});process.exitCode=result.status??1;
