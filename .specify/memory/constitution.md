@@ -1,8 +1,8 @@
 ﻿# FarmaFind Constitution
 
 Estado: Constitución oficial ratificada el 2026-11-10 y enmendada por aprobación
-humana expresa el 2026-11-19.
-Redacción inicial: 2026-11-10; última enmienda: 2026-11-19 (America/Lima).
+humana expresa el 2026-11-22.
+Redacción inicial: 2026-11-10; última enmienda: 2026-11-22 (America/Lima).
 DEBE y NO DEBE expresan obligaciones verificables.
 
 ## Core Principles
@@ -245,10 +245,17 @@ denominación autoriza por sí sola implementar el incremento correspondiente.
 
 ### XVI. Protección de main
 
-Está prohibido realizar cambios directos en main, incluidos commits, push directo y
-force-push. Los cambios DEBEN prepararse en otra rama y pasar por pull request, revisión
-humana y controles aplicables antes de integrarse. Al configurar GitHub se DEBE proteger
-main para impedir que se omitan estos controles.
+Para incrementos con especificación y plan aprobados, el equipo PUEDE trabajar y registrar
+commits descriptivos directamente en `main`, siempre que respete el alcance autorizado,
+ejecute los controles aplicables, revise secretos y datos privados y confirme que las
+protecciones del repositorio permiten el push normal. Ningún commit equivale a aceptación
+funcional. Está prohibido el force-push, eludir protecciones o integrar cambios con controles
+obligatorios fallidos. Si GitHub exige rama, pull request, revisión o controles adicionales,
+estos DEBEN cumplirse. Las enmiendas de la Constitution, los cambios de arquitectura o
+seguridad que requieran aprobación humana y cualquier otro cambio sujeto a una puerta
+específica DEBEN obtener esa aprobación antes de integrarse. Una rama temporal PUEDE
+utilizarse cuando exista una necesidad técnica concreta, sin crearla automáticamente para
+cada funcionalidad.
 
 ### XVII. Una funcionalidad por vez
 
@@ -412,17 +419,20 @@ Inconsistencias y decisiones que DEBEN permanecer visibles hasta revisión human
 
 ## Flujo de desarrollo y evidencias
 
-1. Seleccionar una funcionalidad y su rama. Identificar HU, RF, AC, RC, DA, ADR y criterios
-   de rúbrica aplicables, con fuentes y conflictos pendientes.
+1. Seleccionar una funcionalidad y la rama de trabajo autorizada (`main` o una rama
+   temporal justificada). Identificar HU, RF, AC, RC, DA, ADR y criterios de rúbrica
+   aplicables, con fuentes y conflictos pendientes.
 2. Elaborar y aclarar la especificación mediante Spec Kit. Registrar aprobación humana
    de su revisión antes de avanzar al diseño de implementación.
 3. Elaborar el plan, contratos, modelo de datos, controles tenant, pruebas y riesgos.
    Revisar cumplimiento constitucional y registrar aprobación humana del plan.
 4. Descomponer en tareas y comprobar consistencia documental. Generar código únicamente
    con ambas aprobaciones vigentes y dentro del alcance autorizado.
-5. Ejecutar verificaciones, reunir evidencias y presentar pull request. El cierre exige
-   revisión humana y resultados verificables; los pendientes DEBEN quedar expresos.
-   Los recursos AWS facturables requieren además la autorización del principio XII.
+5. Ejecutar verificaciones, reunir evidencias y someter el cierre funcional a revisión
+   humana. Presentar pull request cuando lo exijan las protecciones, la decisión del
+   responsable o el alcance del cambio. Los commits directos en `main` no cierran por sí
+   solos tareas de aceptación humana; los pendientes DEBEN quedar expresos. Los recursos
+   AWS facturables requieren además la autorización del principio XII.
 
 La siguiente matriz DEBE guiar la trazabilidad de los 16 criterios de RUBRICA.png,
 contrastados con los capítulos 18 y 35. La columna de evidencia prescribe entregables
@@ -515,9 +525,18 @@ aceptaciones históricas. El responsable aprobó expresamente la propuesta de en
 1.3.0 en esta conversación el 2026-11-19. DEC-01–03 conservan sus límites TEST/DEMO;
 esta enmienda no aprueba provisión privilegiada persistente, producción ni aceptación F02.5.
 
-Cada plan y pull request DEBE revisar principios aplicables, continuidad documental,
-aprobaciones y evidencias. Un incumplimiento DEBE corregirse antes de integrar; si exige
-cambiar una regla, DEBE tramitarse como enmienda humana y no como excepción tácita.
+La versión 2.0.0 redefine de forma incompatible la prohibición de trabajo directo en
+`main` de la sección XVI. El responsable ratificó expresamente esta enmienda en su
+mensaje «F02.1 — Especificación / Política de Git» del 2026-11-22, tras revisar la
+propuesta `docs/propuesta-enmienda-flujo-main.md`. Permite commits directos únicamente
+cuando las protecciones efectivas de GitHub los admitan y se cumplan aprobaciones SDD,
+controles y revisión de secretos; no autoriza eludir un ruleset que exija PR, ni aprueba
+una implementación por sí sola.
+
+Cada plan y cambio destinado a `main`, sea por pull request o por commit directo
+autorizado, DEBE revisar principios aplicables, continuidad documental, aprobaciones
+y evidencias. Un incumplimiento DEBE corregirse antes de integrar; si exige cambiar
+una regla, DEBE tramitarse como enmienda humana y no como excepción tácita.
 Las actualizaciones de otros artefactos DEBEN autorizarse por separado y conservar
 la trazabilidad de esta enmienda.
 
@@ -526,5 +545,8 @@ Enmienda 1.2.0 aprobada expresamente por el responsable el 2026-11-17, sin atrib
 adopción retroactiva a las versiones propuestas ni aceptación a F06.1–F10.
 Enmienda 1.3.0 aprobada expresamente por el responsable el 2026-11-19 en respuesta
 a la propuesta de secuencia F02.5; se conserva la precedencia general del v3.0.
+Enmienda 2.0.0 aprobada expresamente por el responsable el 2026-11-22 para el flujo
+Git condicionado por las protecciones reales de GitHub; no altera las aprobaciones
+obligatorias de especificación y plan ni las restricciones de seguridad.
 
-**Version**: 1.3.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-19
+**Version**: 2.0.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-22

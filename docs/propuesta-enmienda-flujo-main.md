@@ -1,6 +1,6 @@
 # Propuesta de enmienda: flujo de trabajo en `main`
 
-**Estado:** propuesta para aprobación humana; no modifica ni sustituye la Constitution 1.3.0 vigente.
+**Estado:** ratificada expresamente por el responsable el 2026-11-22 e incorporada como Constitution 2.0.0 en la rama de trabajo; su integración en `main` debe seguir el ruleset vigente que exige PR. Conserva este texto como propuesta histórica trazable.
 **Fecha:** 2026-11-22 (America/Lima).
 **Origen:** solicitud del responsable del proyecto «Integrar los avances existentes en main y adoptar main como rama de trabajo».
 **Versión candidata:** 2.0.0, porque sustituir la prohibición de commits directos por una autorización condicionada redefine de forma incompatible la sección XVI; la regla de versionado de la Constitution exige MAJOR para ello.
@@ -39,10 +39,10 @@ La fuente de esta propuesta es la decisión expresa del responsable en esta conv
 - Protecciones efectivas de GitHub, aunque exijan PR o revisiones.
 - Prohibición de force-push, despliegues AWS o recursos facturables sin autorización.
 
-El PR #2 se rige por la Constitution actual: necesita revisión humana antes del merge. Esta propuesta no autoriza fusionarlo ni empezar a trabajar directamente en `main` hasta su ratificación expresa y la actualización formal de la Constitution.
+Nota histórica: el PR #2 se preparó bajo Constitution 1.3.0 y necesitaba revisión humana antes del merge. Posteriormente se integró en `main` como `5d509f6`. La enmienda 2.0.0 fue ratificada después; no se aplica retroactivamente a esa integración.
 
 ## Autorización de integración y estado del PR #2
 
 El responsable autorizó expresamente, en su mensaje «Integración definitiva de avances en main y cambio controlado del flujo Git» del 2026-11-22, revisar y validar el PR #2 y realizar su merge **si** se cumplen las reglas y aprobaciones obligatorias. Esta autorización no es una aceptación funcional de F02.5 ni declara completadas T046, T057 o T063. El requisito F025-RF23 continúa aplazado.
 
-La consulta de GitHub del 2026-11-22 confirmó que el PR #2 seguía abierto, con base `main`, origen `feat/f025-incorporacion-farmacias`, 35 commits, 758 archivos y estado de merge sin conflictos. No había revisiones registradas ni checks de GitHub. El ruleset activo `Proteccion-main` exige pull request y no fija un número mínimo de aprobaciones, pero la sección XVI de la Constitution sí exige revisión humana. Por tanto, el PR queda pendiente de esa revisión específica; la autorización general de integración no la sustituye.
+La consulta de GitHub anterior a la integración del 2026-11-22 mostró el PR #2 abierto, con base `main`, origen `feat/f025-incorporacion-farmacias`, 35 commits y estado de merge sin conflictos. La sincronización posterior verificó `main` y `origin/main` en `5d509f6`. El ruleset `Proteccion-main` exige pull request; la enmienda 2.0.0 no lo desactiva.
