@@ -1,8 +1,8 @@
 ﻿# FarmaFind Constitution
 
 Estado: Constitución oficial ratificada el 2026-11-10 y enmendada por aprobación
-humana expresa el 2026-11-17.
-Redacción inicial: 2026-11-10; última enmienda: 2026-11-17 (America/Lima).
+humana expresa el 2026-11-19.
+Redacción inicial: 2026-11-10; última enmienda: 2026-11-19 (America/Lima).
 DEBE y NO DEBE expresan obligaciones verificables.
 
 ## Core Principles
@@ -227,9 +227,16 @@ están documentados en el maestro v2.0; las nuevas
 decisiones DEBEN registrarse en ADR complementarias sobre despliegue AWS económico con
 evolución, modelo multi-tenant/RLS y agente informativo con presupuesto controlado.
 Estas ADR y sus especificaciones requieren aprobación. Los capítulos 25–36 del v2.0
-conservan las decisiones compatibles sobre AWS y multitenencia; la Parte A del v3.0
-establece el roadmap futuro F06.1 → F07 geolocalización → F08 frontend profesional
-→ F09 AWS manual → F10 escalabilidad y evidencias. F00–F06 conservan sus IDs y
+conservan las decisiones compatibles sobre AWS y multitenencia. La secuencia futura
+aprobada es F06.1 → F07 geolocalización → F08 frontend profesional → F02.5
+incorporación y administración de farmacias → F09 AWS manual → F10 escalabilidad y
+evidencias. F02.5 es un incremento independiente, incorporado cronológicamente después
+de F08; su identificador funcional no renumera ni altera los incrementos históricos.
+El Documento Maestro v3.1, sección A4 bis, aporta el alcance propuesto de F02.5 y no
+sustituye por sí mismo la precedencia general del v3.0 ni modifica obligaciones
+históricas. La implementación de F02.5 requiere aprobación expresa de su especificación
+y plan, y sus operaciones privilegiadas se limitan a bases TEST/DEMO aisladas según
+DEC-01–03. F00–F06 conservan sus IDs y
 aceptaciones históricas. El antiguo F07 AWS DEBE identificarse en trazabilidad como
 F07-LEGACY-AWS y el antiguo F08 escalabilidad como F08-LEGACY-SCALE, sin renombrar
 retroactivamente ramas, commits, archivos, requisitos o ADR. Los prefijos numéricos
@@ -502,6 +509,11 @@ manual de AWS y la información farmacológica educativa de F06.1 sin retirar lo
 límites de seguridad. Fue aprobada por el responsable mediante declaración humana
 expresa en esta conversación el 2026-11-17. No aprueba especificaciones, planes,
 proveedores, contenidos farmacéuticos concretos, implementaciones ni despliegues.
+La versión 1.3.0 incorpora F02.5 a la secuencia futura entre F08 y F09, sin adoptar
+automáticamente el Documento Maestro v3.1 como referencia principal ni alterar las
+aceptaciones históricas. El responsable aprobó expresamente la propuesta de enmienda
+1.3.0 en esta conversación el 2026-11-19. DEC-01–03 conservan sus límites TEST/DEMO;
+esta enmienda no aprueba provisión privilegiada persistente, producción ni aceptación F02.5.
 
 Cada plan y pull request DEBE revisar principios aplicables, continuidad documental,
 aprobaciones y evidencias. Un incumplimiento DEBE corregirse antes de integrar; si exige
@@ -512,5 +524,7 @@ la trazabilidad de esta enmienda.
 Ratificación original registrada mediante aprobación humana expresa el 2026-11-10.
 Enmienda 1.2.0 aprobada expresamente por el responsable el 2026-11-17, sin atribuir
 adopción retroactiva a las versiones propuestas ni aceptación a F06.1–F10.
+Enmienda 1.3.0 aprobada expresamente por el responsable el 2026-11-19 en respuesta
+a la propuesta de secuencia F02.5; se conserva la precedencia general del v3.0.
 
-**Version**: 1.2.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-17
+**Version**: 1.3.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-19
