@@ -26,8 +26,14 @@ group('PostgreSQL RLS F04',()=>{
 
   beforeAll(async()=>{
     const url=new URL(baseText!);
-    if(url.hostname!=='127.0.0.1'||url.port!=='55431'||url.pathname!=='/farmafind_f01_test')throw new Error('F04 RLS solo base local');
-    base=await connect(baseText!);const suffix=hex(6);databaseName=`farmafind_f01_test_${suffix}`;roleName=`f04_test_${suffix}`;
+    if(url.hostname!=='127.0.0.1'||url.port!=='55431'||!/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(url.pathname))
+      throw new Error('F04 RLS solo base TEST efimera local');
+    base=await connect(baseText!);
+    const source=await base.query(`SELECT current_setting('cluster_name') AS cluster,
+      (SELECT description FROM pg_shdescription WHERE objoid=(SELECT oid FROM pg_database WHERE datname=current_database())) AS marker`);
+    if(source.rows[0]?.cluster!=='farmafind-f025-test'||source.rows[0]?.marker!=='FarmaFind F07 TEST efimera')
+      throw new Error('F04 RLS requiere el cluster TEST F02.5 identificado');
+    const suffix=hex(6);databaseName=`farmafind_f01_test_${suffix}`;roleName=`f04_test_${suffix}`;
     await base.query(`CREATE DATABASE "${databaseName}"`);url.pathname=`/${databaseName}`;db=await connect(url.toString());
     await migrateTestDatabase(url.toString(),connect);await migrateF02TestDatabase(url.toString(),connect);await migrateF04TestDatabase(url.toString(),connect);if((await migrateF04TestDatabase(url.toString(),connect)).length!==0)throw new Error('F04 migracion repetida no fue idempotente');
     pharmacyA=randomUUID();pharmacyB=randomUUID();medication=randomUUID();customer=randomUUID();ownerA=randomUUID();customerSecret=hex(32);ownerSecret=hex(32);
@@ -49,10 +55,10 @@ group('PostgreSQL RLS F04',()=>{
   afterAll(async()=>{if(pool)await pool.end();if(workerPool)await workerPool.end();if(db)await db.end();if(base){if(databaseName&&(await base.query('SELECT 1 FROM pg_database WHERE datname=$1',[databaseName])).rows.length)await base.query(`DROP DATABASE "${databaseName}"`);for(const role of [roleName,workerRoleName])if(role&&(await base.query('SELECT 1 FROM pg_roles WHERE rolname=$1',[role])).rows.length)await base.query(`DROP ROLE "${role}"`);await base.end();}},120000);
 
   it('crea, confirma y entrega atomicamente una sola vez',async()=>{
-    const uow=new PgReservationUnitOfWork(new PgIdentityUnitOfWork(pool));const clock={now:()=>new Date('2026-11-13T10:00:00Z')};
+    const uow=new PgReservationUnitOfWork(new PgIdentityUnitOfWork(pool));const started=new Date();const clock={now:()=>started};
     const create=new CreateReservation(uow,clock,20);const made=await create.execute(customerSecret,{pharmacyId:pharmacyA,medicationId:medication,quantity:2,idempotencyKey:'create-f04-a'});
     expect(made.reservation.state).toBe('PENDIENTE');expect((await create.execute(customerSecret,{pharmacyId:pharmacyA,medicationId:medication,quantity:2,idempotencyKey:'create-f04-a'})).replay).toBe(true);
-    const confirmed=await new ConfirmReservation(uow,clock).execute(ownerSecret,pharmacyA,made.reservation.id,'confirm-f04-a');expect(confirmed.pickupExpiresAt).toBe('2026-11-13T14:00:00.000Z');
+    const confirmed=await new ConfirmReservation(uow,clock).execute(ownerSecret,pharmacyA,made.reservation.id,'confirm-f04-a');expect(confirmed.pickupExpiresAt).toBe(new Date(started.getTime()+4*60*60*1000).toISOString());
     const delivery=new DeliverReservation(uow,clock);const delivered=await delivery.execute(ownerSecret,pharmacyA,made.reservation.id,'deliver-f04-a');expect(delivered.state).toBe('ENTREGADA');expect((await delivery.execute(ownerSecret,pharmacyA,made.reservation.id,'deliver-f04-a')).state).toBe('ENTREGADA');
     expect((await db.query('SELECT cantidad_fisica,cantidad_comprometida FROM f02.inventario WHERE farmacia_id=$1',[pharmacyA])).rows[0]).toMatchObject({cantidad_fisica:8,cantidad_comprometida:0});
     expect((await db.query('SELECT count(*)::int count FROM f04.outbox_evento WHERE reserva_id=$1',[made.reservation.id])).rows[0].count).toBe(3);
@@ -65,7 +71,55 @@ group('PostgreSQL RLS F04',()=>{
   it('cambiar 4 a 8 no altera vencimientos confirmados y aplica a confirmaciones futuras',async()=>{const uow=new PgReservationUnitOfWork(new PgIdentityUnitOfWork(pool));const clock={now:()=>new Date('2026-11-13T10:00:00Z')},create=new CreateReservation(uow,clock,20),confirm=new ConfirmReservation(uow,clock);const first=await create.execute(customerSecret,{pharmacyId:pharmacyA,medicationId:medication,quantity:1,idempotencyKey:'window-create-a'});const old=await confirm.execute(ownerSecret,pharmacyA,first.reservation.id,'window-confirm-a');expect(old.pickupExpiresAt).toBe('2026-11-13T14:00:00.000Z');await new ManagePickupWindow(uow).save(ownerSecret,pharmacyA,8);expect((await db.query('SELECT recogida_expira_en FROM f04.reserva WHERE id=$1',[first.reservation.id])).rows[0].recogida_expira_en.toISOString()).toBe('2026-11-13T14:00:00.000Z');const second=await create.execute(customerSecret,{pharmacyId:pharmacyA,medicationId:medication,quantity:1,idempotencyKey:'window-create-b'});const future=await confirm.execute(ownerSecret,pharmacyA,second.reservation.id,'window-confirm-b');expect(future.pickupExpiresAt).toBe('2026-11-13T18:00:00.000Z');expect(await new PgExpirationWorker(workerPool).run(new Date('2026-11-13T19:00:00Z'),100)).toBe(2);},30000);
   it('expira por lote, libera una vez y el worker no configura farmacias',async()=>{const uow=new PgReservationUnitOfWork(new PgIdentityUnitOfWork(pool));const made=await new CreateReservation(uow,{now:()=>new Date('2026-11-13T08:00:00Z')},20).execute(customerSecret,{pharmacyId:pharmacyA,medicationId:medication,quantity:1,idempotencyKey:'expire-f04-a'});await db.query("UPDATE f04.reserva SET respuesta_expira_en='2026-11-13T08:20:00Z' WHERE id=$1",[made.reservation.id]);const worker=new PgExpirationWorker(workerPool);expect(await worker.run(new Date('2026-11-13T09:00:00Z'),100)).toBe(1);expect(await worker.run(new Date('2026-11-13T09:00:00Z'),100)).toBe(0);expect((await db.query('SELECT estado FROM f04.reserva WHERE id=$1',[made.reservation.id])).rows[0].estado).toBe('EXPIRADA');const client=await workerPool.connect();try{await client.query('BEGIN');await client.query('SET LOCAL ROLE f04_expiration_worker');await expect(client.query("INSERT INTO f04.configuracion_farmacia(farmacia_id,plazo_recogida_horas,actualizado_por) VALUES($1,8,$2)",[pharmacyA,ownerA])).rejects.toMatchObject({code:'42501'});await client.query('ROLLBACK');}finally{client.release();}},30000);
   it('carrera cancelar/expirar termina una sola vez y libera una sola vez',async()=>{const uow=new PgReservationUnitOfWork(new PgIdentityUnitOfWork(pool)),clock={now:()=>new Date('2020-01-01T00:00:00Z')};const made=await new CreateReservation(uow,clock,20).execute(customerSecret,{pharmacyId:pharmacyA,medicationId:medication,quantity:1,idempotencyKey:'race-create-a'});const outcomes=await Promise.allSettled([new CancelReservation(uow,{now:()=>new Date('2020-01-01T01:00:00Z')}).execute(customerSecret,made.reservation.id,'race-cancel-a'),new PgExpirationWorker(workerPool).run(new Date('2020-01-01T01:00:00Z'),100)]);expect(outcomes.some(result=>result.status==='fulfilled')).toBe(true);expect(['CANCELADA','EXPIRADA']).toContain((await db.query('SELECT estado FROM f04.reserva WHERE id=$1',[made.reservation.id])).rows[0].estado);expect((await db.query("SELECT count(*)::int count FROM f04.transicion_reserva WHERE reserva_id=$1 AND estado_destino IN ('CANCELADA','EXPIRADA')",[made.reservation.id])).rows[0].count).toBe(1);},30000);
-  it('carrera entregar/expirar produce un solo estado terminal y un solo consumo',async()=>{const uow=new PgReservationUnitOfWork(new PgIdentityUnitOfWork(pool)),createdAt={now:()=>new Date('2020-02-01T00:00:00Z')};const made=await new CreateReservation(uow,createdAt,20).execute(customerSecret,{pharmacyId:pharmacyA,medicationId:medication,quantity:1,idempotencyKey:'deliver-race-create'});await new ConfirmReservation(uow,createdAt).execute(ownerSecret,pharmacyA,made.reservation.id,'deliver-race-confirm');const before=Number((await db.query('SELECT cantidad_fisica FROM f02.inventario WHERE farmacia_id=$1',[pharmacyA])).rows[0].cantidad_fisica);await Promise.allSettled([new DeliverReservation(uow,{now:()=>new Date('2020-02-01T01:00:00Z')}).execute(ownerSecret,pharmacyA,made.reservation.id,'deliver-race-action'),new PgExpirationWorker(workerPool).run(new Date('2020-02-02T00:00:00Z'),100)]);const state=(await db.query('SELECT estado FROM f04.reserva WHERE id=$1',[made.reservation.id])).rows[0].estado;expect(['ENTREGADA','EXPIRADA']).toContain(state);expect((await db.query("SELECT count(*)::int count FROM f04.transicion_reserva WHERE reserva_id=$1 AND estado_destino IN ('ENTREGADA','EXPIRADA')",[made.reservation.id])).rows[0].count).toBe(1);const after=Number((await db.query('SELECT cantidad_fisica FROM f02.inventario WHERE farmacia_id=$1',[pharmacyA])).rows[0].cantidad_fisica);expect([before,before-1]).toContain(after);},30000);
+  it('carrera entregar/expirar produce un solo estado terminal y un solo consumo',async()=>{const uow=new PgReservationUnitOfWork(new PgIdentityUnitOfWork(pool)),start=new Date(),createdAt={now:()=>start};const made=await new CreateReservation(uow,createdAt,20).execute(customerSecret,{pharmacyId:pharmacyA,medicationId:medication,quantity:1,idempotencyKey:'deliver-race-create'});await new ConfirmReservation(uow,createdAt).execute(ownerSecret,pharmacyA,made.reservation.id,'deliver-race-confirm');const before=Number((await db.query('SELECT cantidad_fisica FROM f02.inventario WHERE farmacia_id=$1',[pharmacyA])).rows[0].cantidad_fisica);await Promise.allSettled([new DeliverReservation(uow,{now:()=>new Date()}).execute(ownerSecret,pharmacyA,made.reservation.id,'deliver-race-action'),new PgExpirationWorker(workerPool).run(new Date(start.getTime()+24*60*60*1000),100)]);const state=(await db.query('SELECT estado FROM f04.reserva WHERE id=$1',[made.reservation.id])).rows[0].estado;expect(['ENTREGADA','EXPIRADA']).toContain(state);expect((await db.query("SELECT count(*)::int count FROM f04.transicion_reserva WHERE reserva_id=$1 AND estado_destino IN ('ENTREGADA','EXPIRADA')",[made.reservation.id])).rows[0].count).toBe(1);const after=Number((await db.query('SELECT cantidad_fisica FROM f02.inventario WHERE farmacia_id=$1',[pharmacyA])).rows[0].cantidad_fisica);expect([before,before-1]).toContain(after);},30000);
   it('AC05 concede exactamente 10 de 100 solicitudes concurrentes sobre 10 unidades',async()=>{const concurrentPool=new Pool({connectionString:runtimeConnection,max:20});try{const create=new CreateReservation(new PgReservationUnitOfWork(new PgIdentityUnitOfWork(concurrentPool)),{now:()=>new Date('2026-11-13T10:00:00Z')},20);const started=performance.now();const durations:number[]=[];const results=await Promise.allSettled(Array.from({length:100},async(_,index)=>{const at=performance.now();try{return await create.execute(customerSecret,{pharmacyId:pharmacyB,medicationId:medication,quantity:1,idempotencyKey:`load-f04-${index.toString().padStart(3,'0')}`});}finally{durations.push(performance.now()-at);}}));durations.sort((a,b)=>a-b);console.info(`AC05 F04: exitos=${results.filter(result=>result.status==='fulfilled').length}/100 p95=${durations[94].toFixed(1)}ms p99=${durations[98].toFixed(1)}ms total=${(performance.now()-started).toFixed(1)}ms`);expect(results.filter(result=>result.status==='fulfilled')).toHaveLength(10);expect((await db.query('SELECT cantidad_comprometida FROM f02.inventario WHERE farmacia_id=$1',[pharmacyB])).rows[0].cantidad_comprometida).toBe(10);expect((await db.query('SELECT count(*)::int count FROM f04.reserva WHERE farmacia_id=$1',[pharmacyB])).rows[0].count).toBe(10);expect((await db.query('SELECT count(*)::int count FROM f04.outbox_evento WHERE farmacia_id=$1',[pharmacyB])).rows[0].count).toBe(10);}finally{await concurrentPool.end();}},60000);
   it('usa FORCE RLS y roles sin BYPASSRLS',async()=>{const tables=await db.query("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid IN ('f04.reserva'::regclass,'f04.outbox_evento'::regclass)");expect(tables.rows.every(row=>row.relrowsecurity&&row.relforcerowsecurity)).toBe(true);expect((await base.query('SELECT rolsuper,rolbypassrls FROM pg_roles WHERE rolname=$1',[roleName])).rows[0]).toEqual({rolsuper:false,rolbypassrls:false});});
+
+  it('niega inventario privado y EXECUTE directo con actor falsificado',async()=>{
+    const client=await pool.connect();
+    try{
+      await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE f01_runtime');
+      await client.query("SELECT set_config('app.actor_user_id',$1,true)",[customer]);
+      await client.query("SELECT set_config('app.session_fingerprint',$1,true)",
+        [createHash('sha256').update(Buffer.from(customerSecret,'hex')).digest('hex')]);
+      await client.query("SELECT set_config('app.farmacia_id',$1,true)",[pharmacyB]);
+      expect((await client.query('SELECT count(*)::int count FROM f02.inventario')).rows[0].count).toBe(0);
+      expect((await client.query('UPDATE f02.inventario SET precio_centavos=precio_centavos+1 WHERE farmacia_id=$1',
+        [pharmacyB])).rowCount).toBe(0);
+      await client.query('SAVEPOINT direct_denial');
+      await expect(client.query('SELECT f04.reserve_stock($1,$2,$3,1,now()+interval \'20 minutes\',$4)',
+        [ownerA,pharmacyB,medication,randomUUID()])).rejects.toMatchObject({code:'42501'});
+      await client.query('ROLLBACK TO SAVEPOINT direct_denial');
+      await client.query('SAVEPOINT direct_denial');
+      await expect(client.query('SELECT f04.close_reservation_stock($1,$2,$3,$4,$5,$6,$7)',
+        [ownerA,randomUUID(),pharmacyB,'ENTREGADA',null,new Date('2020-01-01'),randomUUID()]))
+        .rejects.toMatchObject({code:'42501'});
+      await client.query('ROLLBACK TO SAVEPOINT direct_denial');
+      await client.query('ROLLBACK');
+    }finally{client.release();}
+  });
+
+  it('rechaza entrega vencida aunque EXECUTE directo falsee el reloj',async()=>{
+    const uow=new PgReservationUnitOfWork(new PgIdentityUnitOfWork(pool));
+    const old={now:()=>new Date('2020-01-01T10:00:00Z')};
+    const made=await new CreateReservation(uow,old,20).execute(customerSecret,
+      {pharmacyId:pharmacyA,medicationId:medication,quantity:1,idempotencyKey:'expired-direct-create'});
+    await new ConfirmReservation(uow,old).execute(ownerSecret,pharmacyA,made.reservation.id,'expired-direct-confirm');
+    const client=await pool.connect();
+    try{
+      await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE f01_runtime');
+      await client.query("SELECT set_config('app.actor_user_id',$1,true)",[ownerA]);
+      await client.query("SELECT set_config('app.session_fingerprint',$1,true)",
+        [createHash('sha256').update(Buffer.from(ownerSecret,'hex')).digest('hex')]);
+      await client.query("SELECT set_config('app.farmacia_id',$1,true)",[pharmacyA]);
+      await expect(client.query('SELECT f04.close_reservation_stock($1,$2,$3,$4,$5,$6,$7)',
+        [ownerA,made.reservation.id,pharmacyA,'ENTREGADA',null,old.now(),randomUUID()]))
+        .rejects.toMatchObject({code:'42501'});
+      await client.query('ROLLBACK');
+    }finally{client.release();}
+    expect((await db.query('SELECT estado FROM f04.reserva WHERE id=$1',[made.reservation.id])).rows[0].estado)
+      .toBe('CONFIRMADA');
+  });
 });
