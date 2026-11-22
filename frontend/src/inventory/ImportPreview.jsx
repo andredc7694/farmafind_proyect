@@ -11,6 +11,7 @@ export function ImportPreview({ onPreview, onConfirm, preview, busy, canConfirm 
   return <section aria-labelledby="import-title">
     <h2 id="import-title">Importar inventario</h2>
     <p>Revisa las filas antes de confirmar. Un error bloquea el archivo completo.</p>
+    <p><a href="/plantilla-inventario-demo.csv" download="plantilla-inventario-demo.csv">Descargar plantilla CSV de demostración</a></p>
     <form onSubmit={event => { event.preventDefault(); if (file) void onPreview(file, mapping); }}>
       <label htmlFor="inventory-file">Archivo CSV o XLSX</label>
       <input id="inventory-file" type="file" accept=".csv,.xlsx" required

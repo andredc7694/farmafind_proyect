@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { createSessionClient } from '../identity/session-client.js';
+import { createPharmacyApplicationClient } from '../pharmacies/application-client.js';
 import { accountNavigation, pharmacyNavigation, publicNavigation } from './routes.js';
 
 const client = createSessionClient();
+const applications = createPharmacyApplicationClient();
 
 export function AppShell({ children, path = window.location.pathname }) {
   const [session, setSession] = useState(null);
   const [memberships, setMemberships] = useState([]);
-  // F00 exercises the root with the API deliberately stopped. Other routes may
-  // resolve the current session without persisting identity in browser storage.
-  const sessionAware = path !== '/' && path !== '/bootstrap';
+  const [canReviewApplications, setCanReviewApplications] = useState(false);
+  // The public home still renders when the API is unavailable. A live session
+  // enables the reviewer link without storing identity or grants in the browser.
+  const sessionAware = path !== '/bootstrap';
 
   useEffect(() => {
     if (!sessionAware) return undefined;
@@ -19,10 +22,14 @@ export function AppShell({ children, path = window.location.pathname }) {
         const value = await client.session();
         if (!active) return;
         setSession(value);
-        if (!value) { setMemberships([]); return; }
-        try { const own = await client.memberships(); if (active) setMemberships(own); }
-        catch { if (active) setMemberships([]); }
-      } catch { if (active) { setSession(null); setMemberships([]); } }
+        if (!value) { setMemberships([]); setCanReviewApplications(false); return; }
+        const [own, review] = await Promise.allSettled([
+          client.memberships(), applications.canReview(),
+        ]);
+        if (!active) return;
+        setMemberships(own.status === 'fulfilled' ? own.value : []);
+        setCanReviewApplications(review.status === 'fulfilled');
+      } catch { if (active) { setSession(null); setMemberships([]); setCanReviewApplications(false); } }
     }
     void refresh();
     window.addEventListener('farmafind:session-changed', refresh);
@@ -30,7 +37,10 @@ export function AppShell({ children, path = window.location.pathname }) {
   }, [sessionAware]);
 
   const links = [...publicNavigation, ...(session ? accountNavigation : [{ href: '/identity', label: 'Mi cuenta' }]),
-    ...pharmacyNavigation(memberships)];
+    ...pharmacyNavigation(memberships),
+    ...(session && canReviewApplications ? [
+      { href: '/admin/farmacias/solicitudes', label: 'Revisar solicitudes' },
+    ] : [])];
 
   return <div className="site-frame">
     <a className="skip-link" href="#contenido">Saltar al contenido</a>

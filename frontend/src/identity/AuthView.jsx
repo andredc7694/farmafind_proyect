@@ -11,11 +11,12 @@ function submitCredentials(event, action) {
 
 /** Presentation only; session, CSRF and authorization remain server responsibilities. */
 export function AuthView({ status = 'anonymous', error = false, notice = null, profile = null,
-  onRegister, onLogin, onLogout }) {
+  returnTo = null, onRegister, onLogin, onLogout }) {
   if (status === 'authenticated') {
     return <section className="account-panel" aria-labelledby="identity-title">
       <h2 id="identity-title">Sesión activa</h2>
       {profile?.email && <p>Correo de tu perfil: <strong>{profile.email}</strong></p>}
+      {returnTo && <p><a href={returnTo}>Continuar con la solicitud de farmacia</a></p>}
       <button type="button" onClick={onLogout}>Cerrar sesión</button>
     </section>;
   }

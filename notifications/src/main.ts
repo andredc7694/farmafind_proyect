@@ -5,6 +5,7 @@ import { validateConfig,validateF05Config } from './config/index.js';
 import {Pool} from 'pg';
 import {PgEventRepository} from './events/repository.js';
 import {ProcessEvent} from './events/process-event.js';
+import {PgApplicationEventRepository} from './events/application-repository.js';
 
 const file = new URL('../.env.local', import.meta.url);
 let config;
@@ -17,7 +18,14 @@ try {
   throw error;
 }
 const pool=config.mode==='notifications'?new Pool({connectionString:config.databaseUrl,max:4}):null;
-const events=config.mode==='notifications'?{processor:new ProcessEvent(new PgEventRepository(pool!),{now:()=>new Date()}),secret:config.hmacSecret}:undefined;
+const applicationTest=config.mode==='notifications'&&
+  /^\/farmafind_f01_test_[a-f0-9]{12}$/.test(new URL(config.databaseUrl).pathname);
+const retentionDays=Number(process.env.F025_NOTIFICATION_RETENTION_DAYS??'30');
+if(applicationTest&&(!Number.isInteger(retentionDays)||retentionDays<1||retentionDays>365))
+  throw new Error('F02.5: retención TEST inválida');
+const events=config.mode==='notifications'?{processor:new ProcessEvent(new PgEventRepository(pool!),{now:()=>new Date()}),
+  secret:config.hmacSecret,
+  applicationRepository:applicationTest?new PgApplicationEventRepository(pool!,retentionDays):undefined}:undefined;
 const server = createApp(events).listen(config.port, config.host, () => {
   console.log(`farmafind-notifications bootstrap: http://${config.host}:${config.port}/health`);
 });

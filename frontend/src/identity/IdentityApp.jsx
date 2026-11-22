@@ -6,10 +6,14 @@ import { createSessionClient } from './session-client.js';
 import { InventoryView } from '../inventory/InventoryView.jsx';
 import { ReservationsView } from '../reservations/ReservationsView.jsx';
 import { LocationAdmin } from '../geolocation/LocationAdmin.jsx';
+import { PrivatePharmacyProfile } from '../pharmacies/PrivatePharmacyProfile.jsx';
 
 const identity = createSessionClient();
 
 export function IdentityApp({ inventoryMode = false, reservationsMode = false, locationMode = false }) {
+  const returnTo = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('return') === '/farmacias/solicitar'
+      ? '/farmacias/solicitar' : null;
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -150,6 +154,7 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
     {status === 'anonymous' && reservationsMode && <p>Inicia sesión para consultar tus reservas o solicitar una desde una oferta pública.</p>}
     {status === 'anonymous' && (inventoryMode || locationMode) && <p>Inicia sesión con una membresía autorizada para acceder a esta área.</p>}
     <AuthView status={status} error={error} notice={notice} profile={profile}
+      returnTo={returnTo}
       onRegister={register} onLogin={login} onLogout={logout} />
     {status === 'authenticated' && <PharmacySelector pharmacies={pharmacies}
       activePharmacyId={activePharmacyId} selectingPharmacyId={selectingPharmacyId}
@@ -163,8 +168,10 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
         .some(code => code === 'GEO_LOCATION_PROPOSE' || code === 'GEO_LOCATION_REVIEW') &&
       <p role="status">No tienes permiso para administrar la ubicación de esta farmacia.</p>}
     {status === 'authenticated' && activePharmacyId && !reservationsMode && !locationMode && (inventoryMode
-      ? <InventoryView pharmacyId={activePharmacyId}
-        capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />
+      ? <><PrivatePharmacyProfile pharmacyId={activePharmacyId}
+          capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />
+        <InventoryView pharmacyId={activePharmacyId}
+          capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} /></>
       : <MembershipAdmin pharmacyId={activePharmacyId} />)}
   </main>;
 }

@@ -57,6 +57,16 @@ import { createGeolocationRouter } from './modules/busqueda/presentation/geoloca
 import { PgLocationUnitOfWork } from './modules/farmacias/infrastructure/location-unit-of-work.js';
 import { ManagePharmacyLocation } from './modules/farmacias/application/manage-pharmacy-location.js';
 import { createLocationRouter } from './modules/farmacias/presentation/location-router.js';
+import { PgPharmacyUnitOfWork } from './modules/farmacias/infrastructure/pharmacy-unit-of-work.js';
+import { ManageApplications } from './modules/farmacias/application/manage-applications.js';
+import { createPharmacyApplicationRouter } from './modules/farmacias/presentation/application-router.js';
+import { ReviewApplications } from './modules/farmacias/application/review-applications.js';
+import { createPlatformApplicationsRouter } from './modules/farmacias/presentation/platform-applications-router.js';
+import { TestDocumentService } from './modules/farmacias/infrastructure/test-document-service.js';
+import { createTestDocumentRouter } from './modules/farmacias/presentation/test-document-router.js';
+import { PharmacyPublicationInvalidator } from './modules/farmacias/infrastructure/publication-invalidator.js';
+import { ManagePharmacyProfile } from './modules/farmacias/application/manage-pharmacy-profile.js';
+import { createPharmacyProfileRouter } from './modules/farmacias/presentation/pharmacy-profile-router.js';
 
 export interface LocalIdentityRuntimeConfig {
   authDatabaseUrl: string;
@@ -69,6 +79,8 @@ export interface LocalIdentityRuntimeConfig {
   reservations?: ReservationRuntimeConfig;
   /** F07 is limited to isolated local TEST databases until persistent migration is authorized. */
   geolocationTest?: true;
+  /** F02.5 routes are never mounted on persistent or production databases. */
+  pharmaciesTest?: true;
 }
 
 interface SqlClient {
@@ -118,12 +130,32 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     const geoRepository=config.geolocationTest ? new PgPublicOfferRepository(tenantPool) : null;
     const geoRouter=geoRepository ? createGeolocationRouter(new ListNearbyPharmacies(geoRepository)) : undefined;
     const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http),geoRouter);
+    let invalidator: RedisSearchInvalidator | undefined;
+    if(config.pharmaciesTest){
+      const authUrl=new URL(config.authDatabaseUrl),tenantUrl=new URL(config.tenantDatabaseUrl);
+      if(!/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(tenantUrl.pathname)||
+        authUrl.pathname!==tenantUrl.pathname||authUrl.hostname!=='127.0.0.1'||
+        tenantUrl.hostname!=='127.0.0.1'||authUrl.port!=='55431'||tenantUrl.port!=='55431')
+        throw new Error('F02.5: solo base TEST efímera local');
+      const result=await tenantPool.query(`SELECT current_setting('cluster_name') AS cluster,
+        (SELECT description FROM pg_shdescription WHERE objoid=(SELECT oid FROM pg_database
+          WHERE datname=current_database())) AS marker`);
+      if(result.rows[0]?.cluster!=='farmafind-f025-test'||
+        result.rows[0]?.marker!=='FarmaFind F07 TEST efimera')
+        throw new Error('F02.5: clúster TEST no autorizado');
+      const pharmacyWork=new PgPharmacyUnitOfWork(tenantTransactions);
+      app.use('/api/v1',createPharmacyApplicationRouter(identity,
+        new ManageApplications(pharmacyWork),http));
+      app.use('/api/v1',createPlatformApplicationsRouter(identity,
+        new ReviewApplications(pharmacyWork,new PharmacyPublicationInvalidator(()=>invalidator)),http));
+      app.use('/api/v1',createTestDocumentRouter(new TestDocumentService(pharmacyWork),http));
+      app.use('/api/v1',createPharmacyProfileRouter(new ManagePharmacyProfile(tenantTransactions),http));
+    }
     app.use('/api/v1', createAdminMembershipRouter(identity, management, http));
     const platformManagement = new ManagePlatformAuthorizations(new PgPlatformAuthorizationUnitOfWork(tenantTransactions));
     app.use('/api/v1', createPlatformAuthorizationRouter(identity, platformManagement, http));
     app.use('/api/v1', createCatalogRouter(new ListCatalog(new AuthorizedCatalogReader(tenantTransactions)), http));
     const inventoryTransactions = new PgInventoryTenantRunner(tenantTransactions);
-    let invalidator = undefined;
     if (config.search) {
       redisClient = createClient({ url: config.search.redisUrl, socket: { connectTimeout: config.search.cacheTimeoutMs,
         reconnectStrategy: false } });
