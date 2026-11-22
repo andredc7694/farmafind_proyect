@@ -1,7 +1,6 @@
 /** F06.1 local test runner. No external provider or database is started here. */
 import { spawnSync } from 'node:child_process';
 import { readdirSync } from 'node:fs';
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const mode = process.argv[2] ?? 'unit';
@@ -15,13 +14,19 @@ const files = ['backend/tests/assistant', 'frontend/tests/assistant']
 if (files.length === 0) throw new Error(`No hay pruebas F06.1 del grupo ${mode}; no se declara resultado satisfactorio.`);
 const env = { ...process.env };
 if (mode === 'integration') {
-  const postgresSecret = readFileSync('.cache/f01-docker/postgres-password.txt', 'utf8').trim();
-  const redisSecret = readFileSync('.cache/f03-docker/redis-password.txt', 'utf8').trim();
-  if (!/^[a-f0-9]{64}$/iu.test(postgresSecret) || !/^[a-f0-9]{64}$/iu.test(redisSecret)) {
-    throw new Error('Credenciales TEST locales inválidas');
+  if (!env.F061_TEST_BASE_URL || !env.SEARCH_REDIS_URL) {
+    throw new Error('F06.1: configurar F061_TEST_BASE_URL y SEARCH_REDIS_URL en entorno TEST aislado');
   }
-  env.F01_TEST_DATABASE_URL = `postgresql://f01_migrator:${postgresSecret}@127.0.0.1:55431/farmafind_f01_test`;
-  env.SEARCH_REDIS_URL = `redis://:${redisSecret}@127.0.0.1:56379`;
+  const base = new URL(env.F061_TEST_BASE_URL);
+  if (base.hostname !== '127.0.0.1' || base.port !== '55431' ||
+      base.pathname !== '/farmafind_f061_fixture_test' || base.username !== 'f01_migrator' ||
+      !base.password || base.search || base.hash) {
+    throw new Error('F06.1: destino PostgreSQL TEST inválido');
+  }
+  const redis = new URL(env.SEARCH_REDIS_URL);
+  if (redis.hostname !== '127.0.0.1' || redis.port !== '56379') {
+    throw new Error('F06.1: Redis TEST debe usar loopback y puerto aislado');
+  }
 }
 const result = spawnSync(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', ...files],
   { stdio: 'inherit', shell: false, env });

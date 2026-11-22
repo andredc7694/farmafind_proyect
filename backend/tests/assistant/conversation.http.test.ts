@@ -21,6 +21,14 @@ function app(withSource = true, limit = new InMemoryAssistantRateLimit()) {
 }
 
 describe('HTTP F06.1', () => {
+  it('limita solo conversaciones y deja pasar rutas privadas posteriores', async () => {
+    const {server}=app(true,new InMemoryAssistantRateLimit(1));
+    server.get('/api/v1/farmacias/:id/inventario',(_request,response)=>response.sendStatus(404));
+    await request(server).get('/api/v1/farmacias/ajena/inventario').expect(404);
+    await request(server).post('/api/v1/asistente/conversaciones').send({consulta:'Ayuda'}).expect(200);
+    await request(server).post('/api/v1/asistente/conversaciones').send({consulta:'Ayuda'}).expect(429);
+    await request(server).get('/api/v1/farmacias/ajena/inventario').expect(404);
+  });
   it('compone rutas F06 y F06.1 sin base ni Redis activos para ayuda y abstención', async () => {
     const pool = () => ({
       query: async () => ({ rows: [{ rolsuper: false, rolbypassrls: false, permitted: true, forbidden: false }] }),

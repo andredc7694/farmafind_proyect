@@ -18,7 +18,7 @@ export function createConversationRouter(service: ConversationService,
   const router = Router();
   const originSecret = randomBytes(32);
   const originKey = (request: Request) => createHmac('sha256', originSecret).update(request.ip || 'local').digest('hex');
-  router.use((request, response, next) => {
+  router.use('/asistente/conversaciones', (request, response, next) => {
     response.set('Cache-Control', 'no-store');
     const result = limit.allow(originKey(request));
     if (!result.allowed) return fail(response.set('Retry-After', String(result.retryAfter)), 429,

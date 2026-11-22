@@ -9,7 +9,7 @@ function failure(response: Response,status:number,code:string,message:string,cor
 }
 export function createAssistantRouter(service: QueryAssistant, limit: AssistantRateLimit = new InMemoryAssistantRateLimit()): Router {
   const router=Router();
-  router.use((request,response,next)=>{
+  router.use('/asistente/consultar',(request,response,next)=>{
     response.set('Cache-Control','no-store');
     const result=limit.allow(request.ip || 'local');
     if (!result.allowed) return failure(response.set('Retry-After',String(result.retryAfter)),429,'RATE_LIMITED','Demasiadas consultas; intenta nuevamente.',randomUUID());
