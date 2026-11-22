@@ -1,5 +1,7 @@
 # F02.5 — Matriz para revisión de aceptación TEST/DEMO
 
+> **Cambio de prioridad, 2026-11-22:** el responsable solicitó iniciar F02.1 (MEJ-001 y la parte de importación de MEJ-002). F02.5 queda suspendida como funcionalidad activa, sin cierre ni aceptación. T046 y T057 requieren demostración humana, T063 requiere aceptación expresa y F025-RF23 sigue bloqueado por decisión funcional. Se conservan íntegros los resultados técnicos y datos TEST/DEMO existentes; la suspensión no equivale a aprobarlos ni a eliminar pendientes.
+
 **Estado:** propuesta de aceptación **NO APROBADA**, actualizada 2026-11-22. Este documento no cierra T063 ni F02.5. Compara [spec.md](spec.md), [tasks.md](tasks.md), [task-audit.md](task-audit.md), [evidence.md](evidence.md) y los 16 criterios docentes de [traceability.md](traceability.md). «Parcial» indica evidencia técnica existente que aún no satisface todo el criterio.
 
 La [adenda técnica detallada](technical-unblock-proposal.md) delimita T031, T036–T037 y la recuperación segura de las dos suites F06.1. Su especificación y plan quedaron aprobados expresamente el 2026-11-21; contratos, permisos, migraciones y fixtures se implementaron y verificaron únicamente en PostgreSQL TEST efímero; la aceptación final sigue pendiente. Esta aprobación SDD no es aceptación F02.5.
