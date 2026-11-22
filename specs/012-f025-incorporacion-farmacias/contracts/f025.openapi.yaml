@@ -1,0 +1,425 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F02.5 — Solicitudes de farmacias (contrato propuesto)
+  version: 0.1.0-draft
+  description: >-
+    Diseño TEST/DEMO aprobado el 2026-11-19, pendiente de implementación. La sesión
+    F01 se valida en backend; CSRF protege mutaciones. Los permisos F02.5 son
+    expresos y no conceden inventario privado. Ninguna operación se habilita
+    en bases persistentes o producción por este contrato.
+servers:
+  - url: /api/v1
+tags:
+  - name: PharmacyApplications
+  - name: PlatformPharmacyReview
+  - name: PrivatePharmacyProfile
+security:
+  - sessionCookie: []
+paths:
+  /farmacias/{farmaciaId}/perfil:
+    parameters:
+      - name: farmaciaId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [PrivatePharmacyProfile]
+      summary: Perfil privado propio con membresía activa y pharmacy.profile.read
+      responses:
+        '200':
+          description: Perfil privado de farmacia autorizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PharmacyPrivateProfile' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+    patch:
+      tags: [PrivatePharmacyProfile]
+      summary: Editar solo contacto con versión y pharmacy.profile.read/write
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [contacto, version]
+              properties:
+                contacto: { type: string, minLength: 1, maxLength: 160 }
+                version: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Contacto actualizado y auditado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PharmacyPrivateProfile' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /pharmacy-applications:
+    post:
+      tags: [PharmacyApplications]
+      summary: Crear borrador propio; no activa farmacia
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApplicationInput' }
+      responses:
+        '201':
+          description: Borrador propio creado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationOwn' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /pharmacy-applications/me:
+    get:
+      tags: [PharmacyApplications]
+      summary: Listar solicitudes propias, nunca las de otra persona
+      responses:
+        '200':
+          description: Lista propia minimizada
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ApplicationOwn' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /pharmacy-applications/{applicationId}:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    get:
+      tags: [PharmacyApplications]
+      summary: Consultar solo solicitud propia
+      responses:
+        '200':
+          description: Solicitud propia
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationOwn' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+    patch:
+      tags: [PharmacyApplications]
+      summary: Editar BORRADOR u OBSERVADA propia con versión
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApplicationEdit' }
+      responses:
+        '200':
+          description: Versión incrementada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationOwn' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /pharmacy-applications/{applicationId}/submit:
+    post:
+      tags: [PharmacyApplications]
+      summary: Enviar BORRADOR o reenviar OBSERVADA propia
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+        - $ref: '#/components/parameters/Csrf'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VersionCommand' }
+      responses:
+        '200':
+          description: Solicitud PENDIENTE
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationOwn' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /pharmacy-applications/{applicationId}/cancel:
+    post:
+      tags: [PharmacyApplications]
+      summary: Cancelar solicitud propia no terminal
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VersionCommand' }
+      responses:
+        '200': { description: Solicitud CANCELADA }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /pharmacy-applications/{applicationId}/documents:
+    post:
+      tags: [PharmacyApplications]
+      summary: Adjuntar archivo sintético opcional solo en TEST
+      description: >-
+        Requiere propiedad de solicitud editable; el archivo jamás se publica.
+        Se propone un máximo de 5 MiB y tipo real PDF, JPEG o PNG, sujeto a
+        aprobación del plan y pruebas de contenido. No acepta documentos reales.
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [archivo]
+              properties:
+                archivo: { type: string, format: binary }
+      responses:
+        '201': { description: Metadatos privados del adjunto TEST }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /platform/pharmacy-applications:
+    get:
+      tags: [PlatformPharmacyReview]
+      summary: Listar solicitudes minimizadas con F025_APPLICATION_READ
+      parameters:
+        - name: estado
+          in: query
+          schema: { $ref: '#/components/schemas/ApplicationState' }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: Vista minimizada, sin documentos ni inventario
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ApplicationReview' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /platform/pharmacy-applications/{applicationId}:
+    get:
+      tags: [PlatformPharmacyReview]
+      summary: Ver datos de revisión con F025_APPLICATION_REVIEW
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '200':
+          description: Datos privados necesarios para revisión, sin bytes de adjuntos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApplicationReviewDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+  /platform/pharmacy-applications/{applicationId}/decisions:
+    post:
+      tags: [PlatformPharmacyReview]
+      summary: Iniciar revisión, observar, rechazar o aprobar con permisos específicos
+      description: >-
+        APROBAR requiere F025_APPLICATION_DECIDE y F025_PHARMACY_ACTIVATE;
+        OBSERVAR requiere F025_APPLICATION_REVIEW; RECHAZAR requiere
+        F025_APPLICATION_DECIDE. El actor no puede decidir su solicitud.
+        La aprobación genera una sola farmacia y una membresía DUENO en TEST.
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+        - $ref: '#/components/parameters/Csrf'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DecisionInput' }
+      responses:
+        '200':
+          description: Decisión aplicada o repetición idempotente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DecisionResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /platform/pharmacy-applications/{applicationId}/documents/{documentId}:
+    get:
+      tags: [PlatformPharmacyReview]
+      summary: Descargar adjunto sintético TEST con F025_DOCUMENT_READ
+      description: Entrega privada como attachment, sin URL pública ni caché.
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+        - name: documentId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Archivo sintético autorizado
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: ff-session-local
+      description: Cookie opaca HttpOnly del entorno TEST local; el nombre seguro de despliegue sería __Host-ff-session y requiere autorización separada.
+  parameters:
+    ApplicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Csrf:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      schema: { type: string, minLength: 1 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 16, maxLength: 200 }
+  schemas:
+    PharmacyPrivateProfile:
+      type: object
+      additionalProperties: false
+      required: [farmaciaId, contacto, direccion, departamento, provincia, distrito, version, updatedAt]
+      properties:
+        farmaciaId: { type: string, format: uuid }
+        contacto: { type: string }
+        direccion: { type: string }
+        departamento: { type: string }
+        provincia: { type: string }
+        distrito: { type: string }
+        version: { type: integer, minimum: 1 }
+        updatedAt: { type: string, format: date-time }
+    ApplicationState:
+      type: string
+      enum: [BORRADOR, PENDIENTE, EN_REVISION, OBSERVADA, APROBADA, RECHAZADA, CANCELADA]
+    ApplicationInput:
+      type: object
+      additionalProperties: false
+      required: [nombreComercial, contacto, direccion, departamento, provincia, distrito, representante]
+      properties:
+        nombreComercial: { type: string, minLength: 1, maxLength: 160 }
+        contacto: { type: string, minLength: 1, maxLength: 160 }
+        direccion: { type: string, minLength: 1, maxLength: 240 }
+        departamento: { type: string, minLength: 1, maxLength: 100 }
+        provincia: { type: string, minLength: 1, maxLength: 100 }
+        distrito: { type: string, minLength: 1, maxLength: 100 }
+        representante: { type: string, minLength: 1, maxLength: 160 }
+        ruc: { type: string, minLength: 1, maxLength: 20, description: Opcional y ficticio en TEST; sin validación legal }
+    ApplicationEdit:
+      type: object
+      additionalProperties: false
+      required: [version, nombreComercial, contacto, direccion, departamento, provincia, distrito, representante]
+      properties:
+        version: { type: integer, minimum: 1 }
+        nombreComercial: { type: string, minLength: 1, maxLength: 160 }
+        contacto: { type: string, minLength: 1, maxLength: 160 }
+        direccion: { type: string, minLength: 1, maxLength: 240 }
+        departamento: { type: string, minLength: 1, maxLength: 100 }
+        provincia: { type: string, minLength: 1, maxLength: 100 }
+        distrito: { type: string, minLength: 1, maxLength: 100 }
+        representante: { type: string, minLength: 1, maxLength: 160 }
+        ruc: { type: string, minLength: 1, maxLength: 20 }
+    VersionCommand:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: integer, minimum: 1 }
+    ApplicationOwn:
+      type: object
+      additionalProperties: false
+      required: [id, estado, version, nombreComercial, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        estado: { $ref: '#/components/schemas/ApplicationState' }
+        version: { type: integer, minimum: 1 }
+        nombreComercial: { type: string }
+        observacion: { type: string, description: Motivo visible para el titular }
+        farmaciaId: { type: string, format: uuid, description: Solo tras aprobación }
+        createdAt: { type: string, format: date-time }
+    ApplicationReview:
+      type: object
+      additionalProperties: false
+      required: [id, estado, version, nombreComercial, solicitanteId]
+      properties:
+        id: { type: string, format: uuid }
+        estado: { $ref: '#/components/schemas/ApplicationState' }
+        version: { type: integer, minimum: 1 }
+        nombreComercial: { type: string }
+        solicitanteId: { type: string, format: uuid }
+    ApplicationReviewDetail:
+      type: object
+      additionalProperties: false
+      required: [id, estado, version, nombreComercial, solicitanteId, contacto, direccion, departamento, provincia, distrito, representante]
+      properties:
+        id: { type: string, format: uuid }
+        estado: { $ref: '#/components/schemas/ApplicationState' }
+        version: { type: integer, minimum: 1 }
+        nombreComercial: { type: string }
+        solicitanteId: { type: string, format: uuid }
+        contacto: { type: string }
+        direccion: { type: string }
+        departamento: { type: string }
+        provincia: { type: string }
+        distrito: { type: string }
+        representante: { type: string }
+        ruc: { type: string, description: Ficticio y opcional en TEST }
+        documentos:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentMeta' }
+    DocumentMeta:
+      type: object
+      additionalProperties: false
+      required: [id, tipo, tamano]
+      properties:
+        id: { type: string, format: uuid }
+        tipo: { type: string }
+        tamano: { type: integer, minimum: 1, maximum: 5242880 }
+    DecisionInput:
+      type: object
+      additionalProperties: false
+      required: [accion, version, motivo]
+      properties:
+        accion: { type: string, enum: [INICIAR_REVISION, OBSERVAR, RECHAZAR, APROBAR] }
+        version: { type: integer, minimum: 1 }
+        motivo: { type: string, minLength: 8, maxLength: 500 }
+    DecisionResult:
+      type: object
+      additionalProperties: false
+      required: [solicitudId, estado, version]
+      properties:
+        solicitudId: { type: string, format: uuid }
+        estado: { $ref: '#/components/schemas/ApplicationState' }
+        version: { type: integer, minimum: 1 }
+        farmaciaId: { type: string, format: uuid, description: Solo en APROBADA }
+  responses:
+    BadRequest: { description: Entrada no válida }
+    Unauthorized: { description: Sesión no válida }
+    Forbidden: { description: Permiso insuficiente, sin detalles privados }
+    NotVisible: { description: Recurso no visible, sin enumeración }
+    Conflict: { description: Estado, versión o duplicado en conflicto }

@@ -21,6 +21,6 @@ describe('navegación pública F08', () => {
     expect(pharmacyNavigation([])).toEqual([]);
     expect(pharmacyNavigation([{ pharmacyId: 'alfa', delegationCodes: [] }])).toEqual([]);
     expect(pharmacyNavigation([{ pharmacyId: 'alfa', delegationCodes: ['inventory.read', 'GEO_LOCATION_PROPOSE'] }])
-      .map(link => link.href)).toEqual(['/inventory', '/ubicacion']);
+      .map(link => link.href)).toEqual(['/farmacias/panel', '/ubicacion']);
   });
 });

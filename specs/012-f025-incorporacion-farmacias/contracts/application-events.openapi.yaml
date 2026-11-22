@@ -1,0 +1,52 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F02.5 — eventos internos de solicitudes
+  version: 1.0.0-test
+  description: >-
+    Contrato interno TEST separado de los eventos de reservas F04/F05. Solo entrega
+    local; no correo, SMS, proveedor externo ni acceso público.
+servers:
+  - url: http://127.0.0.1:3101
+paths:
+  /internal/v1/pharmacy-application-events:
+    post:
+      summary: Recibir un evento de solicitud firmado
+      parameters:
+        - { name: X-FarmaFind-Event-Id, in: header, required: true, schema: { type: string, format: uuid } }
+        - { name: X-FarmaFind-Timestamp, in: header, required: true, schema: { type: string, format: date-time } }
+        - { name: X-FarmaFind-Signature, in: header, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApplicationEvent' }
+      responses:
+        '202': { description: Entrega local duradera nueva }
+        '200': { description: Repetición idéntica sin duplicado lógico }
+        '401': { description: Firma inválida o vencida }
+        '409': { description: Identificador o efecto lógico en conflicto }
+        '413': { description: Cuerpo superior a 16 KiB }
+        '422': { description: Contrato inválido o campos adicionales }
+        '503': { description: Receptor TEST temporalmente no disponible; publicador reintenta }
+components:
+  schemas:
+    ApplicationEvent:
+      type: object
+      additionalProperties: false
+      required: [eventId, version, type, correlationId, occurredAt, payload]
+      properties:
+        eventId: { type: string, format: uuid }
+        version: { type: integer, const: 1 }
+        type:
+          type: string
+          enum: [SOLICITUD_ENVIADA, SOLICITUD_OBSERVADA, SOLICITUD_APROBADA, SOLICITUD_RECHAZADA]
+        correlationId: { type: string, format: uuid }
+        occurredAt: { type: string, format: date-time }
+        payload:
+          type: object
+          additionalProperties: false
+          required: [applicationId, applicationVersion, recipientUserId]
+          properties:
+            applicationId: { type: string, format: uuid }
+            applicationVersion: { type: integer, minimum: 1 }
+            recipientUserId: { type: string, format: uuid }

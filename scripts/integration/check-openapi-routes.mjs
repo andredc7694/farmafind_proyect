@@ -1,6 +1,6 @@
 /** Compare every documented F00-F06 OpenAPI operation with an implemented Express route. */
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 const root=process.cwd();
@@ -59,12 +59,50 @@ function implementedOperations(file,prefix){
       operations.push(key('post',`${prefix}${template[1].replace('${name}',match[1])}`));
     }
   }
+  if(file.endsWith('presentation/application-router.ts')){
+    const template=source.match(/router\.post\(`([^`]+\$\{action\})`/);
+    assert(template,'Ruta dinámica F02.5 de solicitante ausente');
+    const actions=source.match(/for\(const action of \[([^\]]+)\] as const\)/)?.[1];
+    assert(actions,'Acciones F02.5 de solicitante ausentes');
+    for(const match of actions.matchAll(/'([^']+)'/g))
+      operations.push(key('post',`${prefix}${template[1].replace('${action}',match[1])}`));
+  }
   return operations;
 }
 
-const documented=new Set(contracts.flatMap(([file,prefix])=>contractOperations(file,prefix)));
-const implemented=new Set(routeFiles.flatMap(([file,prefix])=>implementedOperations(file,prefix)));
-const missing=[...documented].filter(operation=>!implemented.has(operation));
-assert.deepEqual(missing,[],`Operaciones OpenAPI sin ruta Express: ${missing.join(', ')}`);
-assert.equal(documented.size,38,'El inventario F00-F06/F06.1 cambió; revisar contrato y validador');
-console.log(`Contratos OpenAPI F00-F06/F06.1: ${documented.size} operaciones documentadas con ruta Express.`);
+if (process.argv.includes('--f025-contract') || process.argv.includes('--f025-routes')) {
+  const file='specs/012-f025-incorporacion-farmacias/contracts/f025.openapi.yaml';
+  const source=readFileSync(path.join(root,file),'utf8');
+  const operations=contractOperations(file,'/api/v1');
+  assert.equal(operations.length,13,'El inventario propuesto F02.5 cambió; revisar contrato');
+  assert.equal(new Set(operations).size,operations.length,'Operación F02.5 duplicada');
+  const schemas=new Set([...source.matchAll(/^    ([A-Za-z][A-Za-z0-9]+):/gm)].map(match=>match[1]));
+  for(const match of source.matchAll(/\$ref: '#\/components\/(?:schemas|parameters|responses)\/([^']+)'/g)){
+    assert(schemas.has(match[1]),`Referencia F02.5 sin definir: ${match[1]}`);
+  }
+  if(process.argv.includes('--f025-routes')){
+    const proposedRoutes=[
+      ['backend/src/modules/farmacias/presentation/application-router.ts','/api/v1'],
+      ['backend/src/modules/farmacias/presentation/platform-applications-router.ts','/api/v1'],
+      ['backend/src/modules/farmacias/presentation/test-document-router.ts','/api/v1'],
+      ['backend/src/modules/farmacias/presentation/pharmacy-profile-router.ts','/api/v1'],
+    ];
+    const implemented=new Set(proposedRoutes.flatMap(([route,prefix])=>
+      existsSync(path.join(root,route)) ? implementedOperations(route,prefix) : []));
+    const missing=operations.filter(operation=>!implemented.has(operation));
+    assert.deepEqual(missing,[],`F02.5: rutas pendientes: ${missing.join(', ')}`);
+    const internal=contractOperations('specs/012-f025-incorporacion-farmacias/contracts/application-events.openapi.yaml','');
+    const internalRoutes=implementedOperations('notifications/src/events/application-router.ts','');
+    assert.deepEqual(internal,['POST /internal/v1/pharmacy-application-events']);
+    assert.deepEqual(internal.filter(operation=>!internalRoutes.includes(operation)),[],
+      'F02.5: contrato interno de solicitudes sin ruta F05');
+    console.log(`Contrato F02.5: ${operations.length} operaciones documentadas con ruta Express.`);
+  } else console.log(`Contrato F02.5: ${operations.length} operaciones documentadas; implementación pendiente.`);
+} else {
+  const documented=new Set(contracts.flatMap(([file,prefix])=>contractOperations(file,prefix)));
+  const implemented=new Set(routeFiles.flatMap(([file,prefix])=>implementedOperations(file,prefix)));
+  const missing=[...documented].filter(operation=>!implemented.has(operation));
+  assert.deepEqual(missing,[],`Operaciones OpenAPI sin ruta Express: ${missing.join(', ')}`);
+  assert.equal(documented.size,38,'El inventario F00-F06/F06.1 cambió; revisar contrato y validador');
+  console.log(`Contratos OpenAPI F00-F06/F06.1: ${documented.size} operaciones documentadas con ruta Express.`);
+}
