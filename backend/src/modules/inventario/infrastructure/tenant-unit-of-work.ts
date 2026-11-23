@@ -4,7 +4,7 @@ import type { InventoryCapability } from '../domain/authorization.js';
 import type { InventoryUnitOfWork, InventoryOperationPorts } from '../application/ports.js';
 import { PgInventoryRepository } from './inventory-repository.js';
 import { PgImportRepository } from './import-repository.js';
-import { parseInventoryFile } from './file-parser.js';
+import { parseInventoryFile, inspectInventoryFile, selectInventoryFile } from './file-parser.js';
 import { createMedicationReference, type MedicationReference } from '../../medicamentos/contracts/reference.js';
 
 /** Shares one verified F01 transaction and pool client; RLS independently checks the context. */
@@ -19,6 +19,8 @@ export class PgInventoryTenantRunner implements InventoryUnitOfWork {
         inventory: new PgInventoryRepository(client, pharmacyId),
         imports: new PgImportRepository(client, pharmacyId, actorUserId),
         parseFile: parseInventoryFile,
+        inspectFile: inspectInventoryFile,
+        selectFile: selectInventoryFile,
         lookupReferences: async (names: readonly string[]): Promise<readonly MedicationReference[]> => {
           const result = await client.query(`SELECT id,nombre,concentracion,presentacion,clasificacion
             FROM f02.medicamento WHERE estado='ACTIVO' AND nombre=ANY($1::text[])`, [names]);

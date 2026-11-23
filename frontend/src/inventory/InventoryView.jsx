@@ -60,6 +60,13 @@ export function InventoryView({ pharmacyId, capabilities = null }) {
     finally { setBusy(false); }
   }
 
+  async function inspectFile(file) {
+    setBusy(true); setMessage('');
+    try { return await client.inspect(pharmacyId, file); }
+    catch (error) { setMessage(error.message || 'No se pudo analizar el archivo.'); return null; }
+    finally { setBusy(false); }
+  }
+
   if (status === 'loading') return <p role="status">Cargando inventario autorizado…</p>;
   if (status === 'denied') return <p role="alert">No tienes acceso al inventario de esta farmacia.</p>;
   if (capabilities !== null && (!access.inventory || !capabilities.includes('inventory.read'))) {
@@ -114,8 +121,15 @@ export function InventoryView({ pharmacyId, capabilities = null }) {
       <td>{item.cantidadComprometida}</td><td>{new Date(item.ultimaRevision).toLocaleString('es-PE')}</td>
     </tr>)}</tbody></table>}
     {canImport && <ImportPreview preview={preview} busy={busy}
+      onReset={() => setPreview(null)}
       canConfirm={capabilities === null || capabilities.includes('inventory.import.confirm')}
-      onPreview={(file, mapping) => action(async () => { setPreview(await client.preview(pharmacyId, file, mapping)); })}
+      onInspect={inspectFile}
+      onProfiles={() => client.profiles(pharmacyId)}
+      onSaveProfile={(importId, name) => client.saveProfile(pharmacyId, importId, name)}
+      onPreview={(file, mapping, selection) => action(async () => {
+        setPreview(await (selection ? client.previewSelected(pharmacyId, file, mapping, selection)
+          : client.preview(pharmacyId, file, mapping)));
+      })}
       onConfirm={importId => action(async () => { await client.confirm(pharmacyId, importId); setPreview(null); })} />}
     {access.imports ? <ImportHistory records={imports} /> :
       <p role="status">Historial de importaciones no disponible para esta sesión.</p>}

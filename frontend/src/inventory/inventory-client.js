@@ -45,6 +45,21 @@ export function createInventoryClient(fetchImpl = fetch) {
       form.append('mapeo', JSON.stringify(mapping));
       return change(`${path(pharmacyId)}/importaciones/vista-previa`, 'POST', form, false);
     },
+    inspect: (pharmacyId, file) => {
+      const form = new FormData();
+      form.append('archivo', file);
+      return change(`${path(pharmacyId)}/importaciones/analizar`, 'POST', form, false);
+    },
+    previewSelected: (pharmacyId, file, mapping, selection) => {
+      const form = new FormData();
+      form.append('archivo', file);
+      form.append('mapeo', JSON.stringify(mapping));
+      form.append('seleccion', JSON.stringify(selection));
+      return change(`${path(pharmacyId)}/importaciones/vista-previa`, 'POST', form, false);
+    },
+    profiles: pharmacyId => get(`${path(pharmacyId)}/importaciones/perfiles`),
+    saveProfile: (pharmacyId, importId, name) =>
+      change(`${path(pharmacyId)}/importaciones/perfiles`, 'POST', { importacionId: importId, nombre: name }),
     confirm: (pharmacyId, importId) =>
       change(`${path(pharmacyId)}/importaciones/${encodeURIComponent(importId)}/confirmar`, 'POST'),
     imports: pharmacyId => get(`${path(pharmacyId)}/importaciones`),

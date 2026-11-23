@@ -24,8 +24,8 @@
 - [x] Requisitos vinculados a historias y resultados.
 - [x] Alcance separado de F02.5 y mejoras restantes.
 - [x] Aprobación humana de spec.md registrada el 2026-11-22.
-- [ ] Plan técnico generado y aprobado antes de código.
+- [x] Plan técnico generado y aprobado antes de código; aprobación registrada en `approval.md`.
 
 ## Notes
 
-La lista evalúa la redacción, no declara F02.1 implementada ni aceptada. Las casillas de aprobación permanecen pendientes.
+La lista evalúa la redacción y la puerta SDD, no declara F02.1 aceptada. La aceptación del resultado permanece pendiente.

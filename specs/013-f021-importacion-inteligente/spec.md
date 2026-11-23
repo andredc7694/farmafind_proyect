@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f025-incorporacion-farmacias` (rama de desarrollo existente)
 **Created**: 2026-11-22
-**Status**: Especificación aprobada expresamente por el responsable el 2026-11-22 para MEJ-001 y los errores de importación de MEJ-002; plan y código pendientes.
+**Status**: Especificación y plan aprobados expresamente por el responsable el 2026-11-22 para MEJ-001 y los errores de importación de MEJ-002; implementación en curso, aceptación pendiente.
 **Input**: Documento Maestro v3.2 MEJ-001 y MEJ-002; alcance aclarado por el responsable.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -125,9 +125,9 @@ Como responsable autorizado quiero confirmar un archivo válido para actualizar 
 
 | Fuente | Cobertura | Estado |
 |---|---|---|
-| Maestro v3.2 MEJ-001, HU11, RF22–RF24, AC13 | F021-FR-001–005, 007–013; SC-001, 003–007 | Borrador para aprobación. |
+| Maestro v3.2 MEJ-001, HU11, RF22–RF24, AC13 | F021-FR-001–005, 007–013; SC-001, 003–007 | Especificación y plan aprobados; verificación técnica en curso. |
 | Maestro v3.2 MEJ-002, HU12, RF25, AC12–AC13 | F021-FR-006; SC-002; solo importación | Cobertura parcial; resto pendiente. |
-| F02 aprobado, Constitution 1.3.0, ADR-F04-SEC-001 | F021-FR-008–014; aislamiento, atomicidad, stock | Se preservan decisiones históricas. |
+| F02 aprobado, Constitution 2.0.0, ADR-F04-SEC-001 | F021-FR-008–014; aislamiento, atomicidad, stock | Se preservan decisiones históricas. |
 | Roadmap v3.2 y F02.5 | Cambio de prioridad con suspensión expresa | F02.5 no aceptada. |
 
-El responsable aprobó expresamente esta especificación en su mensaje «F02.1 — Especificación» del 2026-11-22, con MEJ-002 limitada a importación. El plan necesita aprobación humana **separada y expresa** antes de código o pruebas ejecutables de F02.1. Esta aprobación no afirma implementación ni resultados de aceptación.
+El responsable aprobó expresamente esta especificación en su mensaje «F02.1 — Especificación» del 2026-11-22, con MEJ-002 limitada a importación. El plan recibió aprobación humana posterior, registrada en [approval.md](approval.md). Ninguna de esas aprobaciones constituye aceptación de los resultados de F02.1.

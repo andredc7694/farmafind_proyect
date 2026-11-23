@@ -1,4 +1,4 @@
-import { assessConfirmation, type ReconciledImportRow } from '../domain/importacion.js';
+import { assessConfirmation, type ReconciledImportRow, type ImportIncident } from '../domain/importacion.js';
 import { NO_INVENTORY_SEARCH_INVALIDATOR, type InventorySearchInvalidator, type InventoryUnitOfWork, type ImportRecord } from './ports.js';
 
 export class ImportConflictError extends Error {}
@@ -45,7 +45,9 @@ export class ConfirmImport {
             throw new ImportConflictError('Importación no confirmable');
           }
           const rows = await imports.rows(importId);
-          const assessment = assessConfirmation(locked.state, locked.expiresAt, new Date().toISOString(), rows);
+          const incidents = await imports.incidents?.(importId) ?? [];
+          let assessment = assessConfirmation(locked.state, locked.expiresAt, new Date().toISOString(), rows);
+          if (assessment === 'CONFIRMABLE' && incidents.length > 0) assessment = 'RECHAZADA';
           if (assessment === 'ALREADY_CONFIRMED') return locked;
           if (assessment === 'CONFLICT') throw new ImportConflictError('Importación no confirmable');
           if (assessment === 'EXPIRADA' || assessment === 'RECHAZADA') {
@@ -96,14 +98,17 @@ export class ConfirmImport {
   }
 
   async status(secret: string, pharmacyId: string, importId: string): Promise<
-    PublicImport & { readonly incidencias: readonly { fila: number; codigo: string }[] }> {
+    PublicImport & { readonly incidencias: readonly ImportIncident[] }> {
     return this.transactions.run(secret, pharmacyId, 'inventory.history', async ports => {
       const imports = ports.imports;
       const record = await imports.find(importId);
       if (!record) throw new Error('No visible');
       const rows: readonly ReconciledImportRow[] = await imports.rows(importId);
-      return { ...publicRecord(record), incidencias: rows.filter(row => row.errorCode !== null)
-        .map(row => ({ fila: row.line, codigo: row.errorCode! })) };
+      const incidents = await imports.incidents?.(importId);
+      return { ...publicRecord(record), incidencias: incidents ?? rows.filter(row => row.errorCode !== null)
+        .map(row => ({ line: row.line, field: 'nombre', column: 'nombre', code: row.errorCode!,
+          title: 'Incidencia de importación', cause: 'Revisa el archivo',
+          action: 'Corrige y vuelve a validar', supportCode: `F021-${row.errorCode}` })) };
     });
   }
 }

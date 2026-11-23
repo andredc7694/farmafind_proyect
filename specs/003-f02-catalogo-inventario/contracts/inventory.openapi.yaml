@@ -89,6 +89,59 @@ paths:
         '200': { description: Historial limitado a la farmacia y permiso verificados }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /farmacias/{pharmacyId}/importaciones/analizar:
+    post:
+      summary: Inspeccionar hojas y encabezados sin persistir inventario (F02.1)
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [archivo]
+              properties:
+                archivo: { type: string, format: binary }
+      responses:
+        '200':
+          description: Huella, hojas y candidatos de encabezado/mapeo sin valores del inventario
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '413': { description: Archivo excede el límite configurado }
+  /farmacias/{pharmacyId}/importaciones/perfiles:
+    get:
+      summary: Listar perfiles privados compatibles con la farmacia autorizada (F02.1)
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+      responses:
+        '200': { description: Perfiles de la farmacia activa; no incluye datos de productos }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      summary: Guardar mapeo validado de una vista previa propia (F02.1)
+      parameters:
+        - $ref: '#/components/parameters/PharmacyId'
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [nombre, importacionId]
+              properties:
+                nombre: { type: string, minLength: 1, maxLength: 80 }
+                importacionId: { type: string, format: uuid }
+      responses:
+        '201': { description: Perfil privado creado para el mismo establecimiento }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
   /farmacias/{pharmacyId}/importaciones/vista-previa:
     post:
       summary: Validar archivo sin cambiar inventario
@@ -107,6 +160,13 @@ paths:
                 mapeo:
                   type: object
                   description: Correspondencia explícita entre columnas del archivo y campos requeridos
+                seleccion:
+                  type: object
+                  description: Hoja, fila de encabezado y huella devueltos por analizar; opcional para conservar F02
+                  properties:
+                    sheet: { type: string }
+                    headerRow: { type: integer, minimum: 1 }
+                    digest: { type: string, pattern: '^[0-9a-f]{64}$' }
       responses:
         '200':
           description: Vista previa, errores por fila y conciliación; cero cambios de inventario
