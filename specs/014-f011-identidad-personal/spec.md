@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f011-identidad-personal`
 **Created**: 2026-11-23
-**Status**: Especificación aprobada el 2026-11-23 (ver [approval.md](approval.md)); *clarify* resuelto el 2026-11-23 (5 respuestas del responsable). Spec Kit: en curso *plan*, pendiente de aprobación.
+**Status**: Especificación aprobada el 2026-11-23 (ver [approval.md](approval.md)); *clarify* resuelto el 2026-11-23 (5 respuestas del responsable). Spec Kit: *plan* creado, pendiente de aprobación.
 **Input**: Documento Maestro v3.2 MEJ-015, MEJ-016, MEJ-017 y MEJ-019 (HU23–25, HU27; RF37–RF41, RF44–RF45; AC10–AC11); roadmap v3.2, orden 3.
 
 ## Clarifications
