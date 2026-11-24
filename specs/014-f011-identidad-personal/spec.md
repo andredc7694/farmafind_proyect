@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f011-identidad-personal`
 **Created**: 2026-11-23
-**Status**: Borrador — pendiente de aprobación del responsable (Puerta 3). Spec Kit: paso *specify* completado; siguiente, *clarify* (3 decisiones abiertas).
+**Status**: Especificación aprobada por el responsable el 2026-11-23 (ver [approval.md](approval.md)). Spec Kit: *specify* aprobado; en curso *clarify* (3 decisiones abiertas + 2 de detalle).
 **Input**: Documento Maestro v3.2 MEJ-015, MEJ-016, MEJ-017 y MEJ-019 (HU23–25, HU27; RF37–RF41, RF44–RF45; AC10–AC11); roadmap v3.2, orden 3.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -157,4 +157,4 @@ Como usuario autenticado quiero editar mis datos y gestionar la seguridad de mi 
 | MEJ-019, HU27, RF44–RF45 | F011-FR-013–014 | Propuesta |
 | F01 (EXC-01, ROL-01, GLO-01, BOOT-01), Constitution 2.0.0 | F011-FR-015–016; SC-008–009 | Se preservan |
 
-Esta especificación no está aprobada. Su aprobación se registrará en [approval.md](approval.md) antes de pasar a *clarify*.
+Aprobada el 2026-11-23 para pasar a *clarify*; ver [approval.md](approval.md).

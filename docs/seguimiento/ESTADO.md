@@ -4,13 +4,13 @@
 
 ## Resumen
 - **F02.1: ACEPTADA por Andre el 2026-11-23 («ACEPTO»)**, alcance TEST/DEMO. T038 marcada (38/38). Registro en `specs/013-f021-importacion-inteligente/acceptance.md` y `approval.md`.
-- **F01.1 (carpeta `specs/014-f011-identidad-personal/`): paso Spec Kit = *specify* completado; esperando aprobación de la spec (Puerta 3) y luego *clarify* (Puerta 4).**
+- **F01.1 (`specs/014-f011-identidad-personal/`): spec aprobada el 2026-11-23; paso actual = *clarify*, esperando respuestas de Andre (Puerta 4).**
 
 ## Pasos de Spec Kit por incremento
 | Incremento | specify | clarify | plan | tasks | analyze | implement | converge | acceptance |
 |---|---|---|---|---|---|---|---|---|
 | 013 F02.1 | ✔ | ✔ | ✔ | ✔ | — | ✔ 38/38 | — | ✔ ACEPTO 2026-11-23 |
-| 014 F01.1 | ✔ borrador, **sin aprobar** | pendiente (3 decisiones) | — | — | — | — | — | — |
+| 014 F01.1 | ✔ aprobada 2026-11-23 | **en curso, esperando respuestas A/B/C (Puerta 4)** | — | — | — | — | — | — |
 | F04.1, F08.1 | no iniciados (siguiente número libre: 015) | | | | | | | |
 
 ## Qué se hizo en este bloque
