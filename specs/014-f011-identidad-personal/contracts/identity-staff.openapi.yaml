@@ -399,6 +399,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/MfaEnrollment' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: El segundo factor ya está activo }
   /me/mfa/activate:
     post:
       tags: [Mfa]

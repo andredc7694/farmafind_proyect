@@ -171,6 +171,35 @@ No se ejecutaron: `check-f04-rls.mjs` (este lote no toca esas rutas; última eje
 - **Reemisión restringida:** solo para cuentas con alias y sin correo cuya clave temporal emitió esa misma farmacia; un propietario nunca fija credenciales de una cuenta con correo ni de otra farmacia. Apuntar sobre uno mismo devuelve 403 (no 404).
 - **Ámbitos de abuso sin usar:** `TEMP_KEY_ACCOUNT` y `STAFF_CREATE_IP` siguen reservados sin uso (ver lote 2).
 
+## Lote 5 — US4: segundo factor TOTP del administrador general (T037–T043), 2026-11-23
+
+Migración `015_mfa.sql`; casos de uso `mfa.ts`; `mfa-router.ts` (`POST /me/mfa/enroll`, `POST /me/mfa/activate`, `POST /auth/mfa/verify`); `scripts/f01/reset-mfa.mjs`; `MfaEnroll.jsx`.
+
+| Archivo de prueba | Capa | Casos | Qué demuestra |
+|---|---|---|---|
+| `f011-us4.rls.test.ts` | HTTP + PostgreSQL + RLS | 7 | Cliente, trabajador y propietario no pueden enrolar (403), no hay rutas de ascenso y quedan 3 auditorías `ELEVATION_DENIED`; administrador sin factor: `/platform/**` 403, el alta devuelve el secreto una vez y se guarda cifrado (el secreto en claro no está en la fila); activar con código correcto habilita `/platform/**` en esa sesión; con factor activo el siguiente login nace `MFA_PENDIENTE` (403 en todo salvo verificar) y el código del paso ya usado se rechaza; otra sesión no reutiliza el código; 5 fallos → 429 aun con código correcto; el 2.º administrador no hereda nada; el rol de aplicación no puede leer/escribir el secreto ni ejecutar `complete_mfa`; reinicio técnico: secreto destruido (REINICIADO), sesiones cerradas, `MFA_RESET` auditado y nueva alta posible |
+| `f011-mfa.http.test.ts` | HTTP (router con casos de uso simulados) | 7 | CSRF y sesión antes del caso de uso; secreto con `no-store`; 204 sin cuerpo; cuerpos estrictos; errores sin detalle interno; 429 con `Retry-After` |
+| `f011-reset-mfa.unit.test.ts` | Unitaria + proceso | 3 | Expediente solo bajo `.cache/` y con campos válidos; el script rechaza la base persistente y bases no locales antes de conectarse; no existe ruta ni pantalla de reinicio en `backend/src`/`frontend/src` |
+| `f011-mfa.test.jsx` | React/jsdom | 5 | Cliente (CSRF, solo el código, estado HTTP del fallo), verificar con validación local, mensajes genéricos/429, secreto visible una sola vez, aviso para cuentas no administradoras |
+
+### Regresión tras el lote 5 (resultados reales)
+
+| Comprobación | Resultado |
+|---|---|
+| `scripts/f01/check.mjs unit` / `api` / `rls` | **114/114** · **97/97** · **112/112** (antes 111 · 90 · 105) |
+| `test:f02:rls` | 15/15 |
+| Frontend completo (sin `*.spec.js` de Playwright) | 36 archivos, **127/127** (antes 122) |
+| `npm run check` / `build` / `verify:contracts` | correctos (249 archivos JS; 41 operaciones); `--f011-contract`: 26 operaciones |
+
+No se ejecutaron: F04 rls (el script se omitió por no tener su clúster encendido; el lote no toca rutas de reservas), Playwright/E2E (T053), F05, DEMO (T055). Base persistente `farmafind_f01_test`: no se tocó. Contenedor PostgreSQL TEST detenido al terminar.
+
+### Hallazgos del lote 5 (para *analyze* y *converge*)
+
+- **Prueba heredada ajustada con motivo:** `bootstrap-authorization.rls.test.ts` creaba sesiones de administrador sin segundo factor; con la nueva regla en la base fallaban 2 casos. Se corrigió el fixture (sesión con `mfa_verificada_at`); la regla no se relajó.
+- **Decisión menor (reversible):** un administrador que aún no tiene factor activo recibe sesión normal (para poder enrolarse); la protección real está en que `/platform/**` exige factor verificado. Alternativa descartada: sesión restringida a «enrolar», que habría exigido ampliar la lista permitida del guardia.
+- **Supuesto de función definer:** igual que en lotes anteriores, el propietario de las funciones debe poder escribir tablas con FORCE RLS (superusuario en TEST); validar antes de cualquier base persistente (Puerta 6).
+- **Pendiente T049/T055:** los scripts de arranque/DEMO no pasan aún `mfaKey` ni `accountMessages`; sin `mfaKey` las rutas del segundo factor no se montan (falla cerrado: los administradores con factor activo no podrían verificar).
+
 ## Pendiente (siguientes lotes)
 
 US4 (T037–T043) en adelante. Nada de lo anterior constituye aceptación de F01.1.
