@@ -78,3 +78,12 @@ Trabajar de forma continua y autónoma, deteniéndose **solo** en las puertas de
 - Usar `gh` (GitHub CLI) para PR y merge. Comprobar que esté instalado y con sesión; si falta, guiar a Andre para iniciar sesión por navegador (`gh auth login`). **Nunca pedir ni pegar tokens** en archivos ni chat.
 - Excepción histórica: `feat/f011-identidad-personal` se creó desde `feat/f021-importacion-inteligente` (F02.1 aún no integrada en `main`).
 
+
+## Modo de trabajo continuo (autorizado por Andre, 2026-11-23; reemplaza las paradas por lote)
+- Trabajar de corrido: no detenerse entre lotes ni para informar avances. Encadenar lotes hasta terminar el incremento. Tras cada lote probado: actualizar `ESTADO.md` y hacer push, sin pedir nada.
+- Detenerse solo cuando falte algo que solo Andre puede dar: aprobación de spec/plan/tasks, decisión de negocio o seguridad sin recomendación resoluble, aceptación humana del incremento, costo nuevo, algo destructivo o cambio fuera de alcance. Varias decisiones pendientes se agrupan en un solo mensaje con opciones A/B/C y recomendación.
+- Si una puerta no bloquea el trabajo siguiente, seguir avanzando y dejar la pregunta anotada para la próxima respuesta.
+- Decisiones menores y reversibles (sin impacto en seguridad, costos ni alcance): decidir con mejor criterio y registrarlas en `ESTADO.md` para revisión posterior.
+- **PR permanente:** cuando Andre acepte un incremento, abrir su PR a `main` y fusionarlo con «merge commit» (sin squash, sin borrar la rama) sin otra confirmación, si el estado es MERGEABLE y CLEAN, no hay secretos y la regresión del incremento pasó. Después actualizar `main` local y crear la rama del siguiente. Avisar en dos líneas. Si hay conflicto, algo raro o verificación fallida: detenerse.
+- Modo económico: pruebas por capas, E2E solo al final del incremento, salidas cortas, sin releer documentos grandes.
+- Informes de parada: máximo 10 líneas, lenguaje sencillo.
