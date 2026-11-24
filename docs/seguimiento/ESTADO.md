@@ -4,13 +4,13 @@
 
 ## Resumen
 - **F02.1: ACEPTADA por Andre el 2026-11-23 («ACEPTO»)**, alcance TEST/DEMO. T038 marcada (38/38). Registro en `specs/013-f021-importacion-inteligente/acceptance.md` y `approval.md`.
-- **F01.1 (`specs/014-f011-identidad-personal/`): spec, clarify, plan y tasks aprobados el 2026-11-23. Implementación: lotes 1–3 (T001–T030: base + US1 + US2) completados y verificados; siguiente = US3 (T031–T036). Decisión A (Puerta 6): concesión directa retirada (410). No aceptada.**
+- **F01.1 (`specs/014-f011-identidad-personal/`): spec, clarify, plan y tasks aprobados el 2026-11-23. Implementación: lotes 1–4 (T001–T036: base + US1 + US2 + US3) completados y verificados; siguiente = US4 (T037–T043). PR #4 de F02.1 abierto (sin fusionar, espera confirmación de Andre). No aceptada.**
 
 ## Pasos de Spec Kit por incremento
 | Incremento | specify | clarify | plan | tasks | analyze | implement | converge | acceptance |
 |---|---|---|---|---|---|---|---|---|
 | 013 F02.1 | ✔ | ✔ | ✔ | ✔ | — | ✔ 38/38 | — | ✔ ACEPTO 2026-11-23 |
-| 014 F01.1 | ✔ aprobada 2026-11-23 | ✔ 5 respuestas 2026-11-23 | ✔ aprobado 2026-11-23 (D-06 = A) | ✔ aprobado 2026-11-23 (58 tareas) | — | **en curso: lotes 1–3 hechos (T001–T030); siguiente US3** | — | — |
+| 014 F01.1 | ✔ aprobada 2026-11-23 | ✔ 5 respuestas 2026-11-23 | ✔ aprobado 2026-11-23 (D-06 = A) | ✔ aprobado 2026-11-23 (58 tareas) | — | **en curso: lotes 1–4 hechos (T001–T036); siguiente US4** | — | — |
 | F04.1, F08.1 | no iniciados (siguiente número libre: 015) | | | | | | | |
 
 ## Qué se hizo en este bloque

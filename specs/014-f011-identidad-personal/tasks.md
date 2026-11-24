@@ -59,12 +59,12 @@ Formato: `- [ ] Txxx [P] [USn] descripción con ruta (requisitos)`. `[P]` = para
 **Objetivo**: verificación de correo, restablecimiento y recuperación de personal sin correo.
 **Prueba independiente**: con simulador local, un usuario con correo restablece su clave; un trabajador sin correo recupera acceso con una nueva clave temporal.
 
-- [ ] T031 [P] [US3] Pruebas HTTP de restablecimiento y verificación (respuestas indistinguibles, un solo uso, caducidad 30 min/24 h, otras sesiones cerradas, límites) en `backend/tests/identity/f011-recovery.http.test.ts` (FR-010; SC-007).
-- [ ] T032 [US3] Casos de uso `RequestPasswordReset`, `ConfirmPasswordReset` y `VerifyEmail` con `token_cuenta` (solo hash SHA-256), comparación ficticia cuando la cuenta no existe y entrega por el puerto, en `backend/src/modules/usuarios/application/account-recovery.ts` (FR-010); depende de T007, T014, T015.
-- [ ] T033 [US3] Caso de uso y ruta `POST /pharmacies/{id}/staff/{userId}/temporary-key` (reemisión que invalida la anterior, solo propietario/administrador autorizado de esa farmacia) en `backend/src/modules/usuarios/application/issue-temporary-key.ts` y `presentation/staff-router.ts` (FR-011); depende de T018.
-- [ ] T034 [US3] Rutas `/auth/password/reset/request|confirm` y `/auth/email/verify` con CSRF y `no-store` en `backend/src/modules/usuarios/presentation/auth-router.ts` (FR-010); depende de T032.
-- [ ] T035 [P] [US3] Interfaz: «Olvidé mi clave», confirmación con token y botón «Emitir nueva clave temporal» en `frontend/src/identity/PasswordReset.jsx` y `StaffAdmin.jsx` (FR-010–011); depende de T033–T034.
-- [ ] T036 [US3] Verificar US3 con el simulador (`scripts/f01/mailbox.mjs`) y negativos de enumeración y reuso en `backend/tests/identity/f011-us3.rls.test.ts` y `frontend/tests/f011-recovery.test.jsx` (SC-002, SC-007–008); depende de T034–T035.
+- [X] T031 [P] [US3] Pruebas HTTP de restablecimiento y verificación (respuestas indistinguibles, un solo uso, caducidad 30 min/24 h, otras sesiones cerradas, límites) en `backend/tests/identity/f011-recovery.http.test.ts` (FR-010; SC-007).
+- [X] T032 [US3] Casos de uso `RequestPasswordReset`, `ConfirmPasswordReset` y `VerifyEmail` con `token_cuenta` (solo hash SHA-256), comparación ficticia cuando la cuenta no existe y entrega por el puerto, en `backend/src/modules/usuarios/application/account-recovery.ts` (FR-010); depende de T007, T014, T015.
+- [X] T033 [US3] Caso de uso y ruta `POST /pharmacies/{id}/staff/{userId}/temporary-key` (reemisión que invalida la anterior, solo propietario/administrador autorizado de esa farmacia) en `backend/src/modules/usuarios/application/issue-temporary-key.ts` y `presentation/staff-router.ts` (FR-011); depende de T018.
+- [X] T034 [US3] Rutas `/auth/password/reset/request|confirm` y `/auth/email/verify` con CSRF y `no-store` en `backend/src/modules/usuarios/presentation/auth-router.ts` (FR-010); depende de T032.
+- [X] T035 [P] [US3] Interfaz: «Olvidé mi clave», confirmación con token y botón «Emitir nueva clave temporal» en `frontend/src/identity/PasswordReset.jsx` y `StaffAdmin.jsx` (FR-010–011); depende de T033–T034.
+- [X] T036 [US3] Verificar US3 con el simulador (`scripts/f01/mailbox.mjs`) y negativos de enumeración y reuso en `backend/tests/identity/f011-us3.rls.test.ts` y `frontend/tests/f011-recovery.test.jsx` (SC-002, SC-007–008); depende de T034–T035.
 
 ## Phase 6: User Story 4 — Administradores solo por provisión técnica y con segundo factor (P2)
 
@@ -129,3 +129,7 @@ T017–T024 marcadas con evidencia real en [evidence.md](evidence.md). Desviacio
 ## Notas de ejecución del lote 3 (2026-11-23)
 
 T025–T030 marcadas con evidencia real en [evidence.md](evidence.md). Desviaciones: las operaciones de T026/T027 se implementaron como funciones `SECURITY DEFINER` en `backend/migrations/f01/013_staff_invitations.sql` (autorización dentro de la base); T027 incluye cambiar `PATCH …/memberships/{id}` para que cierre sesiones y revoque delegaciones; se aplicó la decisión A de la Puerta 6 (concesión directa retirada, 410), registrada en `approval.md`; el servicio y las rutas están en `application/manage-staff-access.ts` y `presentation/staff-access-router.ts`.
+
+## Notas de ejecución del lote 4 (2026-11-23)
+
+T031–T036 marcadas con evidencia real en [evidence.md](evidence.md). Desviaciones: T032/T033 se implementaron como funciones `SECURITY DEFINER` en `backend/migrations/f01/014_account_recovery.sql`; se añadió `POST /me/email/verification` al contrato (26 operaciones) para la solicitud autenticada de verificación; la vigencia de los tokens la calcula la base de datos (hallazgo de desfase de reloj); T036 usa `f011-us3.rls.test.ts` con el simulador local real (`FileMailboxSimulator`) y `frontend/tests/f011-recovery.test.jsx`.

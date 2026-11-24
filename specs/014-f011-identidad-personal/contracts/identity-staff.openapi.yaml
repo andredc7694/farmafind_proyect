@@ -374,6 +374,18 @@ paths:
       parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
       responses:
         '204': { description: Demás sesiones cerradas }
+  /me/email/verification:
+    post:
+      tags: [Authentication]
+      summary: Solicitar el código de verificación del propio correo (sesión no restringida)
+      description: Adición del lote 4 (US3) para cubrir F011-FR-010; la cuenta sin correo recibe 400.
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '202': { description: Aceptada; el código se entrega por el puerto de mensajes (simulador local en TEST) }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/RateLimited' }
   /me/mfa/enroll:
     post:
       tags: [Mfa]

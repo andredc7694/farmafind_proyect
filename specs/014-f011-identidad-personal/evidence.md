@@ -137,6 +137,40 @@ No se ejecutaron: Playwright/E2E (T053), F05, DEMO (T055). Contenedores encendid
 - La invitación solo admite cuentas con correo (existentes). No notifica por correo (decisión D-06 A: la persona la ve en «Mis invitaciones»).
 - `data-model.md` y `research.md` siguen mencionando solo `011` y `personal.gestionar`; se corrigen en *analyze*.
 
+## Lote 4 — US3 «Acceso reforzado y recuperación segura» (T031–T036, 2026-11-23)
+
+**Qué se implementó:** migración `014_account_recovery.sql` (funciones `SECURITY DEFINER`: `complete_password_reset`, `verify_email`, `issue_temporary_key`); `AccountRecovery` (solicitar y confirmar restablecimiento, verificar correo, solicitud autenticada de verificación) con presupuesto de intentos `RESET_ACCOUNT`/`RESET_IP` y tokens de ≥256 bits guardados solo como SHA-256; 4 rutas nuevas en `auth-router` y `POST /pharmacies/{id}/staff/{userId}/temporary-key`; entrega por el puerto de mensajes con el simulador local (D-06 A), invocada **sin esperar** para no distinguir cuentas por tiempo; React: «Olvidé mi clave» (`PasswordReset`) y «Emitir nueva clave temporal» en «Personal de la farmacia».
+
+### Pruebas nuevas (30 satisfactorias)
+
+| Archivo | Tipo | Pruebas | Cubre |
+|---|---|---|---|
+| `f011-us3.rls.test.ts` | HTTP + PostgreSQL + simulador de correo | 8 | T036: solicitar es indistinguible (mismo 202 y cuerpo) exista o no la cuenta y el código llega solo al simulador; solo existe el hash del token, sin el código en claro; confirmar cambia la clave y **cierra las sesiones previas**; token inválido/usado → mismo 400; el límite devuelve 429 igual para cuentas existentes e inexistentes (sin mensaje); verificación de correo con token de un solo uso y auditoría; token vencido rechazado sin cambios; reemisión de clave temporal (sesiones cerradas, clave anterior inservible, motivo `RECUPERACION`, auditoría); la reemisión no alcanza a otra farmacia, a cuentas con correo, a uno mismo (403) ni a trabajadores |
+| `f011-recovery.http.test.ts` | HTTP (router con casos de uso simulados) | 13 | T031: sin recuperación compuesta → 404; CSRF en las 4 mutaciones; 202 sin cuerpo; cuerpos estrictos; 400/429 (`Retry-After`); confirmar limpia la cookie de sesión y el 400 no explica el motivo; verificar; solicitud autenticada exige sesión; fallo interno sin detalles |
+| `f011-recovery.test.jsx` | React/jsdom | 9 | T035: clientes (CSRF, rutas), «Olvidé mi clave», pedir código sin confirmar existencia, validación local de la clave, código inválido con mensaje genérico, reemisión visible una sola vez y solo para cuentas con alias |
+
+### Regresión tras el lote 4 (resultados reales)
+
+| Comprobación | Resultado |
+|---|---|
+| `scripts/f01/check.mjs unit` / `api` / `rls` | 111/111 · **90/90** (antes 77) · **105/105** (antes 97) |
+| `test:f02:unit` / `test:f02:rls` / `test:f03:unit` / `test:f03:rls` | 15/15 · 15/15 · 25/25 · 4/4 |
+| `test:f04:unit` / `test:f04:api` | 18/18 · 6/6 |
+| `f021-rls.test.ts` | 3/3 |
+| Frontend completo | 35 archivos, **122/122** (antes 113) |
+| `npm run check` / `build` / `verify:contracts` | correctos (246 archivos JS; 41 operaciones); `--f011-contract`: 26 operaciones |
+
+No se ejecutaron: `check-f04-rls.mjs` (este lote no toca esas rutas; última ejecución: lote 3, 18/18), Playwright/E2E (T053), F05, DEMO (T055).
+
+### Hallazgos y desviaciones del lote 4 (para *analyze* y *converge*)
+
+- **Desfase de reloj (defecto real corregido):** la primera ejecución falló con 500 al crear el token de verificación de 24 h porque la aplicación calculaba `expira_at` con su reloj y la base lo validaba contra el suyo (`expira_at <= creado_at + 24 h`); el reloj de la VM de Docker difiere del de Windows. Ahora la vigencia la calcula la base (`now() + make_interval`) y la verificación dura 23 h 59 min. Las credenciales temporales de las migraciones 012/014 ya usaban el reloj de la base.
+- **Adición al contrato:** `POST /me/email/verification` (solicitud autenticada del código de verificación) no estaba en el contrato aprobado; se añadió (26 operaciones) para cubrir F011-FR-010. La pantalla para introducir el código de verificación llega con el perfil (US5); hoy solo existe el endpoint.
+- **Presupuesto compartido por IP:** `RESET_IP` cuenta solicitudes, confirmaciones fallidas y verificaciones fallidas (5 en 15 min por IP); varias personas tras una misma IP (NAT) comparten el límite. Aceptable en TEST; revisar antes de cualquier despliegue.
+- **Entrega sin esperar:** el mensaje se entrega después de responder y sin esperar, para que el tiempo no distinga cuentas; los fallos de entrega se registran sin el código. No se midió estadísticamente la indistinguibilidad temporal (T054/T051).
+- **Reemisión restringida:** solo para cuentas con alias y sin correo cuya clave temporal emitió esa misma farmacia; un propietario nunca fija credenciales de una cuenta con correo ni de otra farmacia. Apuntar sobre uno mismo devuelve 403 (no 404).
+- **Ámbitos de abuso sin usar:** `TEMP_KEY_ACCOUNT` y `STAFF_CREATE_IP` siguen reservados sin uso (ver lote 2).
+
 ## Pendiente (siguientes lotes)
 
-US3 (T031–T036) en adelante. Nada de lo anterior constituye aceptación de F01.1.
+US4 (T037–T043) en adelante. Nada de lo anterior constituye aceptación de F01.1.
