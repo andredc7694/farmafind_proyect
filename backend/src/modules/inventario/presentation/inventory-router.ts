@@ -12,7 +12,7 @@ function cents(value: unknown): number | null {
   return Number.isSafeInteger(scaled) && Math.abs(scaled / 100 - value) < 1e-9 ? scaled : null;
 }
 
-export function createInventoryRouter(service: Pick<ManualInventory, 'list' | 'movements' | 'review'>,
+export function createInventoryRouter(service: Pick<ManualInventory, 'list' | 'movements' | 'review'> & Partial<Pick<ManualInventory, 'summary'>>,
   options: AuthHttpOptions): Router {
   const router = Router();
   const security = authHttpSecurity(options);
@@ -26,6 +26,19 @@ export function createInventoryRouter(service: Pick<ManualInventory, 'list' | 'm
     const secret = readSessionCookie(request, options);
     if (!secret) sendIdentityError(response, 401, 'UNAUTHENTICATED', 'Sesión no válida');
     return secret;
+  }
+
+  if (service.summary) {
+    const summary = service.summary.bind(service);
+    router.get('/farmacias/:pharmacyId/inventario/resumen', async (request, response) => {
+      const secret = secretFor(request, response);
+      if (!secret) return;
+      if (typeof request.params.pharmacyId !== 'string' || !uuid.test(request.params.pharmacyId)) {
+        sendIdentityError(response, 404, 'NOT_VISIBLE', 'Recurso no visible'); return;
+      }
+      try { response.status(200).json(await summary(secret, request.params.pharmacyId)); }
+      catch { sendIdentityError(response, 404, 'NOT_VISIBLE', 'Recurso no visible'); }
+    });
   }
 
   router.get('/farmacias/:pharmacyId/inventario/movimientos', async (request, response) => {

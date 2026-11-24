@@ -21,7 +21,11 @@ export interface AttentionItem { id: string; state: 'PENDIENTE' | 'CONFIRMADA'; 
 export interface HistoryItem { id: string; code: string; state: 'ENTREGADA' | 'CANCELADA' | 'EXPIRADA'; quantity: number; medication: string;
   createdAt: string; confirmedAt: string | null; pickupExpiresAt: string | null; closeReason: string | null; pickupPreference: PickupPreference | null }
 
+export interface ReservationSummaryCounts { pending: number; confirmed: number; expiringSoon: number }
+
 export interface ReservationRepository {
+  /** F08.1: cifras de la cola; el reloj es el de la base de datos. */
+  summary(pharmacyId: string): Promise<ReservationSummaryCounts>;
   attention(pharmacyId: string, filters: AttentionFilters): Promise<readonly AttentionItem[]>;
   history(pharmacyId: string, filters: HistoryFilters): Promise<{ items: readonly HistoryItem[]; next: { createdAt: string; id: string } | null }>;
   exportHistory(pharmacyId: string, filters: Omit<HistoryFilters, 'limit' | 'cursor'>, max: number):

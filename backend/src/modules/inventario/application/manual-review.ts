@@ -8,6 +8,12 @@ export class ManualInventory {
     return this.transactions.run(secret, pharmacyId, 'inventory.read', async ports => ports.inventory.list());
   }
 
+  /** F08.1: resumen de solo lectura; exige `inventory.read` de esa farmacia. */
+  async summary(secret: string, pharmacyId: string): Promise<{ generatedAt: string; products: number; withoutStock: number }> {
+    const counts = await this.transactions.run(secret, pharmacyId, 'inventory.read', async ports => ports.inventory.summary());
+    return { generatedAt: new Date().toISOString(), ...counts };
+  }
+
   movements(secret: string, pharmacyId: string): Promise<readonly Record<string, unknown>[]> {
     return this.transactions.run(secret, pharmacyId, 'inventory.history', async ports => ports.inventory.movements());
   }

@@ -1,11 +1,7 @@
 import React from 'react';
-import {IdentityApp} from '../identity/IdentityApp.jsx';
+import {PharmacyPanel} from './PharmacyPanel.jsx';
 
-/** Reuse the F01 selector and F02 inventory controls; no new tenant authority. */
+/** F08.1: panel por capacidades (Resumen, Farmacia, Inventario, Importar, Reservas, Historial, Personal, Configuración). */
 export function PharmacyDashboard(){
-  return <main className="page-stack">
-    <header><h1>Panel de farmacia</h1>
-      <p>Selecciona una farmacia autorizada para consultar o importar su inventario.</p></header>
-    <IdentityApp inventoryMode />
-  </main>;
+  return <main className="page-stack"><PharmacyPanel /></main>;
 }

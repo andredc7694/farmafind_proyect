@@ -150,3 +150,9 @@ a { color: var(--emerald-dark); }
 .theme-switcher { margin-left: 0; display: flex; align-items: center; gap: .45rem; flex: none; }
 .theme-switcher label { font-size: .85rem; color: var(--ink-muted); }
 .theme-switcher select { min-height: 40px; padding: .35rem .6rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; }
+.panel-nav { list-style: none; display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; margin: 1rem 0; }
+.panel-nav button, .pharmacy-panel [role='group'] button { min-height: 44px; padding: .5rem .9rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; }
+.panel-nav button[aria-current='true'], .pharmacy-panel [role='group'] button[aria-pressed='true'] { background: var(--mint); color: var(--emerald-dark); font-weight: 700; }
+.summary-grid { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; padding: 0; }
+.summary-card { display: grid; gap: .2rem; }
+.summary-value { font-size: 2rem; line-height: 1; color: var(--emerald-dark); }

@@ -83,14 +83,14 @@ function History({ client, pharmacyId }) {
 }
 
 /** Visibilidad de presentación solamente; F04 y PostgreSQL RLS autorizan cada petición. */
-export function PharmacyReservations({ client, pharmacyId, onChanged, capabilities = null, intervalMs = 30000 }) {
+export function PharmacyReservations({ client, pharmacyId, onChanged, capabilities = null, intervalMs = 30000, initialTab = 'queue', showTabs = true, showSettings = true }) {
   const [queue, setQueue] = useState([]);
   const [hours, setHours] = useState(4);
   const [status, setStatus] = useState('loading');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [messageKind, setMessageKind] = useState('status');
-  const [tab, setTab] = useState('queue');
+  const [tab, setTab] = useState(initialTab);
   const [stateFilter, setStateFilter] = useState('');
   const [sync, setSync] = useState({ state: 'ok', at: null });
   const [nowMs, setNowMs] = useState(Date.now());
@@ -145,12 +145,12 @@ export function PharmacyReservations({ client, pharmacyId, onChanged, capabiliti
   if (status === 'loading') return <p role="status">Cargando reservas de la farmacia…</p>;
   return <section aria-labelledby="pharmacy-reservations-title">
     <h3 id="pharmacy-reservations-title">Centro de atención</h3>
-    {hasCenter && <div role="tablist" aria-label="Vistas de reservas">
+    {hasCenter && showTabs && <div role="tablist" aria-label="Vistas de reservas">
       <button type="button" role="tab" aria-selected={tab === 'queue'} onClick={() => setTab('queue')}>Cola</button>{' '}
       <button type="button" role="tab" aria-selected={tab === 'history'} onClick={() => setTab('history')}>Historial</button>
     </div>}
     {message && <p role={messageKind}>{message}</p>}
-    {can('reservation.settings') && <form onSubmit={saveHours}>
+    {showSettings && can('reservation.settings') && <form onSubmit={saveHours}>
       <label htmlFor="pickup-hours">Plazo de recogida (1 a 8 horas)</label>
       <input id="pickup-hours" type="number" min="1" max="8" value={hours} onChange={event => setHours(event.target.value)} />
       <button type="submit" disabled={busy}>Guardar plazo</button>
