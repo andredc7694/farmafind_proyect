@@ -72,8 +72,9 @@ Trabajar de forma continua y autónoma, deteniéndose **solo** en las puertas de
 - Mantener `docs/seguimiento/ESTADO.md` con el paso de Spec Kit de cada incremento.
 
 ## Flujo de ramas definitivo (autorizado por Andre, 2026-11-23)
-- **Un incremento, una rama:** . Crearla al empezar el incremento, partiendo del  **actualizado**, y publicarla con **push** después de cada lote probado. Nada de commits que queden solo en local. Push a ramas de trabajo: autorizado de forma permanente. Nunca force push.
-- **Al aceptar Andre el incremento (Puerta 1), antes de pasar al siguiente:** integrar la rama en  con el método que permitan las protecciones reales de GitHub y la Constitution 2.0.0. Si exigen PR: abrir el PR con , verificar que pasen los controles y fusionarlo **solo cuando Andre lo confirme**. El PR y el merge a  son una puerta: pedir confirmación explícita **cada vez**, con el resumen de lo que se integra.
-- **Después de integrar:** actualizar  local y **solo entonces** crear la rama del incremento siguiente.
-- Usar  (GitHub CLI) para PR y merge. Comprobar que esté instalado y con sesión; si falta, guiar a Andre para iniciar sesión por navegador (). **Nunca pedir ni pegar tokens** en archivos ni chat.
-- Excepción histórica:  se creó desde  (F02.1 aún no integrada en ).
+- **Un incremento, una rama:** `feat/<fase>-<nombre>`. Crearla al empezar el incremento, partiendo del `main` **actualizado**, y publicarla con **push** después de cada lote probado. No dejar commits solo en local. Push a ramas de trabajo: autorizado de forma permanente. Nunca force push.
+- **Al aceptar Andre el incremento (Puerta 1), antes de pasar al siguiente:** integrar la rama en `main` con el método que permitan las protecciones reales de GitHub y la Constitution 2.0.0. Si exigen PR: abrir el PR con `gh`, verificar que pasen los controles y fusionarlo **solo cuando Andre lo confirme**. PR y merge a `main` son una puerta: pedir confirmación explícita **cada vez**, con el resumen de lo que se integra.
+- **Después de integrar:** actualizar `main` local y **solo entonces** crear la rama del incremento siguiente.
+- Usar `gh` (GitHub CLI) para PR y merge. Comprobar que esté instalado y con sesión; si falta, guiar a Andre para iniciar sesión por navegador (`gh auth login`). **Nunca pedir ni pegar tokens** en archivos ni chat.
+- Excepción histórica: `feat/f011-identidad-personal` se creó desde `feat/f021-importacion-inteligente` (F02.1 aún no integrada en `main`).
+
