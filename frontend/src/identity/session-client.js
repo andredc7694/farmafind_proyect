@@ -34,6 +34,7 @@ export function createSessionClient(fetchImpl = fetch) {
       if (!response.ok) throw genericFailure();
       return response.json();
     },
+    changeTemporaryPassword: newPassword => mutate('/api/v1/auth/password/change-temporary', { newPassword }),
     selectPharmacy: pharmacyId => mutate('/api/v1/me/active-pharmacy', { pharmacyId }, 'PUT'),
     async session() {
       const response = await fetchImpl(`${base}/session`, { credentials: 'same-origin', cache: 'no-store' });

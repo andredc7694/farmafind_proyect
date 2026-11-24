@@ -37,8 +37,8 @@ export function AuthView({ status = 'anonymous', error = false, notice = null, p
     </form>
     <form onSubmit={event => submitCredentials(event, onLogin)}>
       <h3>Iniciar sesión</h3>
-      <label htmlFor="login-email">Correo electrónico</label>
-      <input id="login-email" name="email" type="email" autoComplete="username" required />
+      <label htmlFor="login-email">Usuario o correo electrónico</label>
+      <input id="login-email" name="email" type="text" autoComplete="username" required maxLength={254} />
       <label htmlFor="login-password">Contraseña</label>
       <input id="login-password" name="password" type="password" autoComplete="current-password" required />
       <button type="submit" disabled={status === 'loading'}>Iniciar sesión</button>
