@@ -65,20 +65,13 @@ export function createAdminMembershipRouter(identity: LiveSession, management: L
     catch (error) { sendFailure(error, response); }
   });
 
+  // F01.1 (decisión A, Puerta 6, 2026-11-23): la concesión directa por userId se retiró; la vinculación de
+  // cuentas existentes solo ocurre por invitación aceptada (POST /pharmacies/{id}/staff/invitations).
+  // La ruta se conserva únicamente porque el contrato F01 histórico la documenta; no concede nada.
   router.post('/pharmacies/:pharmacyId/memberships', security.requireCsrf, async (request, response) => {
     const actor = await session(request, response);
     if (!actor) return;
-    const pharmacyId = String(request.params.pharmacyId);
-    const body = request.body as unknown;
-    if (!uuid.test(pharmacyId) || !exactBody(body, ['userId', 'role']) ||
-        typeof body.userId !== 'string' || !uuid.test(body.userId) || body.role !== 'TRABAJADOR') {
-      sendIdentityError(response, 400, 'BAD_REQUEST', 'Entrada no valida'); return;
-    }
-    if (body.userId === actor.userId) {
-      sendIdentityError(response, 403, 'FORBIDDEN', 'Permiso insuficiente'); return;
-    }
-    try { response.status(201).json(await management.grant(actor.secret, pharmacyId, body.userId, 'TRABAJADOR')); }
-    catch (error) { sendFailure(error, response); }
+    sendIdentityError(response, 410, 'GONE', 'Esta operación fue reemplazada por las invitaciones de personal');
   });
 
   router.patch('/pharmacies/:pharmacyId/memberships/:membershipId', security.requireCsrf,

@@ -85,6 +85,22 @@ export interface StaffMemberRow {
   readonly capabilities: readonly string[];
 }
 
+export interface InvitationRow {
+  readonly id: string;
+  /** Alias, nombre o correo enmascarado: nunca el correo completo. */
+  readonly destination: string;
+  readonly state: 'PENDIENTE' | 'ACEPTADA' | 'RECHAZADA' | 'VENCIDA' | 'REVOCADA';
+  readonly createdAt: Date;
+  readonly expiresAt: Date;
+}
+
+export interface MyInvitationRow {
+  readonly id: string;
+  readonly pharmacyName: string;
+  readonly state: 'PENDIENTE';
+  readonly expiresAt: Date;
+}
+
 /** F01.1: transacción de personal dentro de la farmacia ya validada por la sesión viva. */
 export interface StaffTransaction {
   useAuthorizedPharmacy(actorUserId: string, pharmacyId: string): Promise<Membership>;
@@ -93,6 +109,13 @@ export interface StaffTransaction {
   createStaffAccount(input: { pharmacyId: string; alias: string; displayName: string; unusableHash: string;
     temporaryKeyHash: string; capabilities: readonly string[] }): Promise<{ userId: string; expiresAt: Date }>;
   listStaff(pharmacyId: string): Promise<readonly StaffMemberRow[]>;
+  inviteStaff(pharmacyId: string, email: string): Promise<void>;
+  listInvitations(pharmacyId: string): Promise<readonly InvitationRow[]>;
+  revokeInvitation(pharmacyId: string, invitationId: string): Promise<void>;
+  setStaffCapabilities(pharmacyId: string, membershipId: string, capabilities: readonly string[]): Promise<void>;
+  listMyInvitations(): Promise<readonly MyInvitationRow[]>;
+  acceptInvitation(invitationId: string): Promise<string>;
+  declineInvitation(invitationId: string): Promise<void>;
 }
 
 export interface StaffUnitOfWork {

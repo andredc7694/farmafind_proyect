@@ -85,10 +85,9 @@ class PgIdentityTransaction implements AdminMembershipTransaction {
   }
 
   async revokeWorker(pharmacyId: string, membershipId: string): Promise<WorkerMembershipRow | null> {
-    const result = await this.client.query(`UPDATE f01.usuario_farmacia
-      SET estado='REVOCADA',changed_by_usuario_id=$3,updated_at=now()
-      WHERE id=$1 AND farmacia_id=$2 AND rol='TRABAJADOR' AND estado='ACTIVA'
-      RETURNING id,usuario_id,farmacia_id,estado`, [membershipId, pharmacyId, this.actorUserId]);
+    // F01.1: la base revoca la membresía y sus delegaciones y, si no queda ninguna activa, cierra las sesiones.
+    const result = await this.client.query('SELECT id,usuario_id,farmacia_id,estado FROM f01.revoke_staff_membership($1,$2)',
+      [pharmacyId, membershipId]);
     return result.rows.length === 1 ? workerRow(result.rows[0]) : null;
   }
 

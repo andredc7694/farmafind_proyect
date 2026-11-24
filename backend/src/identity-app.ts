@@ -11,6 +11,8 @@ import { createAdminMembershipRouter } from './modules/usuarios/presentation/adm
 import { createRestrictedSessionGuard } from './modules/usuarios/presentation/auth-middleware.js';
 import { createStaffRouter } from './modules/usuarios/presentation/staff-router.js';
 import { ManageStaff } from './modules/usuarios/application/manage-staff.js';
+import { ManageStaffAccess } from './modules/usuarios/application/manage-staff-access.js';
+import { createStaffAccessRouter } from './modules/usuarios/presentation/staff-access-router.js';
 import { PgStaffUnitOfWork } from './modules/usuarios/infrastructure/staff-unit-of-work.js';
 import { ManagePlatformAuthorizations } from './modules/usuarios/application/manage-platform-authorizations.js';
 import { PgPlatformAuthorizationUnitOfWork } from './modules/usuarios/infrastructure/platform-authorization-repository.js';
@@ -161,7 +163,9 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       app.use('/api/v1',createPharmacyProfileRouter(new ManagePharmacyProfile(tenantTransactions),http));
     }
     app.use('/api/v1', createAdminMembershipRouter(identity, management, http));
-    app.use('/api/v1', createStaffRouter(identity, new ManageStaff(new PgStaffUnitOfWork(tenantTransactions), hasher), http));
+    const staffTransactions = new PgStaffUnitOfWork(tenantTransactions);
+    app.use('/api/v1', createStaffRouter(identity, new ManageStaff(staffTransactions, hasher), http));
+    app.use('/api/v1', createStaffAccessRouter(identity, new ManageStaffAccess(staffTransactions), http));
     const platformManagement = new ManagePlatformAuthorizations(new PgPlatformAuthorizationUnitOfWork(tenantTransactions));
     app.use('/api/v1', createPlatformAuthorizationRouter(identity, platformManagement, http));
     app.use('/api/v1', createCatalogRouter(new ListCatalog(new AuthorizedCatalogReader(tenantTransactions)), http));

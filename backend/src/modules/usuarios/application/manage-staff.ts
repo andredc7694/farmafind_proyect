@@ -1,8 +1,8 @@
 import { randomBytes } from 'node:crypto';
-import { MembershipConflictError, MembershipForbiddenError, MembershipNotVisibleError } from './manage-memberships.js';
+import { authorizeStaffManager, mapStaffDatabaseError } from './staff-errors.js';
 import type { PasswordHasher, StaffMemberRow, StaffTransaction, StaffUnitOfWork } from './ports.js';
 import { canonicalAlias } from '../domain/alias.js';
-import { assertCanManageStaff, StaffPolicyError, validateRequestedCapabilities } from '../domain/staff-policy.js';
+import { validateRequestedCapabilities } from '../domain/staff-policy.js';
 import { generateTemporaryKey, normalizeTemporaryKey } from '../domain/temporary-key-policy.js';
 
 export interface CreatedStaff {
@@ -18,27 +18,10 @@ export class ManageStaff {
   constructor(private readonly transactions: StaffUnitOfWork, private readonly passwords: PasswordHasher,
     private readonly random: (size: number) => Buffer = randomBytes) {}
 
-  private async authorize(transaction: StaffTransaction, actorUserId: string, pharmacyId: string): Promise<void> {
-    let membership;
-    try { membership = await transaction.useAuthorizedPharmacy(actorUserId, pharmacyId); }
-    catch { throw new MembershipNotVisibleError(); }
-    const pharmacy = await transaction.findPharmacyReference(pharmacyId);
-    const delegations = await transaction.listOwnDelegations(membership.id);
-    try {
-      assertCanManageStaff({ actorUserId, actorRole: membership.roleCode, actorMembershipState: membership.state,
-        actorPermissionCodes: delegations.filter(item => item.state === 'ACTIVA').map(item => item.capabilityCode),
-        actorPharmacyId: membership.pharmacyId, pharmacyId, pharmacyState: pharmacy?.state ?? 'INACTIVA',
-        targetUserId: null, requestedRole: 'TRABAJADOR' });
-    } catch (error) {
-      if (error instanceof StaffPolicyError) throw new MembershipForbiddenError();
-      throw error;
-    }
-  }
-
   list(secret: string, pharmacyId: string): Promise<readonly StaffMemberRow[]> {
     return this.transactions.runStaff(secret, async (transaction, actorUserId) => {
-      await this.authorize(transaction, actorUserId, pharmacyId);
-      try { return await transaction.listStaff(pharmacyId); } catch (error) { throw this.mapDatabaseError(error); }
+      await authorizeStaffManager(transaction, actorUserId, pharmacyId);
+      try { return await transaction.listStaff(pharmacyId); } catch (error) { throw mapStaffDatabaseError(error); }
     });
   }
 
@@ -55,20 +38,12 @@ export class ManageStaff {
     const [temporaryKeyHash, unusableHash] = await Promise.all([
       this.passwords.hash(normalized), this.passwords.hash(this.random(32).toString('hex'))]);
     return this.transactions.runStaff(secret, async (transaction, actorUserId) => {
-      await this.authorize(transaction, actorUserId, pharmacyId);
+      await authorizeStaffManager(transaction, actorUserId, pharmacyId);
       try {
         const created = await transaction.createStaffAccount({ pharmacyId, alias, displayName, unusableHash,
           temporaryKeyHash, capabilities });
         return { userId: created.userId, alias, temporaryPassword: temporaryKey, expiresAt: created.expiresAt };
-      } catch (error) { throw this.mapDatabaseError(error); }
+      } catch (error) { throw mapStaffDatabaseError(error); }
     });
-  }
-
-  private mapDatabaseError(error: unknown): Error {
-    const code = (error as { code?: string }).code;
-    if (code === '23505') return new MembershipConflictError();
-    if (code === '42501') return new MembershipForbiddenError();
-    if (code === '22023') return new Error('Entrada inválida');
-    return error instanceof Error ? error : new Error('Error');
   }
 }
