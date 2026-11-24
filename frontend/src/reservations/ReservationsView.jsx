@@ -29,7 +29,7 @@ export function ReservationsView({ pharmacyId, capabilities = null }) {
     {message && <p role="alert">{message}</p>}
     {!pharmacyId && <p>Para solicitar una reserva, elige una oferta en <a href="/search">la búsqueda pública</a>. Tus reservas propias se muestran aquí aunque no pertenezcas a una farmacia.</p>}
     <CreateReservation pharmacyId={targetPharmacyId} medicationId={offerMedicationId} busy={busy}
-      onCreate={(medicationId, quantity) => action(() => client.create(targetPharmacyId, medicationId, quantity))} />
+      onCreate={(medicationId, quantity, preference) => action(() => client.create(targetPharmacyId, medicationId, quantity, preference))} />
     <OwnReservations items={items} busy={busy} onCancel={id => action(() => client.cancel(id))} />
     {pharmacyId && <PharmacyReservations client={client} pharmacyId={pharmacyId} capabilities={capabilities} />}
   </section>;
