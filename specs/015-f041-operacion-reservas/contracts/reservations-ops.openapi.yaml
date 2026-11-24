@@ -1,0 +1,137 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F04.1 — operación de reservas (adición aditiva a F04)
+  version: 0.1.0
+  description: >
+    Tres operaciones nuevas de lectura y una extensión opcional de la creación de reservas.
+    No cambia estados, vencimientos ni stock. Autoriza el servidor; el contexto de farmacia se verifica
+    en la transacción y con RLS.
+servers: [{ url: /api/v1 }]
+paths:
+  /farmacias/{pharmacyId}/reservas/centro:
+    parameters: [{ $ref: '#/components/parameters/PharmacyId' }]
+    get:
+      tags: [AttentionCenter]
+      summary: Instantánea de la cola de atención (PENDIENTE y CONFIRMADA) con filtros
+      description: El cliente la repite cada 30 s y reemplaza su lista por la instantánea más reciente.
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - { name: estado, in: query, required: false, schema: { type: string, enum: [PENDIENTE, CONFIRMADA] } }
+        - { name: desde, in: query, required: false, schema: { type: string, format: date-time } }
+        - { name: hasta, in: query, required: false, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: Cola autorizada de la farmacia
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttentionSnapshot' }
+        '400': { description: Filtro inválido }
+        '401': { description: Sin sesión }
+        '403': { description: Sin capacidad reservation.read }
+        '404': { description: Farmacia no visible }
+  /farmacias/{pharmacyId}/reservas/historial:
+    parameters: [{ $ref: '#/components/parameters/PharmacyId' }]
+    get:
+      tags: [History]
+      summary: Historial paginado de reservas cerradas de la farmacia
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - { name: estado, in: query, required: false, schema: { type: string, enum: [ENTREGADA, CANCELADA, EXPIRADA] } }
+        - { name: desde, in: query, required: false, schema: { type: string, format: date-time } }
+        - { name: hasta, in: query, required: false, schema: { type: string, format: date-time } }
+        - { name: limite, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        '200':
+          description: Página del historial
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HistoryPage' }
+        '400': { description: Filtro o cursor inválido }
+        '401': { description: Sin sesión }
+        '403': { description: Sin capacidad reservation.read }
+        '404': { description: Farmacia no visible }
+  /farmacias/{pharmacyId}/reservas/historial/exportar:
+    parameters: [{ $ref: '#/components/parameters/PharmacyId' }]
+    get:
+      tags: [History]
+      summary: Exportar el historial de la farmacia como CSV (sin datos personales del cliente)
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - { name: estado, in: query, required: false, schema: { type: string, enum: [ENTREGADA, CANCELADA, EXPIRADA] } }
+        - { name: desde, in: query, required: false, schema: { type: string, format: date-time } }
+        - { name: hasta, in: query, required: false, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: Archivo CSV UTF-8 (máximo 5000 filas)
+          headers:
+            X-Export-Truncated: { schema: { type: string, enum: ['true', 'false'] } }
+            Content-Disposition: { schema: { type: string } }
+          content:
+            text/csv: { schema: { type: string } }
+        '400': { description: Filtro inválido }
+        '401': { description: Sin sesión }
+        '403': { description: Sin capacidad reservation.read }
+        '404': { description: Farmacia no visible }
+x-extension-of-f04:
+  POST /reservas: >
+    El cuerpo admite opcionalmente `pickupPreference` (ver PickupPreference). Sin ella el comportamiento es el de F04.
+    Una preferencia inválida o fuera de la ventana de la farmacia responde 422. La respuesta y los listados incluyen
+    `pickupPreference` (o null). No cambia `pickupExpiresAt`.
+components:
+  securitySchemes:
+    sessionCookie: { type: apiKey, in: cookie, name: ff_session }
+  parameters:
+    PharmacyId: { name: pharmacyId, in: path, required: true, schema: { type: string, format: uuid } }
+  schemas:
+    PickupPreference:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [type, minutes]
+          properties: { type: { const: MINUTES }, minutes: { type: integer, enum: [30, 60, 120] } }
+        - type: object
+          additionalProperties: false
+          required: [type, start, end]
+          properties:
+            type: { const: WINDOW }
+            start: { type: string, format: date-time }
+            end: { type: string, format: date-time, description: 'Dentro de [ahora, ahora + plazo de la farmacia]; duración 15–120 min.' }
+      description: Orientación del cliente; no es cita ni cambia el vencimiento.
+    AttentionItem:
+      type: object
+      required: [id, state, quantity, createdAt, expiresAt]
+      properties:
+        id: { type: string, format: uuid }
+        state: { type: string, enum: [PENDIENTE, CONFIRMADA] }
+        quantity: { type: integer }
+        medication: { type: string }
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time, description: Vencimiento de respuesta (PENDIENTE) o de recogida (CONFIRMADA), sin cambios. }
+        pickupPreference: { oneOf: [{ $ref: '#/components/schemas/PickupPreference' }, { type: 'null' }] }
+    AttentionSnapshot:
+      type: object
+      required: [generatedAt, items]
+      properties:
+        generatedAt: { type: string, format: date-time }
+        items: { type: array, items: { $ref: '#/components/schemas/AttentionItem' } }
+    HistoryItem:
+      type: object
+      required: [id, code, state, quantity, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string, description: Primeros 8 caracteres del identificador (sin datos del cliente). }
+        state: { type: string, enum: [ENTREGADA, CANCELADA, EXPIRADA] }
+        quantity: { type: integer }
+        medication: { type: string }
+        createdAt: { type: string, format: date-time }
+        confirmedAt: { type: [string, 'null'], format: date-time }
+        pickupExpiresAt: { type: [string, 'null'], format: date-time }
+        closeReason: { type: [string, 'null'] }
+        pickupPreference: { oneOf: [{ $ref: '#/components/schemas/PickupPreference' }, { type: 'null' }] }
+    HistoryPage:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/HistoryItem' } }
+        nextCursor: { type: [string, 'null'] }

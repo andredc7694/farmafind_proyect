@@ -2,10 +2,10 @@
 
 **Feature Branch**: `feat/f041-operacion-reservas`
 **Created**: 2026-11-24
-**Status**: Borrador pendiente de aprobación de Andre (Puerta 3). Spec Kit: *specify* hecho; *clarify* con 3 decisiones abiertas.
+**Status**: Especificación aprobada el 2026-11-24 (ver [approval.md](approval.md)); *clarify* resuelto con las recomendaciones A/A/A (revisables). Plan y tasks creados, pendientes de aprobación.
 **Input**: Documento Maestro v3.2 MEJ-013 y MEJ-014 (HU21–HU22; RF34–RF36; AC14–AC15); roadmap v3.2, orden 4. Conserva ADR-F04-SEC-001 y F04-TIME-01 (vencimiento fijo de 1–8 h, 4 por defecto, desde la confirmación).
 
-## Decisiones abiertas (se resuelven en *clarify*, después de aprobar esta spec)
+## Clarificaciones resueltas (2026-11-24, recomendaciones A/A/A aplicadas por Claude; Andre puede cambiarlas)
 
 - **D-01 · Franjas «dentro de horario»**: hoy FarmaFind no guarda el horario de atención de las farmacias. ¿Qué significa «dentro de horario»? Se propone (A) sin horario semanal: la preferencia solo debe caber antes del vencimiento de la reserva; (B) añadir un horario semanal opcional por farmacia; (C) postergar las franjas y dejar solo 30/60/120 min.
 - **D-02 · Exportación del historial**: formato y alcance. Se propone (A) CSV del historial de la farmacia activa con filtros de estado y fechas, sin datos personales del cliente más allá de un código de reserva; (B) CSV con nombre del cliente; (C) sin exportación en este incremento.
