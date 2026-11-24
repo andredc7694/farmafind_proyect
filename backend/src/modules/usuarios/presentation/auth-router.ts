@@ -39,8 +39,21 @@ function handleError(error: unknown, response: import('express').Response): void
   }
 }
 
+interface RecoveryEndpoints {
+  requestPasswordReset(email: unknown, ip: string): Promise<void>;
+  confirmPasswordReset(token: unknown, newPassword: unknown, ip: string): Promise<void>;
+  verifyEmail(token: unknown, ip: string): Promise<void>;
+  requestEmailVerification(secret: string): Promise<void>;
+}
+
+function exactKeys(body: unknown, keys: readonly string[]): body is Record<string, unknown> {
+  return body !== null && typeof body === 'object' && !Array.isArray(body) &&
+    Object.keys(body).length === keys.length && keys.every(key => Object.hasOwn(body, key));
+}
+
 /** Mounted only when F01 identity composition provides real scoped dependencies. */
-export function createIdentityRouter(identity: IdentityEndpoints, options: AuthHttpOptions): Router {
+export function createIdentityRouter(identity: IdentityEndpoints, options: AuthHttpOptions,
+  recovery?: RecoveryEndpoints): Router {
   const router = Router();
   const security = authHttpSecurity(options);
   router.use((request, response, next) => {
@@ -80,6 +93,33 @@ export function createIdentityRouter(identity: IdentityEndpoints, options: AuthH
       response.status(204).end();
     } catch (error) { handleError(error, response); }
   });
+  if (recovery) {
+    // Respuesta 202 siempre igual, exista o no la cuenta (F011-FR-010, SC-007).
+    router.post('/auth/password/reset/request', security.requireCsrf, async (request, response) => {
+      if (!exactKeys(request.body, ['email'])) { sendIdentityError(response, 400, 'BAD_REQUEST', 'Entrada inválida'); return; }
+      try { await recovery.requestPasswordReset(request.body.email, localClientIp(request)); response.status(202).end(); }
+      catch (error) { handleError(error, response); }
+    });
+    router.post('/auth/password/reset/confirm', security.requireCsrf, async (request, response) => {
+      if (!exactKeys(request.body, ['token', 'newPassword'])) { sendIdentityError(response, 400, 'BAD_REQUEST', 'Entrada inválida'); return; }
+      try {
+        await recovery.confirmPasswordReset(request.body.token, request.body.newPassword, localClientIp(request));
+        security.clearSession(response);
+        response.status(204).end();
+      } catch (error) { handleError(error, response); }
+    });
+    router.post('/auth/email/verify', security.requireCsrf, async (request, response) => {
+      if (!exactKeys(request.body, ['token'])) { sendIdentityError(response, 400, 'BAD_REQUEST', 'Entrada inválida'); return; }
+      try { await recovery.verifyEmail(request.body.token, localClientIp(request)); response.status(204).end(); }
+      catch (error) { handleError(error, response); }
+    });
+    router.post('/me/email/verification', security.requireCsrf, async (request, response) => {
+      const secret = readSessionCookie(request, options);
+      if (!secret) { sendIdentityError(response, 401, 'UNAUTHENTICATED', 'Sesión no válida'); return; }
+      try { await recovery.requestEmailVerification(secret); response.status(202).end(); }
+      catch (error) { handleError(error, response); }
+    });
+  }
   router.get('/auth/session', async (request, response) => {
     const secret = readSessionCookie(request, options);
     if (!secret) { sendIdentityError(response, 401, 'UNAUTHENTICATED', 'Sesión no válida'); return; }

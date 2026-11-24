@@ -1,6 +1,7 @@
 import type { AbuseRepository, AuditWriter, AuthExtras, AuthUnitOfWork, SessionRepository, UserRepository } from '../../application/ports.js';
 import { PgTemporaryCredentialRepository } from '../temporary-credential-repository.js';
 import { PgIdentityAuditRepository } from '../identity-audit-repository.js';
+import { PgAccountTokenRepository } from '../account-token-repository.js';
 import { PgSessionRepository, PgUserRepository } from '../identity-repository.js';
 import { PgAbuseRepository } from '../abuse-repository.js';
 import { PgAuthAuditRepository } from '../audit-repository.js';
@@ -34,9 +35,11 @@ export class PgAuthUnitOfWork implements AuthUnitOfWork {
       await client.query('BEGIN');
       inTransaction = true;
       await client.query('SET LOCAL ROLE f01_auth');
+      const abuse = new PgAbuseRepository(client, this.abuseHmacKey);
       const result = await work(new PgUserRepository(client), new PgSessionRepository(client),
-        new PgAbuseRepository(client, this.abuseHmacKey), new PgAuthAuditRepository(client),
-        { credentials: new PgTemporaryCredentialRepository(client), identityAudit: new PgIdentityAuditRepository(client) });
+        abuse, new PgAuthAuditRepository(client),
+        { credentials: new PgTemporaryCredentialRepository(client), identityAudit: new PgIdentityAuditRepository(client),
+          tokens: new PgAccountTokenRepository(client), budgets: abuse });
       await client.query('COMMIT');
       inTransaction = false;
       return result;

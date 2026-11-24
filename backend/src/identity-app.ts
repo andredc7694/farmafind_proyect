@@ -12,6 +12,8 @@ import { createRestrictedSessionGuard } from './modules/usuarios/presentation/au
 import { createStaffRouter } from './modules/usuarios/presentation/staff-router.js';
 import { ManageStaff } from './modules/usuarios/application/manage-staff.js';
 import { ManageStaffAccess } from './modules/usuarios/application/manage-staff-access.js';
+import { AccountRecovery } from './modules/usuarios/application/account-recovery.js';
+import type { AccountMessageDelivery } from './modules/usuarios/application/account-messages.js';
 import { createStaffAccessRouter } from './modules/usuarios/presentation/staff-access-router.js';
 import { PgStaffUnitOfWork } from './modules/usuarios/infrastructure/staff-unit-of-work.js';
 import { ManagePlatformAuthorizations } from './modules/usuarios/application/manage-platform-authorizations.js';
@@ -84,6 +86,8 @@ export interface LocalIdentityRuntimeConfig {
   abuseKey: Buffer;
   allowedOrigin: string;
   cookieSecure: false;
+  /** F01.1: entrega de mensajes de cuenta. En TEST, el simulador local; sin él no se envía nada. */
+  accountMessages?: AccountMessageDelivery;
   search?: SearchRuntimeConfig;
   reservations?: ReservationRuntimeConfig;
   /** F07 is limited to isolated local TEST databases until persistent migration is authorized. */
@@ -140,7 +144,8 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     const geoRouter=geoRepository ? createGeolocationRouter(new ListNearbyPharmacies(geoRepository)) : undefined;
     // F01.1: la guardia de sesión restringida se monta antes que cualquier ruta de negocio.
     const restrictedGuard = createRestrictedSessionGuard({ ...http, prefix: '/api/v1', restrictionOf: secret => identity.restrictionOf(secret) });
-    const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http),geoRouter,restrictedGuard);
+    const app = createApp(createIdentityRouter(identity, http, new AccountRecovery(new PgAuthUnitOfWork(authPool, config.abuseKey), hasher,
+      { now: () => new Date() }, config.accountMessages ?? null)), createMembershipRouter(identity, memberships, http),geoRouter,restrictedGuard);
     let invalidator: RedisSearchInvalidator | undefined;
     if(config.pharmaciesTest){
       const authUrl=new URL(config.authDatabaseUrl),tenantUrl=new URL(config.tenantDatabaseUrl);

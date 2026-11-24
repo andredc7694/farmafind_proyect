@@ -25,6 +25,24 @@ export class ManageStaff {
     });
   }
 
+  /** Recuperación de un trabajador sin correo: nueva clave temporal (una sola vez, 24 h); invalida la anterior. */
+  async issueTemporaryKey(secret: string, pharmacyId: string, userId: unknown): Promise<{ temporaryPassword: string; expiresAt: Date }> {
+    if (typeof userId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)) {
+      throw new Error('Entrada inválida');
+    }
+    const temporaryKey = generateTemporaryKey(this.random);
+    const normalized = normalizeTemporaryKey(temporaryKey);
+    if (!normalized) throw new Error('No se pudo generar la clave temporal');
+    const keyHash = await this.passwords.hash(normalized);
+    return this.transactions.runStaff(secret, async (transaction, actorUserId) => {
+      await authorizeStaffManager(transaction, actorUserId, pharmacyId);
+      try {
+        const expiresAt = await transaction.issueTemporaryKey(pharmacyId, userId, keyHash);
+        return { temporaryPassword: temporaryKey, expiresAt };
+      } catch (error) { throw mapStaffDatabaseError(error); }
+    });
+  }
+
   async create(secret: string, pharmacyId: string,
     input: { alias: unknown; displayName: unknown; capabilities?: unknown }): Promise<CreatedStaff> {
     const alias = canonicalAlias(input.alias);

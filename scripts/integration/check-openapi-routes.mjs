@@ -75,7 +75,7 @@ if (process.argv.includes('--f011-contract') || process.argv.includes('--f011-ro
   const file='specs/014-f011-identidad-personal/contracts/identity-staff.openapi.yaml';
   const source=readFileSync(path.join(root,file),'utf8');
   const operations=contractOperations(file,'/api/v1');
-  assert.equal(operations.length,25,'El inventario propuesto F01.1 cambió; revisar contrato');
+  assert.equal(operations.length,26,'El inventario propuesto F01.1 cambió; revisar contrato');
   assert.equal(new Set(operations).size,operations.length,'Operación F01.1 duplicada');
   const defined=new Set([...source.matchAll(/^    ([A-Za-z][A-Za-z0-9]+):/gm)].map(match=>match[1]));
   for(const match of source.matchAll(/\$ref: '#\/components\/(?:schemas|parameters|responses)\/([^']+)'/g)){

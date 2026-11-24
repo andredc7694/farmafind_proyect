@@ -51,9 +51,21 @@ export interface TemporaryCredentialRepository {
   completePasswordChange(newPasswordHash: string): Promise<void>;
 }
 
+/** F01.1 US3: tokens de un solo uso para restablecer la clave o verificar el correo (solo se guarda su hash). */
+export interface AccountTokenRepository {
+  /** La vigencia la calcula la base de datos con su propio reloj (evita desfases con la aplicación). */
+  create(input: { userId: string; purpose: 'VERIFICAR_CORREO' | 'RESTABLECER_CLAVE'; tokenHash: Buffer;
+    ttlSeconds: number }): Promise<void>;
+  /** false si el token no existe, ya se usó o venció (sin distinguir). */
+  completePasswordReset(tokenHash: Buffer, newPasswordHash: string): Promise<boolean>;
+  verifyEmail(tokenHash: Buffer): Promise<boolean>;
+}
+
 export interface AuthExtras {
   readonly credentials: TemporaryCredentialRepository;
   readonly identityAudit: IdentityAuditSink;
+  readonly tokens: AccountTokenRepository;
+  readonly budgets: AbuseBudgetRepository;
 }
 
 export interface AuthUnitOfWork {
@@ -109,6 +121,7 @@ export interface StaffTransaction {
   createStaffAccount(input: { pharmacyId: string; alias: string; displayName: string; unusableHash: string;
     temporaryKeyHash: string; capabilities: readonly string[] }): Promise<{ userId: string; expiresAt: Date }>;
   listStaff(pharmacyId: string): Promise<readonly StaffMemberRow[]>;
+  issueTemporaryKey(pharmacyId: string, userId: string, keyHash: string): Promise<Date>;
   inviteStaff(pharmacyId: string, email: string): Promise<void>;
   listInvitations(pharmacyId: string): Promise<readonly InvitationRow[]>;
   revokeInvitation(pharmacyId: string, invitationId: string): Promise<void>;

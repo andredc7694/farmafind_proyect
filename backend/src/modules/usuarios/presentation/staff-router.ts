@@ -12,6 +12,7 @@ interface LiveSession { session(secret: string): Promise<{ userId: string }> }
 interface StaffManagement {
   list(secret: string, pharmacyId: string): Promise<readonly StaffMemberRow[]>;
   create(secret: string, pharmacyId: string, input: { alias: unknown; displayName: unknown; capabilities?: unknown }): Promise<CreatedStaff>;
+  issueTemporaryKey?(secret: string, pharmacyId: string, userId: unknown): Promise<{ temporaryPassword: string; expiresAt: Date }>;
 }
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -72,6 +73,19 @@ export function createStaffRouter(identity: LiveSession, staff: StaffManagement,
       const created = await staff.create(secret, pharmacyId, input);
       response.status(201).json({ userId: created.userId, alias: created.alias,
         temporaryPassword: created.temporaryPassword, expiresAt: created.expiresAt.toISOString() });
+    } catch (error) { sendFailure(error, response); }
+  });
+  router.post('/pharmacies/:pharmacyId/staff/:userId/temporary-key', security.requireCsrf, async (request, response) => {
+    const secret = await session(request, response);
+    if (!secret) return;
+    const pharmacyId = String(request.params.pharmacyId);
+    const userId = String(request.params.userId);
+    if (!staff.issueTemporaryKey || !uuid.test(pharmacyId) || !uuid.test(userId)) {
+      sendIdentityError(response, 400, 'BAD_REQUEST', 'Entrada no valida'); return;
+    }
+    try {
+      const issued = await staff.issueTemporaryKey(secret, pharmacyId, userId);
+      response.status(201).json({ temporaryPassword: issued.temporaryPassword, expiresAt: issued.expiresAt.toISOString() });
     } catch (error) { sendFailure(error, response); }
   });
   return router;

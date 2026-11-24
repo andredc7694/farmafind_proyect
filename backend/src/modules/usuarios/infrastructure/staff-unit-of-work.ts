@@ -41,6 +41,12 @@ class PgStaffTransaction implements StaffTransaction {
     return result.rows.map(staffRow);
   }
 
+  async issueTemporaryKey(pharmacyId: string, userId: string, keyHash: string): Promise<Date> {
+    const result = await this.client.query('SELECT f01.issue_temporary_key($1,$2,$3) AS expires_at',
+      [this.id(pharmacyId), this.id(userId), keyHash]);
+    return result.rows[0].expires_at as Date;
+  }
+
   private id(value: string): string {
     if (!uuid.test(value)) throw new Error('Entrada inválida');
     return value;

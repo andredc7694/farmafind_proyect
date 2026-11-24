@@ -46,7 +46,7 @@ testGroup('migraciones F01 con PostgreSQL real y BD ficticia nueva', () => {
     expect(before.rows[0]?.relation).toBeNull();
 
     const first = await migrateTestDatabase(testUrl, connect);
-    expect(first.applied).toEqual(['001_identity.sql', '002_memberships.sql', '003_rls_base.sql', '004_rls_private.sql', '005_auth_scope.sql', '006_abuse.sql', '007_auth_audit.sql', '008_access_audit.sql', '009_membership_mutations.sql', '010_platform_authorization.sql', '011_staff_identity.sql', '012_staff_functions.sql', '013_staff_invitations.sql']);
+    expect(first.applied).toEqual(['001_identity.sql', '002_memberships.sql', '003_rls_base.sql', '004_rls_private.sql', '005_auth_scope.sql', '006_abuse.sql', '007_auth_audit.sql', '008_access_audit.sql', '009_membership_mutations.sql', '010_platform_authorization.sql', '011_staff_identity.sql', '012_staff_functions.sql', '013_staff_invitations.sql', '014_account_recovery.sql']);
     const second = await migrateTestDatabase(testUrl, connect);
     expect(second.applied).toEqual([]);
     expect(second.skipped).toEqual(first.applied);
