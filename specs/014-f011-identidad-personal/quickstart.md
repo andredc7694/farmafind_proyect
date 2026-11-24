@@ -39,3 +39,7 @@ Los mensajes de verificación/restablecimiento se escriben en `.cache/f01-mailbo
 ## Cierre
 
 Detener los contenedores encendidos. La aceptación requiere los nueve F011-SC, los casos negativos, revisión humana y evidencia real; aprobar el plan no cierra tareas.
+
+## Clave de cifrado del segundo factor (TEST)
+
+`F01_MFA_KEY_HEX` = 64 caracteres hexadecimales (32 bytes). En TEST se guarda en un archivo ignorado por Git bajo `.cache/` y se carga como variable de entorno; nunca se versiona ni se registra. La validación (`backend/src/config/mfa.ts`) rechaza longitudes incorrectas y claves degeneradas sin mostrar su valor.
