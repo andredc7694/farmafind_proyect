@@ -1,12 +1,11 @@
 # F01.1 — Aceptación humana
 
-**Estado: PENDIENTE de decisión de Andre.** Este archivo se prepara con la evidencia; la decisión no se registra hasta que Andre responda.
+**Estado: ACEPTADA por Andre el 2026-11-24 («acepto»).** Alcance: TEST/DEMO local con datos ficticios, tal como se revisó con la guía [demo-guide.md](demo-guide.md). No cubre bases persistentes ni mensajería real.
 
-- Evidencia técnica: [evidence.md](evidence.md) (lotes 1–7) · convergencia: [convergence.md](convergence.md) · guía de revisión: [demo-guide.md](demo-guide.md).
-- DEMO local preparada y encendida (ver mensaje de entrega para dirección y cuentas ficticias).
+- Evidencia técnica: [evidence.md](evidence.md) (lotes 1–7) · convergencia: [convergence.md](convergence.md).
 
 | Campo | Valor |
 |---|---|
-| Decisión | _pendiente_ (ACEPTO / ACEPTO CON OBSERVACIONES / RECHAZO) |
-| Fecha | _pendiente_ |
-| Observaciones | _pendiente_ |
+| Decisión | **ACEPTO** (mensaje real de Andre: «acepto») |
+| Fecha | 2026-11-24 |
+| Observaciones | Ninguna indicada. Siguen vigentes los límites de convergence.md (revisar el propietario de las funciones SQL definer antes de cualquier base persistente; sin proveedor real de correo). |

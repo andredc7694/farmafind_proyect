@@ -37,3 +37,7 @@
 **Decisión: opción A.** Se retira la concesión directa de membresía por `userId` (`POST /pharmacies/{id}/memberships`): la ruta se conserva únicamente para responder `410 Gone` (sin conceder nada) porque el contrato F01 histórico (carpeta 002, no se modifica) la documenta; la vinculación de cuentas existentes pasa solo por invitación aceptada (F011-FR-004). La revocación (`PATCH`) y el listado se conservan. Las pruebas de F01 que esperaban el 201 se actualizan; la interfaz deja de ofrecer «Conceder rol TRABAJADOR».
 
 **No responde** la pregunta sobre el PR de F02.1 (Puerta 2), que sigue sin autorizar.
+
+## Aceptación humana de F01.1 (T058)
+
+**Fecha:** 2026-11-24. **Responsable:** Andre. **Fuente:** mensaje «acepto» tras la entrega de la DEMO. Decisión: ACEPTO. Autoriza, por su regla permanente de PR, abrir y fusionar con merge commit el PR de F01.1 si está MERGEABLE y CLEAN, sin secretos y con regresión pasada.

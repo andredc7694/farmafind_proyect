@@ -101,7 +101,7 @@ Formato: `- [ ] Txxx [P] [USn] descripción con ruta (requisitos)`. `[P]` = para
 - [X] T055 Ejecutar la DEMO manual en TEST con Alfa/Beta ficticias y preparar la guía de revisión humana (usuarios, contraseñas de prueba, pasos) para el responsable (SC-001–009); depende de T053.
 - [X] T056 Actualizar `traceability.md` con MEJ-015–017/019, HU23–25/27, RF37–41/44–45, AC10–11 y los 16 criterios docentes, con evidencias reales y sin puntajes presumidos (todas las FR/SC); depende de T052–T055.
 - [X] T057 Ejecutar *analyze* y *converge* de Spec Kit, registrar diferencias contra la spec en `specs/014-f011-identidad-personal/convergence.md` y corregir contradicciones (todas las FR); depende de T056.
-- [ ] T058 Preparar `specs/014-f011-identidad-personal/acceptance.md` y solicitar la aceptación humana de F01.1; registrar la decisión y los pendientes solo cuando Andre responda; **nunca autoaprobar**; depende de T057.
+- [X] T058 Preparar `specs/014-f011-identidad-personal/acceptance.md` y solicitar la aceptación humana de F01.1; registrar la decisión y los pendientes solo cuando Andre responda; **nunca autoaprobar**; depende de T057.
 
 ## Dependencies and parallel work
 
