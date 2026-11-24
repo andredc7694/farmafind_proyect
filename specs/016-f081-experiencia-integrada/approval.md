@@ -9,3 +9,6 @@ Andre aprobó la spec sin elegir A/B/C; por su regla de trabajo continuo, **Clau
 - **D-02 = A**: sugerencias 1, 2, 5, 8, 9, 10 y 12 con datos propios; 3 y 4 diferidas; 6 y 7 ya existen (F02.1).
 - **D-03 = A**: tema en el perfil (F01.1) con sesión; en el navegador sin sesión.
 - **D-04 = A**: mapa actual de F07 (OpenStreetMap solo tras clic informado) y elección del punto a mano, sin geocodificación.
+
+## Aprobación de plan.md y tasks.md
+**Fecha:** 2026-11-24. **Responsable:** Andre. **Fuente:** mensaje «apruebo» tras la entrega del plan y las 22 tareas (commit `dbd6db3`). Autoriza implementar por lotes hasta la aceptación humana.

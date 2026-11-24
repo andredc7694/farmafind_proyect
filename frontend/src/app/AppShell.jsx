@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { createSessionClient } from '../identity/session-client.js';
 import { createPharmacyApplicationClient } from '../pharmacies/application-client.js';
-import { accountNavigation, pharmacyNavigation, publicNavigation } from './routes.js';
+import { createProfileClient } from '../identity/profile-client.js';
+import { navigationFor } from './navigation.js';
+import { ThemeSwitcher } from './ThemeSwitcher.jsx';
 
 const client = createSessionClient();
 const applications = createPharmacyApplicationClient();
+const profile = createProfileClient();
 
 export function AppShell({ children, path = window.location.pathname }) {
   const [session, setSession] = useState(null);
@@ -36,11 +39,7 @@ export function AppShell({ children, path = window.location.pathname }) {
     return () => { active = false; window.removeEventListener('farmafind:session-changed', refresh); };
   }, [sessionAware]);
 
-  const links = [...publicNavigation, ...(session ? accountNavigation : [{ href: '/identity', label: 'Mi cuenta' }]),
-    ...pharmacyNavigation(memberships),
-    ...(session && canReviewApplications ? [
-      { href: '/admin/farmacias/solicitudes', label: 'Revisar solicitudes' },
-    ] : [])];
+  const links = navigationFor({ session, memberships, canReview: canReviewApplications });
 
   return <div className="site-frame">
     <a className="skip-link" href="#contenido">Saltar al contenido</a>
@@ -50,6 +49,7 @@ export function AppShell({ children, path = window.location.pathname }) {
         <nav className="site-nav" aria-label="Navegación principal">
           {links.map(link => <a key={link.href} href={link.href} aria-current={path === link.href ? 'page' : undefined}>{link.label}</a>)}
         </nav>
+        <ThemeSwitcher signedIn={Boolean(session)} profile={profile} />
       </div>
     </header>
     <div id="contenido" className="site-content">{children}</div>

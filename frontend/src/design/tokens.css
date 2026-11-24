@@ -1,14 +1,24 @@
 :root {
+  color-scheme: light;
   --ink: #193c3b;
-  --ink-muted: #526a67;
+  --ink-muted: #4a6360;
   --petrol: #103d46;
   --petrol-dark: #082e37;
   --emerald: #087f5b;
   --emerald-dark: #056648;
+  --on-accent: #ffffff;
   --mint: #dff4e9;
   --surface: #ffffff;
+  --surface-soft: #f8fbf9;
   --canvas: #f5f8f6;
+  --tint: #e4f4ed;
+  --tint-2: #edf7f2;
+  --tint-3: #edf4ef;
+  --tint-4: #e1f2ea;
   --line: #d8e5df;
+  --line-strong: #6f8f84;
+  --control-border: #6f8f84;
+  --selection: #b3e4d1;
   --danger: #9e2b30;
   --focus: #c56c18;
   --shadow: 0 12px 34px rgba(17, 60, 57, .08);
@@ -16,4 +26,60 @@
   color: var(--ink);
   background: var(--canvas);
   font-synthesis: none;
+}
+
+/* Tema oscuro explícito. Los valores se repiten (sin variables) en el bloque «sistema» de abajo: una prueba
+   comprueba que ambos coinciden y que todos los pares de contraste cumplen AA. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ink: #e4f1ed;
+  --ink-muted: #b4cbc5;
+  --petrol: #cfe9e2;
+  --petrol-dark: #061f26;
+  --emerald: #3fcf9b;
+  --emerald-dark: #6fe0b5;
+  --on-accent: #04261c;
+  --mint: #1c3a35;
+  --surface: #152625;
+  --surface-soft: #1a2e2c;
+  --canvas: #0e1a19;
+  --tint: #1b3a33;
+  --tint-2: #19332f;
+  --tint-3: #1d3330;
+  --tint-4: #1a3631;
+  --line: #2f4a46;
+  --line-strong: #7fa398;
+  --control-border: #7fa398;
+  --selection: #2b6b57;
+  --danger: #ff9a9e;
+  --focus: #ffb15c;
+  --shadow: 0 12px 34px rgba(0, 0, 0, .45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) {
+    color-scheme: dark;
+    --ink: #e4f1ed;
+    --ink-muted: #b4cbc5;
+    --petrol: #cfe9e2;
+    --petrol-dark: #061f26;
+    --emerald: #3fcf9b;
+    --emerald-dark: #6fe0b5;
+    --on-accent: #04261c;
+    --mint: #1c3a35;
+    --surface: #152625;
+    --surface-soft: #1a2e2c;
+    --canvas: #0e1a19;
+    --tint: #1b3a33;
+    --tint-2: #19332f;
+    --tint-3: #1d3330;
+    --tint-4: #1a3631;
+    --line: #2f4a46;
+    --line-strong: #7fa398;
+    --control-border: #7fa398;
+    --selection: #2b6b57;
+    --danger: #ff9a9e;
+    --focus: #ffb15c;
+    --shadow: 0 12px 34px rgba(0, 0, 0, .45);
+  }
 }

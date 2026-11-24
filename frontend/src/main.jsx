@@ -11,9 +11,11 @@ import { Home } from './app/Home.jsx';
 import { PharmacyApplication } from './pharmacies/PharmacyApplication.jsx';
 import { PlatformApplications } from './pharmacies/PlatformApplications.jsx';
 import { PharmacyDashboard } from './pharmacies/PharmacyDashboard.jsx';
+import { initTheme } from './app/theme.js';
 import './design/tokens.css';
 import './style.css';
 
+initTheme(); // aplica el tema guardado antes de pintar
 const screen = window.location.pathname === '/identity' ? <IdentityApp />
   : window.location.pathname === '/inventory' ? <IdentityApp inventoryMode />
   : window.location.pathname === '/reservations' ? <IdentityApp reservationsMode />
