@@ -95,10 +95,13 @@ async function readSheets(bytes: Buffer, filename: string): Promise<readonly {
   return workbook.worksheets.map(sheet => {
     if (sheet.rowCount > maxRows + 10 || sheet.columnCount > 50) throw new Error('XLSX excede límites');
     const rows: string[][] = [];
-    for (let number = 1; number <= sheet.rowCount; number++) {
+    // rowCount/columnCount recorren la hoja en cada lectura: se calculan una sola vez (medición F02.1).
+    const rowCount = sheet.rowCount;
+    const columnCount = sheet.columnCount;
+    for (let number = 1; number <= rowCount; number++) {
       const row = sheet.getRow(number);
       const cells: string[] = [];
-      for (let column = 1; column <= sheet.columnCount; column++) {
+      for (let column = 1; column <= columnCount; column++) {
         const value = cellText(row.getCell(column).value);
         if (value.length > 10000) throw new Error('Celda XLSX excede límites');
         cells.push(value);
@@ -162,10 +165,11 @@ export async function parseInventoryFile(bytes: Buffer, filename: string): Promi
     throw new Error('XLSX excede límites');
   }
   const rows: string[][] = [];
+  const columnCount = sheet.columnCount;
   sheet.eachRow({ includeEmpty: true }, row => {
     if (rows.length > maxRows) throw new Error('XLSX excede límite de filas');
     const cells: string[] = [];
-    for (let column = 1; column <= sheet.columnCount; column++) {
+    for (let column = 1; column <= columnCount; column++) {
       cells.push(cellText(row.getCell(column).value));
     }
     rows.push(cells);
