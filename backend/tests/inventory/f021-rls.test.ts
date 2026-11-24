@@ -20,7 +20,7 @@ group('F02.1 perfiles e incidencias bajo RLS', () => {
   beforeAll(async () => {
     const url = new URL(baseUrlText!);
     if (url.hostname !== '127.0.0.1' || url.port !== '55431' ||
-        url.pathname !== '/farmafind_f01_test') throw new Error('F02.1: solo TEST local');
+        !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(url.pathname)) throw new Error('F02.1: solo fixture TEST marcado, nunca farmafind_f01_test');
     base = await connect(baseUrlText!);
     const suffix = hex(6);
     databaseName = `farmafind_f01_test_${suffix}`;

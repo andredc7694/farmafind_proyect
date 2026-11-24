@@ -49,7 +49,7 @@ group('fundamento PostgreSQL RLS F02', () => {
   beforeAll(async () => {
     const baseUrl = new URL(baseText!);
     if (baseUrl.hostname !== '127.0.0.1' || baseUrl.port !== '55431' ||
-        baseUrl.pathname !== '/farmafind_f01_test') throw new Error('F02 RLS: solo base local TEST');
+        !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(baseUrl.pathname)) throw new Error('F02 RLS: solo fixture TEST marcado, nunca farmafind_f01_test');
     base = await connect(baseText!);
     const suffix = hex(6);
     databaseName = `farmafind_f01_test_${suffix}`;
