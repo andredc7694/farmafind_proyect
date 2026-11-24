@@ -31,7 +31,7 @@
 - [X] T016 [P] Medición breve: tiempo de la instantánea y de la exportación con 5000 filas ficticias en TEST; registrar sin inventar umbrales (plan).
 - [X] T017 DEMO manual en TEST con Alfa/Beta ficticias y guía `demo-guide.md` (SC-005).
 - [X] T018 Trazabilidad (`traceability.md`) y *analyze*/*converge* (`convergence.md`), corrigiendo contradicciones (todas las FR).
-- [ ] T019 Preparar `acceptance.md` y solicitar la aceptación humana; **nunca autoaprobar**; registrar la decisión solo cuando Andre responda.
+- [X] T019 Preparar `acceptance.md` y solicitar la aceptación humana; **nunca autoaprobar**; registrar la decisión solo cuando Andre responda.
 
 ## Dependencias
 

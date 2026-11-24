@@ -11,3 +11,6 @@ Andre aprobó la spec sin elegir A/B/C. Por su regla de trabajo continuo («deci
 
 ## Aprobación de plan.md y tasks.md
 **Fecha:** 2026-11-24. **Responsable:** Andre. **Fuente:** mensaje «apruebo» tras la entrega del plan y las 19 tareas (commit `3af0133`). **Alcance:** plan.md, research.md, data-model.md, contrato `reservations-ops.openapi.yaml`, quickstart.md y tasks.md. Autoriza implementar por lotes hasta la aceptación humana.
+
+## Aceptación humana de F04.1 (T019)
+**Fecha:** 2026-11-24. **Responsable:** Andre. **Fuente:** mensaje «acepto» tras la entrega de la DEMO. Decisión: ACEPTO. Confirma D-01/D-02/D-03 = A y autoriza abrir y fusionar el PR con merge commit (regla permanente).
