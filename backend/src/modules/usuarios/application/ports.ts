@@ -5,6 +5,11 @@ export class DuplicateIdentityError extends Error {
   constructor() { super('Identidad duplicada'); }
 }
 
+/** F011-FR-003/012: la sesión sólo puede completar el paso de seguridad pendiente. */
+export class SessionRestrictedError extends Error {
+  constructor(readonly restriction: 'CAMBIO_CLAVE' | 'MFA_PENDIENTE') { super('Sesión restringida'); }
+}
+
 export class RateLimitedError extends Error {
   constructor(readonly retryAfterSeconds: number) { super('Solicitud limitada'); }
 }
@@ -24,6 +29,13 @@ export interface SessionRepository {
 
 export interface AuthUnitOfWork {
   run<T>(work: (users: UserRepository, sessions: SessionRepository, abuse: AbuseRepository, audit: AuditWriter) => Promise<T>): Promise<T>;
+}
+
+/** F01.1: presupuesto único de intentos (5 en 15 min) por ámbito; sin correo ni IP en claro. */
+export type AbuseBudgetScope = 'TEMP_KEY_ACCOUNT' | 'RESET_ACCOUNT' | 'RESET_IP' | 'TOTP_ACCOUNT' | 'STAFF_CREATE_IP';
+export interface AbuseBudgetRepository {
+  assessBudget(scope: AbuseBudgetScope, identifier: string, now: Date): Promise<AbuseDecision>;
+  recordBudget(scope: AbuseBudgetScope, identifier: string, now: Date): Promise<void>;
 }
 
 export interface AbuseRepository {

@@ -2,6 +2,7 @@ import type { AdminMembershipTransaction, AdminMembershipUnitOfWork, IdentityTra
   WorkerMembershipRow } from '../../application/ports.js';
 import type { Delegation, Membership, PharmacyReference } from '../../domain/identity.js';
 import { createHash } from 'node:crypto';
+import { SessionRestrictedError } from '../../application/ports.js';
 import { PgMembershipRepository } from '../membership-repository.js';
 
 export interface SqlClient {
@@ -132,12 +133,15 @@ export class PgIdentityUnitOfWork implements IdentityUnitOfWork, AdminMembership
       await client.query('SET LOCAL ROLE f01_runtime');
       await client.query("SELECT set_config('app.session_fingerprint',$1,true)", [fingerprintHex]);
       const active = await client.query(`
-        SELECT u.id FROM f01.sesion AS s JOIN f01.usuario AS u ON u.id=s.usuario_id
+        SELECT u.id, s.restringida_motivo FROM f01.sesion AS s JOIN f01.usuario AS u ON u.id=s.usuario_id
         WHERE s.token_fingerprint=$1 AND s.estado='VIGENTE'
           AND s.idle_expires_at > now() AND s.absolute_expires_at > now()
           AND u.estado='ACTIVO'
       `, [fingerprint]);
       if (active.rows.length !== 1 || !validId(String(active.rows[0].id))) throw new Error('No autorizado');
+      // Sesión restringida (cambio de clave / segundo factor pendiente): ninguna operación de negocio.
+      const restriction = active.rows[0].restringida_motivo;
+      if (restriction === 'CAMBIO_CLAVE' || restriction === 'MFA_PENDIENTE') throw new SessionRestrictedError(restriction);
       const actorUserId = String(active.rows[0].id);
       await client.query("SELECT set_config('app.actor_user_id',$1,true)", [actorUserId]);
       const result = await work(new PgIdentityTransaction(client, actorUserId), client, actorUserId);

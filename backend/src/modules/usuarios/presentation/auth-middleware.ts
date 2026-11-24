@@ -80,3 +80,37 @@ export function authHttpSecurity(options: AuthHttpOptions) {
 export function localClientIp(request: Request): string {
   return request.socket.remoteAddress ?? 'unknown-local';
 }
+
+export type SessionRestriction = 'CAMBIO_CLAVE' | 'MFA_PENDIENTE';
+
+/** contracts/security.md §6: rutas que una sesión restringida puede usar (método + ruta bajo el prefijo de la API). */
+export const restrictedSessionAllowlist: Readonly<Record<SessionRestriction, readonly string[]>> = {
+  CAMBIO_CLAVE: ['GET /auth/csrf', 'GET /auth/session', 'POST /auth/logout', 'POST /auth/password/change-temporary'],
+  MFA_PENDIENTE: ['GET /auth/csrf', 'GET /auth/session', 'POST /auth/logout', 'POST /auth/mfa/verify'],
+};
+
+export interface RestrictedSessionGuardOptions extends AuthHttpOptions {
+  /** Prefijo bajo el que se monta la API, p. ej. «/api/v1». */
+  readonly prefix: string;
+  /** Consulta la restricción de la sesión (null si no hay o no está restringida). */
+  restrictionOf(sessionSecret: string): Promise<SessionRestriction | null>;
+}
+
+/**
+ * Bloquea con 403 toda ruta fuera de la lista permitida cuando la sesión está restringida
+ * (F011-FR-003/012). Falla cerrado: si no puede consultar la sesión, deniega.
+ */
+export function createRestrictedSessionGuard(options: RestrictedSessionGuardOptions) {
+  return async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+    const secret = readSessionCookie(request, options);
+    if (!secret) { next(); return; }
+    let restriction: SessionRestriction | null;
+    try { restriction = await options.restrictionOf(secret); }
+    catch { sendIdentityError(response, 503, 'UNAVAILABLE', 'No se pudo verificar la sesión'); return; }
+    if (restriction === null) { next(); return; }
+    const path = request.originalUrl.split('?')[0];
+    const route = path.startsWith(options.prefix) ? path.slice(options.prefix.length) : path;
+    if (restrictedSessionAllowlist[restriction].includes(`${request.method.toUpperCase()} ${route}`)) { next(); return; }
+    sendIdentityError(response, 403, 'SESSION_RESTRICTED', 'Completa primero el paso de seguridad pendiente');
+  };
+}
