@@ -36,3 +36,45 @@ La primera repetición ampliada de Playwright falló en la segunda prueba porque
 - T038 sigue pendiente de aceptación humana. [traceability.md](traceability.md) registra la cobertura técnica y los límites TEST/DEMO sin asignar puntajes.
 - Las pruebas aquí registradas no constituyen aceptación F02.1 ni aprobación de MEJ-002 completa; la parte no relacionada con importación permanece pendiente.
 - F02.5 continúa suspendida y no aceptada. No se probó ni modificó su base manual persistente.
+
+# Verificación previa a la aceptación T038 — 2026-11-23
+
+Ejecutada por Claude Code (PowerShell, Windows 10, Node 24.17.0) tras la migración desde Codex. **No es aceptación**: T038 sigue pendiente de decisión humana.
+
+## Cambio de código fuera de las tareas originales (aprobado por Andre el 2026-11-23)
+
+La medición de límites pedida por `plan.md` («medir tiempo y memoria con archivos límite») reveló un defecto de rendimiento en `backend/src/modules/inventario/infrastructure/file-parser.ts`: `sheet.columnCount` se reevaluaba en cada celda y esa propiedad recorre toda la hoja. Un XLSX de 5000 filas × 50 columnas (1.54 MB, dentro de los límites) superó 6 minutos de CPU sin terminar y se detuvo manualmente; 1000×50 tardó 13 s y 2000×50 unos 84 s en un experimento aparte. Corrección: calcular `rowCount`/`columnCount` una sola vez en `readSheets` (F02.1) y `parseInventoryFile` (importador F02 anterior, mismo patrón). Sin cambio de comportamiento. Commit local `c4c5f4e` «fix(f02): evitar recálculo de columnCount en el parser». Tras el cambio, 12/12 pruebas de parser/preview/confirm y la suite completa siguientes pasaron.
+
+## Pruebas ejecutadas (resultado real)
+
+| Comprobación | Resultado |
+|---|---|
+| Suite focal F02.1 (8 archivos) | 21/21 satisfactorias |
+| `npm run test:f02:unit` | 15/15 |
+| `npm run test:f03:unit` | 25/25 |
+| `npm run test:f03:integration` (Redis TEST local) | 3/3 |
+| `npm run test:f04:unit` / `npm run test:f04:api` | 18/18 / 6/6 |
+| `npm run check` / `npm run build` | correctos |
+| `npm run verify:contracts` | 41 operaciones OpenAPI con ruta Express |
+| `node scripts/f02/smoke.mjs` sobre el fixture TEST marcado | sesión, selector, catálogo y accesos Alfa/Beta verificados |
+
+**No ejecutadas en este bloque:** `test:f02:rls`, `test:f03:rls`, `f021-rls` y `test:f04:rls` (ver «Pendientes»). Los resultados de RLS de `evidence.md` anterior (2026-11-22) no se repiten aquí.
+
+## Medición de tiempo y memoria con archivos al límite
+
+`node scripts/f021/measure-limits.mjs 3`: Node 24.17.0, Windows x64, mediana de 3 repeticiones, proceso hijo limpio por caso, en memoria (sin BD, Redis ni HTTP). Pipeline: inspección + selección + sugerencia de mapeo + conciliación. Pico = `maxRSS` del proceso. Límites F02: 5 MiB, 5000 filas, 50 columnas. Datos 100 % ficticios en `.cache/f021-perf` (ignorado).
+
+| Caso | Tamaño | Resultado | Tiempo total | Pico RSS |
+|---|---|---|---|---|
+| CSV 5000 filas × 50 col | 5.13 MB | procesado; 6168 incidencias | 523 ms | 130 MiB |
+| XLSX 5000 filas × 50 col | 1.54 MB | procesado; 6168 incidencias | 2761 ms | 366 MiB |
+| XLSX 5 hojas × 1000 filas × 20 col | 0.39 MB | procesado | 2024 ms | 246 MiB |
+| CSV 5001 filas | 0.73 MB | rechazado («excede límite») | 390 ms | 73 MiB |
+| CSV 14.5 MB | 14.5 MB | rechazado («excede límites») | 1 ms | 62 MiB |
+
+Limitaciones: no incluye persistencia PostgreSQL de miles de incidencias, confirmación ni HTTP; no se definió un umbral nuevo (el plan prohíbe inventarlo). Los 5 MiB exactos solo se alcanzan en CSV; un XLSX de 5000×50 pesa mucho menos comprimido.
+
+## Pendientes de esta verificación
+
+- Las suites `test:f02:rls`, `test:f03:rls` y `f021-rls` (y `test:f04:rls` en el clúster F02.5) **no se ejecutaron**: las tres primeras se conectan a `farmafind_f01_test` como canal administrativo para crear y borrar sus propias bases efímeras, y la instrucción vigente de Andre prohíbe cualquier operación sobre esa base. Se espera su decisión.
+- Revisión manual en navegador y T038: pendiente de Andre. Observación para esa revisión: la interfaz no tiene un botón «Cancelar»; F021-FR-009 se cumple por abandono (no confirmar no persiste nada).
