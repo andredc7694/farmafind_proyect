@@ -4,6 +4,7 @@ import { createPharmacyApplicationClient } from '../pharmacies/application-clien
 import { createProfileClient } from '../identity/profile-client.js';
 import { navigationFor } from './navigation.js';
 import { ThemeSwitcher } from './ThemeSwitcher.jsx';
+import { ChatBubble } from '../assistant/ChatBubble.jsx';
 
 const client = createSessionClient();
 const applications = createPharmacyApplicationClient();
@@ -53,6 +54,7 @@ export function AppShell({ children, path = window.location.pathname }) {
       </div>
     </header>
     <div id="contenido" className="site-content">{children}</div>
+    <ChatBubble path={path} />
     <footer className="site-footer"><div className="site-footer-inner">
       <div><strong>FarmaFind</strong><p>Información farmacéutica pública y referencial. La disponibilidad se confirma con cada farmacia.</p></div>
       <div><a href="/search">Buscar</a><a href="/mapa">Farmacias</a><a href="/assistant/conversation">Asistente</a></div>

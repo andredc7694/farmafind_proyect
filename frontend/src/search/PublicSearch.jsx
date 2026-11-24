@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { createPublicSearchClient } from './search-client.js';
 import { EmptyState } from '../design/Primitives.jsx';
 import { SuggestBox } from './SuggestBox.jsx';
+import { PointPicker } from '../geolocation/PointPicker.jsx';
 import { comparableFor, priceGapCents } from './comparable.js';
 import { forgetFilters, parseFilters, readRememberedFilters, rememberFilters, serializeFilters } from './filters-state.js';
 
@@ -82,6 +83,8 @@ export function PublicSearch({ client = createPublicSearchClient() }) {
       }}>Usar mi ubicación</button>
       <details className="search-filter-panel">
         <summary>Escribir mi ubicación a mano</summary>
+        <PointPicker value={manualLatitude !== '' && manualLongitude !== '' ? { latitude: Number(manualLatitude), longitude: Number(manualLongitude) } : null}
+          onChange={point => { setManualLatitude(String(point.latitude)); setManualLongitude(String(point.longitude)); }} />
         <div className="search-filters">
           <label>Latitud<input inputMode="decimal" value={manualLatitude} onChange={event => setManualLatitude(event.target.value)} /></label>
           <label>Longitud<input inputMode="decimal" value={manualLongitude} onChange={event => setManualLongitude(event.target.value)} /></label>

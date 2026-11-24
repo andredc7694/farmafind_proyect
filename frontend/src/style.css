@@ -164,3 +164,21 @@ a { color: var(--emerald-dark); }
 .search-view-toggle { display: flex; gap: .5rem; flex-wrap: wrap; margin: 1rem 0; }
 .comparables { color: var(--ink-muted); font-size: .92rem; }
 .search-filter-panel summary { cursor: pointer; font-weight: 700; padding: .5rem 0; }
+.point-picker { border: 1px solid var(--line); border-radius: 12px; padding: 1rem; margin: 1rem 0; }
+.point-picker legend { font-weight: 700; padding: 0 .4rem; }
+.point-picker-map { min-height: 280px; }
+.chat-bubble { position: fixed; right: 1rem; bottom: 1rem; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; max-width: calc(100vw - 2rem); }
+.chat-toggle { min-height: 48px; padding: .7rem 1.1rem; color: var(--on-accent); background: var(--emerald); border: 0; border-radius: 999px; font-weight: 700; box-shadow: var(--shadow); }
+.chat-panel { width: min(380px, calc(100vw - 2rem)); max-height: min(70vh, 640px); overflow-y: auto; padding: 1rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+.chat-panel header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.chat-panel h2 { margin: 0; font-size: 1.1rem; }
+.chat-panel textarea { width: 100%; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; padding: .5rem; }
+.chat-panel button { min-height: 40px; padding: .4rem .8rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; }
+.chat-panel button[type='submit'] { color: var(--on-accent); background: var(--emerald); border-color: var(--emerald); }
+.chat-note, .chat-sources, .chat-answer small { color: var(--ink-muted); font-size: .88rem; }
+.chat-suggestions ul { list-style: none; padding: 0; display: grid; gap: .35rem; }
+.chat-suggestions button { text-align: left; width: 100%; }
+.chat-question { font-weight: 700; }
+.chat-actions { display: flex; gap: .5rem; margin-top: .5rem; flex-wrap: wrap; }
+@media (min-width: 900px) { body[data-chat='open'] .site-content { margin-right: min(410px, 36vw); } }
+@media (max-width: 899px) { body[data-chat='open'] .site-content { padding-bottom: min(70vh, 640px); } .chat-bubble { left: 1rem; align-items: stretch; } .chat-panel { width: 100%; } }

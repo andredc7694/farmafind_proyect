@@ -44,6 +44,7 @@ describe('geolocalización TEST en F08', () => {
       'Dirección pública': 'Calle ficticia', Ciudad: 'Lima', Latitud: '-12', Longitud: '-77',
       Fuente: 'Fixture TEST', 'Referencia de evidencia no sensible': 'REF-TEST',
     })) fireEvent.change(screen.getByLabelText(name), { target: { value } });
+    fireEvent.click(screen.getByLabelText(/Confirmo que la dirección pública y el punto/)); // F08.1: confirmación explícita de la dirección
     fireEvent.click(screen.getByRole('button', { name: 'Enviar propuesta' }));
     expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'No tienes permiso para esta operación');
     expect(screen.queryByText(/Propuesta registrada/)).toBeNull();
