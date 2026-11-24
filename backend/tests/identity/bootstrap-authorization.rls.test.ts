@@ -35,8 +35,8 @@ group('GLO-01/BOOT-01 con PostgreSQL real aislado', () => {
     for (let index=0; index<users.length; index++) {
       await database.query(`INSERT INTO f01.usuario(id,email_canonico,password_hash) VALUES($1,$2,'$argon2id$fixture-only')`,
         [users[index],`global-${index}@example.invalid`]);
-      await database.query(`INSERT INTO f01.sesion(usuario_id,token_fingerprint,idle_expires_at,absolute_expires_at)
-        VALUES($1,decode($2,'hex'),now()+interval '1 hour',now()+interval '8 hours')`,[users[index],fingerprints[index]]);
+      await database.query(`/* F01.1: sesión de administrador con segundo factor verificado */ INSERT INTO f01.sesion(usuario_id,token_fingerprint,idle_expires_at,absolute_expires_at,mfa_verificada_at)
+        VALUES($1,decode($2,'hex'),now()+interval '1 hour',now()+interval '8 hours',now())`,[users[index],fingerprints[index]]);
     }
     await database.query('INSERT INTO f01.farmacia_referencia(id,nombre_publico) VALUES($1,$2)',
       [pharmacy,'Farmacia bootstrap ficticia']);

@@ -104,7 +104,9 @@ export class IdentityUseCases {
         await auditIdentity(audit, 'LOGIN', 'DENEGADO', now);
         return { kind: 'invalid-credentials' as const };
       }
-      const restriction = temporary ? 'CAMBIO_CLAVE' as const : null;
+      // F011-FR-012: el administrador general con factor activo entra con sesión restringida hasta verificar su código.
+      const mfa = !temporary && extras ? await extras.mfa.requirement(user.id) : 'NONE';
+      const restriction = temporary ? 'CAMBIO_CLAVE' as const : mfa === 'VERIFY' ? 'MFA_PENDIENTE' as const : null;
       const issued = createOpaqueSession(user.id, now, restriction);
       await sessions.save(issued.session);
       await auditIdentity(audit, 'LOGIN', 'PERMITIDO', now, user.id);

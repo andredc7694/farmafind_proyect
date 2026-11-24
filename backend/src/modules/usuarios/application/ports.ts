@@ -61,7 +61,24 @@ export interface AccountTokenRepository {
   verifyEmail(tokenHash: Buffer): Promise<boolean>;
 }
 
+/** F01.1 US4: segundo factor TOTP del administrador general (el cifrado y la validación del código viven en la aplicación). */
+export interface MfaRepository {
+  /** NONE: no es administrador general · ENROLL: sin factor activo · VERIFY: factor activo. */
+  requirement(userId: string): Promise<'NONE' | 'ENROLL' | 'VERIFY'>;
+  beginEnrollment(sealed: { ciphertext: Buffer; nonce: Buffer }): Promise<'OK' | 'FORBIDDEN' | 'CONFLICT'>;
+  load(userId: string): Promise<{ state: 'PENDIENTE' | 'ACTIVO' | 'REINICIADO'; ciphertext: Buffer; nonce: Buffer;
+    lastStep: number | null } | null>;
+  complete(mode: 'ACTIVATE' | 'VERIFY', step: number): Promise<'OK' | 'REUSED' | 'INVALID_STATE'>;
+}
+
+/** Cifrado autenticado de secretos en reposo; `context` liga el secreto a su dueño. */
+export interface SecretSealer {
+  seal(plain: Buffer, context: string): { ciphertext: Buffer; nonce: Buffer };
+  open(sealed: { ciphertext: Buffer; nonce: Buffer }, context: string): Buffer;
+}
+
 export interface AuthExtras {
+  readonly mfa: MfaRepository;
   readonly credentials: TemporaryCredentialRepository;
   readonly identityAudit: IdentityAuditSink;
   readonly tokens: AccountTokenRepository;

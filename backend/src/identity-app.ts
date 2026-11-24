@@ -9,6 +9,9 @@ import { createIdentityRouter } from './modules/usuarios/presentation/auth-route
 import { createMembershipRouter } from './modules/usuarios/presentation/membership-router.js';
 import { createAdminMembershipRouter } from './modules/usuarios/presentation/admin-memberships-router.js';
 import { createRestrictedSessionGuard } from './modules/usuarios/presentation/auth-middleware.js';
+import { MfaUseCases } from './modules/usuarios/application/mfa.js';
+import { createMfaRouter } from './modules/usuarios/presentation/mfa-router.js';
+import { SecretBox } from './modules/usuarios/infrastructure/secret-box.js';
 import { createStaffRouter } from './modules/usuarios/presentation/staff-router.js';
 import { ManageStaff } from './modules/usuarios/application/manage-staff.js';
 import { ManageStaffAccess } from './modules/usuarios/application/manage-staff-access.js';
@@ -88,6 +91,8 @@ export interface LocalIdentityRuntimeConfig {
   cookieSecure: false;
   /** F01.1: entrega de mensajes de cuenta. En TEST, el simulador local; sin él no se envía nada. */
   accountMessages?: AccountMessageDelivery;
+  /** F01.1 US4: clave de cifrado del secreto TOTP (32 bytes). Sin ella no se montan las rutas del segundo factor. */
+  mfaKey?: Buffer;
   search?: SearchRuntimeConfig;
   reservations?: ReservationRuntimeConfig;
   /** F07 is limited to isolated local TEST databases until persistent migration is authorized. */
@@ -172,6 +177,10 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     app.use('/api/v1', createStaffRouter(identity, new ManageStaff(staffTransactions, hasher), http));
     app.use('/api/v1', createStaffAccessRouter(identity, new ManageStaffAccess(staffTransactions), http));
     const platformManagement = new ManagePlatformAuthorizations(new PgPlatformAuthorizationUnitOfWork(tenantTransactions));
+    if (config.mfaKey) {
+      app.use('/api/v1', createMfaRouter(new MfaUseCases(new PgAuthUnitOfWork(authPool, config.abuseKey),
+        new SecretBox(config.mfaKey), { now: () => new Date() }), http));
+    }
     app.use('/api/v1', createPlatformAuthorizationRouter(identity, platformManagement, http));
     app.use('/api/v1', createCatalogRouter(new ListCatalog(new AuthorizedCatalogReader(tenantTransactions)), http));
     const inventoryTransactions = new PgInventoryTenantRunner(tenantTransactions);
