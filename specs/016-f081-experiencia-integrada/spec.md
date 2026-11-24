@@ -2,10 +2,10 @@
 
 **Feature Branch**: `feat/f081-experiencia-integrada`
 **Created**: 2026-11-24
-**Status**: Borrador pendiente de aprobación de Andre (Puerta 3). Spec Kit: *specify* hecho; 4 decisiones propuestas con recomendación (se aplican tras la aprobación, revisables).
+**Status**: Especificación aprobada el 2026-11-24 (ver [approval.md](approval.md)); decisiones D-01..D-04 = A aplicadas (revisables). Plan y tasks creados, pendientes de aprobación.
 **Input**: Documento Maestro v3.2 MEJ-003–MEJ-012 y MEJ-018 (HU13–HU20, HU26; RF26–RF33, RF42–RF43; AC12, AC16); roadmap v3.2, orden 5. Se apoya en F01.1, F02.1, F04.1 (ya integradas), F02.5 (**no aceptada**), F03, F06.1 (mock), F07 y F08. React + Vite + JSX; el backend autoriza cada acción; US$0.
 
-## Decisiones propuestas (recomendación A en todas; se registran como decisiones menores revisables)
+## Decisiones resueltas (A/A/A/A aplicadas por Claude el 2026-11-24; Andre puede cambiarlas)
 
 - **D-01 · Alcance y orden**: (A) un solo incremento entregado por lotes en orden de prioridad (navegación por actor → búsqueda comparativa → tema/accesibilidad → mapa y ubicación → chat flotante y sugerencias), **dejando fuera el asistente de solicitud de farmacia (MEJ-011) y la sugerencia 11** hasta que F02.5 esté aceptada; (B) dividir en dos incrementos; (C) incluirlo todo ahora.
 - **D-02 · Sugerencias que dependen de datos externos**: (A) entregar las sugerencias 1, 2, 5, 8, 9, 10 y 12 con datos propios (catálogo F02, búsqueda pública F03, reglas F06.1) y **diferir** la 3 (dirección con proveedor de geocodificación) y la 4 (departamento/provincia/distrito, requiere un catálogo oficial con licencia); las 6 y 7 ya existen en F02.1; (B) incluir un catálogo geográfico mínimo cargado a mano; (C) incluir un proveedor de geocodificación (puede costar y requiere privacidad/licencia).
