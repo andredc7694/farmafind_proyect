@@ -21,7 +21,7 @@ export function createSessionClient(fetchImpl = fetch) {
       headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-    if (!response.ok) throw genericFailure();
+    if (!response.ok) throw Object.assign(genericFailure(), { status: response.status });
     return response.status === 204 || response.status === 202 ? null : response.json();
   }
 
@@ -38,6 +38,9 @@ export function createSessionClient(fetchImpl = fetch) {
     requestPasswordReset: email => mutate('/api/v1/auth/password/reset/request', { email }),
     confirmPasswordReset: ({ token, newPassword }) => mutate('/api/v1/auth/password/reset/confirm', { token, newPassword }),
     changeTemporaryPassword: newPassword => mutate('/api/v1/auth/password/change-temporary', { newPassword }),
+    enrollMfa: () => mutate('/api/v1/me/mfa/enroll'),
+    activateMfa: code => mutate('/api/v1/me/mfa/activate', { code }),
+    verifyMfa: code => mutate('/api/v1/auth/mfa/verify', { code }),
     selectPharmacy: pharmacyId => mutate('/api/v1/me/active-pharmacy', { pharmacyId }, 'PUT'),
     async session() {
       const response = await fetchImpl(`${base}/session`, { credentials: 'same-origin', cache: 'no-store' });

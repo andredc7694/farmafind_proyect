@@ -6,6 +6,7 @@ import { StaffAdmin } from './StaffAdmin.jsx';
 import { MyInvitations } from './MyInvitations.jsx';
 import { PasswordReset } from './PasswordReset.jsx';
 import { ForcedPasswordChange } from './ForcedPasswordChange.jsx';
+import { MfaEnroll } from './MfaEnroll.jsx';
 import { createSessionClient } from './session-client.js';
 import { InventoryView } from '../inventory/InventoryView.jsx';
 import { ReservationsView } from '../reservations/ReservationsView.jsx';
@@ -32,7 +33,8 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   // F01.1: una sesión con cambio de clave pendiente solo puede completar ese paso.
-  const restricted = profile?.restriction === 'CAMBIO_CLAVE';
+  const restricted = Boolean(profile?.restriction);
+  const mfaPending = profile?.restriction === 'MFA_PENDIENTE';
 
   useEffect(() => {
     let current = true;
@@ -176,13 +178,17 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
       : locationMode ? 'FarmaFind — Ubicación' : 'FarmaFind — Identidad'}</h1>
     {status === 'anonymous' && reservationsMode && <p>Inicia sesión para consultar tus reservas o solicitar una desde una oferta pública.</p>}
     {status === 'anonymous' && (inventoryMode || locationMode) && <p>Inicia sesión con una membresía autorizada para acceder a esta área.</p>}
-    {status === 'authenticated' && restricted && <ForcedPasswordChange busy={passwordBusy} error={passwordError}
+    {status === 'authenticated' && mfaPending && <MfaEnroll mode="verify" api={identity} onLogout={logout}
+      onDone={() => { void recheckSession(); window.dispatchEvent(new Event('farmafind:session-changed')); }} />}
+    {status === 'authenticated' && restricted && !mfaPending && <ForcedPasswordChange busy={passwordBusy} error={passwordError}
       onSubmit={changePassword} onLogout={logout} />}
     {status === 'anonymous' && resetting && <PasswordReset api={identity} onDone={() => setResetting(false)}
       initialToken={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('reset') ?? '' : ''} />}
     {!(status === 'authenticated' && restricted) && !(status === 'anonymous' && resetting) && <AuthView status={status} error={error} notice={notice} profile={profile}
       returnTo={returnTo}
       onRegister={register} onLogin={login} onLogout={logout} onForgotPassword={() => setResetting(true)} />}
+    {status === 'authenticated' && !restricted && !inventoryMode && !reservationsMode && !locationMode &&
+      <MfaEnroll mode="enroll" api={identity} />}
     {status === 'authenticated' && !restricted && !inventoryMode && !reservationsMode && !locationMode &&
       <MyInvitations onAccepted={() => setMembershipsVersion(value => value + 1)} />}
     {status === 'authenticated' && !restricted && <PharmacySelector pharmacies={pharmacies}
