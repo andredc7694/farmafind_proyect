@@ -32,10 +32,10 @@ group('F01.1 migración 011 (identidad y personal)', () => {
 
   it('se aplica una sola vez, es idempotente y deja registrada 011', async () => {
     const first = await migrateTestDatabase(testUrl, connect);
-    expect(first.applied.at(-1)).toBe('011_staff_identity.sql');
+    expect(first.applied.slice(-2)).toEqual(['011_staff_identity.sql', '012_staff_functions.sql']);
     const second = await migrateTestDatabase(testUrl, connect);
     expect(second.applied).toEqual([]);
-    expect(second.skipped).toContain('011_staff_identity.sql');
+    expect(second.skipped).toEqual(expect.arrayContaining(['011_staff_identity.sql', '012_staff_functions.sql']));
   });
 
   it('exige al menos un identificador y valida el formato del alias', async () => {

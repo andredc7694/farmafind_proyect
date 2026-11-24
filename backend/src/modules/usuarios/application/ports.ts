@@ -1,5 +1,6 @@
 import type { Delegation, Membership, PharmacyReference, Session, User } from '../domain/identity.js';
 import type { AbuseDecision } from '../domain/abuse-policy.js';
+import type { IdentityAuditSink } from '../domain/identity-audit.js';
 
 export class DuplicateIdentityError extends Error {
   constructor() { super('Identidad duplicada'); }
@@ -10,12 +11,19 @@ export class SessionRestrictedError extends Error {
   constructor(readonly restriction: 'CAMBIO_CLAVE' | 'MFA_PENDIENTE') { super('Sesión restringida'); }
 }
 
+/** La sesión existe pero su estado no permite esta operación (p. ej. no está en cambio de clave). */
+export class InvalidSessionStateError extends Error {
+  constructor() { super('Estado de sesión inválido'); }
+}
+
 export class RateLimitedError extends Error {
   constructor(readonly retryAfterSeconds: number) { super('Solicitud limitada'); }
 }
 
 export interface UserRepository {
   findById(id: string): Promise<User | null>;
+  /** F01.1: cuenta operativa de personal por alias canónico. */
+  findByAlias(alias: string): Promise<User | null>;
   findByCanonicalEmail(email: string): Promise<User | null>;
   createCustomer(input: { canonicalEmail: string; passwordHash: string }): Promise<User>;
 }
@@ -27,8 +35,30 @@ export interface SessionRepository {
   touch(fingerprint: string, at: Date, idleExpiresAt: Date): Promise<void>;
 }
 
+export interface TemporaryCredentialRow {
+  readonly userId: string;
+  readonly hash: string;
+  readonly expiresAt: Date;
+  readonly consumedAt: Date | null;
+}
+
+/** F01.1: clave temporal de un solo uso y cambio de clave de la sesión restringida. */
+export interface TemporaryCredentialRepository {
+  find(userId: string): Promise<TemporaryCredentialRow | null>;
+  /** Marca la credencial como consumida; devuelve false si otra petición ya la consumió. */
+  consume(userId: string, at: Date): Promise<boolean>;
+  /** Actúa solo sobre la sesión del contexto (huella ya fijada por `findByFingerprint`). */
+  completePasswordChange(newPasswordHash: string): Promise<void>;
+}
+
+export interface AuthExtras {
+  readonly credentials: TemporaryCredentialRepository;
+  readonly identityAudit: IdentityAuditSink;
+}
+
 export interface AuthUnitOfWork {
-  run<T>(work: (users: UserRepository, sessions: SessionRepository, abuse: AbuseRepository, audit: AuditWriter) => Promise<T>): Promise<T>;
+  run<T>(work: (users: UserRepository, sessions: SessionRepository, abuse: AbuseRepository, audit: AuditWriter,
+    extras?: AuthExtras) => Promise<T>): Promise<T>;
 }
 
 /** F01.1: presupuesto único de intentos (5 en 15 min) por ámbito; sin correo ni IP en claro. */
@@ -43,6 +73,30 @@ export interface AbuseRepository {
   recordLoginFailure(account: string, ip: string, now: Date): Promise<void>;
   assessRegistration(ip: string, now: Date): Promise<AbuseDecision>;
   recordRegistrationAttempt(ip: string, now: Date): Promise<void>;
+}
+
+export interface StaffMemberRow {
+  readonly membershipId: string;
+  readonly userId: string;
+  readonly alias: string | null;
+  readonly displayName: string | null;
+  readonly state: 'ACTIVA' | 'SUSPENDIDA' | 'REVOCADA';
+  readonly pendingTemporaryKey: boolean;
+  readonly capabilities: readonly string[];
+}
+
+/** F01.1: transacción de personal dentro de la farmacia ya validada por la sesión viva. */
+export interface StaffTransaction {
+  useAuthorizedPharmacy(actorUserId: string, pharmacyId: string): Promise<Membership>;
+  findPharmacyReference(pharmacyId: string): Promise<PharmacyReference | null>;
+  listOwnDelegations(membershipId: string): Promise<readonly Delegation[]>;
+  createStaffAccount(input: { pharmacyId: string; alias: string; displayName: string; unusableHash: string;
+    temporaryKeyHash: string; capabilities: readonly string[] }): Promise<{ userId: string; expiresAt: Date }>;
+  listStaff(pharmacyId: string): Promise<readonly StaffMemberRow[]>;
+}
+
+export interface StaffUnitOfWork {
+  runStaff<T>(sessionSecret: string, work: (transaction: StaffTransaction, actorUserId: string) => Promise<T>): Promise<T>;
 }
 
 /** Read-only until EXC-01/ROL-01 permit a separate, audited mutation port. */

@@ -1,20 +1,8 @@
-/** F011-FR-008: auditoría de identidad con catálogo cerrado; el tipo no admite campos libres ni secretos. */
-export const identityAuditActions = [
-  'STAFF_CREATE', 'TEMP_KEY_ISSUE', 'TEMP_KEY_CONSUME', 'INVITE_CREATE', 'INVITE_ACCEPT', 'INVITE_DECLINE',
-  'INVITE_REVOKE', 'CAPABILITY_GRANT', 'CAPABILITY_REVOKE', 'MEMBERSHIP_REVOKE', 'PASSWORD_CHANGE',
-  'PASSWORD_RESET', 'EMAIL_VERIFY', 'EMAIL_CHANGE', 'MFA_ENROLL', 'MFA_VERIFY', 'MFA_RESET',
-  'SESSION_REVOKE', 'ELEVATION_DENIED',
-] as const;
-export type IdentityAuditAction = (typeof identityAuditActions)[number];
+import { identityAuditActions } from '../domain/identity-audit.js';
+import type { IdentityAuditEvent, IdentityAuditSink } from '../domain/identity-audit.js';
 
-export interface IdentityAuditEvent {
-  readonly actorUserId: string | null;
-  readonly targetUserId?: string | null;
-  readonly pharmacyId?: string | null;
-  readonly action: IdentityAuditAction;
-  readonly result: 'PERMITIDO' | 'DENEGADO';
-  readonly correlationId: string;
-}
+export { identityAuditActions };
+export type { IdentityAuditAction, IdentityAuditEvent } from '../domain/identity-audit.js';
 
 interface SqlClient {
   query(sql: string, values?: unknown[]): Promise<{ rows: Array<Record<string, unknown>> }>;
@@ -23,7 +11,7 @@ interface SqlClient {
 const allowedKeys = new Set(['actorUserId', 'targetUserId', 'pharmacyId', 'action', 'result', 'correlationId']);
 
 /** Debe usarse dentro de la misma transacción que la operación auditada. */
-export class PgIdentityAuditRepository {
+export class PgIdentityAuditRepository implements IdentityAuditSink {
   constructor(private readonly client: SqlClient) {}
 
   async record(event: IdentityAuditEvent, now: Date = new Date()): Promise<void> {

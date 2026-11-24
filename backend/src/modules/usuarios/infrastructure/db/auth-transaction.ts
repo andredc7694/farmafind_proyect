@@ -1,4 +1,6 @@
-import type { AbuseRepository, AuditWriter, AuthUnitOfWork, SessionRepository, UserRepository } from '../../application/ports.js';
+import type { AbuseRepository, AuditWriter, AuthExtras, AuthUnitOfWork, SessionRepository, UserRepository } from '../../application/ports.js';
+import { PgTemporaryCredentialRepository } from '../temporary-credential-repository.js';
+import { PgIdentityAuditRepository } from '../identity-audit-repository.js';
 import { PgSessionRepository, PgUserRepository } from '../identity-repository.js';
 import { PgAbuseRepository } from '../abuse-repository.js';
 import { PgAuthAuditRepository } from '../audit-repository.js';
@@ -16,7 +18,8 @@ interface SqlPool {
 export class PgAuthUnitOfWork implements AuthUnitOfWork {
   constructor(private readonly pool: SqlPool, private readonly abuseHmacKey: Buffer) {}
 
-  async run<T>(work: (users: UserRepository, sessions: SessionRepository, abuse: AbuseRepository, audit: AuditWriter) => Promise<T>): Promise<T> {
+  async run<T>(work: (users: UserRepository, sessions: SessionRepository, abuse: AbuseRepository, audit: AuditWriter,
+    extras?: AuthExtras) => Promise<T>): Promise<T> {
     const client = await this.pool.connect();
     let inTransaction = false;
     let discard = false;
@@ -32,7 +35,8 @@ export class PgAuthUnitOfWork implements AuthUnitOfWork {
       inTransaction = true;
       await client.query('SET LOCAL ROLE f01_auth');
       const result = await work(new PgUserRepository(client), new PgSessionRepository(client),
-        new PgAbuseRepository(client, this.abuseHmacKey), new PgAuthAuditRepository(client));
+        new PgAbuseRepository(client, this.abuseHmacKey), new PgAuthAuditRepository(client),
+        { credentials: new PgTemporaryCredentialRepository(client), identityAudit: new PgIdentityAuditRepository(client) });
       await client.query('COMMIT');
       inTransaction = false;
       return result;

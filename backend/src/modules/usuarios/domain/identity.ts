@@ -13,7 +13,9 @@ export type PharmacyState = (typeof PHARMACY_STATES)[number];
 
 export interface User {
   readonly id: string;
-  readonly canonicalEmail: string;
+  /** F01.1: el correo es opcional para cuentas operativas de personal (alias). */
+  readonly canonicalEmail: string | null;
+  readonly alias?: string | null;
   readonly passwordHash: string;
   readonly state: UserState;
   readonly createdAt: Date;
@@ -31,6 +33,8 @@ export interface Session {
   readonly idleExpiresAt: Date;
   readonly absoluteExpiresAt: Date;
   readonly revokedAt: Date | null;
+  /** F01.1: sesión restringida hasta completar el paso de seguridad pendiente. */
+  readonly restriction?: 'CAMBIO_CLAVE' | 'MFA_PENDIENTE' | null;
 }
 
 /** Role names have no authority until a separate approved permission policy evaluates them. */

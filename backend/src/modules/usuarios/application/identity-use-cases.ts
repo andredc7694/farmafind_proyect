@@ -1,13 +1,27 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { RateLimitedError } from './ports.js';
+import { InvalidSessionStateError, RateLimitedError } from './ports.js';
 import type { AuditWriter, AuthUnitOfWork, Clock, PasswordHasher } from './ports.js';
-import { canonicalEmail, RegistrationService } from './registration.js';
+import { RegistrationService } from './registration.js';
 import { createOpaqueSession, sessionIsAuthorized } from '../domain/session-policy.js';
+import { classifyLoginIdentifier } from '../domain/alias.js';
+import type { LoginIdentifier } from '../domain/alias.js';
+import { assessTemporaryKey, normalizeTemporaryKey } from '../domain/temporary-key-policy.js';
+import { validateNewPassword } from '../domain/password-policy.js';
+import type { Session, User } from '../domain/identity.js';
 
 export interface SessionView {
   readonly userId: string;
-  readonly email: string;
+  readonly email: string | null;
+  /** Solo presente para cuentas operativas de personal. */
+  readonly alias?: string;
   readonly activePharmacyId: null;
+  /** Solo presente mientras la sesión debe completar un paso de seguridad. */
+  readonly restriction?: 'CAMBIO_CLAVE' | 'MFA_PENDIENTE';
+}
+
+function viewOf(user: User, restriction: Session['restriction'] = null): SessionView {
+  return { userId: user.id, email: user.canonicalEmail, activePharmacyId: null,
+    ...(user.alias ? { alias: user.alias } : {}), ...(restriction ? { restriction } : {}) };
 }
 
 async function auditIdentity(audit: AuditWriter, action: 'REGISTER' | 'LOGIN' | 'LOGOUT',
@@ -53,32 +67,52 @@ export class IdentityUseCases {
     if (outcome.kind === 'invalid') throw new Error('Entrada inválida');
   }
 
-  async login(emailInput: unknown, passwordInput: unknown, ip: string): Promise<{ secret: string; view: SessionView }> {
+  /**
+   * Inicio de sesión por correo o alias (F011-FR-001). Con una clave temporal vigente, la consume (un solo uso)
+   * y abre una sesión restringida a «cambio de clave». Los fallos son uniformes y limitados por cuenta e IP.
+   */
+  async login(identifierInput: unknown, passwordInput: unknown, ip: string): Promise<{ secret: string; view: SessionView }> {
     if (!ip) throw new Error('Entrada inválida');
-    let email: string | null = null;
-    try { email = canonicalEmail(emailInput); } catch { /* still count malformed login by IP */ }
-    const accountKey = typeof emailInput === 'string' ? emailInput.trim().toLowerCase().slice(0, 254) : '<invalid>';
-    const outcome = await this.transactions.run(async (users, sessions, abuse, audit) => {
+    let identifier: LoginIdentifier | null = null;
+    try { identifier = classifyLoginIdentifier(identifierInput); } catch { /* still count malformed login by IP */ }
+    const accountKey = typeof identifierInput === 'string' ? identifierInput.trim().toLowerCase().slice(0, 254) : '<invalid>';
+    const outcome = await this.transactions.run(async (users, sessions, abuse, audit, extras) => {
       const now = this.clock.now();
       const limit = await abuse.assessLogin(accountKey, ip, now);
       if (!limit.allowed) return { kind: 'limited' as const, retryAfterSeconds: limit.retryAfterSeconds };
-      if (!email || typeof passwordInput !== 'string' || passwordInput.length === 0) {
+      if (!identifier || typeof passwordInput !== 'string' || passwordInput.length === 0) {
         await abuse.recordLoginFailure(accountKey, ip, now);
         await auditIdentity(audit, 'LOGIN', 'DENEGADO', now);
         return { kind: 'invalid-input' as const };
       }
-      const user = await users.findByCanonicalEmail(email);
+      const user = identifier.kind === 'email'
+        ? await users.findByCanonicalEmail(identifier.value) : await users.findByAlias(identifier.value);
       const validPassword = await this.passwords.verify(user?.passwordHash ?? this.dummyHash, passwordInput);
-      if (!user || user.state !== 'ACTIVO' || !validPassword) {
+      let temporary = false;
+      if (!validPassword && extras) {
+        // Se verifica siempre un segundo hash (real o ficticio) para que el tiempo no distinga las cuentas.
+        const credential = user ? await extras.credentials.find(user.id) : null;
+        const normalized = normalizeTemporaryKey(passwordInput);
+        const matches = await this.passwords.verify(credential?.hash ?? this.dummyHash, normalized ?? passwordInput);
+        if (user && credential && normalized && matches && user.state === 'ACTIVO' &&
+            assessTemporaryKey({ consumedAt: credential.consumedAt, expiresAt: credential.expiresAt, now }) === 'VIGENTE') {
+          temporary = await extras.credentials.consume(user.id, now);
+        }
+      }
+      if (!user || user.state !== 'ACTIVO' || (!validPassword && !temporary)) {
         await abuse.recordLoginFailure(accountKey, ip, now);
         await auditIdentity(audit, 'LOGIN', 'DENEGADO', now);
         return { kind: 'invalid-credentials' as const };
       }
-      const issued = createOpaqueSession(user.id, now);
+      const restriction = temporary ? 'CAMBIO_CLAVE' as const : null;
+      const issued = createOpaqueSession(user.id, now, restriction);
       await sessions.save(issued.session);
       await auditIdentity(audit, 'LOGIN', 'PERMITIDO', now, user.id);
-      return { kind: 'ok' as const, secret: issued.secret,
-        view: { userId: user.id, email: user.canonicalEmail, activePharmacyId: null } };
+      if (temporary && extras) {
+        await extras.identityAudit.record({ actorUserId: user.id, targetUserId: user.id, pharmacyId: null,
+          action: 'TEMP_KEY_CONSUME', result: 'PERMITIDO', correlationId: randomUUID() }, now);
+      }
+      return { kind: 'ok' as const, secret: issued.secret, view: viewOf(user, restriction) };
     });
     if (outcome.kind === 'limited') throw new RateLimitedError(outcome.retryAfterSeconds);
     if (outcome.kind === 'invalid-input') throw new Error('Entrada inválida');
@@ -95,7 +129,35 @@ export class IdentityUseCases {
       const now = this.clock.now();
       if (!user || !sessionIsAuthorized(current, user.state, now)) throw new Error('No autorizado');
       await sessions.touch(hash, now, new Date(now.getTime() + 30 * 60_000));
-      return { userId: user.id, email: user.canonicalEmail, activePharmacyId: null };
+      return viewOf(user, current.restriction ?? null);
+    });
+  }
+
+  /** Restricción vigente de la sesión (null si no existe, no está viva o no tiene restricción). */
+  async restrictionOf(secret: string): Promise<'CAMBIO_CLAVE' | 'MFA_PENDIENTE' | null> {
+    const hash = fingerprint(secret);
+    return this.transactions.run(async (users, sessions) => {
+      const current = await sessions.findByFingerprint(hash);
+      if (!current) return null;
+      const user = await users.findById(current.userId);
+      if (!user || !sessionIsAuthorized(current, user.state, this.clock.now())) return null;
+      return current.restriction ?? null;
+    });
+  }
+
+  /** Define la clave definitiva tras el primer ingreso con clave temporal (F011-FR-003). */
+  async changeTemporaryPassword(secret: string, newPassword: unknown): Promise<void> {
+    const hash = fingerprint(secret);
+    const password = validateNewPassword(newPassword);
+    const newHash = await this.passwords.hash(password);
+    await this.transactions.run(async (users, sessions, _abuse, _audit, extras) => {
+      if (!extras) throw new Error('No autorizado');
+      const current = await sessions.findByFingerprint(hash);
+      if (!current) throw new Error('No autorizado');
+      const user = await users.findById(current.userId);
+      if (!user || !sessionIsAuthorized(current, user.state, this.clock.now())) throw new Error('No autorizado');
+      if (current.restriction !== 'CAMBIO_CLAVE') throw new InvalidSessionStateError();
+      await extras.credentials.completePasswordChange(newHash);
     });
   }
 

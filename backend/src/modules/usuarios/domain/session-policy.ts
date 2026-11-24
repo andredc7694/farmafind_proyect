@@ -5,7 +5,8 @@ const idleMilliseconds = 30 * 60 * 1000;
 const absoluteMilliseconds = 8 * 60 * 60 * 1000;
 
 /** Domain-level issuance; the application must persist the fingerprint atomically. */
-export function createOpaqueSession(userId: string, at: Date): { secret: string; session: Session } {
+export function createOpaqueSession(userId: string, at: Date,
+  restriction: 'CAMBIO_CLAVE' | 'MFA_PENDIENTE' | null = null): { secret: string; session: Session } {
   const secretBytes = randomBytes(32);
   const secret = secretBytes.toString('hex');
   const tokenFingerprint = createHash('sha256').update(secretBytes).digest('hex');
@@ -22,6 +23,7 @@ export function createOpaqueSession(userId: string, at: Date): { secret: string;
       idleExpiresAt: new Date(at.getTime() + idleMilliseconds),
       absoluteExpiresAt: new Date(at.getTime() + absoluteMilliseconds),
       revokedAt: null,
+      restriction,
     },
   };
 }

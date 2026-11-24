@@ -8,6 +8,10 @@ import { ManageMemberships } from './modules/usuarios/application/manage-members
 import { createIdentityRouter } from './modules/usuarios/presentation/auth-router.js';
 import { createMembershipRouter } from './modules/usuarios/presentation/membership-router.js';
 import { createAdminMembershipRouter } from './modules/usuarios/presentation/admin-memberships-router.js';
+import { createRestrictedSessionGuard } from './modules/usuarios/presentation/auth-middleware.js';
+import { createStaffRouter } from './modules/usuarios/presentation/staff-router.js';
+import { ManageStaff } from './modules/usuarios/application/manage-staff.js';
+import { PgStaffUnitOfWork } from './modules/usuarios/infrastructure/staff-unit-of-work.js';
 import { ManagePlatformAuthorizations } from './modules/usuarios/application/manage-platform-authorizations.js';
 import { PgPlatformAuthorizationUnitOfWork } from './modules/usuarios/infrastructure/platform-authorization-repository.js';
 import { createPlatformAuthorizationRouter } from './modules/usuarios/presentation/platform-authorization-router.js';
@@ -132,7 +136,9 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     }
     const geoRepository=config.geolocationTest ? new PgPublicOfferRepository(tenantPool) : null;
     const geoRouter=geoRepository ? createGeolocationRouter(new ListNearbyPharmacies(geoRepository)) : undefined;
-    const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http),geoRouter);
+    // F01.1: la guardia de sesión restringida se monta antes que cualquier ruta de negocio.
+    const restrictedGuard = createRestrictedSessionGuard({ ...http, prefix: '/api/v1', restrictionOf: secret => identity.restrictionOf(secret) });
+    const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http),geoRouter,restrictedGuard);
     let invalidator: RedisSearchInvalidator | undefined;
     if(config.pharmaciesTest){
       const authUrl=new URL(config.authDatabaseUrl),tenantUrl=new URL(config.tenantDatabaseUrl);
@@ -155,6 +161,7 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       app.use('/api/v1',createPharmacyProfileRouter(new ManagePharmacyProfile(tenantTransactions),http));
     }
     app.use('/api/v1', createAdminMembershipRouter(identity, management, http));
+    app.use('/api/v1', createStaffRouter(identity, new ManageStaff(new PgStaffUnitOfWork(tenantTransactions), hasher), http));
     const platformManagement = new ManagePlatformAuthorizations(new PgPlatformAuthorizationUnitOfWork(tenantTransactions));
     app.use('/api/v1', createPlatformAuthorizationRouter(identity, platformManagement, http));
     app.use('/api/v1', createCatalogRouter(new ListCatalog(new AuthorizedCatalogReader(tenantTransactions)), http));
