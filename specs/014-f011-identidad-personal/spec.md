@@ -2,8 +2,20 @@
 
 **Feature Branch**: `feat/f011-identidad-personal`
 **Created**: 2026-11-23
-**Status**: Especificación aprobada por el responsable el 2026-11-23 (ver [approval.md](approval.md)). Spec Kit: *specify* aprobado; en curso *clarify* (3 decisiones abiertas + 2 de detalle).
+**Status**: Especificación aprobada el 2026-11-23 (ver [approval.md](approval.md)); *clarify* resuelto el 2026-11-23 (5 respuestas del responsable). Spec Kit: en curso *plan*, pendiente de aprobación.
 **Input**: Documento Maestro v3.2 MEJ-015, MEJ-016, MEJ-017 y MEJ-019 (HU23–25, HU27; RF37–RF41, RF44–RF45; AC10–AC11); roadmap v3.2, orden 3.
+
+## Clarifications
+
+### Session 2026-11-23
+
+- Q: ¿Cómo inicia sesión el personal? → A: **C** — con un alias interno único; el correo es opcional y se agrega después desde el perfil, con reverificación (F011-FR-001, FR-013).
+- Q: ¿Cómo recupera su acceso un trabajador sin correo? → A: **A** — el propietario le emite una nueva clave temporal; quien tiene correo verificado restablece por el simulador local (F011-FR-011).
+- Q: ¿Quién usa segundo factor (TOTP)? → A: **A** — obligatorio solo para administradores generales; propietarios quedan fuera de este incremento (F011-FR-012).
+- Q: ¿Caducidad y límite de intentos de la clave temporal? → A: **A** — 24 horas; bloqueo temporal de 15 minutos tras 5 intentos fallidos (F011-FR-002).
+- Q: ¿Cómo recupera su acceso un administrador que pierde el dispositivo del segundo factor? → A: **B** — reinicio técnico auditado por el operador, sin pantalla en la aplicación y sin códigos de respaldo (F011-FR-012).
+
+Fuente: respuesta del responsable «si esta bien como detallaste» (aceptó las cinco recomendaciones).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -50,7 +62,7 @@ Como usuario con cuenta quiero verificar mi correo (cuando lo tenga) y poder rec
 
 1. **Given** un usuario con correo, **When** solicita verificar o restablecer su clave, **Then** recibe un enlace/código de un solo uso con caducidad corta (en TEST, visible solo en el simulador local) y los intentos repetidos quedan limitados.
 2. **Given** una solicitud de recuperación, **When** el correo o la cuenta no existen, **Then** la respuesta es idéntica a la de una cuenta existente (sin revelar si existe).
-3. **Given** un trabajador sin correo propio, **When** pierde su clave, **Then** recupera el acceso por la vía aprobada [NEEDS CLARIFICATION: ¿cómo recupera su acceso un trabajador sin correo? A) el propietario emite una nueva clave temporal; B) código de recuperación entregado al crear la cuenta; C) el trabajador agrega un correo propio verificado].
+3. **Given** un trabajador sin correo propio, **When** pierde su clave, **Then** recupera el acceso por la vía aprobada (el propietario le emite una nueva clave temporal, con las mismas reglas de un solo uso y caducidad).
 4. **Given** un restablecimiento completado, **When** se usa un enlace o código anterior, **Then** se rechaza y las demás sesiones de esa cuenta se cierran.
 
 ---
@@ -65,7 +77,7 @@ Como responsable del proyecto quiero que nadie pueda volverse administrador gene
 **Acceptance Scenarios**:
 
 1. **Given** cualquier usuario autenticado (incluido un propietario o administrador), **When** intenta crear o ascender un administrador por la aplicación, **Then** no existe vía para hacerlo y los intentos directos a la API se deniegan y auditan.
-2. **Given** un administrador general provisionado técnicamente, **When** inicia sesión, **Then** debe completar un segundo factor temporal antes de realizar acciones de plataforma; el secreto del factor se guarda protegido y nunca se muestra de nuevo [NEEDS CLARIFICATION: ¿mecanismo y alcance del segundo factor? A) TOTP obligatorio solo para administradores generales; B) TOTP obligatorio para administradores y propietarios; C) TOTP para administradores y opcional para propietarios].
+2. **Given** un administrador general provisionado técnicamente, **When** inicia sesión, **Then** debe completar un segundo factor temporal antes de realizar acciones de plataforma; el secreto del factor se guarda protegido y nunca se muestra de nuevo (código temporal tipo TOTP, obligatorio solo para administradores generales).
 3. **Given** un administrador general, **When** consulta datos de farmacias, **Then** no obtiene acceso automático a inventarios ni reservas privadas.
 
 ---
@@ -97,8 +109,8 @@ Como usuario autenticado quiero editar mis datos y gestionar la seguridad de mi 
 
 ### Functional Requirements
 
-- **F011-FR-001**: El propietario autorizado puede crear una cuenta operativa de trabajador con identificador interno único (no se presenta como correo entregable) y rol inicial; solo en su farmacia [NEEDS CLARIFICATION: ¿cómo inicia sesión el personal? A) con un alias interno de la farmacia (p. ej. «alfa.caja1»); B) con su correo, aunque sea personal; C) alias, y correo opcional que se puede agregar luego].
-- **F011-FR-002**: La clave temporal es de un solo uso, caduca en poco tiempo, se muestra una única vez y no se puede reconsultar por nadie.
+- **F011-FR-001**: El propietario autorizado puede crear una cuenta operativa de trabajador con identificador interno único (no se presenta como correo entregable) y rol inicial; solo en su farmacia; el personal inicia sesión con ese alias (p. ej. «alfa.caja1») y puede agregar luego un correo opcional desde su perfil.
+- **F011-FR-002**: La clave temporal es de un solo uso, caduca a las 24 horas, se muestra una única vez y no se puede reconsultar por nadie; tras 5 intentos fallidos la cuenta se bloquea temporalmente 15 minutos.
 - **F011-FR-003**: En el primer ingreso con clave temporal el trabajador debe definir una clave nueva antes de acceder a cualquier función.
 - **F011-FR-004**: El propietario puede vincular una cuenta existente mediante invitación que la persona acepta; nunca se fusionan identidades automáticamente.
 - **F011-FR-005**: Los permisos de personal son independientes y por farmacia (leer/confirmar/entregar reservas, leer/escribir inventario, ejecutar importaciones); gestionar personal queda reservado al propietario.
@@ -108,7 +120,7 @@ Como usuario autenticado quiero editar mis datos y gestionar la seguridad de mi 
 - **F011-FR-009**: No existe pantalla, botón ni ruta pública para crear o ascender administradores generales; la provisión sigue siendo un procedimiento técnico auditado, solo en bases TEST efímeras.
 - **F011-FR-010**: La verificación de correo y el restablecimiento de clave usan códigos/enlaces de un solo uso con caducidad corta y respuestas que no revelan si una cuenta existe; en TEST se entregan por un simulador local (sin proveedor de correo real ni costo).
 - **F011-FR-011**: Existe una vía de recuperación para trabajadores sin correo, definida en la aclaración, sin intervención de administradores generales sobre datos privados.
-- **F011-FR-012**: Los administradores generales requieren un segundo factor temporal; su secreto se guarda protegido y nunca se vuelve a mostrar; las acciones sensibles de otros roles se refuerzan según la política aprobada.
+- **F011-FR-012**: Los administradores generales requieren un segundo factor temporal (TOTP); su secreto se guarda protegido y nunca se vuelve a mostrar. Si pierden el dispositivo, el reinicio es un procedimiento técnico auditado del operador (sin pantalla en la aplicación ni códigos de respaldo). Los propietarios no usan segundo factor en este incremento; sus acciones sensibles se refuerzan con reautenticación.
 - **F011-FR-013**: El usuario puede editar su perfil (nombre, teléfono, avatar opcional, tema, notificaciones), cambiar su correo con reverificación y su clave con reautenticación, y gestionar sus propias sesiones.
 - **F011-FR-014**: El perfil nunca permite editar roles, membresías ni permisos.
 - **F011-FR-015**: El aislamiento entre farmacias se conserva: contexto de farmacia verificado en el servidor y en la base de datos, cero acceso cruzado Alfa/Beta, sin permisos globales implícitos ni elusión de las políticas de la base de datos.
@@ -141,7 +153,7 @@ Como usuario autenticado quiero editar mis datos y gestionar la seguridad de mi 
 ## Assumptions
 
 - Se reutiliza F01 (correo y clave, sesiones, membresías, RLS, GLO-01/BOOT-01) sin reabrir sus aceptaciones; F01.1 la extiende.
-- Se asume por defecto (a confirmar en *clarify*): clave temporal de un solo uso con caducidad de 24 horas y bloqueo por intentos fallidos.
+- Clave temporal: caducidad de 24 horas y bloqueo de 15 minutos tras 5 intentos fallidos (confirmado en *clarify*).
 - En TEST/DEMO no hay proveedor de correo real: se usa un simulador local. Activar correo real requiere autorización de licencia, privacidad y costo (Puerta 5).
 - Incluye de MEJ-018 solo lo mínimo para operar estas pantallas; el sistema visual integral pertenece a F08.1.
 - Fuera de alcance: despliegue en AWS (F09), bases persistentes o datos reales, nuevo proveedor de pago, reservas/inventario (F04.1/F08.1), cambios a F02.5.

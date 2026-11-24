@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain — **3 abiertos a propósito**: inicio de sesión del personal (FR-001), recuperación sin correo (US3) y alcance del segundo factor (US4). Se resuelven en *clarify* (Puerta 4).
+- [x] No [NEEDS CLARIFICATION] markers remain — los 3 marcadores y 2 detalles se resolvieron en *clarify* el 2026-11-23 (ver Clarifications en spec.md).
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic
@@ -31,5 +31,4 @@
 
 ## Notes
 
-- Quedan pendientes de confirmar en *clarify* los valores por defecto asumidos (caducidad de la clave temporal de 24 h y bloqueo por intentos).
-- Los marcadores restantes impiden pasar a *plan* hasta recibir las respuestas del responsable.
+- Valores por defecto confirmados en *clarify* (24 h y 5 intentos).
