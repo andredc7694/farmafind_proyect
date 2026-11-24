@@ -26,7 +26,7 @@ testGroup('API US2 con PostgreSQL real y pool compartido', () => {
 
   beforeAll(async () => {
     const url = new URL(baseUrl!);
-    if (url.hostname !== '127.0.0.1' || url.port !== '55431' || url.pathname !== '/farmafind_f01_test') {
+    if (url.hostname !== '127.0.0.1' || url.port !== '55431' || !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(url.pathname)) {
       throw new Error('F01: prueba limitada al cluster aislado de loopback');
     }
     admin = new Client({ connectionString: baseUrl });

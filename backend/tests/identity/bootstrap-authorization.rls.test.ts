@@ -22,7 +22,7 @@ group('GLO-01/BOOT-01 con PostgreSQL real aislado', () => {
 
   beforeAll(async () => {
     const base = new URL(baseUrl!);
-    if (base.hostname !== '127.0.0.1' || base.port !== '55431' || base.pathname !== '/farmafind_f01_test')
+    if (base.hostname !== '127.0.0.1' || base.port !== '55431' || !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(base.pathname))
       throw new Error('Solo PostgreSQL ficticio local F01');
     admin = new Client({ connectionString: baseUrl }); await admin.connect();
     const suffix = randomBytes(6).toString('hex');

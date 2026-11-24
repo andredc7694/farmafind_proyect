@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
+import { fixtureAdminUrl } from './fixture-admin-url.mjs';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -48,15 +49,16 @@ if (mode === 'api' && !files.some(name => name.endsWith('.http.test.ts'))) {
   console.error('F01 api: faltan pruebas de contrato HTTP; las pruebas de proyección no acreditan la API');
   process.exit(1);
 }
-if (mode === 'rls' && !process.env.F01_TEST_DATABASE_URL) {
-  console.error('F01 rls: falta F01_TEST_DATABASE_URL de una base PostgreSQL de prueba autorizada');
-  process.exit(1);
+const env = { ...process.env };
+if (mode === 'rls' && !env.F01_TEST_DATABASE_URL) {
+  // Solo fixture TEST marcado; nunca la base persistente farmafind_f01_test.
+  env.F01_TEST_DATABASE_URL = fixtureAdminUrl(root);
 }
 
 const vitest = path.join(root, 'node_modules/vitest/vitest.mjs');
 const result = spawnSync(process.execPath, [vitest, 'run', ...files.map(name => path.join(testsDir, name))], {
   cwd: root,
-  env: process.env,
+  env,
   stdio: 'inherit',
 });
 if (result.error) {

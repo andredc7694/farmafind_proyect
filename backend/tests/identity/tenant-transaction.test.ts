@@ -23,7 +23,7 @@ testGroup('contexto F01 con rol runtime y PostgreSQL real', () => {
 
   beforeAll(async () => {
     const base = new URL(baseUrl!);
-    if (base.hostname !== '127.0.0.1' || base.port !== '55431' || base.pathname !== '/farmafind_f01_test') {
+    if (base.hostname !== '127.0.0.1' || base.port !== '55431' || !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(base.pathname)) {
       throw new Error('Pruebas F01: solo instancia local aislada y base farmafind_f01_test');
     }
     admin = new Client({ connectionString: baseUrl });
