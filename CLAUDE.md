@@ -23,7 +23,7 @@ Responder siempre en español. Fuente de verdad: `.specify/memory/constitution.m
 - Un commit por incremento probado. Un commit no equivale a aceptación funcional.
 - Nunca force push. Nunca publicar secretos (`.env`, `.cache`, credenciales).
 - Respetar las protecciones de GitHub: si exigen PR, usar PR.
-- No hacer commit/push sin que Andre lo pida.
+- Commits: ver «Flujo de ramas» abajo (commit y push a ramas de trabajo autorizados; PR y merge a `main` siempre con confirmación explícita de Andre).
 
 ## Costos
 - US$0 en APIs nuevas. No activar Gemini facturable, proveedores de pago ni AWS.
@@ -62,3 +62,28 @@ Trabajar de forma continua y autónoma, deteniéndose **solo** en las puertas de
 **No hacer:** declarar aceptadas F02.1, F02.5 (T046, T057, T063), F08 ni F06.1 (dejarlas pendientes en ESTADO.md). No abrir F01.1 ni otro incremento hasta cerrar F02.1.
 
 **Formato de cada parada (máx. 15 líneas):** qué hice · pruebas ejecutadas y resultado real · qué debo aprobar/decidir (con recomendación) · qué haré después.
+
+## Metodología Spec Kit por incremento (obligatoria, autorizada 2026-11-23)
+- Skills en `.agents/skills/speckit-*` (specify, clarify, plan, tasks, analyze, implement, converge, checklist, constitution). Mi entorno no los detecta como invocables: **leer cada `SKILL.md` y seguirlo paso a paso**, generando los mismos archivos.
+- Cada incremento nuevo va en carpeta nueva y numerada de `specs/` (siguiente libre: 015; 014 = F01.1). No reutilizar números ni tocar carpetas ya existentes.
+- Flujo: a) specify → `spec.md` **[PUERTA: aprobación]** · b) clarify con opciones A/B/C y recomendación **[PUERTA: respuestas]** · c) plan → `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md` **[PUERTA]** · d) tasks → `tasks.md` numeradas y enlazadas a requisitos **[PUERTA]** · e) analyze (corregir contradicciones antes de implementar) · f) implement por lotes; casilla solo con evidencia real en `evidence.md` · g) converge (diferencias contra la spec) · h) `acceptance.md`; la decisión final es de Andre, nunca mía.
+- Cada aprobación de Andre se registra con fecha y alcance en `approval.md` del incremento **antes** de avanzar. No pasar de a→b, c→d ni d→f sin ella.
+- Al presentar spec/plan/tasks para aprobar: resumen de máx. 15 líneas en lenguaje sencillo (qué se construye, qué queda fuera, riesgos, decisiones abiertas).
+- Mantener `docs/seguimiento/ESTADO.md` con el paso de Spec Kit de cada incremento.
+
+## Flujo de ramas definitivo (autorizado por Andre, 2026-11-23)
+- **Un incremento, una rama:** `feat/<fase>-<nombre>`. Crearla al empezar el incremento, partiendo del `main` **actualizado**, y publicarla con **push** después de cada lote probado. No dejar commits solo en local. Push a ramas de trabajo: autorizado de forma permanente. Nunca force push.
+- **Al aceptar Andre el incremento (Puerta 1), antes de pasar al siguiente:** integrar la rama en `main` con el método que permitan las protecciones reales de GitHub y la Constitution 2.0.0. Si exigen PR: abrir el PR con `gh`, verificar que pasen los controles y fusionarlo **solo cuando Andre lo confirme**. PR y merge a `main` son una puerta: pedir confirmación explícita **cada vez**, con el resumen de lo que se integra.
+- **Después de integrar:** actualizar `main` local y **solo entonces** crear la rama del incremento siguiente.
+- Usar `gh` (GitHub CLI) para PR y merge. Comprobar que esté instalado y con sesión; si falta, guiar a Andre para iniciar sesión por navegador (`gh auth login`). **Nunca pedir ni pegar tokens** en archivos ni chat.
+- Excepción histórica: `feat/f011-identidad-personal` se creó desde `feat/f021-importacion-inteligente` (F02.1 aún no integrada en `main`).
+
+
+## Modo de trabajo continuo (autorizado por Andre, 2026-11-23; reemplaza las paradas por lote)
+- Trabajar de corrido: no detenerse entre lotes ni para informar avances. Encadenar lotes hasta terminar el incremento. Tras cada lote probado: actualizar `ESTADO.md` y hacer push, sin pedir nada.
+- Detenerse solo cuando falte algo que solo Andre puede dar: aprobación de spec/plan/tasks, decisión de negocio o seguridad sin recomendación resoluble, aceptación humana del incremento, costo nuevo, algo destructivo o cambio fuera de alcance. Varias decisiones pendientes se agrupan en un solo mensaje con opciones A/B/C y recomendación.
+- Si una puerta no bloquea el trabajo siguiente, seguir avanzando y dejar la pregunta anotada para la próxima respuesta.
+- Decisiones menores y reversibles (sin impacto en seguridad, costos ni alcance): decidir con mejor criterio y registrarlas en `ESTADO.md` para revisión posterior.
+- **PR permanente:** cuando Andre acepte un incremento, abrir su PR a `main` y fusionarlo con «merge commit» (sin squash, sin borrar la rama) sin otra confirmación, si el estado es MERGEABLE y CLEAN, no hay secretos y la regresión del incremento pasó. Después actualizar `main` local y crear la rama del siguiente. Avisar en dos líneas. Si hay conflicto, algo raro o verificación fallida: detenerse.
+- Modo económico: pruebas por capas, E2E solo al final del incremento, salidas cortas, sin releer documentos grandes.
+- Informes de parada: máximo 10 líneas, lenguaje sencillo.

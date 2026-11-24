@@ -1,5 +1,7 @@
 import { validateIdentityConfig } from './identity.js';
 import type { LocalIdentityRuntimeConfig } from '../identity-app.js';
+import { loadMfaKey } from './mfa.js';
+import { FileMailboxSimulator } from '../modules/usuarios/infrastructure/mailbox-simulator.js';
 
 function key(env: Record<string, string | undefined>, name: string): Buffer {
   const value = env[name] ?? '';
@@ -36,6 +38,10 @@ export function validateLocalIdentityRuntime(env: Record<string, string | undefi
   const csrfKey = key(env, 'F01_CSRF_KEY_HEX');
   const abuseKey = key(env, 'F01_ABUSE_KEY_HEX');
   if (csrfKey.equals(abuseKey)) throw new Error('F01: claves CSRF y abuso deben ser distintas');
+  // F01.1 (solo TEST local): segundo factor y simulador de correo, ambos opcionales.
+  const mfaKey = env.F01_MFA_KEY_HEX ? loadMfaKey(env) : undefined;
+  const accountMessages = env.F01_MAILBOX_DIR ? new FileMailboxSimulator(env.F01_MAILBOX_DIR) : undefined;
   return { authDatabaseUrl: authUrl.toString(), tenantDatabaseUrl: tenantUrl.toString(),
-    csrfKey, abuseKey, allowedOrigin: base.allowedOrigin, cookieSecure: false };
+    csrfKey, abuseKey, allowedOrigin: base.allowedOrigin, cookieSecure: false,
+    ...(mfaKey ? { mfaKey } : {}), ...(accountMessages ? { accountMessages } : {}) };
 }

@@ -30,3 +30,8 @@ export function assessLoginLimit(accountFailures: readonly Date[], ipFailures: r
 export function assessRegistrationLimit(ipAttempts: readonly Date[], now: Date): AbuseDecision {
   return decision(waitSeconds(ipAttempts, now));
 }
+
+/** Presupuesto único (5 intentos en 15 minutos): clave temporal, restablecimiento, TOTP y alta de personal. */
+export function assessSingleBudget(attempts: readonly Date[], now: Date): AbuseDecision {
+  return decision(waitSeconds(attempts, now));
+}

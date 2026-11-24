@@ -21,7 +21,7 @@ group('proceso F01 compuesto contra PostgreSQL ficticio', () => {
 
   beforeAll(async () => {
     const base = new URL(baseUrl!);
-    if (base.hostname !== '127.0.0.1' || base.port !== '55431' || base.pathname !== '/farmafind_f01_test') {
+    if (base.hostname !== '127.0.0.1' || base.port !== '55431' || !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(base.pathname)) {
       throw new Error('F01: prueba limitada al cluster ficticio aislado');
     }
     admin = new Client({ connectionString: baseUrl });
@@ -163,32 +163,34 @@ group('proceso F01 compuesto contra PostgreSQL ficticio', () => {
     const local = `/api/v1/pharmacies/${a}/memberships`;
     const foreign = `/api/v1/pharmacies/${b}/memberships`;
     const token = await csrf(owner);
+    // F01.1 (decisión A, 2026-11-23): la concesión directa por userId ya no concede nada (410) en ningún caso.
     await owner.post(local).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: ids['owner-local@example.test'], role: 'TRABAJADOR' }).expect(403);
+      .send({ userId: ids['owner-local@example.test'], role: 'TRABAJADOR' }).expect(410);
     await owner.post(local).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: ids['worker-local@example.test'], role: 'DUENO' }).expect(400);
+      .send({ userId: ids['worker-local@example.test'], role: 'DUENO' }).expect(410);
     await owner.post(foreign).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: ids['worker-local@example.test'], role: 'TRABAJADOR' }).expect(404);
+      .send({ userId: ids['worker-local@example.test'], role: 'TRABAJADOR' }).expect(410);
     await owner.post(local).set('Origin', origin)
       .send({ userId: ids['worker-local@example.test'], role: 'TRABAJADOR' }).expect(403);
+    const noPermissionToken = await csrf(noPermission);
     const denied = await noPermission.post(local).set('Origin', origin)
-      .set('X-CSRF-Token', await csrf(noPermission))
-      .send({ userId: ids['worker-local@example.test'], role: 'TRABAJADOR' }).expect(403);
+      .set('X-CSRF-Token', noPermissionToken)
+      .send({ userId: ids['worker-local@example.test'], role: 'TRABAJADOR' }).expect(410);
     expect(JSON.stringify(denied.body)).not.toContain(ids['worker-local@example.test']);
-
     const granted = await owner.post(local).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: ids['worker-local@example.test'], role: 'TRABAJADOR' }).expect(201);
-    expect(granted.body).toMatchObject({ userId: ids['worker-local@example.test'], pharmacyId: a,
-      role: 'TRABAJADOR', status: 'ACTIVA' });
-    await owner.post(local).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: ids['worker-local@example.test'], role: 'TRABAJADOR' }).expect(409);
+      .send({ userId: ids['worker-local@example.test'], role: 'TRABAJADOR' }).expect(410);
+    expect((await database.query('SELECT count(*)::int AS n FROM f01.usuario_farmacia WHERE usuario_id=$1 AND farmacia_id=$2',
+      [ids['worker-local@example.test'], a])).rows[0].n).toBe(0);
+    // La membresía del trabajador se siembra como lo haría la aceptación de una invitación.
+    granted.body.id = (await database.query<{ id: string }>(`INSERT INTO f01.usuario_farmacia(usuario_id,farmacia_id,rol,changed_by_usuario_id)
+      VALUES($1,$2,'TRABAJADOR',$3) RETURNING id`, [ids['worker-local@example.test'], a, ids['owner-local@example.test']])).rows[0].id;
     const listed = await owner.get(local).expect(200);
     expect(listed.body).toHaveLength(1);
     expect(listed.body[0].id).toBe(granted.body.id);
     await owner.get(foreign).expect(404);
     const workerToken = await csrf(worker);
     await worker.post(local).set('Origin', origin).set('X-CSRF-Token', workerToken)
-      .send({ userId: ids['outsider-local@example.test'], role: 'TRABAJADOR' }).expect(403);
+      .send({ userId: ids['outsider-local@example.test'], role: 'TRABAJADOR' }).expect(410);
     await owner.patch(`${foreign}/${granted.body.id}`).set('Origin', origin)
       .set('X-CSRF-Token', token).send({ status: 'REVOCADA' }).expect(404);
 
@@ -197,11 +199,11 @@ group('proceso F01 compuesto contra PostgreSQL ficticio', () => {
     expect(revoked.body.status).toBe('REVOCADA');
     await owner.patch(`${local}/${granted.body.id}`).set('Origin', origin)
       .set('X-CSRF-Token', token).send({ status: 'REVOCADA' }).expect(409);
-    const workerOwn = await worker.get('/api/v1/me/memberships').expect(200);
-    expect(workerOwn.body).toEqual([]);
+    // F01.1 (D-08): al quedar sin membresías activas, las sesiones del trabajador se cierran de inmediato.
+    await worker.get('/api/v1/me/memberships').expect(401);
     const events = await database.query<{ accion: string }>(`SELECT accion FROM f01.auditoria_acceso
       WHERE actor_usuario_id=$1 AND farmacia_id=$2 ORDER BY occurred_at`, [ids['owner-local@example.test'], a]);
-    expect(events.rows.map(row => row.accion)).toEqual(['MEMBERSHIP_GRANT', 'MEMBERSHIP_REVOKE']);
+    expect(events.rows.map(row => row.accion)).toEqual(['MEMBERSHIP_REVOKE']);
     const foreignMember = await database.query(`SELECT rol,estado FROM f01.usuario_farmacia
       WHERE usuario_id=$1 AND farmacia_id=$2`, [ids['outsider-local@example.test'], b]);
     expect(foreignMember.rows).toEqual([{ rol: 'TRABAJADOR', estado: 'ACTIVA' }]);

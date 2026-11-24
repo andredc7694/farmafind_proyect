@@ -1,0 +1,529 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F01.1 Identity and Staff API (propuesta)
+  version: 0.1.0-draft
+  description: >-
+    Contrato aditivo a F01 (no reemplaza identity.openapi.yaml). Ninguna operación
+    crea ni asciende administradores generales: esa vía no existe en la API. Conocer
+    pharmacyId, userId o membershipId no concede acceso. Claves temporales, tokens y
+    secretos solo aparecen en la respuesta que los entrega, una única vez.
+servers:
+  - url: /api/v1
+tags:
+  - name: Authentication
+  - name: Staff
+  - name: Invitations
+  - name: Profile
+  - name: Mfa
+paths:
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Iniciar sesión con usuario (alias) o correo. Extiende el contrato F01 sin romperlo.
+      description: Se sigue aceptando el campo histórico `email`. Respuesta idéntica ante cuenta inexistente o clave errónea.
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [password]
+              properties:
+                identifier: { type: string, minLength: 3, maxLength: 320 }
+                email: { type: string, description: Campo histórico F01 }
+                password: { type: string }
+      responses:
+        '200':
+          description: Sesión activa; si requiere cambio de clave o segundo factor la sesión es restringida.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionView' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /auth/password/change-temporary:
+    post:
+      tags: [Authentication]
+      summary: Definir la clave definitiva tras ingresar con clave temporal (sesión restringida CAMBIO_CLAVE)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewPassword' }
+      responses:
+        '204': { description: Clave cambiada; la sesión deja de ser restringida }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /auth/password/reset/request:
+    post:
+      tags: [Authentication]
+      summary: Solicitar restablecimiento por correo verificado (simulador local en TEST)
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email]
+              properties: { email: { type: string, format: email } }
+      responses:
+        '202': { description: Siempre la misma respuesta, exista o no la cuenta }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /auth/password/reset/confirm:
+    post:
+      tags: [Authentication]
+      summary: Confirmar restablecimiento con token de un solo uso
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [token, newPassword]
+              properties:
+                token: { type: string, minLength: 20 }
+                newPassword: { type: string, minLength: 12, maxLength: 128 }
+      responses:
+        '204': { description: Clave restablecida; se cierran las otras sesiones de la cuenta }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /auth/email/verify:
+    post:
+      tags: [Authentication]
+      summary: Verificar correo con token de un solo uso
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [token]
+              properties: { token: { type: string, minLength: 20 } }
+      responses:
+        '204': { description: Correo verificado }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /auth/mfa/verify:
+    post:
+      tags: [Mfa]
+      summary: Completar el segundo factor de una sesión restringida MFA_PENDIENTE
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MfaCode' }
+      responses:
+        '204': { description: Sesión con segundo factor verificado }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /pharmacies/{pharmacyId}/staff:
+    parameters: [{ $ref: '#/components/parameters/PharmacyId' }]
+    get:
+      tags: [Staff]
+      summary: Listar personal de la farmacia activa del propietario (sin claves ni hashes)
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Personal de esta farmacia
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/StaffMember' } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+    post:
+      tags: [Staff]
+      summary: Crear cuenta operativa de trabajador (alias + clave temporal mostrada una vez)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [alias, displayName]
+              properties:
+                alias: { type: string, pattern: '^[a-z0-9][a-z0-9._-]{2,39}$' }
+                displayName: { type: string, maxLength: 120 }
+                capabilities: { type: array, items: { $ref: '#/components/schemas/Capability' } }
+      responses:
+        '201':
+          description: Cuenta creada. `temporaryPassword` se devuelve solo aquí.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreatedStaff' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: 'No disponible (mensaje genérico, sin revelar de quién es el alias)' }
+  /pharmacies/{pharmacyId}/staff/{userId}/temporary-key:
+    parameters: [{ $ref: '#/components/parameters/PharmacyId' }, { $ref: '#/components/parameters/UserId' }]
+    post:
+      tags: [Staff]
+      summary: Emitir nueva clave temporal (recuperación de un trabajador sin correo)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '201':
+          description: Nueva clave temporal, mostrada una sola vez; invalida la anterior
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TemporaryKey' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+  /pharmacies/{pharmacyId}/staff/invitations:
+    parameters: [{ $ref: '#/components/parameters/PharmacyId' }]
+    post:
+      tags: [Invitations]
+      summary: Invitar a una cuenta existente por correo (respuesta uniforme)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email]
+              properties: { email: { type: string, format: email } }
+      responses:
+        '202': { description: Aceptada; no indica si la cuenta existe }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+    get:
+      tags: [Invitations]
+      summary: Listar invitaciones de la farmacia
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Invitaciones (sin datos de la cuenta destino más allá de un alias o nombre visible)
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Invitation' } }
+  /pharmacies/{pharmacyId}/staff/invitations/{invitationId}:
+    parameters: [{ $ref: '#/components/parameters/PharmacyId' }, { $ref: '#/components/parameters/InvitationId' }]
+    delete:
+      tags: [Invitations]
+      summary: Revocar una invitación pendiente
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '204': { description: Revocada }
+        '404': { $ref: '#/components/responses/NotVisible' }
+  /pharmacies/{pharmacyId}/staff/{membershipId}/capabilities:
+    parameters: [{ $ref: '#/components/parameters/PharmacyId' }, { $ref: '#/components/parameters/MembershipId' }]
+    put:
+      tags: [Staff]
+      summary: Reemplazar las capacidades delegadas (revocación efectiva en la siguiente petición)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [capabilities]
+              properties:
+                capabilities: { type: array, items: { $ref: '#/components/schemas/Capability' } }
+      responses:
+        '204': { description: Capacidades actualizadas y auditadas }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotVisible' }
+  /me/invitations:
+    get:
+      tags: [Invitations]
+      summary: Mis invitaciones pendientes
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Invitaciones dirigidas al usuario autenticado
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Invitation' } }
+  /me/invitations/{invitationId}/accept:
+    parameters: [{ $ref: '#/components/parameters/InvitationId' }]
+    post:
+      tags: [Invitations]
+      summary: Aceptar una invitación propia (crea la membresía)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '204': { description: Vinculación creada }
+        '404': { $ref: '#/components/responses/NotVisible' }
+        '409': { description: Invitación vencida, revocada o ya resuelta }
+  /me/invitations/{invitationId}/decline:
+    parameters: [{ $ref: '#/components/parameters/InvitationId' }]
+    post:
+      tags: [Invitations]
+      summary: Rechazar una invitación propia
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '204': { description: Rechazada }
+        '404': { $ref: '#/components/responses/NotVisible' }
+  /me/profile:
+    get:
+      tags: [Profile]
+      summary: Ver mi perfil
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Perfil propio (sin roles ni permisos editables)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+    patch:
+      tags: [Profile]
+      summary: Editar nombre, teléfono, avatar, tema y preferencias
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileUpdate' }
+      responses:
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /me/email/change:
+    post:
+      tags: [Profile]
+      summary: Pedir cambio de correo (reautenticación + verificación del nuevo correo)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [newEmail, currentPassword]
+              properties:
+                newEmail: { type: string, format: email }
+                currentPassword: { type: string }
+      responses:
+        '202': { description: Aceptada; el correo nuevo no se activa hasta verificarlo }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+  /me/password:
+    post:
+      tags: [Profile]
+      summary: Cambiar mi clave (reautenticación)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string }
+                newPassword: { type: string, minLength: 12, maxLength: 128 }
+      responses:
+        '204': { description: Clave cambiada; se cierran las demás sesiones }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+  /me/sessions:
+    get:
+      tags: [Profile]
+      summary: Listar mis sesiones (sin secretos)
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Sesiones propias
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/SessionSummary' } }
+  /me/sessions/{sessionId}:
+    parameters: [{ name: sessionId, in: path, required: true, schema: { type: string, format: uuid } }]
+    delete:
+      tags: [Profile]
+      summary: Cerrar una de mis sesiones
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '204': { description: Cerrada }
+        '404': { $ref: '#/components/responses/NotVisible' }
+  /me/sessions/revoke-others:
+    post:
+      tags: [Profile]
+      summary: Cerrar todas mis demás sesiones
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '204': { description: Demás sesiones cerradas }
+  /me/email/verification:
+    post:
+      tags: [Authentication]
+      summary: Solicitar el código de verificación del propio correo (sesión no restringida)
+      description: Adición del lote 4 (US3) para cubrir F011-FR-010; la cuenta sin correo recibe 400.
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '202': { description: Aceptada; el código se entrega por el puerto de mensajes (simulador local en TEST) }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /me/mfa/enroll:
+    post:
+      tags: [Mfa]
+      summary: Iniciar alta de segundo factor (solo administradores generales)
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      responses:
+        '201':
+          description: URI de aprovisionamiento y secreto, mostrados una sola vez
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MfaEnrollment' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: El segundo factor ya está activo }
+  /me/mfa/activate:
+    post:
+      tags: [Mfa]
+      summary: Activar el segundo factor con un primer código válido
+      security: [{ sessionCookie: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MfaCode' }
+      responses:
+        '204': { description: Segundo factor activo }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: ff_session
+      description: Cookie opaca HttpOnly; nunca valor en JSON.
+  parameters:
+    CsrfToken: { name: X-CSRF-Token, in: header, required: true, schema: { type: string, minLength: 1 } }
+    PharmacyId: { name: pharmacyId, in: path, required: true, schema: { type: string, format: uuid }, description: Solicitado, no prueba de autorización. }
+    UserId: { name: userId, in: path, required: true, schema: { type: string, format: uuid } }
+    MembershipId: { name: membershipId, in: path, required: true, schema: { type: string, format: uuid } }
+    InvitationId: { name: invitationId, in: path, required: true, schema: { type: string, format: uuid } }
+  schemas:
+    Capability:
+      type: string
+      enum: [reservation.read, reservation.accept, reservation.deliver, reservation.settings,
+             inventory.read, inventory.write, inventory.import.preview, inventory.import.confirm, inventory.history]
+    NewPassword:
+      type: object
+      additionalProperties: false
+      required: [newPassword]
+      properties: { newPassword: { type: string, minLength: 12, maxLength: 128 } }
+    MfaCode:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties: { code: { type: string, pattern: '^[0-9]{6}$' } }
+    SessionView:
+      type: object
+      required: [userId, activePharmacyId]
+      properties:
+        userId: { type: string, format: uuid }
+        email: { type: [string, 'null'] }
+        alias: { type: [string, 'null'] }
+        activePharmacyId: { type: [string, 'null'], format: uuid }
+        restriction: { type: [string, 'null'], enum: [CAMBIO_CLAVE, MFA_PENDIENTE, null] }
+    TemporaryKey:
+      type: object
+      required: [temporaryPassword, expiresAt]
+      properties:
+        temporaryPassword: { type: string, description: Se devuelve una sola vez y no se puede reconsultar. }
+        expiresAt: { type: string, format: date-time }
+    CreatedStaff:
+      allOf:
+        - { $ref: '#/components/schemas/TemporaryKey' }
+        - type: object
+          required: [userId, alias]
+          properties:
+            userId: { type: string, format: uuid }
+            alias: { type: string }
+    StaffMember:
+      type: object
+      required: [membershipId, userId, role, state, capabilities]
+      properties:
+        membershipId: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        alias: { type: [string, 'null'] }
+        displayName: { type: [string, 'null'] }
+        role: { type: string, enum: [TRABAJADOR] }
+        state: { type: string, enum: [ACTIVA, SUSPENDIDA, REVOCADA] }
+        pendingTemporaryKey: { type: boolean }
+        capabilities: { type: array, items: { $ref: '#/components/schemas/Capability' } }
+    Invitation:
+      type: object
+      required: [id, pharmacyName, state, expiresAt]
+      properties:
+        id: { type: string, format: uuid }
+        pharmacyName: { type: string }
+        state: { type: string, enum: [PENDIENTE, ACEPTADA, RECHAZADA, VENCIDA, REVOCADA] }
+        expiresAt: { type: string, format: date-time }
+    Profile:
+      type: object
+      required: [userId, theme]
+      properties:
+        userId: { type: string, format: uuid }
+        displayName: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
+        avatarPreset: { type: [integer, 'null'], minimum: 1, maximum: 12 }
+        theme: { type: string, enum: [CLARO, OSCURO, SISTEMA] }
+        notifyReservations: { type: boolean }
+        notifySecurity: { type: boolean }
+        email: { type: [string, 'null'] }
+        emailVerified: { type: boolean }
+    ProfileUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        displayName: { type: string, maxLength: 120 }
+        phone: { type: [string, 'null'] }
+        avatarPreset: { type: [integer, 'null'], minimum: 1, maximum: 12 }
+        theme: { type: string, enum: [CLARO, OSCURO, SISTEMA] }
+        notifyReservations: { type: boolean }
+        notifySecurity: { type: boolean }
+    SessionSummary:
+      type: object
+      required: [id, createdAt, current]
+      properties:
+        id: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+        lastUsedAt: { type: string, format: date-time }
+        current: { type: boolean }
+    MfaEnrollment:
+      type: object
+      required: [otpauthUri, secret]
+      properties:
+        otpauthUri: { type: string }
+        secret: { type: string, description: Mostrado una sola vez. }
+  responses:
+    BadRequest: { description: Entrada inválida }
+    Unauthenticated: { description: Credenciales o sesión no válidas (mensaje uniforme) }
+    Forbidden: { description: Permiso o estado de sesión insuficiente }
+    NotVisible: { description: No visible para este actor (sin revelar existencia) }
+    RateLimited: { description: Solicitud limitada, con Retry-After }

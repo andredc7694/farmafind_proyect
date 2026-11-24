@@ -59,6 +59,15 @@ function implementedOperations(file,prefix){
       operations.push(key('post',`${prefix}${template[1].replace('${name}',match[1])}`));
     }
   }
+  if(file.endsWith('presentation/staff-access-router.ts')){
+    // F01.1: aceptar y rechazar invitaciones comparten una ruta generada en un bucle.
+    const template=source.match(/router\.post\(`([^`]+\$\{action\})`/);
+    assert(template,'Ruta dinámica F01.1 de invitaciones ausente');
+    const actions=source.match(/for\s*\(const action of \[([^\]]+)\] as const\)/)?.[1];
+    assert(actions,'Acciones F01.1 de invitaciones ausentes');
+    for(const match of actions.matchAll(/'([^']+)'/g))
+      operations.push(key('post',`${prefix}${template[1].replace('${action}',match[1])}`));
+  }
   if(file.endsWith('presentation/application-router.ts')){
     const template=source.match(/router\.post\(`([^`]+\$\{action\})`/);
     assert(template,'Ruta dinámica F02.5 de solicitante ausente');
@@ -70,7 +79,32 @@ function implementedOperations(file,prefix){
   return operations;
 }
 
-if (process.argv.includes('--f025-contract') || process.argv.includes('--f025-routes')) {
+if (process.argv.includes('--f011-contract') || process.argv.includes('--f011-routes')) {
+  // F01.1 (specs/014): contrato aditivo; las rutas se exigen solo con --f011-routes (tarea T049).
+  const file='specs/014-f011-identidad-personal/contracts/identity-staff.openapi.yaml';
+  const source=readFileSync(path.join(root,file),'utf8');
+  const operations=contractOperations(file,'/api/v1');
+  assert.equal(operations.length,26,'El inventario propuesto F01.1 cambió; revisar contrato');
+  assert.equal(new Set(operations).size,operations.length,'Operación F01.1 duplicada');
+  const defined=new Set([...source.matchAll(/^    ([A-Za-z][A-Za-z0-9]+):/gm)].map(match=>match[1]));
+  for(const match of source.matchAll(/\$ref: '#\/components\/(?:schemas|parameters|responses)\/([^']+)'/g)){
+    assert(defined.has(match[1]),`Referencia F01.1 sin definir: ${match[1]}`);
+  }
+  if(process.argv.includes('--f011-routes')){
+    const proposedRoutes=[
+      ['backend/src/modules/usuarios/presentation/auth-router.ts','/api/v1'],
+      ['backend/src/modules/usuarios/presentation/staff-router.ts','/api/v1'],
+      ['backend/src/modules/usuarios/presentation/staff-access-router.ts','/api/v1'],
+      ['backend/src/modules/usuarios/presentation/profile-router.ts','/api/v1'],
+      ['backend/src/modules/usuarios/presentation/mfa-router.ts','/api/v1'],
+    ];
+    const implemented=new Set(proposedRoutes.flatMap(([route,prefix])=>
+      existsSync(path.join(root,route)) ? implementedOperations(route,prefix) : []));
+    const missing=operations.filter(operation=>!implemented.has(operation));
+    assert.deepEqual(missing,[],`F01.1: rutas pendientes: ${missing.join(', ')}`);
+    console.log(`Contrato F01.1: ${operations.length} operaciones documentadas con ruta Express.`);
+  } else console.log(`Contrato F01.1: ${operations.length} operaciones documentadas; implementación pendiente.`);
+} else if (process.argv.includes('--f025-contract') || process.argv.includes('--f025-routes')) {
   const file='specs/012-f025-incorporacion-farmacias/contracts/f025.openapi.yaml';
   const source=readFileSync(path.join(root,file),'utf8');
   const operations=contractOperations(file,'/api/v1');

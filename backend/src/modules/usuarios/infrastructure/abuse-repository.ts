@@ -1,15 +1,15 @@
 import { createHmac } from 'node:crypto';
-import { assessLoginLimit, assessRegistrationLimit } from '../domain/abuse-policy.js';
+import { assessLoginLimit, assessRegistrationLimit, assessSingleBudget } from '../domain/abuse-policy.js';
 import type { AbuseDecision } from '../domain/abuse-policy.js';
-import type { AbuseRepository } from '../application/ports.js';
+import type { AbuseBudgetRepository, AbuseBudgetScope, AbuseRepository } from '../application/ports.js';
 
-type Scope = 'LOGIN_ACCOUNT' | 'LOGIN_IP' | 'REGISTER_IP';
+type Scope = 'LOGIN_ACCOUNT' | 'LOGIN_IP' | 'REGISTER_IP' | AbuseBudgetScope;
 interface SqlClient {
   query(sql: string, values?: unknown[]): Promise<{ rows: Array<Record<string, unknown>> }>;
 }
 
 /** Must be used inside the f01_auth transaction so advisory locks cover check + record. */
-export class PgAbuseRepository implements AbuseRepository {
+export class PgAbuseRepository implements AbuseRepository, AbuseBudgetRepository {
   constructor(private readonly client: SqlClient, private readonly hmacKey: Buffer) {
     if (hmacKey.length < 32) throw new Error('Clave ABUSE-01 insuficiente');
   }
@@ -57,5 +57,16 @@ export class PgAbuseRepository implements AbuseRepository {
   async recordRegistrationAttempt(ip: string, now: Date): Promise<void> {
     await this.client.query(`INSERT INTO f01.abuse_attempt(scope,key_digest,occurred_at) VALUES($1,$2,$3)`,
       ['REGISTER_IP', this.digest('REGISTER_IP', ip), now]);
+  }
+
+  async assessBudget(scope: AbuseBudgetScope, identifier: string, now: Date): Promise<AbuseDecision> {
+    const digest = this.digest(scope, identifier);
+    await this.lock([digest]);
+    return assessSingleBudget(await this.dates(scope, digest, now), now);
+  }
+
+  async recordBudget(scope: AbuseBudgetScope, identifier: string, now: Date): Promise<void> {
+    await this.client.query('INSERT INTO f01.abuse_attempt(scope,key_digest,occurred_at) VALUES($1,$2,$3)',
+      [scope, this.digest(scope, identifier), now]);
   }
 }

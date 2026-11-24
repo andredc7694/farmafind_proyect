@@ -64,15 +64,17 @@ describe('T043: contrato HTTP de membresias locales TRABAJADOR', () => {
     expect(management.revoke).not.toHaveBeenCalled();
   });
 
-  it('lista, concede y revoca solo TRABAJADOR de otra persona en A', async () => {
+  it('lista y revoca solo TRABAJADOR de otra persona en A; la concesión directa quedó retirada (410)', async () => {
     const { agent, management, token } = await loggedIn();
     await agent.get(pathA).expect(200);
-    await agent.post(pathA).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: workerId, role: 'TRABAJADOR' }).expect(201);
+    // F01.1, decisión A (Puerta 6, 2026-11-23): la vinculación pasa solo por invitación aceptada.
+    const gone = await agent.post(pathA).set('Origin', origin).set('X-CSRF-Token', token)
+      .send({ userId: workerId, role: 'TRABAJADOR' }).expect(410);
+    expect(gone.body.code).toBe('GONE');
     await agent.patch(`${pathA}/${membershipId}`).set('Origin', origin).set('X-CSRF-Token', token)
       .send({ status: 'REVOCADA' }).expect(200);
     expect(management.list).toHaveBeenCalledOnce();
-    expect(management.grant).toHaveBeenCalledOnce();
+    expect(management.grant).not.toHaveBeenCalled();
     expect(management.revoke).toHaveBeenCalledOnce();
   });
 
@@ -90,26 +92,24 @@ describe('T043: contrato HTTP de membresias locales TRABAJADOR', () => {
     expect(logged.management.grant).not.toHaveBeenCalled();
   });
 
-  it('rechaza autoasignacion, rol no delegable y farmacia B sin revelar filas', async () => {
+  it('la concesión directa no concede nada, ni a uno mismo, ni otro rol, ni en la farmacia B', async () => {
     const { agent, management, token } = await loggedIn();
-    await agent.post(pathA).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: actorId, role: 'TRABAJADOR' }).expect(403);
-    await agent.post(pathA).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: workerId, role: 'DUENO' }).expect(400);
-    const cross = await agent.post(pathB).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: workerId, role: 'TRABAJADOR' }).expect(404);
-    expect(JSON.stringify(cross.body)).not.toContain(workerId);
-    expect(management.grant).toHaveBeenCalledOnce();
+    for (const [path, body] of [[pathA, { userId: actorId, role: 'TRABAJADOR' }], [pathA, { userId: workerId, role: 'DUENO' }],
+      [pathB, { userId: workerId, role: 'TRABAJADOR' }]] as const) {
+      const response = await agent.post(path).set('Origin', origin).set('X-CSRF-Token', token).send(body).expect(410);
+      expect(JSON.stringify(response.body)).not.toContain(workerId);
+    }
+    expect(management.grant).not.toHaveBeenCalled();
   });
 
   it('distingue conflicto 409 y cambio no autorizado sin eco de datos privados', async () => {
     const { agent, management, token } = await loggedIn();
-    management.grant.mockRejectedValueOnce(new Error('Conflicto'));
-    await agent.post(pathA).set('Origin', origin).set('X-CSRF-Token', token)
-      .send({ userId: workerId, role: 'TRABAJADOR' }).expect(409);
+    management.revoke.mockRejectedValueOnce(new Error('Conflicto'));
+    await agent.patch(`${pathA}/${membershipId}`).set('Origin', origin).set('X-CSRF-Token', token)
+      .send({ status: 'REVOCADA' }).expect(409);
     const cross = await agent.patch(`${pathB}/${membershipId}`).set('Origin', origin)
       .set('X-CSRF-Token', token).send({ status: 'REVOCADA' }).expect(404);
     expect(JSON.stringify(cross.body)).not.toContain(workerId);
-    expect(management.revoke).toHaveBeenCalledOnce();
+    expect(management.revoke).toHaveBeenCalledTimes(2);
   });
 });

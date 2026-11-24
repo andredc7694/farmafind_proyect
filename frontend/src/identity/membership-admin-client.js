@@ -24,7 +24,6 @@ export function createMembershipAdminClient(fetchImpl = fetch) {
       if (!response.ok) throw genericFailure();
       return response.json();
     },
-    grant: (pharmacyId, userId) => mutate(path(pharmacyId), 'POST', { userId, role: 'TRABAJADOR' }),
     revoke: (pharmacyId, membershipId) => mutate(`${path(pharmacyId)}/${encodeURIComponent(membershipId)}`,
       'PATCH', { status: 'REVOCADA' }),
   };

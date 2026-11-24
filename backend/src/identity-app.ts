@@ -8,6 +8,19 @@ import { ManageMemberships } from './modules/usuarios/application/manage-members
 import { createIdentityRouter } from './modules/usuarios/presentation/auth-router.js';
 import { createMembershipRouter } from './modules/usuarios/presentation/membership-router.js';
 import { createAdminMembershipRouter } from './modules/usuarios/presentation/admin-memberships-router.js';
+import { createRestrictedSessionGuard } from './modules/usuarios/presentation/auth-middleware.js';
+import { MfaUseCases } from './modules/usuarios/application/mfa.js';
+import { OwnProfileUseCases } from './modules/usuarios/application/profile.js';
+import { createProfileRouter } from './modules/usuarios/presentation/profile-router.js';
+import { createMfaRouter } from './modules/usuarios/presentation/mfa-router.js';
+import { SecretBox } from './modules/usuarios/infrastructure/secret-box.js';
+import { createStaffRouter } from './modules/usuarios/presentation/staff-router.js';
+import { ManageStaff } from './modules/usuarios/application/manage-staff.js';
+import { ManageStaffAccess } from './modules/usuarios/application/manage-staff-access.js';
+import { AccountRecovery } from './modules/usuarios/application/account-recovery.js';
+import type { AccountMessageDelivery } from './modules/usuarios/application/account-messages.js';
+import { createStaffAccessRouter } from './modules/usuarios/presentation/staff-access-router.js';
+import { PgStaffUnitOfWork } from './modules/usuarios/infrastructure/staff-unit-of-work.js';
 import { ManagePlatformAuthorizations } from './modules/usuarios/application/manage-platform-authorizations.js';
 import { PgPlatformAuthorizationUnitOfWork } from './modules/usuarios/infrastructure/platform-authorization-repository.js';
 import { createPlatformAuthorizationRouter } from './modules/usuarios/presentation/platform-authorization-router.js';
@@ -78,6 +91,10 @@ export interface LocalIdentityRuntimeConfig {
   abuseKey: Buffer;
   allowedOrigin: string;
   cookieSecure: false;
+  /** F01.1: entrega de mensajes de cuenta. En TEST, el simulador local; sin él no se envía nada. */
+  accountMessages?: AccountMessageDelivery;
+  /** F01.1 US4: clave de cifrado del secreto TOTP (32 bytes). Sin ella no se montan las rutas del segundo factor. */
+  mfaKey?: Buffer;
   search?: SearchRuntimeConfig;
   reservations?: ReservationRuntimeConfig;
   /** F07 is limited to isolated local TEST databases until persistent migration is authorized. */
@@ -132,7 +149,10 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     }
     const geoRepository=config.geolocationTest ? new PgPublicOfferRepository(tenantPool) : null;
     const geoRouter=geoRepository ? createGeolocationRouter(new ListNearbyPharmacies(geoRepository)) : undefined;
-    const app = createApp(createIdentityRouter(identity, http), createMembershipRouter(identity, memberships, http),geoRouter);
+    // F01.1: la guardia de sesión restringida se monta antes que cualquier ruta de negocio.
+    const restrictedGuard = createRestrictedSessionGuard({ ...http, prefix: '/api/v1', restrictionOf: secret => identity.restrictionOf(secret) });
+    const app = createApp(createIdentityRouter(identity, http, new AccountRecovery(new PgAuthUnitOfWork(authPool, config.abuseKey), hasher,
+      { now: () => new Date() }, config.accountMessages ?? null)), createMembershipRouter(identity, memberships, http),geoRouter,restrictedGuard);
     let invalidator: RedisSearchInvalidator | undefined;
     if(config.pharmaciesTest){
       const authUrl=new URL(config.authDatabaseUrl),tenantUrl=new URL(config.tenantDatabaseUrl);
@@ -155,7 +175,16 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       app.use('/api/v1',createPharmacyProfileRouter(new ManagePharmacyProfile(tenantTransactions),http));
     }
     app.use('/api/v1', createAdminMembershipRouter(identity, management, http));
+    const staffTransactions = new PgStaffUnitOfWork(tenantTransactions);
+    app.use('/api/v1', createStaffRouter(identity, new ManageStaff(staffTransactions, hasher), http));
+    app.use('/api/v1', createStaffAccessRouter(identity, new ManageStaffAccess(staffTransactions), http));
     const platformManagement = new ManagePlatformAuthorizations(new PgPlatformAuthorizationUnitOfWork(tenantTransactions));
+    app.use('/api/v1', createProfileRouter(new OwnProfileUseCases(new PgAuthUnitOfWork(authPool, config.abuseKey), hasher,
+      { now: () => new Date() }, config.accountMessages ?? null), http));
+    if (config.mfaKey) {
+      app.use('/api/v1', createMfaRouter(new MfaUseCases(new PgAuthUnitOfWork(authPool, config.abuseKey),
+        new SecretBox(config.mfaKey), { now: () => new Date() }), http));
+    }
     app.use('/api/v1', createPlatformAuthorizationRouter(identity, platformManagement, http));
     app.use('/api/v1', createCatalogRouter(new ListCatalog(new AuthorizedCatalogReader(tenantTransactions)), http));
     const inventoryTransactions = new PgInventoryTenantRunner(tenantTransactions);

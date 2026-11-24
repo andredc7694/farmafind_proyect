@@ -16,7 +16,7 @@ describe('cliente de sesión de mismo origen F01', () => {
       headers: { 'X-CSRF-Token': 'fixture-csrf' } });
     expect(fetcher.mock.calls[1][1].body).toContain('ficticia');
     expect(JSON.stringify(result)).not.toContain('ficticia');
-    expect(Object.keys(client)).toEqual(['register', 'login', 'logout', 'memberships', 'selectPharmacy', 'session']);
+    expect(Object.keys(client)).toEqual(['register', 'login', 'logout', 'memberships', 'requestPasswordReset', 'confirmPasswordReset', 'changeTemporaryPassword', 'enrollMfa', 'activateMfa', 'verifyMfa', 'selectPharmacy', 'session']);
   });
 
   it('trata la sesión 401 como anónima y oculta errores sensibles', async () => {

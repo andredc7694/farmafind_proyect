@@ -7,7 +7,6 @@ const client = createMembershipAdminClient();
 export function MembershipAdmin({ pharmacyId }) {
   const [status, setStatus] = useState('loading');
   const [workers, setWorkers] = useState([]);
-  const [userId, setUserId] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -25,7 +24,6 @@ export function MembershipAdmin({ pharmacyId }) {
     try {
       await action();
       setWorkers(await client.list(pharmacyId));
-      setUserId('');
       setStatus('ready');
     } catch { setStatus('error'); }
     finally { setBusy(false); }
@@ -36,12 +34,7 @@ export function MembershipAdmin({ pharmacyId }) {
   return <section aria-labelledby="worker-admin-title">
     <h2 id="worker-admin-title">Trabajadores de la farmacia seleccionada</h2>
     {status === 'error' && <p role="alert">No se pudo completar la operación.</p>}
-    <form onSubmit={event => { event.preventDefault(); void change(() => client.grant(pharmacyId, userId)); }}>
-      <label htmlFor="worker-user-id">Identificador del usuario</label>
-      <input id="worker-user-id" value={userId} onChange={event => setUserId(event.target.value)}
-        required autoComplete="off" />
-      <button type="submit" disabled={busy}>Conceder rol TRABAJADOR</button>
-    </form>
+    <p>Para sumar personal usa «Personal de la farmacia»: crear una cuenta o invitar a una cuenta existente.</p>
     <ul>{workers.map(worker => <li key={worker.id}>
       <span>{worker.userId} — {worker.status}</span>{' '}
       {worker.status === 'ACTIVA' && <button type="button" disabled={busy}
