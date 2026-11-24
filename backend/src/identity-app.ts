@@ -20,6 +20,9 @@ import { createInventoryRouter } from './modules/inventario/presentation/invento
 import { PreviewImport } from './modules/inventario/application/preview-import.js';
 import { ConfirmImport } from './modules/inventario/application/confirm-import.js';
 import { createImportRouter } from './modules/inventario/presentation/import-router.js';
+import { ImportProfiles } from './modules/inventario/application/import-profiles.js';
+import { InspectImport } from './modules/inventario/application/inspect-import.js';
+import { inspectInventoryFile, selectInventoryFile } from './modules/inventario/infrastructure/file-parser.js';
 import { createClient, type RedisClientType } from 'redis';
 import type { SearchRuntimeConfig } from './config/search.js';
 import { PgPublicOfferRepository } from './modules/busqueda/infrastructure/public-offer-repository.js';
@@ -185,8 +188,10 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
         new ManagePharmacyLocation(new PgLocationUnitOfWork(tenantTransactions), invalidator), http));
     }
     app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));
-    app.use('/api/v1', createImportRouter(new PreviewImport(inventoryTransactions),
-      new ConfirmImport(inventoryTransactions, invalidator), http));
+    const previewImport = new PreviewImport(inventoryTransactions);
+    app.use('/api/v1', createImportRouter(previewImport,
+      new ConfirmImport(inventoryTransactions, invalidator), http, new ImportProfiles(inventoryTransactions),
+      new InspectImport(previewImport, { inspect: inspectInventoryFile, select: selectInventoryFile })));
     if (config.reservations) {
       const reservationTransactions = new PgReservationUnitOfWork(tenantTransactions);
       const clock = { now: () => new Date() };

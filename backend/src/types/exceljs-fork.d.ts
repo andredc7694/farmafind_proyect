@@ -3,10 +3,13 @@ declare module '@excel.js/exceljs' {
   interface Cell { value: unknown; }
   interface Row { getCell(column: number | string): Cell; }
   interface Worksheet {
+    readonly name: string;
+    readonly rowCount: number;
     readonly actualRowCount: number;
     readonly columnCount: number;
     addRow(values: readonly unknown[]): Row;
     getCell(address: string): Cell;
+    getRow(number: number): Row;
     eachRow(options: { includeEmpty: boolean }, callback: (row: Row) => void): void;
   }
   class Workbook {

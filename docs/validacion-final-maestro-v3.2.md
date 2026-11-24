@@ -18,7 +18,7 @@ La [fe de erratas y versión interpretativa corregida](conciliacion-maestro-v3.2
 | DEC-001 | Objetivo US$0 para servicios externos TEST/DEMO, especialmente nuevas APIs; mocks/servicios locales. | Propuesta de costo del v3.2 compatible con prohibición vigente de gastos AWS sin permiso. No es garantía de tarifa cero. |
 | 16 criterios docentes | Constitution XIV y maestro §17/anexo conservados, con evidencia exigida por incremento. | Sin puntajes ni nuevas pruebas ejecutadas en etapa 0.1. |
 | F01–F08/F06.1 | Código y evidencias históricas consultados; F08 registra aceptación humana pendiente; F06.1 conserva límites de fuentes profesionales/mock. | Base reutilizable, no aceptación automática de ampliaciones v3.2. |
-| F02.5 | `tasks.md` declara 19/63 marcadas; `evidence.md` contiene avances posteriores. T054/T057/T063 y cierre transversal siguen pendientes; F025-RF23 bloqueada. | Funcionalidad activa TEST/DEMO, **no aceptada**. Reconciliar tareas con evidencias antes de cerrar. |
+| F02.5 | Actualizado 2026-11-23: `tasks.md` declara **61/64** marcadas (el 2026-11-21 figuraban 19/63). Pendientes: T046, T057 y T063; F025-RF23 bloqueada. | Suspendida desde 2026-11-22 por cambio de prioridad a F02.1 (F02.1: 37/38, falta T038). **No aceptada**. |
 
 ## Compatibilidad constitucional del borrador 1.4.0
 

@@ -13,6 +13,9 @@ import { ManualInventory } from '../../src/modules/inventario/application/manual
 import { PgInventoryTenantRunner } from '../../src/modules/inventario/infrastructure/tenant-unit-of-work.js';
 import { createInventoryRouter } from '../../src/modules/inventario/presentation/inventory-router.js';
 import { PreviewImport } from '../../src/modules/inventario/application/preview-import.js';
+import { ImportProfiles } from '../../src/modules/inventario/application/import-profiles.js';
+import { InspectImport } from '../../src/modules/inventario/application/inspect-import.js';
+import { inspectInventoryFile, selectInventoryFile } from '../../src/modules/inventario/infrastructure/file-parser.js';
 import { createImportRouter } from '../../src/modules/inventario/presentation/import-router.js';
 import { ConfirmImport, ImportConflictError } from '../../src/modules/inventario/application/confirm-import.js';
 
@@ -46,7 +49,7 @@ group('fundamento PostgreSQL RLS F02', () => {
   beforeAll(async () => {
     const baseUrl = new URL(baseText!);
     if (baseUrl.hostname !== '127.0.0.1' || baseUrl.port !== '55431' ||
-        baseUrl.pathname !== '/farmafind_f01_test') throw new Error('F02 RLS: solo base local TEST');
+        !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(baseUrl.pathname)) throw new Error('F02 RLS: solo fixture TEST marcado, nunca farmafind_f01_test');
     base = await connect(baseText!);
     const suffix = hex(6);
     databaseName = `farmafind_f01_test_${suffix}`;
@@ -248,6 +251,71 @@ group('fundamento PostgreSQL RLS F02', () => {
     expect((await request(app).post(`/api/v1/farmacias/${pharmacyB}/importaciones/vista-previa`)
       .set('Cookie', cookie).set('Origin', 'http://127.0.0.1:5173').set('X-CSRF-Token', token)
       .attach('archivo', csv, 'stock.csv').field('mapeo', JSON.stringify(mapping))).status).toBe(404);
+  });
+
+  it('F02.1 analiza y previsualiza encabezado desplazado por HTTP sin exponer Beta', async () => {
+    const key = Buffer.alloc(32, 12);
+    const nonce = hex(32);
+    const token = createHmac('sha256', key).update('f01-csrf\0').update(nonce).update('\0')
+      .update(secretA).digest('hex');
+    const cookie = `ff-session-local=${secretA}; ff-csrf-local=${nonce}`;
+    const app = express();
+    app.use(express.json());
+    const runner = new PgInventoryTenantRunner(new PgIdentityUnitOfWork(pool));
+    const previewService = new PreviewImport(runner);
+    app.use('/api/v1', createImportRouter(previewService, new ConfirmImport(runner),
+      { allowedOrigin: 'http://127.0.0.1:5173', csrfKey: key, cookieSecure: false },
+      new ImportProfiles(runner),
+      new InspectImport(previewService, { inspect: inspectInventoryFile, select: selectInventoryFile })));
+    const csv = Buffer.from('Prueba ficticia\nnombre,concentracion,presentacion,clasificacion,precio,cantidad\n' +
+      'producto ficticio,10 mg,tabletas,venta libre,,\n');
+    const headers = { Cookie: cookie, Origin: 'http://127.0.0.1:5173', 'X-CSRF-Token': token };
+    const inspectPath = `/api/v1/farmacias/${pharmacyA}/importaciones/analizar`;
+    expect((await request(app).post(inspectPath).set('Cookie', cookie)
+      .attach('archivo', csv, 'inteligente.csv')).status).toBe(403);
+    const inspected = await request(app).post(inspectPath).set(headers)
+      .attach('archivo', csv, 'inteligente.csv');
+    expect(inspected.status, JSON.stringify(inspected.body)).toBe(200);
+    expect(inspected.body.candidatos).toEqual(expect.arrayContaining([
+      expect.objectContaining({ sheet: 'CSV', headerRow: 2, matchedFields: 6 })]));
+    expect(JSON.stringify(inspected.body)).not.toContain('producto ficticio');
+    const mapping = { nombre: 'nombre', concentracion: 'concentracion', presentacion: 'presentacion',
+      clasificacion: 'clasificacion', precioReferencial: 'precio', cantidadFisica: 'cantidad' };
+    const preview = await request(app).post(`/api/v1/farmacias/${pharmacyA}/importaciones/vista-previa`)
+      .set(headers).attach('archivo', csv, 'inteligente.csv')
+      .field('mapeo', JSON.stringify(mapping))
+      .field('seleccion', JSON.stringify({ sheet: 'CSV', headerRow: 2, digest: inspected.body.huella }));
+    expect(preview.status, JSON.stringify(preview.body)).toBe(200);
+    expect(preview.body.filas[0].line).toBe(3);
+    expect(preview.body.incidencias).toHaveLength(2);
+    const savedStatus = await request(app).get(`/api/v1/farmacias/${pharmacyA}/importaciones/${preview.body.importacionId}`)
+      .set('Cookie', cookie);
+    expect(savedStatus.status).toBe(200);
+    expect(savedStatus.body.incidencias.map((item: { code: string }) => item.code))
+      .toEqual(['PRECIO_REQUERIDO','CANTIDAD_REQUERIDA']);
+    expect((await database.query(`SELECT count(*)::int AS count FROM f02.importacion_incidencia
+      WHERE importacion_id=$1`, [preview.body.importacionId])).rows[0].count).toBe(2);
+    expect((await request(app).post(`/api/v1/farmacias/${pharmacyB}/importaciones/analizar`)
+      .set(headers).attach('archivo', csv, 'inteligente.csv')).status).toBe(404);
+    const validCsv = Buffer.from('Archivo ficticio\nnombre,concentracion,presentacion,clasificacion,precio,cantidad\n' +
+      'producto ficticio,10 mg,tabletas,venta libre,12.50,4\n');
+    const validInspect = await request(app).post(inspectPath).set(headers)
+      .attach('archivo', validCsv, 'perfil.csv');
+    expect(validInspect.status).toBe(200);
+    const validPreview = await request(app).post(`/api/v1/farmacias/${pharmacyA}/importaciones/vista-previa`)
+      .set(headers).attach('archivo', validCsv, 'perfil.csv')
+      .field('mapeo', JSON.stringify(mapping))
+      .field('seleccion', JSON.stringify({ sheet: 'CSV', headerRow: 2, digest: validInspect.body.huella }));
+    expect(validPreview.status, JSON.stringify(validPreview.body)).toBe(200);
+    expect(validPreview.body.errores).toEqual([]);
+    const saved = await request(app).post(`/api/v1/farmacias/${pharmacyA}/importaciones/perfiles`)
+      .set(headers).send({ nombre: 'Columnas ficticias', importacionId: validPreview.body.importacionId });
+    expect(saved.status, JSON.stringify(saved.body)).toBe(201);
+    expect(saved.body.mapping).toMatchObject(mapping);
+    expect((await request(app).get(`/api/v1/farmacias/${pharmacyA}/importaciones/perfiles`)
+      .set('Cookie', cookie)).body).toHaveLength(1);
+    expect((await request(app).get(`/api/v1/farmacias/${pharmacyB}/importaciones/perfiles`)
+      .set('Cookie', cookie)).status).toBe(404);
   });
 
   it('confirmación aplica una vez o revierte todo el archivo ante conflicto', async () => {

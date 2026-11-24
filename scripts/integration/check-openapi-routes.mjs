@@ -103,6 +103,6 @@ if (process.argv.includes('--f025-contract') || process.argv.includes('--f025-ro
   const implemented=new Set(routeFiles.flatMap(([file,prefix])=>implementedOperations(file,prefix)));
   const missing=[...documented].filter(operation=>!implemented.has(operation));
   assert.deepEqual(missing,[],`Operaciones OpenAPI sin ruta Express: ${missing.join(', ')}`);
-  assert.equal(documented.size,38,'El inventario F00-F06/F06.1 cambió; revisar contrato y validador');
-  console.log(`Contratos OpenAPI F00-F06/F06.1: ${documented.size} operaciones documentadas con ruta Express.`);
+  assert.equal(documented.size,41,'El inventario F00-F06/F06.1/F02.1 cambió; revisar contrato y validador');
+  console.log(`Contratos OpenAPI F00-F06/F06.1/F02.1: ${documented.size} operaciones documentadas con ruta Express.`);
 }

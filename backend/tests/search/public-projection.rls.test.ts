@@ -14,7 +14,7 @@ group('proyección PostgreSQL RLS real F03', () => {
   async function connect(url: string) { const client = new Client({ connectionString:url }); await client.connect(); return client; }
   beforeAll(async () => {
     const baseUrl = new URL(baseText!);
-    if (baseUrl.hostname !== '127.0.0.1' || baseUrl.port !== '55431' || baseUrl.pathname !== '/farmafind_f01_test') throw new Error('F03 RLS: solo base local TEST');
+    if (baseUrl.hostname !== '127.0.0.1' || baseUrl.port !== '55431' || !/^\/farmafind_f01_test_[a-f0-9]{12}$/.test(baseUrl.pathname)) throw new Error('F03 RLS: solo fixture TEST marcado, nunca farmafind_f01_test');
     base = await connect(baseText!); const suffix = hex(6); databaseName = `farmafind_f01_test_${suffix}`; roleName = `f03_test_runtime_${suffix}`;
     await base.query(`CREATE DATABASE "${databaseName}"`); baseUrl.pathname = `/${databaseName}`; database = await connect(baseUrl.toString());
     await migrateTestDatabase(baseUrl.toString(),connect); await migrateF02TestDatabase(baseUrl.toString(),connect); await migrateF03TestDatabase(baseUrl.toString(),connect);
