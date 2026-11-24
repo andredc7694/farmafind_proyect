@@ -14,21 +14,63 @@ const capabilityLabels = [
   ['inventory.history', 'Ver historial de inventario'],
 ];
 
+const stateLabel = { PENDIENTE: 'pendiente', ACEPTADA: 'aceptada', RECHAZADA: 'rechazada', VENCIDA: 'vencida', REVOCADA: 'revocada' };
+
+function CapabilityChecklist({ selected, onToggle, idPrefix }) {
+  return <>{capabilityLabels.map(([code, label]) => <label key={code} htmlFor={`${idPrefix}-${code}`}>
+    <input id={`${idPrefix}-${code}`} type="checkbox" checked={selected.includes(code)} onChange={() => onToggle(code)} /> {label}
+  </label>)}</>;
+}
+
+function MemberRow({ member, busy, onSave, onRevoke }) {
+  const [editing, setEditing] = useState(false);
+  const [selected, setSelected] = useState(member.capabilities);
+  const [confirming, setConfirming] = useState(false);
+  useEffect(() => { setSelected(member.capabilities); }, [member.capabilities]);
+  const toggle = code => setSelected(current => current.includes(code) ? current.filter(item => item !== code) : [...current, code]);
+  const active = member.state === 'ACTIVA';
+  return <li>
+    <strong>{member.alias ?? member.userId}</strong> — {member.displayName ?? 'sin nombre'} — {member.state}
+    {member.pendingTemporaryKey && ' — clave temporal pendiente de usar'}
+    {active && <>{' '}
+      <button type="button" disabled={busy} onClick={() => setEditing(value => !value)}>
+        {editing ? 'Cerrar permisos' : 'Permisos'}</button>{' '}
+      {!confirming
+        ? <button type="button" disabled={busy} onClick={() => setConfirming(true)}>Revocar acceso</button>
+        : <><button type="button" disabled={busy} onClick={() => { setConfirming(false); onRevoke(member); }}>Confirmar revocación</button>{' '}
+          <button type="button" onClick={() => setConfirming(false)}>Cancelar</button></>}
+    </>}
+    {active && editing && <fieldset><legend>Permisos de {member.alias ?? member.displayName}</legend>
+      <CapabilityChecklist selected={selected} onToggle={toggle} idPrefix={`cap-${member.membershipId}`} />
+      <button type="button" disabled={busy} onClick={() => onSave(member, selected)}>Guardar permisos</button>
+    </fieldset>}
+  </li>;
+}
+
 /** Solo una respuesta correcta del servidor revela esta vista; el navegador no concede nada. */
 export function StaffAdmin({ pharmacyId, api = client }) {
   const [status, setStatus] = useState('loading');
   const [members, setMembers] = useState([]);
+  const [invitations, setInvitations] = useState([]);
   const [alias, setAlias] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [capabilities, setCapabilities] = useState([]);
+  const [inviteEmail, setInviteEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(null);
+  const [notice, setNotice] = useState(null);
   const [issued, setIssued] = useState(null); // { alias, temporaryPassword, expiresAt }: se muestra una sola vez
+
+  async function refresh() {
+    setMembers(await api.list(pharmacyId));
+    setInvitations(api.listInvitations ? await api.listInvitations(pharmacyId) : []);
+  }
 
   useEffect(() => {
     let active = true;
-    setStatus('loading'); setMembers([]); setIssued(null);
-    api.list(pharmacyId).then(rows => { if (active) { setMembers(rows); setStatus('ready'); } })
+    setStatus('loading'); setMembers([]); setInvitations([]); setIssued(null); setNotice(null);
+    Promise.all([api.list(pharmacyId), api.listInvitations ? api.listInvitations(pharmacyId) : Promise.resolve([])])
+      .then(([rows, invites]) => { if (active) { setMembers(rows); setInvitations(invites); setStatus('ready'); } })
       .catch(() => { if (active) setStatus('denied'); });
     return () => { active = false; setIssued(null); };
   }, [pharmacyId, api]);
@@ -39,16 +81,35 @@ export function StaffAdmin({ pharmacyId, api = client }) {
 
   async function submit(event) {
     event.preventDefault();
-    setBusy(true); setMessage(null);
+    setBusy(true); setMessage(null); setNotice(null);
     try {
       const created = await api.create(pharmacyId, { alias: alias.trim(), displayName: displayName.trim(), capabilities });
       setIssued({ alias: created.alias, temporaryPassword: created.temporaryPassword, expiresAt: created.expiresAt });
       setAlias(''); setDisplayName(''); setCapabilities([]);
-      setMembers(await api.list(pharmacyId));
+      await refresh();
     } catch (error) {
       setMessage(error?.status === 409 ? 'Ese usuario no está disponible. Prueba con otro.'
         : 'No se pudo crear la cuenta. Revisa los datos e inténtalo de nuevo.');
     } finally { setBusy(false); }
+  }
+
+  async function invite(event) {
+    event.preventDefault();
+    setBusy(true); setMessage(null); setNotice(null);
+    try {
+      await api.invite(pharmacyId, inviteEmail.trim());
+      setInviteEmail('');
+      setNotice('Si existe una cuenta con ese correo, recibirá la invitación en «Mis invitaciones». No se confirma si la cuenta existe.');
+      await refresh();
+    } catch { setMessage('No se pudo enviar la invitación. Revisa el correo e inténtalo de nuevo.'); }
+    finally { setBusy(false); }
+  }
+
+  async function run(action, failure) {
+    setBusy(true); setMessage(null); setNotice(null);
+    try { await action(); await refresh(); }
+    catch { setMessage(failure); try { await refresh(); } catch { /* se conserva el estado anterior */ } }
+    finally { setBusy(false); }
   }
 
   if (status === 'loading') return <p role="status">Comprobando acceso al personal…</p>;
@@ -68,16 +129,29 @@ export function StaffAdmin({ pharmacyId, api = client }) {
       <label htmlFor="staff-name">Nombre para mostrar</label>
       <input id="staff-name" value={displayName} onChange={event => setDisplayName(event.target.value)} required maxLength={120} autoComplete="off" />
       <fieldset><legend>Permisos iniciales</legend>
-        {capabilityLabels.map(([code, label]) => <label key={code}>
-          <input type="checkbox" checked={capabilities.includes(code)} onChange={() => toggle(code)} /> {label}
-        </label>)}
+        <CapabilityChecklist selected={capabilities} onToggle={toggle} idPrefix="new-cap" />
       </fieldset>
       {message && <p role="alert">{message}</p>}
       <button type="submit" disabled={busy}>Crear cuenta de trabajador</button>
     </form>
-    <ul>{members.map(member => <li key={member.membershipId}>
-      <strong>{member.alias ?? member.userId}</strong> — {member.displayName ?? 'sin nombre'} — {member.state}
-      {member.pendingTemporaryKey && ' — clave temporal pendiente de usar'}
-    </li>)}</ul>
+    {api.invite && <form onSubmit={invite} aria-labelledby="invite-title">
+      <h3 id="invite-title">Invitar a una cuenta existente</h3>
+      <label htmlFor="invite-email">Correo de la persona</label>
+      <input id="invite-email" type="email" value={inviteEmail} onChange={event => setInviteEmail(event.target.value)}
+        required maxLength={254} autoComplete="off" />
+      <button type="submit" disabled={busy}>Enviar invitación</button>
+      {notice && <p role="status">{notice}</p>}
+    </form>}
+    {invitations.length > 0 && <>
+      <h3>Invitaciones enviadas</h3>
+      <ul>{invitations.map(item => <li key={item.id}>
+        {item.destination} — {stateLabel[item.state] ?? item.state}{' '}
+        {item.state === 'PENDIENTE' && <button type="button" disabled={busy}
+          onClick={() => void run(() => api.revokeInvitation(pharmacyId, item.id), 'No se pudo revocar la invitación.')}>
+          Revocar invitación</button>}
+      </li>)}</ul></>}
+    <ul>{members.map(member => <MemberRow key={member.membershipId} member={member} busy={busy}
+      onSave={(row, selected) => void run(() => api.setCapabilities(pharmacyId, row.membershipId, selected), 'No se pudieron guardar los permisos.')}
+      onRevoke={row => void run(() => api.revokeMembership(pharmacyId, row.membershipId), 'No se pudo revocar el acceso.')} />)}</ul>
   </section>;
 }

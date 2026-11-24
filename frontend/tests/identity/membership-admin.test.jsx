@@ -12,19 +12,14 @@ describe('administracion local React: el servidor autoriza, el cliente solo soli
       { credentials: 'same-origin', cache: 'no-store' });
   });
 
-  it('pide CSRF por cada cambio y envía solo TRABAJADOR o REVOCADA', async () => {
+  it('pide CSRF en cada cambio, envía solo REVOCADA y ya no ofrece la concesión directa', async () => {
     const fetcher = vi.fn()
-      .mockResolvedValueOnce(response(200, { csrfToken: 'fixture-csrf-1' }))
-      .mockResolvedValueOnce(response(201, { role: 'TRABAJADOR' }))
       .mockResolvedValueOnce(response(200, { csrfToken: 'fixture-csrf-2' }))
       .mockResolvedValueOnce(response(200, { status: 'REVOCADA' }));
     const client = createMembershipAdminClient(fetcher);
-    await client.grant('farmacia-a', 'usuario-ficticio');
+    expect(client.grant).toBeUndefined(); // decisión A (Puerta 6): la vinculación es por invitación
     await client.revoke('farmacia-a', 'membresia-ficticia');
-    expect(fetcher.mock.calls[1][1]).toMatchObject({ method: 'POST', credentials: 'same-origin',
-      body: '{"userId":"usuario-ficticio","role":"TRABAJADOR"}',
-      headers: { 'X-CSRF-Token': 'fixture-csrf-1' } });
-    expect(fetcher.mock.calls[3][1]).toMatchObject({ method: 'PATCH', credentials: 'same-origin',
+    expect(fetcher.mock.calls[1][1]).toMatchObject({ method: 'PATCH', credentials: 'same-origin',
       body: '{"status":"REVOCADA"}', headers: { 'X-CSRF-Token': 'fixture-csrf-2' } });
   });
 

@@ -3,6 +3,7 @@ import { AuthView } from './AuthView.jsx';
 import { PharmacySelector } from './PharmacySelector.jsx';
 import { MembershipAdmin } from './MembershipAdmin.jsx';
 import { StaffAdmin } from './StaffAdmin.jsx';
+import { MyInvitations } from './MyInvitations.jsx';
 import { ForcedPasswordChange } from './ForcedPasswordChange.jsx';
 import { createSessionClient } from './session-client.js';
 import { InventoryView } from '../inventory/InventoryView.jsx';
@@ -24,6 +25,7 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
   const [pharmacyStatus, setPharmacyStatus] = useState('loading');
   const [activePharmacyId, setActivePharmacyId] = useState(null);
   const [selectingPharmacyId, setSelectingPharmacyId] = useState(null);
+  const [membershipsVersion, setMembershipsVersion] = useState(0);
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   // F01.1: una sesión con cambio de clave pendiente solo puede completar ese paso.
@@ -59,7 +61,7 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
       if (await recheckSession()) setPharmacyStatus('denied');
     });
     return () => { current = false; };
-  }, [status, restricted]);
+  }, [status, restricted, membershipsVersion]);
 
   useEffect(() => {
     if (status !== 'authenticated') return undefined;
@@ -176,6 +178,8 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
     {!(status === 'authenticated' && restricted) && <AuthView status={status} error={error} notice={notice} profile={profile}
       returnTo={returnTo}
       onRegister={register} onLogin={login} onLogout={logout} />}
+    {status === 'authenticated' && !restricted && !inventoryMode && !reservationsMode && !locationMode &&
+      <MyInvitations onAccepted={() => setMembershipsVersion(value => value + 1)} />}
     {status === 'authenticated' && !restricted && <PharmacySelector pharmacies={pharmacies}
       activePharmacyId={activePharmacyId} selectingPharmacyId={selectingPharmacyId}
       status={pharmacyStatus} onSelect={selectPharmacy} />}
