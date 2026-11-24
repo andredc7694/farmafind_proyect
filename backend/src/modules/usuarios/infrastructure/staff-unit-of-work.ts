@@ -47,6 +47,12 @@ class PgStaffTransaction implements StaffTransaction {
     return result.rows[0].expires_at as Date;
   }
 
+  async recordDenied(pharmacyId: string): Promise<void> {
+    await this.client.query(`INSERT INTO f01.auditoria_identidad(actor_usuario_id,farmacia_id,accion,resultado,correlation_id)
+      VALUES (NULLIF(current_setting('app.actor_user_id', true), '')::uuid, $1, 'ELEVATION_DENIED', 'DENEGADO', gen_random_uuid())`,
+    [this.id(pharmacyId)]);
+  }
+
   private id(value: string): string {
     if (!uuid.test(value)) throw new Error('Entrada inválida');
     return value;

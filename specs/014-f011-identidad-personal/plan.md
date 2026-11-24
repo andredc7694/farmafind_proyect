@@ -11,7 +11,7 @@ Extender F01 sin reescribirlo: cuentas operativas de personal con alias y clave 
 
 **Language/Version**: Node.js 24.17.0, npm 11.13.0, TypeScript 5.9.3; React 19.2.7/JSX y Vite 7.3.8 (manifests F00).
 **Primary Dependencies**: reutilizar Express 5.2.1, `pg@8.23.1`, Argon2id existente (`argon2-password.ts`) y `node:crypto`. **Ninguna dependencia nueva**: TOTP (RFC 6238) y cifrado AES-256-GCM del secreto se implementan con `node:crypto` y se prueban con los vectores oficiales (ver research D-04).
-**Storage**: PostgreSQL; migración aditiva `backend/migrations/f01/011_staff_identity.sql` (ver [data-model.md](data-model.md)). Las tablas nuevas usan RLS y `FORCE ROW LEVEL SECURITY` como las de F01. Sin Redis nuevo.
+**Storage**: PostgreSQL; migraciones aditivas `backend/migrations/f01/011` a `016` (ver [data-model.md](data-model.md)). Las tablas nuevas usan RLS y `FORCE ROW LEVEL SECURITY` como las de F01. Sin Redis nuevo.
 **Testing**: Vitest (unitarias de política y TOTP), HTTP con supertest, PostgreSQL TEST efímero con RLS Alfa/Beta, concurrencia (doble uso de clave, doble aceptación), matriz de ataques, E2E en navegador compatible (Playwright Linux en contenedor) y regresión F01/F02/F04/F05.
 **Target Platform**: Windows 10 para desarrollo; E2E Playwright en Linux de contenedor. Sin AWS ni Gemini.
 **Project Type**: monolito modular: módulo `usuarios` (backend) y `frontend/src/identity` (React).

@@ -44,7 +44,7 @@ Decisiones tomadas para resolver cada incógnita del plan. Cada una indica alter
 - **Decisión**: F01 ya revalida membresía y delegación por petición; se añade (a) cierre de sesiones si el usuario queda sin membresías activas y (b) borrado de la farmacia activa seleccionada si era la revocada. Prueba: «revocar y reintentar en el siguiente request» (SC-003).
 
 ## D-09 — Permisos de personal sobre `delegacion`
-- **Decisión**: reutilizar `delegacion.capacidad` con el catálogo ya existente en F02/F04: `reservation.read`, `reservation.accept`, `reservation.deliver`, `reservation.settings`, `inventory.read`, `inventory.write`, `inventory.import.preview`, `inventory.import.confirm`, `inventory.history`; `personal.gestionar` no es delegable (solo propietario). Los códigos existentes de F02/F04 se conservan tal cual.
+- **Decisión**: reutilizar `delegacion.capacidad` con el catálogo ya existente en F02/F04: `reservation.read`, `reservation.accept`, `reservation.deliver`, `reservation.settings`, `inventory.read`, `inventory.write`, `inventory.import.preview`, `inventory.import.confirm`, `inventory.history`; la capacidad de gestión real es `membership.manage` (no `personal.gestionar`) y no es delegable por esta vía (solo propietario). Los códigos existentes de F02/F04 se conservan tal cual.
 - **Razón**: coherencia con ROL-01/EXC-01 y F02/F04; sin tabla paralela.
 - **Verificado 2026-11-23** contra el código: F04 usa `reservation.read|accept|deliver|settings` y F02 usa `inventory.read|write|import.preview|import.confirm|history`. Las capacidades de reserva y su delegación a trabajadores no se renombran.
 

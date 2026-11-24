@@ -229,6 +229,22 @@ No se ejecutaron: F04 rls (no tocado), Playwright/E2E (T053), F05, DEMO (T055). 
 - **Cambiar correo no cierra otras sesiones** (la clave sí). Si Andre prefiere cerrarlas también, es un cambio de una línea en `verify_email`.
 - **Supuesto de función definer** (propietario con escritura en tablas FORCE RLS): igual que lotes previos; validar antes de cualquier base persistente (Puerta 6).
 
-## Pendiente (siguientes lotes)
+## Lote 7 — Fase 8: cierre técnico (T049–T057), 2026-11-23
 
-US4 (T037–T043) en adelante. Nada de lo anterior constituye aceptación de F01.1.
+| Tarea | Resultado real |
+|---|---|
+| T049 rutas/contrato | `npm run verify:contracts:f011`: **26/26** operaciones con ruta Express; `verify:contracts`: 41 operaciones |
+| T050 sin secretos | `f011-no-secrets.rls.test.ts`: 5/5 — se recogen 14+ secretos emitidos (claves temporales de alta/reemisión y su forma compacta, códigos de restablecimiento/verificación/cambio de correo, secreto TOTP base32/hex, claves y cookies de sesión) y no aparecen en respuestas posteriores, registros del proceso ni en **ninguna fila de las tablas del esquema f01**; la auditoría solo tiene columnas de identificación |
+| T051 matriz de ataques | `f011-attack-matrix.rls.test.ts`: 9/9 con un pool de **una sola conexión** (el contexto no se filtra entre peticiones): trabajador Alfa → 403 con 5 filas `ELEVATION_DENIED`; propietario Alfa sobre Beta → 404 en 9 rutas sin cambios ni auditoría de Beta; sin ascensos; invitación ajena → 404; clave temporal consumida/vencida/alias inexistente/clave errónea indistinguibles; sondeo de correos indistinguible; sesión restringida y administrador sin factor → 403; roles directos sin permisos |
+| T052 regresión | F01 unit **114/114**, api **128/128**, rls **135/135**; F02 unit 15/15, rls 15/15; F03 unit 25/25, rls 4/4; F04 unit 18/18, api 6/6; F05 unit 8/8, api 5/5; `f021-rls` 3/3; frontend 37 archivos **134/134**; `npm run check` (258 archivos JS), `build`, `verify:contracts` correctos. **No reejecutadas:** `f04:rls` y `f05:rls` (sus pruebas exigen una base distinta de la marcada y la persistente está vedada; sin cambios en esas rutas; última: F04 18/18 en lote 3) |
+| T053 E2E | Playwright Linux (Chromium, contenedor) sobre fixture efímero propio: **6/6** recorridos (alta de trabajador y clave temporal visible una vez; primer ingreso y no reutilización; invitación, aceptación y revocación inmediata; recuperación con simulador de correo; segundo factor del administrador con rechazo de código reutilizado y `/platform` 403→200; perfil y cambio de clave). Las primeras corridas fallaron por tiempos/reinicio del servidor de desarrollo y por una aserción propia mal planteada (tras perder la última membresía la sesión se cierra → 401); se corrigió el spec, no el producto. Fixture eliminado al terminar |
+| T054 Argon2id | `scripts/f01/measure-argon2.mjs` (argon2id, 64 MiB, 3 pasadas, 1 hilo; i5-10210U, 8 CPU, Node 24.17, 10 repeticiones): hash mediana 265 ms (p95 422); verificación correcta mediana 273 ms (p95 321); incorrecta mediana 455 ms (p95 853; ruido del equipo); login con 2 verificaciones mediana 466 ms (p95 1184); 4 verificaciones concurrentes 337 ms en total, 8 concurrentes 878 ms. Sin umbrales definidos; el RSS no captura la memoria nativa |
+| T055 DEMO | Fixture TEST efímero preparado, API y web encendidas; guía en [demo-guide.md](demo-guide.md); revisión humana pendiente |
+| T056 trazabilidad | [traceability.md](traceability.md) actualizada, sin puntajes |
+| T057 analyze/converge | [convergence.md](convergence.md); contradicciones corregidas en research.md, data-model.md, plan.md y contrato |
+
+Cambios de código de este lote: `ELEVATION_DENIED` en denegaciones de personal (`runAuthorizedStaff`), `mfaKey`/`F01_MAILBOX_DIR` opcionales en `identity-runtime.ts`, `scripts/f011/*`, `scripts/f01/mailbox.mjs` (bandeja de la DEMO), `verify:contracts:f011`.
+
+## Pendiente
+
+T058: decisión de aceptación de Andre. Nada de lo anterior constituye aceptación de F01.1.

@@ -168,7 +168,6 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409': { description: 'No disponible (mensaje genérico, sin revelar de quién es el alias)' }
-        '429': { $ref: '#/components/responses/RateLimited' }
   /pharmacies/{pharmacyId}/staff/{userId}/temporary-key:
     parameters: [{ $ref: '#/components/parameters/PharmacyId' }, { $ref: '#/components/parameters/UserId' }]
     post:

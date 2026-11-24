@@ -170,6 +170,8 @@ export interface StaffTransaction {
   listMyInvitations(): Promise<readonly MyInvitationRow[]>;
   acceptInvitation(invitationId: string): Promise<string>;
   declineInvitation(invitationId: string): Promise<void>;
+  /** Auditoría ELEVATION_DENIED del propio actor en esta farmacia (sin secretos ni datos del objetivo). */
+  recordDenied(pharmacyId: string): Promise<void>;
 }
 
 export interface StaffUnitOfWork {

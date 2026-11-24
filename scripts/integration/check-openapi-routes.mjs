@@ -59,6 +59,15 @@ function implementedOperations(file,prefix){
       operations.push(key('post',`${prefix}${template[1].replace('${name}',match[1])}`));
     }
   }
+  if(file.endsWith('presentation/staff-access-router.ts')){
+    // F01.1: aceptar y rechazar invitaciones comparten una ruta generada en un bucle.
+    const template=source.match(/router\.post\(`([^`]+\$\{action\})`/);
+    assert(template,'Ruta dinámica F01.1 de invitaciones ausente');
+    const actions=source.match(/for\s*\(const action of \[([^\]]+)\] as const\)/)?.[1];
+    assert(actions,'Acciones F01.1 de invitaciones ausentes');
+    for(const match of actions.matchAll(/'([^']+)'/g))
+      operations.push(key('post',`${prefix}${template[1].replace('${action}',match[1])}`));
+  }
   if(file.endsWith('presentation/application-router.ts')){
     const template=source.match(/router\.post\(`([^`]+\$\{action\})`/);
     assert(template,'Ruta dinámica F02.5 de solicitante ausente');
@@ -85,6 +94,7 @@ if (process.argv.includes('--f011-contract') || process.argv.includes('--f011-ro
     const proposedRoutes=[
       ['backend/src/modules/usuarios/presentation/auth-router.ts','/api/v1'],
       ['backend/src/modules/usuarios/presentation/staff-router.ts','/api/v1'],
+      ['backend/src/modules/usuarios/presentation/staff-access-router.ts','/api/v1'],
       ['backend/src/modules/usuarios/presentation/profile-router.ts','/api/v1'],
       ['backend/src/modules/usuarios/presentation/mfa-router.ts','/api/v1'],
     ];

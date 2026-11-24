@@ -92,15 +92,15 @@ Formato: `- [ ] Txxx [P] [USn] descripción con ruta (requisitos)`. `[P]` = para
 
 ## Phase 8: Polish, seguridad y aceptación
 
-- [ ] T049 [P] Registrar las 25 operaciones nuevas en `backend/src/` (composición Express) y completar el contrato si la implementación difiere, ejecutando `npm run verify:contracts` hasta que cada operación tenga ruta (FR-001–014); depende de T021, T028, T034, T040, T046.
-- [ ] T050 [P] Prueba transversal «sin secretos»: buscar claves temporales, tokens y secretos TOTP en auditoría, logs, respuestas posteriores y volcados de prueba, en `backend/tests/identity/f011-no-secrets.test.ts` (FR-008; SC-008); depende de T024, T030, T036, T043, T048.
-- [ ] T051 [P] Matriz de ataques Alfa/Beta completa de [security.md](contracts/security.md) con conexiones reutilizadas y roles directos en `backend/tests/identity/f011-attack-matrix.rls.test.ts` (FR-015; SC-004); depende de T024, T030, T043.
-- [ ] T052 Regresión: `npm run check`, `npm run build`, `verify:contracts`, F01 (`api`, `rls`), F02, F03, F04 y F05 sin cambios de comportamiento, con resultados reales en `evidence.md` (SC-009); depende de T049–T051.
-- [ ] T053 Recorridos E2E de navegador en Playwright Linux (alta y primer ingreso, invitación y revocación, recuperación, administrador con MFA, perfil) en `frontend/e2e/f011-identity.spec.js` y `scripts/f011/run-browser-linux.mjs`, solo sobre fixture TEST marcado y sin tocar `farmafind_f01_test` (SC-001–007); depende de T052.
-- [ ] T054 [P] Medir el costo de verificación Argon2id en login y cambio de clave (tiempo/memoria con los parámetros F01) y registrarlo en `evidence.md` sin inventar umbrales (plan: Performance Goals); depende de T024.
-- [ ] T055 Ejecutar la DEMO manual en TEST con Alfa/Beta ficticias y preparar la guía de revisión humana (usuarios, contraseñas de prueba, pasos) para el responsable (SC-001–009); depende de T053.
-- [ ] T056 Actualizar `traceability.md` con MEJ-015–017/019, HU23–25/27, RF37–41/44–45, AC10–11 y los 16 criterios docentes, con evidencias reales y sin puntajes presumidos (todas las FR/SC); depende de T052–T055.
-- [ ] T057 Ejecutar *analyze* y *converge* de Spec Kit, registrar diferencias contra la spec en `specs/014-f011-identidad-personal/convergence.md` y corregir contradicciones (todas las FR); depende de T056.
+- [X] T049 [P] Registrar las 25 operaciones nuevas en `backend/src/` (composición Express) y completar el contrato si la implementación difiere, ejecutando `npm run verify:contracts` hasta que cada operación tenga ruta (FR-001–014); depende de T021, T028, T034, T040, T046.
+- [X] T050 [P] Prueba transversal «sin secretos»: buscar claves temporales, tokens y secretos TOTP en auditoría, logs, respuestas posteriores y volcados de prueba, en `backend/tests/identity/f011-no-secrets.test.ts` (FR-008; SC-008); depende de T024, T030, T036, T043, T048.
+- [X] T051 [P] Matriz de ataques Alfa/Beta completa de [security.md](contracts/security.md) con conexiones reutilizadas y roles directos en `backend/tests/identity/f011-attack-matrix.rls.test.ts` (FR-015; SC-004); depende de T024, T030, T043.
+- [X] T052 Regresión: `npm run check`, `npm run build`, `verify:contracts`, F01 (`api`, `rls`), F02, F03, F04 y F05 sin cambios de comportamiento, con resultados reales en `evidence.md` (SC-009); depende de T049–T051.
+- [X] T053 Recorridos E2E de navegador en Playwright Linux (alta y primer ingreso, invitación y revocación, recuperación, administrador con MFA, perfil) en `frontend/e2e/f011-identity.spec.js` y `scripts/f011/run-browser-linux.mjs`, solo sobre fixture TEST marcado y sin tocar `farmafind_f01_test` (SC-001–007); depende de T052.
+- [X] T054 [P] Medir el costo de verificación Argon2id en login y cambio de clave (tiempo/memoria con los parámetros F01) y registrarlo en `evidence.md` sin inventar umbrales (plan: Performance Goals); depende de T024.
+- [X] T055 Ejecutar la DEMO manual en TEST con Alfa/Beta ficticias y preparar la guía de revisión humana (usuarios, contraseñas de prueba, pasos) para el responsable (SC-001–009); depende de T053.
+- [X] T056 Actualizar `traceability.md` con MEJ-015–017/019, HU23–25/27, RF37–41/44–45, AC10–11 y los 16 criterios docentes, con evidencias reales y sin puntajes presumidos (todas las FR/SC); depende de T052–T055.
+- [X] T057 Ejecutar *analyze* y *converge* de Spec Kit, registrar diferencias contra la spec en `specs/014-f011-identidad-personal/convergence.md` y corregir contradicciones (todas las FR); depende de T056.
 - [ ] T058 Preparar `specs/014-f011-identidad-personal/acceptance.md` y solicitar la aceptación humana de F01.1; registrar la decisión y los pendientes solo cuando Andre responda; **nunca autoaprobar**; depende de T057.
 
 ## Dependencies and parallel work
@@ -141,3 +141,7 @@ T037–T043 marcadas con evidencia real en [evidence.md](evidence.md). Desviacio
 ## Notas de ejecución del lote 6 (2026-11-23)
 
 T044–T048 marcadas con evidencia real en [evidence.md](evidence.md). Desviaciones: las operaciones del perfil son funciones `SECURITY DEFINER` en `backend/migrations/f01/016_profile.sql` que derivan al usuario **solo** de la sesión vigente y sin restricción (ninguna recibe un identificador de usuario); el rol de aplicación (`f01_runtime`) no puede ejecutarlas. `verify_email` ahora también confirma `CAMBIO_CORREO` (el correo nuevo solo se activa con el código enviado a él). T044: `f011-profile.http.test.ts`; T048: `f011-us5.rls.test.ts` (HTTP + PostgreSQL). Se añadió la política de inserción `EMAIL_CHANGE` para el rol de autenticación (hallada por la propia prueba). La interfaz «Mi perfil» incluye la verificación del propio correo pendiente desde el lote 4.
+
+## Notas de ejecución del lote 7 (2026-11-23)
+
+T049–T057 marcadas con evidencia real en [evidence.md](evidence.md). **T058 queda sin marcar:** [acceptance.md](acceptance.md) está preparado, la decisión es solo de Andre. Desviaciones: T050 → `f011-no-secrets.rls.test.ts` y T051 → `f011-attack-matrix.rls.test.ts` (sufijos exigidos por `check.mjs`); T049 se cumplió con `npm run verify:contracts:f011` (26/26) y el validador ahora reconoce el bucle de aceptar/rechazar invitaciones; T052: `f04:rls` y `f05:rls` no se reejecutaron (sus pruebas exigen una base distinta a la marcada; no se tocó la persistente); T053 usa un fixture propio (`scripts/f011/`) que se crea y se elimina por corrida; T055: DEMO encendida y guía en [demo-guide.md](demo-guide.md); T057: [convergence.md](convergence.md).

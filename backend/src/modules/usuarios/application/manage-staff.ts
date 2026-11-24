@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { authorizeStaffManager, mapStaffDatabaseError } from './staff-errors.js';
+import { runAuthorizedStaff } from './staff-errors.js';
 import type { PasswordHasher, StaffMemberRow, StaffTransaction, StaffUnitOfWork } from './ports.js';
 import { canonicalAlias } from '../domain/alias.js';
 import { validateRequestedCapabilities } from '../domain/staff-policy.js';
@@ -19,10 +19,7 @@ export class ManageStaff {
     private readonly random: (size: number) => Buffer = randomBytes) {}
 
   list(secret: string, pharmacyId: string): Promise<readonly StaffMemberRow[]> {
-    return this.transactions.runStaff(secret, async (transaction, actorUserId) => {
-      await authorizeStaffManager(transaction, actorUserId, pharmacyId);
-      try { return await transaction.listStaff(pharmacyId); } catch (error) { throw mapStaffDatabaseError(error); }
-    });
+    return runAuthorizedStaff(this.transactions, secret, pharmacyId, transaction => transaction.listStaff(pharmacyId));
   }
 
   /** Recuperación de un trabajador sin correo: nueva clave temporal (una sola vez, 24 h); invalida la anterior. */
@@ -34,12 +31,9 @@ export class ManageStaff {
     const normalized = normalizeTemporaryKey(temporaryKey);
     if (!normalized) throw new Error('No se pudo generar la clave temporal');
     const keyHash = await this.passwords.hash(normalized);
-    return this.transactions.runStaff(secret, async (transaction, actorUserId) => {
-      await authorizeStaffManager(transaction, actorUserId, pharmacyId);
-      try {
-        const expiresAt = await transaction.issueTemporaryKey(pharmacyId, userId, keyHash);
-        return { temporaryPassword: temporaryKey, expiresAt };
-      } catch (error) { throw mapStaffDatabaseError(error); }
+    return runAuthorizedStaff(this.transactions, secret, pharmacyId, async transaction => {
+      const expiresAt = await transaction.issueTemporaryKey(pharmacyId, userId, keyHash);
+      return { temporaryPassword: temporaryKey, expiresAt };
     });
   }
 
@@ -55,13 +49,10 @@ export class ManageStaff {
     if (!normalized) throw new Error('No se pudo generar la clave temporal');
     const [temporaryKeyHash, unusableHash] = await Promise.all([
       this.passwords.hash(normalized), this.passwords.hash(this.random(32).toString('hex'))]);
-    return this.transactions.runStaff(secret, async (transaction, actorUserId) => {
-      await authorizeStaffManager(transaction, actorUserId, pharmacyId);
-      try {
-        const created = await transaction.createStaffAccount({ pharmacyId, alias, displayName, unusableHash,
-          temporaryKeyHash, capabilities });
-        return { userId: created.userId, alias, temporaryPassword: temporaryKey, expiresAt: created.expiresAt };
-      } catch (error) { throw mapStaffDatabaseError(error); }
+    return runAuthorizedStaff(this.transactions, secret, pharmacyId, async transaction => {
+      const created = await transaction.createStaffAccount({ pharmacyId, alias, displayName, unusableHash,
+        temporaryKeyHash, capabilities });
+      return { userId: created.userId, alias, temporaryPassword: temporaryKey, expiresAt: created.expiresAt };
     });
   }
 }

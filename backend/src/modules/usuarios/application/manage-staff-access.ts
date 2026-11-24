@@ -1,4 +1,4 @@
-import { authorizeStaffManager, mapStaffDatabaseError } from './staff-errors.js';
+import { mapStaffDatabaseError, runAuthorizedStaff } from './staff-errors.js';
 import type { InvitationRow, MyInvitationRow, StaffTransaction, StaffUnitOfWork } from './ports.js';
 import { canonicalEmail } from './registration.js';
 import { validateRequestedCapabilities } from '../domain/staff-policy.js';
@@ -15,10 +15,7 @@ export class ManageStaffAccess {
   constructor(private readonly transactions: StaffUnitOfWork) {}
 
   private manage<T>(secret: string, pharmacyId: string, work: (transaction: StaffTransaction) => Promise<T>): Promise<T> {
-    return this.transactions.runStaff(secret, async (transaction, actorUserId) => {
-      await authorizeStaffManager(transaction, actorUserId, pharmacyId);
-      try { return await work(transaction); } catch (error) { throw mapStaffDatabaseError(error); }
-    });
+    return runAuthorizedStaff(this.transactions, secret, pharmacyId, transaction => work(transaction));
   }
 
   /** Respuesta siempre silenciosa: nunca indica si la cuenta existe. */

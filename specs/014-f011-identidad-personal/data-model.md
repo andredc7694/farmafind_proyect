@@ -1,6 +1,6 @@
 # Modelo de datos — F01.1
 
-Migración aditiva `backend/migrations/f01/011_staff_identity.sql` (prefijo siguiente a `010_platform_authorization.sql`). Solo se aplica en bases TEST efímeras o fixtures marcados. Todas las tablas nuevas: `ENABLE` y `FORCE ROW LEVEL SECURITY`; el rol `f01_runtime` no obtiene permisos globales; `f01_auth` recibe únicamente las columnas necesarias.
+Migraciones aditivas `backend/migrations/f01/011_staff_identity.sql` (tablas y políticas), `012_staff_functions.sql` (alta atómica de personal), `013_staff_invitations.sql` (invitaciones y permisos), `014_account_recovery.sql` (restablecimiento, verificación y reemisión), `015_mfa.sql` (segundo factor; exige factor verificado en `has_platform_permission`) y `016_profile.sql` (perfil, sesiones y cambio de clave/correo propios; ámbito `REAUTH_ACCOUNT`). Prefijos siguientes a `010_platform_authorization.sql`. Solo se aplica en bases TEST efímeras o fixtures marcados. Todas las tablas nuevas: `ENABLE` y `FORCE ROW LEVEL SECURITY`; el rol `f01_runtime` no obtiene permisos globales; `f01_auth` recibe únicamente las columnas necesarias.
 
 ## Tablas alteradas
 
@@ -20,7 +20,7 @@ Migración aditiva `backend/migrations/f01/011_staff_identity.sql` (prefijo sigu
 | `mfa_verificada_at timestamptz` | NULL hasta verificar el segundo factor. |
 
 ### `f01.abuse_attempt`
-CHECK de `scope` ampliado con `TEMP_KEY_ACCOUNT`, `RESET_ACCOUNT`, `RESET_IP`, `TOTP_ACCOUNT`, `STAFF_CREATE_IP`.
+CHECK de `scope` ampliado con `TEMP_KEY_ACCOUNT`, `RESET_ACCOUNT`, `RESET_IP`, `TOTP_ACCOUNT`, `STAFF_CREATE_IP`, `REAUTH_ACCOUNT` (016). Reservados sin uso hoy: `TEMP_KEY_ACCOUNT` y `STAFF_CREATE_IP` (el bloqueo de clave temporal reutiliza el límite de inicio de sesión).
 
 ## Tablas nuevas
 
@@ -89,7 +89,7 @@ Sin claves, tokens, códigos ni secretos (SC-008). Solo inserción desde la apli
 ## Relaciones y reglas transversales
 
 - Cuenta de personal → `usuario` (alias) + `usuario_farmacia` (rol `TRABAJADOR`) + `delegacion` (capacidades) + `credencial_temporal` + `perfil_usuario`.
-- Capacidades concedibles (existentes): `reservation.read|accept|deliver|settings`, `inventory.read|write|import.preview|import.confirm|history`. `personal.gestionar` no es delegable.
+- Capacidades concedibles (existentes): `reservation.read|accept|deliver|settings`, `inventory.read|write|import.preview|import.confirm|history`. `membership.manage` (gestión de personal) no es delegable.
 - Contexto: el `farmacia_id` activo lo fija el servidor desde la membresía validada; nunca desde el cliente.
 - Sin datos reales: alias, correos y teléfonos ficticios (`example.test`).
 
