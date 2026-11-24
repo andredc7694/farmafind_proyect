@@ -42,6 +42,8 @@ import { PgPublicOfferRepository } from './modules/busqueda/infrastructure/publi
 import { RedisSearchCache } from './modules/busqueda/infrastructure/redis-search-cache.js';
 import { RedisSearchInvalidator } from './modules/busqueda/infrastructure/search-invalidator.js';
 import { SearchPublicOffers } from './modules/busqueda/application/search-public-offers.js';
+import { SuggestPublicOffers } from './modules/busqueda/application/suggest-public.js';
+import { createPublicSuggestRouter } from './modules/busqueda/presentation/public-suggest-router.js';
 import { createPublicSearchRouter } from './modules/busqueda/presentation/public-search-router.js';
 import { createPublicPharmacyRouter } from './modules/busqueda/presentation/public-pharmacy-router.js';
 import { InMemorySearchMetrics } from './modules/busqueda/infrastructure/in-memory-search-metrics.js';
@@ -199,6 +201,7 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       const search = new SearchPublicOffers(repository, cache, { ttlSeconds: config.search.cacheTtlSeconds,
         candidateLimit: config.search.candidateLimit }, new InMemorySearchMetrics());
       app.use('/api/v1', createPublicSearchRouter(search));
+      app.use('/api/v1', createPublicSuggestRouter(new SuggestPublicOffers(repository)));
       app.use('/api/v1', createPublicPharmacyRouter(repository));
       const publicGateway = new F03PublicAssistantGateway(search, repository);
       const publicTools = new F03PublicKnowledgeTools(publicGateway);

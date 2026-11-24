@@ -5,7 +5,14 @@ function failure(response) {
 }
 
 export function createPublicSearchClient(fetchImpl = fetch) {
-  return { search: async criteria => {
+  return { /** F08.1: sugerencias de nombre/presentación; si falla, la búsqueda sigue funcionando sin ellas. */
+    suggest: async text => {
+      const response = await fetchImpl(`/api/v1/busquedas/sugerencias?${new URLSearchParams({ q: text })}`, { cache: 'no-store' });
+      if (!response.ok) throw failure(response);
+      const data = await response.json();
+      return Array.isArray(data.suggestions) ? data.suggestions : [];
+    },
+    search: async criteria => {
     const params = new URLSearchParams();
     Object.entries(criteria).forEach(([key, value]) => {
       if (value !== '' && value !== null && value !== undefined) params.set(key, String(value));
