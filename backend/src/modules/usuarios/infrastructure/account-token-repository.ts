@@ -10,14 +10,14 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 export class PgAccountTokenRepository implements AccountTokenRepository {
   constructor(private readonly client: SqlClient) {}
 
-  async create(input: { userId: string; purpose: 'VERIFICAR_CORREO' | 'RESTABLECER_CLAVE'; tokenHash: Buffer;
-    ttlSeconds: number }): Promise<void> {
+  async create(input: { userId: string; purpose: 'VERIFICAR_CORREO' | 'RESTABLECER_CLAVE' | 'CAMBIO_CORREO'; tokenHash: Buffer;
+    ttlSeconds: number; destinationEmail?: string }): Promise<void> {
     if (!uuid.test(input.userId) || input.tokenHash.length !== 32 || !Number.isInteger(input.ttlSeconds) ||
         input.ttlSeconds < 60 || input.ttlSeconds > 86_400) throw new Error('Entrada inválida');
     await this.client.query("SELECT set_config('app.auth_user_id',$1,true)", [input.userId]);
     await this.client.query(
-      'INSERT INTO f01.token_cuenta(usuario_id,proposito,token_hash,expira_at) VALUES($1,$2,$3,now() + make_interval(secs => $4))',
-      [input.userId, input.purpose, input.tokenHash, input.ttlSeconds]);
+      'INSERT INTO f01.token_cuenta(usuario_id,proposito,token_hash,correo_destino,expira_at) VALUES($1,$2,$3,$5,now() + make_interval(secs => $4))',
+      [input.userId, input.purpose, input.tokenHash, input.ttlSeconds, input.destinationEmail ?? null]);
   }
 
   async completePasswordReset(tokenHash: Buffer, newPasswordHash: string): Promise<boolean> {

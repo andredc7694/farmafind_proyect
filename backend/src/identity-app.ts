@@ -10,6 +10,8 @@ import { createMembershipRouter } from './modules/usuarios/presentation/membersh
 import { createAdminMembershipRouter } from './modules/usuarios/presentation/admin-memberships-router.js';
 import { createRestrictedSessionGuard } from './modules/usuarios/presentation/auth-middleware.js';
 import { MfaUseCases } from './modules/usuarios/application/mfa.js';
+import { OwnProfileUseCases } from './modules/usuarios/application/profile.js';
+import { createProfileRouter } from './modules/usuarios/presentation/profile-router.js';
 import { createMfaRouter } from './modules/usuarios/presentation/mfa-router.js';
 import { SecretBox } from './modules/usuarios/infrastructure/secret-box.js';
 import { createStaffRouter } from './modules/usuarios/presentation/staff-router.js';
@@ -177,6 +179,8 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     app.use('/api/v1', createStaffRouter(identity, new ManageStaff(staffTransactions, hasher), http));
     app.use('/api/v1', createStaffAccessRouter(identity, new ManageStaffAccess(staffTransactions), http));
     const platformManagement = new ManagePlatformAuthorizations(new PgPlatformAuthorizationUnitOfWork(tenantTransactions));
+    app.use('/api/v1', createProfileRouter(new OwnProfileUseCases(new PgAuthUnitOfWork(authPool, config.abuseKey), hasher,
+      { now: () => new Date() }, config.accountMessages ?? null), http));
     if (config.mfaKey) {
       app.use('/api/v1', createMfaRouter(new MfaUseCases(new PgAuthUnitOfWork(authPool, config.abuseKey),
         new SecretBox(config.mfaKey), { now: () => new Date() }), http));

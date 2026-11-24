@@ -3,6 +3,7 @@ import { PgTemporaryCredentialRepository } from '../temporary-credential-reposit
 import { PgIdentityAuditRepository } from '../identity-audit-repository.js';
 import { PgAccountTokenRepository } from '../account-token-repository.js';
 import { PgMfaRepository } from '../mfa-repository.js';
+import { PgProfileRepository } from '../profile-repository.js';
 import { PgSessionRepository, PgUserRepository } from '../identity-repository.js';
 import { PgAbuseRepository } from '../abuse-repository.js';
 import { PgAuthAuditRepository } from '../audit-repository.js';
@@ -39,7 +40,7 @@ export class PgAuthUnitOfWork implements AuthUnitOfWork {
       const abuse = new PgAbuseRepository(client, this.abuseHmacKey);
       const result = await work(new PgUserRepository(client), new PgSessionRepository(client),
         abuse, new PgAuthAuditRepository(client),
-        { mfa: new PgMfaRepository(client), credentials: new PgTemporaryCredentialRepository(client), identityAudit: new PgIdentityAuditRepository(client),
+        { profile: new PgProfileRepository(client), mfa: new PgMfaRepository(client), credentials: new PgTemporaryCredentialRepository(client), identityAudit: new PgIdentityAuditRepository(client),
           tokens: new PgAccountTokenRepository(client), budgets: abuse });
       await client.query('COMMIT');
       inTransaction = false;

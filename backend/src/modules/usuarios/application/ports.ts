@@ -54,8 +54,8 @@ export interface TemporaryCredentialRepository {
 /** F01.1 US3: tokens de un solo uso para restablecer la clave o verificar el correo (solo se guarda su hash). */
 export interface AccountTokenRepository {
   /** La vigencia la calcula la base de datos con su propio reloj (evita desfases con la aplicación). */
-  create(input: { userId: string; purpose: 'VERIFICAR_CORREO' | 'RESTABLECER_CLAVE'; tokenHash: Buffer;
-    ttlSeconds: number }): Promise<void>;
+  create(input: { userId: string; purpose: 'VERIFICAR_CORREO' | 'RESTABLECER_CLAVE' | 'CAMBIO_CORREO'; tokenHash: Buffer;
+    ttlSeconds: number; destinationEmail?: string }): Promise<void>;
   /** false si el token no existe, ya se usó o venció (sin distinguir). */
   completePasswordReset(tokenHash: Buffer, newPasswordHash: string): Promise<boolean>;
   verifyEmail(tokenHash: Buffer): Promise<boolean>;
@@ -77,7 +77,31 @@ export interface SecretSealer {
   open(sealed: { ciphertext: Buffer; nonce: Buffer }, context: string): Buffer;
 }
 
+/** F01.1 US5: perfil y seguridad del PROPIO usuario; el servidor lo deriva de la sesión, nunca de la entrada. */
+export interface OwnProfile {
+  readonly userId: string;
+  readonly displayName: string | null;
+  readonly phone: string | null;
+  readonly avatarPreset: number | null;
+  readonly theme: 'CLARO' | 'OSCURO' | 'SISTEMA';
+  readonly notifyReservations: boolean;
+  readonly notifySecurity: boolean;
+  readonly email: string | null;
+  readonly emailVerified: boolean;
+}
+export interface OwnSession { readonly id: string; readonly createdAt: Date; readonly lastUsedAt: Date; readonly current: boolean }
+export interface ProfileRepository {
+  get(): Promise<OwnProfile>;
+  update(patch: Readonly<Record<string, unknown>>): Promise<void>;
+  listSessions(): Promise<readonly OwnSession[]>;
+  /** false si la sesión no es del usuario o no existe (no se distingue). */
+  revokeSession(sessionId: string): Promise<boolean>;
+  revokeOthers(): Promise<number>;
+  changePassword(newHash: string): Promise<void>;
+}
+
 export interface AuthExtras {
+  readonly profile: ProfileRepository;
   readonly mfa: MfaRepository;
   readonly credentials: TemporaryCredentialRepository;
   readonly identityAudit: IdentityAuditSink;
@@ -91,7 +115,7 @@ export interface AuthUnitOfWork {
 }
 
 /** F01.1: presupuesto único de intentos (5 en 15 min) por ámbito; sin correo ni IP en claro. */
-export type AbuseBudgetScope = 'TEMP_KEY_ACCOUNT' | 'RESET_ACCOUNT' | 'RESET_IP' | 'TOTP_ACCOUNT' | 'STAFF_CREATE_IP';
+export type AbuseBudgetScope = 'TEMP_KEY_ACCOUNT' | 'RESET_ACCOUNT' | 'RESET_IP' | 'TOTP_ACCOUNT' | 'STAFF_CREATE_IP' | 'REAUTH_ACCOUNT';
 export interface AbuseBudgetRepository {
   assessBudget(scope: AbuseBudgetScope, identifier: string, now: Date): Promise<AbuseDecision>;
   recordBudget(scope: AbuseBudgetScope, identifier: string, now: Date): Promise<void>;
