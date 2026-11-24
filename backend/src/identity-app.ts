@@ -54,6 +54,7 @@ import { ConfirmReservation } from './modules/reservas/application/confirm-reser
 import { ReportPhysicalShortage } from './modules/reservas/application/report-physical-shortage.js';
 import { DeliverReservation } from './modules/reservas/application/deliver-reservation.js';
 import { createCustomerReservationsRouter } from './modules/reservas/presentation/customer-reservations-router.js';
+import { AttentionCenter } from './modules/reservas/application/attention-center.js';
 import { createPharmacyReservationsRouter } from './modules/reservas/presentation/pharmacy-reservations-router.js';
 import type { ReservationRuntimeConfig } from './config/reservations.js';
 import { MockAIProvider } from './modules/asistente-ia/infrastructure/mock-ai-provider.js';
@@ -232,7 +233,7 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       const shortage = new ReportPhysicalShortage(reservationTransactions, clock);
       const deliver = new DeliverReservation(reservationTransactions, clock);
       app.use('/api/v1', createCustomerReservationsRouter({ create, own, cancel }, http));
-      app.use('/api/v1', createPharmacyReservationsRouter({ confirm, settings, shortage, deliver }, http));
+      app.use('/api/v1', createPharmacyReservationsRouter({ confirm, settings, shortage, deliver, center: new AttentionCenter(reservationTransactions, clock) }, http));
     }
     return {
       app,

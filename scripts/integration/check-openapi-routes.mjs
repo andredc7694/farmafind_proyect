@@ -79,7 +79,19 @@ function implementedOperations(file,prefix){
   return operations;
 }
 
-if (process.argv.includes('--f011-contract') || process.argv.includes('--f011-routes')) {
+if (process.argv.includes('--f041-contract') || process.argv.includes('--f041-routes')) {
+  // F04.1 (specs/015): tres operaciones nuevas de lectura; las rutas se exigen con --f041-routes.
+  const file='specs/015-f041-operacion-reservas/contracts/reservations-ops.openapi.yaml';
+  const operations=contractOperations(file,'/api/v1');
+  assert.equal(operations.length,3,'El inventario propuesto F04.1 cambió; revisar contrato');
+  assert.equal(new Set(operations).size,operations.length,'Operación F04.1 duplicada');
+  if(process.argv.includes('--f041-routes')){
+    const implemented=new Set(implementedOperations('backend/src/modules/reservas/presentation/pharmacy-reservations-router.ts','/api/v1'));
+    const missing=operations.filter(operation=>!implemented.has(operation));
+    assert.deepEqual(missing,[],`F04.1: rutas pendientes: ${missing.join(', ')}`);
+    console.log(`Contrato F04.1: ${operations.length} operaciones documentadas con ruta Express.`);
+  } else console.log(`Contrato F04.1: ${operations.length} operaciones documentadas; implementación pendiente.`);
+} else if (process.argv.includes('--f011-contract') || process.argv.includes('--f011-routes')) {
   // F01.1 (specs/014): contrato aditivo; las rutas se exigen solo con --f011-routes (tarea T049).
   const file='specs/014-f011-identidad-personal/contracts/identity-staff.openapi.yaml';
   const source=readFileSync(path.join(root,file),'utf8');
