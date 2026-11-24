@@ -47,12 +47,12 @@ Formato: `- [ ] Txxx [P] [USn] descripción con ruta (requisitos)`. `[P]` = para
 **Objetivo**: invitación aceptada por la persona, permisos granulares y revocación inmediata.
 **Prueba independiente**: una cuenta existente acepta una invitación de Alfa; el propietario concede y revoca un permiso; la siguiente petición del trabajador se deniega.
 
-- [ ] T025 [P] [US2] Pruebas HTTP de invitaciones (respuesta 202 uniforme exista o no la cuenta, solo el destinatario las ve, aceptar/rechazar/vencer/revocar, doble aceptación concurrente) en `backend/tests/identity/f011-invitations.http.test.ts` (FR-004; SC-007).
-- [ ] T026 [US2] Casos de uso `InviteStaff`, `RespondInvitation` y `RevokeInvitation` (membresía creada solo al aceptar, sin fusión de identidades, auditoría) con repositorio SQL y RLS en `backend/src/modules/usuarios/application/invitations.ts` (FR-004, FR-008); depende de T007, T013, T014, T015.
-- [ ] T027 [US2] Caso de uso `UpdateStaffCapabilities` (reemplazo atómico sobre `delegacion`, sin auto-concesión, auditoría `CAPABILITY_GRANT/REVOKE`) y revocación de membresía con cierre de sesiones si queda sin membresías y limpieza de farmacia activa (D-08), en `backend/src/modules/usuarios/application/manage-staff-capabilities.ts` (FR-005–007); depende de T026.
-- [ ] T028 [US2] Rutas de invitaciones (`/pharmacies/{id}/staff/invitations`, `/me/invitations*`) y de capacidades en `backend/src/modules/usuarios/presentation/staff-router.ts` (FR-004–006); depende de T026–T027.
-- [ ] T029 [P] [US2] Interfaz: lista y gestión de invitaciones y permisos en `frontend/src/identity/StaffAdmin.jsx` y «Mis invitaciones» en `frontend/src/identity/MyInvitations.jsx` (FR-004–005); depende de T028.
-- [ ] T030 [US2] Verificar US2: revocar y reintentar en la siguiente petición (reservas e inventario F02/F04), intentos de elevación, cruce Alfa/Beta, en `backend/tests/identity/f011-us2.rls.test.ts` y `frontend/tests/f011-invitations.test.jsx` (SC-003–004); depende de T028–T029.
+- [X] T025 [P] [US2] Pruebas HTTP de invitaciones (respuesta 202 uniforme exista o no la cuenta, solo el destinatario las ve, aceptar/rechazar/vencer/revocar, doble aceptación concurrente) en `backend/tests/identity/f011-invitations.http.test.ts` (FR-004; SC-007).
+- [X] T026 [US2] Casos de uso `InviteStaff`, `RespondInvitation` y `RevokeInvitation` (membresía creada solo al aceptar, sin fusión de identidades, auditoría) con repositorio SQL y RLS en `backend/src/modules/usuarios/application/invitations.ts` (FR-004, FR-008); depende de T007, T013, T014, T015.
+- [X] T027 [US2] Caso de uso `UpdateStaffCapabilities` (reemplazo atómico sobre `delegacion`, sin auto-concesión, auditoría `CAPABILITY_GRANT/REVOKE`) y revocación de membresía con cierre de sesiones si queda sin membresías y limpieza de farmacia activa (D-08), en `backend/src/modules/usuarios/application/manage-staff-capabilities.ts` (FR-005–007); depende de T026.
+- [X] T028 [US2] Rutas de invitaciones (`/pharmacies/{id}/staff/invitations`, `/me/invitations*`) y de capacidades en `backend/src/modules/usuarios/presentation/staff-router.ts` (FR-004–006); depende de T026–T027.
+- [X] T029 [P] [US2] Interfaz: lista y gestión de invitaciones y permisos en `frontend/src/identity/StaffAdmin.jsx` y «Mis invitaciones» en `frontend/src/identity/MyInvitations.jsx` (FR-004–005); depende de T028.
+- [X] T030 [US2] Verificar US2: revocar y reintentar en la siguiente petición (reservas e inventario F02/F04), intentos de elevación, cruce Alfa/Beta, en `backend/tests/identity/f011-us2.rls.test.ts` y `frontend/tests/f011-invitations.test.jsx` (SC-003–004); depende de T028–T029.
 
 ## Phase 5: User Story 3 — Acceso reforzado y recuperación segura (P1)
 
@@ -125,3 +125,7 @@ Tareas T001–T016 marcadas con evidencia real en [evidence.md](evidence.md). De
 ## Notas de ejecución del lote 2 (2026-11-23)
 
 T017–T024 marcadas con evidencia real en [evidence.md](evidence.md). Desviaciones: T018 se implementó con funciones `SECURITY DEFINER` en `backend/migrations/f01/012_staff_functions.sql` (alta atómica con autorización dentro de la base) en vez de un repositorio SQL aparte; T024 se cubrió con `f011-us1.rls.test.ts` (HTTP + PostgreSQL con la app compuesta) y `frontend/tests/f011-staff-create.test.jsx`; el guardia de sesión restringida (T016) ya está montado (T019). Pendiente de decisión para *analyze*: 429 en `POST /staff` del contrato y nombre `membership.manage`.
+
+## Notas de ejecución del lote 3 (2026-11-23)
+
+T025–T030 marcadas con evidencia real en [evidence.md](evidence.md). Desviaciones: las operaciones de T026/T027 se implementaron como funciones `SECURITY DEFINER` en `backend/migrations/f01/013_staff_invitations.sql` (autorización dentro de la base); T027 incluye cambiar `PATCH …/memberships/{id}` para que cierre sesiones y revoque delegaciones; se aplicó la decisión A de la Puerta 6 (concesión directa retirada, 410), registrada en `approval.md`; el servicio y las rutas están en `application/manage-staff-access.ts` y `presentation/staff-access-router.ts`.

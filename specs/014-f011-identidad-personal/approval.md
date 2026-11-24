@@ -29,3 +29,11 @@
 **No autoriza:** AWS, correo real, datos reales, bases persistentes, ni la integración a `main` (Puerta 2).
 
 **Condición resuelta — 2026-11-23:** el responsable respondió con el flujo de ramas definitivo («Sí, confirmo el primer push… Continúa con el lote 1 (T001–T016)»). La aprobación de las tareas queda vigente sin condiciones pendientes y la implementación del lote 1 queda autorizada.
+
+## Decisión de seguridad: ruta heredada de concesión directa (Puerta 6) — 2026-11-23
+
+**Fecha:** 2026-11-23 (America/Lima). **Responsable:** Andre. **Fuente:** mensaje «A» de esta conversación, respuesta a la parada del lote 2.
+
+**Decisión: opción A.** Se retira la concesión directa de membresía por `userId` (`POST /pharmacies/{id}/memberships`): la ruta se conserva únicamente para responder `410 Gone` (sin conceder nada) porque el contrato F01 histórico (carpeta 002, no se modifica) la documenta; la vinculación de cuentas existentes pasa solo por invitación aceptada (F011-FR-004). La revocación (`PATCH`) y el listado se conservan. Las pruebas de F01 que esperaban el 201 se actualizan; la interfaz deja de ofrecer «Conceder rol TRABAJADOR».
+
+**No responde** la pregunta sobre el PR de F02.1 (Puerta 2), que sigue sin autorizar.

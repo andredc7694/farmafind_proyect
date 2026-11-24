@@ -95,6 +95,48 @@ No se ejecutaron: Playwright/E2E (T053), F05, DEMO (T055). Contenedores encendid
 - **Costo de la guardia**: cada petición con cookie de sesión consulta la sesión una vez más (pool de autenticación) para saber si está restringida.
 - **`research.md` D-09 / `data-model.md`**: mencionan `personal.gestionar` y solo la migración 011; la implementación usa `membership.manage` y añade `012`. Se corrigen al ejecutar *analyze*.
 
+## Lote 3 — US2 «Vincular cuenta existente y gestionar permisos» (T025–T030, 2026-11-23)
+
+**Decisión de seguridad previa (Puerta 6, opción A, mensaje «A» del 2026-11-23; ver `approval.md`):** se retira la concesión directa `POST /pharmacies/{id}/memberships`; la ruta se conserva solo para responder `410 Gone` (el contrato F01 histórico de la carpeta 002 no se modifica). La vinculación pasa únicamente por invitación aceptada.
+
+**Qué se implementó:** migración `013_staff_invitations.sql` (funciones `SECURITY DEFINER`: `invite_staff`, `list_invitations`, `revoke_staff_invitation`, `list_my_invitations`, `accept_staff_invitation`, `decline_staff_invitation`, `set_staff_capabilities`, `revoke_staff_membership`); servicio `ManageStaffAccess`; `staff-access-router` (8 rutas); la revocación existente (`PATCH …/memberships/{id}`) ahora invoca `revoke_staff_membership` (revoca delegaciones y cierra sesiones si no queda membresía activa); React: invitaciones, permisos y revocación en «Personal de la farmacia», nueva pantalla «Mis invitaciones»; «Conceder rol TRABAJADOR» eliminado de la interfaz.
+
+### Pruebas nuevas (37 satisfactorias)
+
+| Archivo | Tipo | Pruebas | Cubre |
+|---|---|---|---|
+| `f011-us2.rls.test.ts` | HTTP + PostgreSQL (roles reales sin BYPASSRLS) | 9 | T030: invitar es silencioso (respuesta y cabeceras idénticas exista o no la cuenta; sin duplicados ni autoinvitación); destino enmascarado en el listado y sin el correo completo; Beta no ve, invita ni revoca en Alfa (404); solo la persona invitada ve y responde; **dos aceptaciones simultáneas → exactamente una 204 y una 409**, una sola membresía; permisos por reemplazo atómico (rechaza `membership.manage`, códigos desconocidos, cuerpo extra, trabajador, uno mismo y Beta); revocar la membresía deja delegaciones sin activar y **cierra las sesiones en la siguiente petición** (401); auditoría de las 6 acciones; reinvitar reactiva la misma membresía sin heredar permisos; rechazar/revocar/vencer impiden aceptar; trabajador no invita (403); concesión directa heredada → 410 |
+| `f011-invitations.http.test.ts` | HTTP (router con casos de uso simulados) | 18 | T025: CSRF en las 5 mutaciones, 401, 202 sin cuerpo, cuerpos estrictos, UUID, fechas ISO sin correo completo, 204, mapeo de errores sin detalles |
+| `f011-invitations.test.jsx` | React/jsdom | 10 | T029: cliente (CSRF, métodos, sin `grant`), invitar sin confirmar existencia, revocar invitación, editar permisos, revocación con segunda confirmación, errores, «Mis invitaciones» (aceptar/rechazar/vacío) |
+
+### Regresión tras el lote 3 (resultados reales)
+
+| Comprobación | Resultado |
+|---|---|
+| `scripts/f01/check.mjs unit` / `api` / `rls` | 111/111 · **77/77** (antes 59) · **97/97** (antes 88) |
+| `test:f02:unit` / `test:f02:rls` | 15/15 · 15/15 |
+| `test:f03:unit` / `test:f03:rls` | 25/25 · 4/4 |
+| `test:f04:unit` / `test:f04:api` / `check-f04-rls.mjs` (clúster F02.5, detenido al terminar) | 18/18 · 6/6 · 18/18 |
+| `f021-rls.test.ts` | 3/3 |
+| Frontend completo | 34 archivos, **113/113** (antes 103) |
+| `npm run check` / `build` / `verify:contracts` | correctos (244 archivos JS; 41 operaciones) |
+
+No se ejecutaron: Playwright/E2E (T053), F05, DEMO (T055). Contenedores encendidos por Claude y detenidos al terminar.
+
+### Pruebas existentes modificadas por la decisión A (necesario, no ocultan fallos)
+
+- `admin-memberships.http.test.ts`: la concesión directa ahora espera 410 (nunca llama al caso de uso); el conflicto 409 se prueba sobre la revocación.
+- `identity-composition.rls.test.ts`: la concesión por HTTP se sustituye por la siembra de la membresía en la base; la auditoría esperada pasa de `[MEMBERSHIP_GRANT, MEMBERSHIP_REVOKE]` a `[MEMBERSHIP_REVOKE]`; tras revocar, el trabajador (sin otra membresía) recibe 401 en lugar de lista vacía (cierre de sesiones, D-08). **Se corrigió además un defecto de la propia prueba**: la aserción «sin permiso → 403» usaba un token CSRF obtenido después de crear la solicitud y pasaba por fallo de CSRF, no por falta de permiso; ahora el token se obtiene antes.
+- `membership-admin.test.jsx` y `migrations.test.ts` (lista de migraciones y sin `grant`).
+
+### Hallazgos y desviaciones del lote 3 (para *analyze* y *converge*)
+
+- **Sesiones globales**: el cierre de sesiones al quedar sin membresías activas también cierra las sesiones «de cliente» de una cuenta existente que fue invitada y luego revocada (las sesiones no son por farmacia). Es la decisión D-08 del plan; si se prefiere cerrar solo cuentas de personal (alias), es un ajuste pequeño en `revoke_staff_membership`.
+- **`--f011-routes` del validador OpenAPI** no detecta `POST /me/invitations/{id}/accept|decline` porque se registran en un bucle con ruta de plantilla; T049 debe tratarlas como las acciones dinámicas de F04.
+- **«Siguiente petición» en F02/F04**: la prueba de revocación inmediata se hizo con `/me/memberships`, `/auth/session` y las rutas de personal; las rutas de inventario y reservas pasan por la misma transacción de identidad (`runWithClient`), cubierta por sus suites de regresión, pero no hay una prueba específica «revocar y reintentar sobre inventario/reservas»; añadirla en T051 (matriz de ataques).
+- La invitación solo admite cuentas con correo (existentes). No notifica por correo (decisión D-06 A: la persona la ve en «Mis invitaciones»).
+- `data-model.md` y `research.md` siguen mencionando solo `011` y `personal.gestionar`; se corrigen en *analyze*.
+
 ## Pendiente (siguientes lotes)
 
-US2 (T025–T030) en adelante. Nada de lo anterior constituye aceptación de F01.1.
+US3 (T031–T036) en adelante. Nada de lo anterior constituye aceptación de F01.1.
