@@ -19,3 +19,13 @@
 **Alcance aprobado:** [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/) y [quickstart.md](quickstart.md) de F01.1, tal como están redactados. Esto incluye la decisión **D-06 en su versión propuesta (A)**: mensajes de cuenta por simulador local en TEST, sin extender F05; el responsable no eligió otra opción. La alternativa B (evento en F05) queda para cuando se autorice un proveedor real de correo.
 
 **No autoriza:** tareas ni código (falta aprobar `tasks.md`), AWS, correo real, datos reales, bases persistentes ni cambios a F05. Tampoco responde la Puerta 2 (integración de F02.1 a `main`) ni la decisión sobre las suites RLS, que siguen pendientes.
+
+## Aprobación de las tareas — 2026-11-23
+
+**Fecha:** 2026-11-23 (America/Lima). **Responsable:** Andre. **Fuente:** mensaje «apruebo pero antes de eso dime donde se estan almacenando los commits…» de esta conversación.
+
+**Alcance aprobado:** [tasks.md](tasks.md) (58 tareas, T001–T058) como lista de trabajo de F01.1. **Condición del responsable:** antes de empezar la implementación debe aclararse dónde se guardan los commits (ver respuesta en la conversación). La implementación no arranca hasta esa aclaración.
+
+**No autoriza:** AWS, correo real, datos reales, bases persistentes, ni la integración a `main` (Puerta 2).
+
+**Condición resuelta — 2026-11-23:** el responsable respondió con el flujo de ramas definitivo («Sí, confirmo el primer push… Continúa con el lote 1 (T001–T016)»). La aprobación de las tareas queda vigente sin condiciones pendientes y la implementación del lote 1 queda autorizada.
