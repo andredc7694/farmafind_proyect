@@ -129,11 +129,10 @@ describe('F04.1 centro de atención (pantalla)', () => {
     expect(client.confirm).toHaveBeenCalledWith('p', '1');
   });
 
-  it('la reserva vencida bloquea las acciones y el filtro se envía al servidor', async () => {
+  it('la reserva vencida se marca como tal (decide el servidor) y el filtro se envía al servidor', async () => {
     const client = makeClient({ center: vi.fn().mockResolvedValue({ generatedAt: new Date().toISOString(), items: [item('9', { expiresAt: new Date(Date.now() - 60000).toISOString() })] }) });
     render(<PharmacyReservations client={client} pharmacyId="p" intervalMs={50} />);
-    await screen.findByText(/vencida; se actualizará sola/);
-    expect(screen.queryByText('Confirmar')).toBeNull();
+    await screen.findByText(/vencida; el servidor rechazará/);
     fireEvent.change(screen.getByLabelText('Mostrar'), { target: { value: 'CONFIRMADA' } });
     await waitFor(() => expect(client.center).toHaveBeenCalledWith('p', { estado: 'CONFIRMADA' }));
   });

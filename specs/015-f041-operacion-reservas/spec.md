@@ -78,7 +78,7 @@ Como farmacia quiero que entregar, cancelar y expirar sigan funcionando igual de
 
 ### Edge Cases
 
-- Reserva que vence mientras el personal tiene la lista abierta: la lista la muestra vencida al sincronizar y bloquea acciones sobre ella.
+- Reserva que vence mientras el personal tiene la lista abierta: la lista la muestra marcada como vencida al sincronizar; si se intenta una acción, el servidor la rechaza (la interfaz no decide).
 - Reconexión tras largo corte: se carga el estado completo vigente, sin duplicados.
 - Exportación grande: tope de filas definido en *plan*; se informa si se trunca.
 - Preferencia en reservas ya existentes (creadas antes de F04.1): quedan sin preferencia.

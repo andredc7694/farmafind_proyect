@@ -27,8 +27,7 @@ paths:
               schema: { $ref: '#/components/schemas/AttentionSnapshot' }
         '400': { description: Filtro inválido }
         '401': { description: Sin sesión }
-        '403': { description: Sin capacidad reservation.read }
-        '404': { description: Farmacia no visible }
+        '403': { description: Sin capacidad reservation.read, no es miembro o farmacia ajena }
   /farmacias/{pharmacyId}/reservas/historial:
     parameters: [{ $ref: '#/components/parameters/PharmacyId' }]
     get:
@@ -49,8 +48,7 @@ paths:
               schema: { $ref: '#/components/schemas/HistoryPage' }
         '400': { description: Filtro o cursor inválido }
         '401': { description: Sin sesión }
-        '403': { description: Sin capacidad reservation.read }
-        '404': { description: Farmacia no visible }
+        '403': { description: Sin capacidad reservation.read, no es miembro o farmacia ajena }
   /farmacias/{pharmacyId}/reservas/historial/exportar:
     parameters: [{ $ref: '#/components/parameters/PharmacyId' }]
     get:
@@ -71,8 +69,7 @@ paths:
             text/csv: { schema: { type: string } }
         '400': { description: Filtro inválido }
         '401': { description: Sin sesión }
-        '403': { description: Sin capacidad reservation.read }
-        '404': { description: Farmacia no visible }
+        '403': { description: Sin capacidad reservation.read, no es miembro o farmacia ajena }
 x-extension-of-f04:
   POST /reservas: >
     El cuerpo admite opcionalmente `pickupPreference` (ver PickupPreference). Sin ella el comportamiento es el de F04.

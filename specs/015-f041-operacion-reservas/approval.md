@@ -8,3 +8,6 @@ Andre aprobó la spec sin elegir A/B/C. Por su regla de trabajo continuo («deci
 - **D-01 = A**: sin horario semanal; la preferencia (30/60/120 min o una franja) debe caber dentro del plazo de recogida configurado de la farmacia, contado desde la creación (como el vencimiento real nunca es anterior a ese límite, siempre cabe).
 - **D-02 = A**: exportación CSV del historial de la farmacia activa, con filtros de estado y fechas, sin datos personales del cliente (solo un código de reserva).
 - **D-03 = A**: actualización automática por consulta periódica cada 30 s, tolerante a cortes de red.
+
+## Aprobación de plan.md y tasks.md
+**Fecha:** 2026-11-24. **Responsable:** Andre. **Fuente:** mensaje «apruebo» tras la entrega del plan y las 19 tareas (commit `3af0133`). **Alcance:** plan.md, research.md, data-model.md, contrato `reservations-ops.openapi.yaml`, quickstart.md y tasks.md. Autoriza implementar por lotes hasta la aceptación humana.

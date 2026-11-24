@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|---|---|---|
 | 013 F02.1 | ✔ | ✔ | ✔ | ✔ | — | ✔ 38/38 | — | ✔ ACEPTO 2026-11-23 |
 | 014 F01.1 | ✔ aprobada 2026-11-23 | ✔ 5 respuestas 2026-11-23 | ✔ aprobado 2026-11-23 (D-06 = A) | ✔ aprobado 2026-11-23 (58 tareas) | — | ✔ lotes 1–7 (T001–T057); analyze/converge hechos; **ACEPTADA 2026-11-24 (T058)** | — | — |
-| 015 F04.1 | ✔ aprobada 2026-11-24 | ✔ D-01..D-03 = A (recomendaciones, revisables) | ✔ creado (**espera aprobación**) | ✔ 19 tareas (**espera aprobación**) | — | — | — | — |
+| 015 F04.1 | ✔ aprobada 2026-11-24 | ✔ D-01..D-03 = A (revisables) | ✔ aprobado 2026-11-24 | ✔ aprobado (19 tareas) | ✔ | ✔ T001–T018 verificadas | ✔ convergence.md | **espera aceptación (T019)** |
 | F08.1 | no iniciado (siguiente número libre: 016) | | | | | | | |
 
 ## Qué se hizo en este bloque
@@ -65,3 +65,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-23 · F01.1 lote 6: el perfil usa funciones definer con el rol de autenticación y deriva siempre al usuario de la sesión; cambiar el correo no cierra otras sesiones (cambiar la clave sí).
 - 2026-11-23 · F01.1 lote 7: se añadió auditoría `ELEVATION_DENIED` a las denegaciones de gestión de personal (la matriz de seguridad la pedía); se retiró el 429 de `POST …/staff` del contrato (no implementado, ver convergence.md).
 - 2026-11-24 · F04.1: Andre aprobó la spec sin elegir A/B/C; apliqué mis recomendaciones D-01=A (sin horario semanal), D-02=A (CSV sin datos del cliente), D-03=A (sondeo 30 s). Revisables.
+- 2026-11-24 · F04.1: cierre técnico (T001–T018). Regresión F01–F05 verde salvo `f05:rls` no reejecutado; E2E 4/4; DEMO local encendida en http://127.0.0.1:5173/reservations; esperando aceptación.

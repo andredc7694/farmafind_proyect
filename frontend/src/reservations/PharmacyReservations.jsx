@@ -9,17 +9,17 @@ function QueueItem({ item, nowMs, busy, can, onAction }) {
   const expires = item.expiresAt ?? item.pickupExpiresAt ?? null;
   const overdue = expires !== null && Date.parse(expires) <= nowMs;
   return <li className="surface-card" data-reservation-id={item.id}>
-    <strong>{stateLabels[item.state] ?? item.state}</strong><span> Cantidad: {item.quantity}</span>
+    <strong>{item.state}</strong><span> Cantidad: {item.quantity}</span>
     {item.medication && <span> · {item.medication}</span>}
     {expires && <span> · {item.state === 'PENDIENTE' ? 'responder antes de' : 'vence'} {new Date(expires).toLocaleString('es-PE')}
-      {overdue ? ' (vencida; se actualizará sola)' : ` (faltan ${minutesLeft(expires, nowMs)} min)`}</span>}
+      {overdue ? ' (vencida; el servidor rechazará la acción y la lista se actualizará sola)' : ` (faltan ${minutesLeft(expires, nowMs)} min)`}</span>}
     {item.pickupPreference && <p>{describePreference(item.pickupPreference)}</p>}
     <div className="reservation-actions">
-      {item.state === 'PENDIENTE' && !overdue && can('reservation.accept') && <>
+      {item.state === 'PENDIENTE' && can('reservation.accept') && <>
         <button type="button" disabled={busy} onClick={() => onAction(c => c.confirm, item.id, 'Reserva confirmada.')}>Confirmar</button>
         <button type="button" disabled={busy} onClick={() => onAction(c => c.shortage, item.id, 'Falta física registrada.')}>Falta física</button>
       </>}
-      {item.state === 'CONFIRMADA' && !overdue && can('reservation.deliver') &&
+      {item.state === 'CONFIRMADA' && can('reservation.deliver') &&
         <button type="button" disabled={busy} onClick={() => onAction(c => c.deliver, item.id, 'Entrega registrada.')}>Entregar</button>}
     </div>
   </li>;
