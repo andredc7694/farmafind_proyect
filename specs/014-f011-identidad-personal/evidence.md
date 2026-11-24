@@ -54,6 +54,47 @@ No se ejecutaron en este lote: Playwright/E2E (T053), F05 (`test:f05:*`), DEMO (
 - **Dependencia de migración**: la transacción de identidad ahora lee `sesion.restringida_motivo`; toda base TEST usada con este código requiere la migración 011 (la DEMO de F02.1 sobre el fixture necesitará aplicarla; ver T055). La base persistente `farmafind_f01_test` no se toca ni se migra.
 - **Nombres de archivos de prueba**: `scripts/f01/check.mjs` clasifica por sufijo (`.unit.test.ts`, `.http.test.ts`, `.rls.test.ts`); los archivos de T005, T007, T008, T014, T015 y T016 se nombraron en consecuencia (ver notas en `tasks.md`).
 
+## Lote 2 — US1 «El propietario crea la cuenta de un trabajador» (T017–T024, 2026-11-23)
+
+**Qué se implementó:** migración `012_staff_functions.sql` (funciones `SECURITY DEFINER` `f01.create_staff_account`, `f01.list_staff` y `f01.complete_password_change`, con autorización comprobada dentro de la base); login por «usuario o correo» con clave temporal de un solo uso (consumo atómico, 24 h, sesión restringida `CAMBIO_CLAVE`); casos de uso `ManageStaff` y `changeTemporaryPassword`; rutas `GET/POST /pharmacies/{id}/staff` y `POST /auth/password/change-temporary`; guardia de sesión restringida montada en la composición antes de cualquier ruta; React: `StaffAdmin`, `ForcedPasswordChange`, login «Usuario o correo electrónico».
+
+### Pruebas nuevas (39 satisfactorias)
+
+| Archivo | Tipo | Pruebas | Cubre |
+|---|---|---|---|
+| `f011-us1.rls.test.ts` | HTTP + PostgreSQL (app compuesta, roles reales sin BYPASSRLS) | 12 | T024: alta con clave una sola vez y hash Argon2id; listado sin secretos; alias repetido 409 genérico; entradas y capacidades inválidas 400; Beta no opera sobre Alfa (404) y anónimo 401; primer ingreso escribiendo la clave con minúsculas/espacios; sesión restringida bloqueada (403 `SESSION_RESTRICTED`) en rutas de negocio; reuso rechazado; cambio de clave (débil/extra 400, válido 204); el trabajador solo ve Alfa y no gestiona personal; clave definitiva válida; clave vencida rechazada; 5 fallos → 429 con `Retry-After` incluso con la clave correcta (la credencial queda sin consumir) |
+| `f011-staff-create.http.test.ts` | HTTP (router con casos de uso simulados) | 17 | T017: CSRF/origen, sesión, mapeo de errores sin detalles internos, 409 genérico, `no-store`, cuerpo estricto |
+| `f011-staff-create.test.jsx` | React/jsdom | 10 | T022/T023/T024: cliente, pantalla de personal (clave visible una sola vez y descartada al ocultar o cambiar de farmacia), cambio obligatorio de clave |
+
+### Regresión tras el lote 2 (resultados reales)
+
+| Comprobación | Resultado |
+|---|---|
+| `scripts/f01/check.mjs unit` / `api` / `rls` | 111/111 · **59/59** (antes 42) · **88/88** (antes 76) |
+| `test:f02:unit` / `test:f02:rls` | 15/15 · 15/15 |
+| `test:f03:unit` / `test:f03:rls` | 25/25 · 4/4 |
+| `test:f04:unit` / `test:f04:api` / `check-f04-rls.mjs` (clúster F02.5, detenido al terminar) | 18/18 · 6/6 · 18/18 |
+| `f021-rls.test.ts` | 3/3 |
+| Frontend completo (`frontend/tests`) | 33 archivos, 103/103 |
+| `npm run check` / `build` / `verify:contracts` | correctos (242 archivos JS; 41 operaciones) |
+
+No se ejecutaron: Playwright/E2E (T053), F05, DEMO (T055). Contenedores encendidos por Claude y detenidos al terminar.
+
+### Cambios a pruebas y código existentes (necesarios para el lote)
+
+- `session-client.test.jsx`: la lista de métodos del cliente incluye `changeTemporaryPassword`; `migrations.test.ts`: la lista esperada incluye `011` y `012`.
+- `AuthView.jsx`: el campo de acceso pasa de `type="email"` a texto con etiqueta «Usuario o correo electrónico» (la etiqueta sigue conteniendo «correo electrónico», que es lo que buscan los E2E de Playwright existentes; **no se volvieron a ejecutar**).
+- El campo histórico `email` del login también acepta un alias (compatibilidad); `identifier` es el nombre nuevo.
+
+### Hallazgos y desviaciones del lote 2 (para *analyze* y *converge*)
+
+- **Limitación por creación de cuentas (contrato 429)**: `POST /staff` no aplica `STAFF_CREATE_IP` porque el rol de negocio no accede a la tabla de abuso; el propietario está autenticado y autorizado. El contrato (`identity-staff.openapi.yaml`) aún lista 429: **decidir** quitarlo del contrato o implementar el límite.
+- **Bloqueo de la clave temporal (FR-002)**: se cumple con el límite de login existente (5 fallos / 15 min por cuenta e IP, `LOGIN_ACCOUNT`/`LOGIN_IP`); el ámbito `TEMP_KEY_ACCOUNT` queda reservado y sin usar. Probado con la clave correcta tras 5 fallos.
+- **Funciones `SECURITY DEFINER`**: asumen que el propietario de la función escribe en tablas con `FORCE ROW LEVEL SECURITY` (migrador superusuario local, como `009/010` de F01). Un despliegue con otro modelo de propietario requeriría un rol definidor dedicado con políticas acotadas: decisión de seguridad diferida a la Puerta 6 antes de cualquier base persistente.
+- **Tiempo uniforme**: el login verifica siempre un segundo hash Argon2id (real o ficticio) cuando la clave no es la definitiva. No se midió estadísticamente la indistinguibilidad (queda para T054/T051).
+- **Costo de la guardia**: cada petición con cookie de sesión consulta la sesión una vez más (pool de autenticación) para saber si está restringida.
+- **`research.md` D-09 / `data-model.md`**: mencionan `personal.gestionar` y solo la migración 011; la implementación usa `membership.manage` y añade `012`. Se corrigen al ejecutar *analyze*.
+
 ## Pendiente (siguientes lotes)
 
-US1 (T017–T024) en adelante. Nada de lo anterior constituye aceptación de F01.1.
+US2 (T025–T030) en adelante. Nada de lo anterior constituye aceptación de F01.1.
