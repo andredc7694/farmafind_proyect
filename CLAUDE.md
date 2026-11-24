@@ -62,3 +62,11 @@ Trabajar de forma continua y autónoma, deteniéndose **solo** en las puertas de
 **No hacer:** declarar aceptadas F02.1, F02.5 (T046, T057, T063), F08 ni F06.1 (dejarlas pendientes en ESTADO.md). No abrir F01.1 ni otro incremento hasta cerrar F02.1.
 
 **Formato de cada parada (máx. 15 líneas):** qué hice · pruebas ejecutadas y resultado real · qué debo aprobar/decidir (con recomendación) · qué haré después.
+
+## Metodología Spec Kit por incremento (obligatoria, autorizada 2026-11-23)
+- Skills en `.agents/skills/speckit-*` (specify, clarify, plan, tasks, analyze, implement, converge, checklist, constitution). Mi entorno no los detecta como invocables: **leer cada `SKILL.md` y seguirlo paso a paso**, generando los mismos archivos.
+- Cada incremento nuevo va en carpeta nueva y numerada de `specs/` (siguiente libre: 015; 014 = F01.1). No reutilizar números ni tocar carpetas ya existentes.
+- Flujo: a) specify → `spec.md` **[PUERTA: aprobación]** · b) clarify con opciones A/B/C y recomendación **[PUERTA: respuestas]** · c) plan → `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md` **[PUERTA]** · d) tasks → `tasks.md` numeradas y enlazadas a requisitos **[PUERTA]** · e) analyze (corregir contradicciones antes de implementar) · f) implement por lotes; casilla solo con evidencia real en `evidence.md` · g) converge (diferencias contra la spec) · h) `acceptance.md`; la decisión final es de Andre, nunca mía.
+- Cada aprobación de Andre se registra con fecha y alcance en `approval.md` del incremento **antes** de avanzar. No pasar de a→b, c→d ni d→f sin ella.
+- Al presentar spec/plan/tasks para aprobar: resumen de máx. 15 líneas en lenguaje sencillo (qué se construye, qué queda fuera, riesgos, decisiones abiertas).
+- Mantener `docs/seguimiento/ESTADO.md` con el paso de Spec Kit de cada incremento.
