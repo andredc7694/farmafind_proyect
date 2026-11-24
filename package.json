@@ -67,6 +67,7 @@
     "test:f06:fallback": "npm run build --workspace @farmafind/backend && node scripts/f06/verify-fallback.mjs",
     "verify:f06:integration": "npm run build --workspace @farmafind/backend && node scripts/f06/smoke.mjs",
     "verify:contracts": "node scripts/integration/check-openapi-routes.mjs",
+    "verify:contracts:f041": "node scripts/integration/check-openapi-routes.mjs --f041-routes",
     "verify:contracts:f011": "node scripts/integration/check-openapi-routes.mjs --f011-routes",
     "migrate:f01:test": "node scripts/f01/migrate.mjs",
     "bootstrap:f01:test": "node scripts/f01/bootstrap.mjs",

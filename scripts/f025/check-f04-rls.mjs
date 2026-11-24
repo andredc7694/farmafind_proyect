@@ -18,6 +18,6 @@ await client.connect();
 try { await assertF025ConnectedTarget(client,database); }
 finally { await client.end(); }
 const result=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',
-  'backend/tests/reservations/migrations.test.ts','backend/tests/reservations/reservations.rls.test.ts'],
+  'backend/tests/reservations/migrations.test.ts','backend/tests/reservations/reservations.rls.test.ts','backend/tests/reservations/f041-ops.rls.test.ts'],
   {cwd:root,env:{...process.env,F01_TEST_DATABASE_URL:url.toString()},stdio:'inherit'});
 process.exitCode=result.status??1;
