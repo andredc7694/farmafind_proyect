@@ -29,6 +29,8 @@ export function createStaffClient(fetchImpl = fetch) {
     /** La clave temporal solo llega en esta respuesta; quien llama no debe guardarla. */
     create: (pharmacyId, { alias, displayName, capabilities }) =>
       mutate(path(pharmacyId), 'POST', { alias, displayName, capabilities }),
+    /** Recuperación de un trabajador sin correo: la clave nueva solo llega en esta respuesta. */
+    issueTemporaryKey: (pharmacyId, userId) => mutate(`${path(pharmacyId)}/${enc(userId)}/temporary-key`, 'POST'),
     listInvitations: pharmacyId => read(`${path(pharmacyId)}/invitations`),
     /** La respuesta es siempre la misma exista o no la cuenta; no se interpreta. */
     invite: (pharmacyId, email) => mutate(`${path(pharmacyId)}/invitations`, 'POST', { email }),

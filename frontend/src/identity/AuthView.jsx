@@ -11,7 +11,7 @@ function submitCredentials(event, action) {
 
 /** Presentation only; session, CSRF and authorization remain server responsibilities. */
 export function AuthView({ status = 'anonymous', error = false, notice = null, profile = null,
-  returnTo = null, onRegister, onLogin, onLogout }) {
+  returnTo = null, onRegister, onLogin, onLogout, onForgotPassword }) {
   if (status === 'authenticated') {
     return <section className="account-panel" aria-labelledby="identity-title">
       <h2 id="identity-title">Sesión activa</h2>
@@ -42,6 +42,7 @@ export function AuthView({ status = 'anonymous', error = false, notice = null, p
       <label htmlFor="login-password">Contraseña</label>
       <input id="login-password" name="password" type="password" autoComplete="current-password" required />
       <button type="submit" disabled={status === 'loading'}>Iniciar sesión</button>
+      {onForgotPassword && <p><button type="button" onClick={onForgotPassword}>Olvidé mi clave</button></p>}
     </form></div>
   </section>;
 }

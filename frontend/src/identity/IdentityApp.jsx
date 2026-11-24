@@ -4,6 +4,7 @@ import { PharmacySelector } from './PharmacySelector.jsx';
 import { MembershipAdmin } from './MembershipAdmin.jsx';
 import { StaffAdmin } from './StaffAdmin.jsx';
 import { MyInvitations } from './MyInvitations.jsx';
+import { PasswordReset } from './PasswordReset.jsx';
 import { ForcedPasswordChange } from './ForcedPasswordChange.jsx';
 import { createSessionClient } from './session-client.js';
 import { InventoryView } from '../inventory/InventoryView.jsx';
@@ -26,6 +27,8 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
   const [activePharmacyId, setActivePharmacyId] = useState(null);
   const [selectingPharmacyId, setSelectingPharmacyId] = useState(null);
   const [membershipsVersion, setMembershipsVersion] = useState(0);
+  const [resetting, setResetting] = useState(() => typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('reset'));
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   // F01.1: una sesión con cambio de clave pendiente solo puede completar ese paso.
@@ -175,9 +178,11 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
     {status === 'anonymous' && (inventoryMode || locationMode) && <p>Inicia sesión con una membresía autorizada para acceder a esta área.</p>}
     {status === 'authenticated' && restricted && <ForcedPasswordChange busy={passwordBusy} error={passwordError}
       onSubmit={changePassword} onLogout={logout} />}
-    {!(status === 'authenticated' && restricted) && <AuthView status={status} error={error} notice={notice} profile={profile}
+    {status === 'anonymous' && resetting && <PasswordReset api={identity} onDone={() => setResetting(false)}
+      initialToken={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('reset') ?? '' : ''} />}
+    {!(status === 'authenticated' && restricted) && !(status === 'anonymous' && resetting) && <AuthView status={status} error={error} notice={notice} profile={profile}
       returnTo={returnTo}
-      onRegister={register} onLogin={login} onLogout={logout} />}
+      onRegister={register} onLogin={login} onLogout={logout} onForgotPassword={() => setResetting(true)} />}
     {status === 'authenticated' && !restricted && !inventoryMode && !reservationsMode && !locationMode &&
       <MyInvitations onAccepted={() => setMembershipsVersion(value => value + 1)} />}
     {status === 'authenticated' && !restricted && <PharmacySelector pharmacies={pharmacies}

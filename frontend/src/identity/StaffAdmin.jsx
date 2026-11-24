@@ -22,7 +22,7 @@ function CapabilityChecklist({ selected, onToggle, idPrefix }) {
   </label>)}</>;
 }
 
-function MemberRow({ member, busy, onSave, onRevoke }) {
+function MemberRow({ member, busy, onSave, onRevoke, onReissue }) {
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState(member.capabilities);
   const [confirming, setConfirming] = useState(false);
@@ -35,6 +35,7 @@ function MemberRow({ member, busy, onSave, onRevoke }) {
     {active && <>{' '}
       <button type="button" disabled={busy} onClick={() => setEditing(value => !value)}>
         {editing ? 'Cerrar permisos' : 'Permisos'}</button>{' '}
+      {onReissue && member.alias && <><button type="button" disabled={busy} onClick={() => onReissue(member)}>Emitir nueva clave temporal</button>{' '}</>}
       {!confirming
         ? <button type="button" disabled={busy} onClick={() => setConfirming(true)}>Revocar acceso</button>
         : <><button type="button" disabled={busy} onClick={() => { setConfirming(false); onRevoke(member); }}>Confirmar revocación</button>{' '}
@@ -112,6 +113,16 @@ export function StaffAdmin({ pharmacyId, api = client }) {
     finally { setBusy(false); }
   }
 
+  async function reissue(member) {
+    setBusy(true); setMessage(null); setNotice(null);
+    try {
+      const created = await api.issueTemporaryKey(pharmacyId, member.userId);
+      setIssued({ alias: member.alias, temporaryPassword: created.temporaryPassword, expiresAt: created.expiresAt });
+      await refresh();
+    } catch { setMessage('No se pudo emitir la clave. Solo aplica a trabajadores sin correo de tu farmacia.'); }
+    finally { setBusy(false); }
+  }
+
   if (status === 'loading') return <p role="status">Comprobando acceso al personal…</p>;
   if (status === 'denied') return null;
   return <section aria-labelledby="staff-admin-title">
@@ -152,6 +163,7 @@ export function StaffAdmin({ pharmacyId, api = client }) {
       </li>)}</ul></>}
     <ul>{members.map(member => <MemberRow key={member.membershipId} member={member} busy={busy}
       onSave={(row, selected) => void run(() => api.setCapabilities(pharmacyId, row.membershipId, selected), 'No se pudieron guardar los permisos.')}
-      onRevoke={row => void run(() => api.revokeMembership(pharmacyId, row.membershipId), 'No se pudo revocar el acceso.')} />)}</ul>
+      onRevoke={row => void run(() => api.revokeMembership(pharmacyId, row.membershipId), 'No se pudo revocar el acceso.')}
+      onReissue={api.issueTemporaryKey ? row => void reissue(row) : undefined} />)}</ul>
   </section>;
 }

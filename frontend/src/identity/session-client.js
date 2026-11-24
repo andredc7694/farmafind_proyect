@@ -34,6 +34,9 @@ export function createSessionClient(fetchImpl = fetch) {
       if (!response.ok) throw genericFailure();
       return response.json();
     },
+    /** Respuesta siempre 202, exista o no la cuenta. */
+    requestPasswordReset: email => mutate('/api/v1/auth/password/reset/request', { email }),
+    confirmPasswordReset: ({ token, newPassword }) => mutate('/api/v1/auth/password/reset/confirm', { token, newPassword }),
     changeTemporaryPassword: newPassword => mutate('/api/v1/auth/password/change-temporary', { newPassword }),
     selectPharmacy: pharmacyId => mutate('/api/v1/me/active-pharmacy', { pharmacyId }, 'PUT'),
     async session() {
