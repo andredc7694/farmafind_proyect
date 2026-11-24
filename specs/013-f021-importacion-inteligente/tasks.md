@@ -68,7 +68,7 @@
 - [X] T035 Ejecutar matriz PostgreSQL RLS Alfa/Beta, pool reutilizado y roles directos en TEST efímero; registrar evidencia en `specs/013-f021-importacion-inteligente/evidence.md` (FR-013; SC-005); depende de T026/T032.
 - [X] T036 Ejecutar recorrido de navegador y archivos ficticios, registrar resultados/omisiones sin alterar base persistente en `specs/013-f021-importacion-inteligente/evidence.md` (SC-001–006); depende de T033/T035.
 - [X] T037 Actualizar trazabilidad MEJ-001/HU11/RF22–24/AC13 y cobertura parcial MEJ-002/HU12/RF25/AC12–13, más 16 criterios docentes, en `specs/013-f021-importacion-inteligente/traceability.md` con evidencias reales (FR-001–014; SC-001–007); depende de T034–T036.
-- [ ] T038 Solicitar aceptación humana F02.1 y registrar decisión y pendientes MEJ-002 en `specs/013-f021-importacion-inteligente/acceptance.md`; nunca autoaprobar; depende de T037.
+- [X] T038 Solicitar aceptación humana F02.1 y registrar decisión y pendientes MEJ-002 en `specs/013-f021-importacion-inteligente/acceptance.md`; nunca autoaprobar; depende de T037.
 
 ## Dependencies and parallel work
 
