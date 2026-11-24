@@ -78,3 +78,20 @@ Limitaciones: no incluye persistencia PostgreSQL de miles de incidencias, confir
 
 - Las suites `test:f02:rls`, `test:f03:rls` y `f021-rls` (y `test:f04:rls` en el clúster F02.5) **no se ejecutaron**: las tres primeras se conectan a `farmafind_f01_test` como canal administrativo para crear y borrar sus propias bases efímeras, y la instrucción vigente de Andre prohíbe cualquier operación sobre esa base. Se espera su decisión.
 - Revisión manual en navegador y T038: pendiente de Andre. Observación para esa revisión: la interfaz no tiene un botón «Cancelar»; F021-FR-009 se cumple por abandono (no confirmar no persiste nada).
+
+# Reejecución de suites RLS con fixture TEST marcado — 2026-11-23
+
+Ejecutadas por Claude Code (PowerShell, Node 24.17.0) tras la aceptación de T038, en cumplimiento de la instrucción de Andre de «ejecutarlas con el fixture marcado como TEST, sin escrituras sobre `farmafind_f01_test`».
+
+**Cambio de pruebas (aprobado por Andre el 2026-11-23):** las suites `rls-foundation`, `f021-rls` y `public-projection.rls` ya no admiten `farmafind_f01_test`: su protección ahora exige un fixture marcado `farmafind_f01_test_<12 hex>` y rechaza la base persistente. Los scripts `scripts/f02/check.mjs` y `scripts/f03/check.mjs` obtienen la URL administrativa de `scripts/f01/fixture-admin-url.mjs`, que valida el marcador `F02_FIX01_TEST_ONLY` en `.cache/f02-fixture/state.local.json`. Cada suite crea y elimina sus propias bases efímeras.
+
+| Suite | Resultado |
+|---|---|
+| `npm run test:f02:rls` (rls-foundation) | 15/15 satisfactorias |
+| `npm run test:f03:rls` | 4/4 satisfactorias |
+| `f021-rls.test.ts` (con URL del fixture) | 3/3 satisfactorias |
+| `node scripts/f025/check-f04-rls.mjs` (clúster F02.5 marcado; se detuvo al terminar) | 18/18 satisfactorias |
+
+**Comprobación de la base persistente:** consulta de solo lectura antes y después: 3 usuarios, 3 sesiones, 0 farmacias, 0 membresías y la misma lista de bases; sin diferencias. Las suites no dejaron bases efímeras nuevas. Contenedores encendidos por Claude detenidos; sin borrar volúmenes.
+
+No se repitió Playwright. Esto cierra el pendiente «Pendientes de esta verificación» de la sección del 2026-11-23 anterior para las cuatro suites RLS.
