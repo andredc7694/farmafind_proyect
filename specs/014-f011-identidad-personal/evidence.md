@@ -200,6 +200,35 @@ No se ejecutaron: F04 rls (el script se omitió por no tener su clúster encendi
 - **Supuesto de función definer:** igual que en lotes anteriores, el propietario de las funciones debe poder escribir tablas con FORCE RLS (superusuario en TEST); validar antes de cualquier base persistente (Puerta 6).
 - **Pendiente T049/T055:** los scripts de arranque/DEMO no pasan aún `mfaKey` ni `accountMessages`; sin `mfaKey` las rutas del segundo factor no se montan (falla cerrado: los administradores con factor activo no podrían verificar).
 
+## Lote 6 — US5: perfil y seguridad personal (T044–T048), 2026-11-23
+
+Migración `016_profile.sql`; casos de uso `profile.ts`; `profile-router.ts` (7 operaciones: `GET/PATCH /me/profile`, `POST /me/email/change`, `POST /me/password`, `GET /me/sessions`, `DELETE /me/sessions/{id}`, `POST /me/sessions/revoke-others`); `Profile.jsx` y `profile-client.js`.
+
+| Archivo de prueba | Capa | Casos | Qué demuestra |
+|---|---|---|---|
+| `f011-us5.rls.test.ts` | HTTP + PostgreSQL + RLS | 9 | Perfil con valores por defecto y edición parcial sin exponer secretos; otra persona no cambia; 20 entradas inválidas y **todo campo de rol/membresía/permiso/estado/correo/usuario → 400** sin cambiar `usuario_farmacia` ni `usuario`; cambio de clave exige la actual, auditoría DENEGADO/PERMITIDO sin la clave, cierra las demás sesiones y conserva la actual; 5 fallos de reautenticación → 429 aun con la clave correcta; cambio de correo: código solo al correo **nuevo**, no cambia hasta verificar, el token no se guarda en claro ni se reutiliza, el correo viejo deja de servir; pedir un correo ya usado responde igual (202), no envía nada y no cambia nada; un trabajador con alias agrega correo y lo verifica (el alias sigue sirviendo); sesiones propias sin secretos, no ve ni cierra las ajenas (404), cerrar una / las demás; sesión restringida bloqueada; funciones no ejecutables por `f01_runtime` |
+| `f011-profile.http.test.ts` | HTTP (router con casos de uso simulados) + unitaria | 31 | Sesión y CSRF antes de cualquier caso de uso; lecturas `no-store`; 404 indistinto; cuerpos estrictos; errores sin detalle interno; 429 con `Retry-After`; validador de parche: solo seis campos, rechaza roles/permisos/estado/tipos erróneos |
+| `f011-profile.test.jsx` | React/jsdom | 7 | Cliente con CSRF y sin identificador de usuario; guarda solo los seis campos; sin roles ni permisos en pantalla; verificar correo; cambio de correo sin confirmar existencia; claves no quedan en pantalla; sesiones propias; error genérico |
+
+### Regresión tras el lote 6 (resultados reales)
+
+| Comprobación | Resultado |
+|---|---|
+| `scripts/f01/check.mjs unit` / `api` / `rls` | **114/114** · **128/128** (antes 97) · **121/121** (antes 112) |
+| `test:f02:rls` | 15/15 |
+| Frontend completo (sin `*.spec.js` de Playwright) | 37 archivos, **134/134** (antes 127) |
+| `npm run check` / `build` / `verify:contracts` | correctos (252 archivos JS; 41 operaciones); `--f011-contract`: 26 operaciones |
+
+No se ejecutaron: F04 rls (no tocado), Playwright/E2E (T053), F05, DEMO (T055). Base persistente `farmafind_f01_test`: no se tocó. Contenedor PostgreSQL TEST detenido al terminar.
+
+### Hallazgos del lote 6 (para *analyze* y *converge*)
+
+- **Defecto real hallado por la prueba:** la política de inserción en `auditoria_identidad` del rol de autenticación no incluía `EMAIL_CHANGE`; el intento fallido de cambio de correo daba un 401 «correcto» por un motivo equivocado (violación RLS 42501 traducida a «No autorizado») y no dejaba auditoría. Corregido en 016 y la prueba ahora exige la fila DENEGADO.
+- **Prueba propia corregida:** un caso usaba la clave anterior de una cuenta ya cambiada; se ajustó el fixture.
+- **Decisión menor (reversible):** las operaciones de perfil usan el rol de autenticación con funciones definer (no el rol tenant), porque el rol tenant solo ve su sesión por huella y no puede listar ni cerrar otras; el usuario sale siempre de la sesión.
+- **Cambiar correo no cierra otras sesiones** (la clave sí). Si Andre prefiere cerrarlas también, es un cambio de una línea en `verify_email`.
+- **Supuesto de función definer** (propietario con escritura en tablas FORCE RLS): igual que lotes previos; validar antes de cualquier base persistente (Puerta 6).
+
 ## Pendiente (siguientes lotes)
 
 US4 (T037–T043) en adelante. Nada de lo anterior constituye aceptación de F01.1.

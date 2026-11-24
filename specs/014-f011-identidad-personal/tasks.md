@@ -84,11 +84,11 @@ Formato: `- [ ] Txxx [P] [USn] descripción con ruta (requisitos)`. `[P]` = para
 **Objetivo**: perfil editable y gestión de la propia seguridad sin tocar permisos.
 **Prueba independiente**: un usuario cambia datos, correo (con reverificación), clave y cierra otras sesiones.
 
-- [ ] T044 [P] [US5] Pruebas HTTP del perfil, cambio de correo, cambio de clave y sesiones propias (reautenticación, no editar roles, no ver sesiones ajenas) en `backend/tests/identity/f011-profile.http.test.ts` (FR-013–014).
-- [ ] T045 [US5] Casos de uso `GetProfile`, `UpdateProfile`, `RequestEmailChange`, `ChangeOwnPassword` y `ManageOwnSessions` con `perfil_usuario`, `token_cuenta` y auditoría, en `backend/src/modules/usuarios/application/profile.ts` (FR-013–014); depende de T007, T015, T032.
-- [ ] T046 [US5] Rutas `/me/profile`, `/me/email/change`, `/me/password` y `/me/sessions*` en `backend/src/modules/usuarios/presentation/profile-router.ts` (FR-013); depende de T045.
-- [ ] T047 [P] [US5] Interfaz: pantalla «Mi perfil» (datos, avatar predefinido, tema, notificaciones, correo, clave, sesiones) en `frontend/src/identity/Profile.jsx` y `profile-client.js` (FR-013–014); depende de T046.
-- [ ] T048 [US5] Verificar US5 incluyendo el cierre de otras sesiones y la imposibilidad de editar permisos, en `backend/tests/identity/f011-us5.rls.test.ts` y `frontend/tests/f011-profile.test.jsx` (SC-004, SC-008); depende de T046–T047.
+- [X] T044 [P] [US5] Pruebas HTTP del perfil, cambio de correo, cambio de clave y sesiones propias (reautenticación, no editar roles, no ver sesiones ajenas) en `backend/tests/identity/f011-profile.http.test.ts` (FR-013–014).
+- [X] T045 [US5] Casos de uso `GetProfile`, `UpdateProfile`, `RequestEmailChange`, `ChangeOwnPassword` y `ManageOwnSessions` con `perfil_usuario`, `token_cuenta` y auditoría, en `backend/src/modules/usuarios/application/profile.ts` (FR-013–014); depende de T007, T015, T032.
+- [X] T046 [US5] Rutas `/me/profile`, `/me/email/change`, `/me/password` y `/me/sessions*` en `backend/src/modules/usuarios/presentation/profile-router.ts` (FR-013); depende de T045.
+- [X] T047 [P] [US5] Interfaz: pantalla «Mi perfil» (datos, avatar predefinido, tema, notificaciones, correo, clave, sesiones) en `frontend/src/identity/Profile.jsx` y `profile-client.js` (FR-013–014); depende de T046.
+- [X] T048 [US5] Verificar US5 incluyendo el cierre de otras sesiones y la imposibilidad de editar permisos, en `backend/tests/identity/f011-us5.rls.test.ts` y `frontend/tests/f011-profile.test.jsx` (SC-004, SC-008); depende de T046–T047.
 
 ## Phase 8: Polish, seguridad y aceptación
 
@@ -137,3 +137,7 @@ T031–T036 marcadas con evidencia real en [evidence.md](evidence.md). Desviacio
 ## Notas de ejecución del lote 5 (2026-11-23)
 
 T037–T043 marcadas con evidencia real en [evidence.md](evidence.md). Desviaciones: la exigencia de segundo factor en `/platform/**` se aplica **en la base de datos** (`f01.has_platform_permission` ahora exige `mfa_verificada_at` y sesión sin restricción, migración 015) y no solo en el router, sin cambiar los contratos de `/platform/**`; las transiciones sensibles son funciones `SECURITY DEFINER` (`begin_mfa_enrollment`, `complete_mfa`, `mfa_requirement`). Un administrador **sin** factor activo entra con sesión normal (puede enrolarse) pero `/platform/**` devuelve 403; con factor activo la sesión nace `MFA_PENDIENTE`. T041: la prueba se dividió en `f011-reset-mfa.unit.test.ts` (expediente y rechazo de bases no marcadas) y un caso de reinicio completo dentro de `f011-us4.rls.test.ts` (sufijos exigidos por `check.mjs`). T037: `f011-mfa.http.test.ts` y los casos «sin ruta de ascenso» están en `f011-us4.rls.test.ts` (no se creó `f011-no-elevation.http.test.ts`). El aviso de alta devuelve 409 si el factor ya está activo (añadido al contrato). Se actualizó el fixture de `bootstrap-authorization.rls.test.ts` (sus sesiones de administrador ahora nacen con segundo factor verificado, como exige la nueva regla).
+
+## Notas de ejecución del lote 6 (2026-11-23)
+
+T044–T048 marcadas con evidencia real en [evidence.md](evidence.md). Desviaciones: las operaciones del perfil son funciones `SECURITY DEFINER` en `backend/migrations/f01/016_profile.sql` que derivan al usuario **solo** de la sesión vigente y sin restricción (ninguna recibe un identificador de usuario); el rol de aplicación (`f01_runtime`) no puede ejecutarlas. `verify_email` ahora también confirma `CAMBIO_CORREO` (el correo nuevo solo se activa con el código enviado a él). T044: `f011-profile.http.test.ts`; T048: `f011-us5.rls.test.ts` (HTTP + PostgreSQL). Se añadió la política de inserción `EMAIL_CHANGE` para el rol de autenticación (hallada por la propia prueba). La interfaz «Mi perfil» incluye la verificación del propio correo pendiente desde el lote 4.
