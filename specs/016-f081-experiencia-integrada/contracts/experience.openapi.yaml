@@ -48,7 +48,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/InventorySummary' }
         '401': { description: Sin sesión }
-        '403': { description: Sin capacidad inventory.read, no es miembro o farmacia ajena }
+        '404': { description: Sin capacidad inventory.read, no es miembro o farmacia ajena }
 components:
   securitySchemes:
     sessionCookie: { type: apiKey, in: cookie, name: ff_session }

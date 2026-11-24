@@ -24,6 +24,12 @@ export function ChatBubble({ client = defaultClient, path = typeof window === 'u
     return () => document.body.removeAttribute('data-chat');
   }, [open]);
   useEffect(() => { if (open) fieldRef.current?.focus(); }, [open]);
+  useEffect(() => { // Escape minimiza aunque el foco se haya perdido (p. ej. tras enviar y deshabilitarse el botón)
+    if (!open) return undefined;
+    const onKey = event => { if (event.key === 'Escape') { setOpen(false); setTimeout(() => buttonRef.current?.focus(), 0); } };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
 
   if (hidden) return null;
   const close = () => { setOpen(false); setTimeout(() => buttonRef.current?.focus(), 0); };
@@ -48,8 +54,7 @@ export function ChatBubble({ client = defaultClient, path = typeof window === 'u
   }
 
   return <div className="chat-bubble">
-    {open && <section id={panelId} className="chat-panel" role="dialog" aria-modal="false" aria-labelledby={`${panelId}-title`}
-      onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); close(); } }}>
+    {open && <section id={panelId} className="chat-panel" role="dialog" aria-modal="false" aria-labelledby={`${panelId}-title`}>
       <header>
         <h2 id={`${panelId}-title`}>FarmaFind AI</h2>
         <button type="button" onClick={close} aria-label="Minimizar el asistente">Minimizar</button>
