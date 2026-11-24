@@ -7,6 +7,7 @@ import { MyInvitations } from './MyInvitations.jsx';
 import { PasswordReset } from './PasswordReset.jsx';
 import { ForcedPasswordChange } from './ForcedPasswordChange.jsx';
 import { MfaEnroll } from './MfaEnroll.jsx';
+import { Profile } from './Profile.jsx';
 import { createSessionClient } from './session-client.js';
 import { InventoryView } from '../inventory/InventoryView.jsx';
 import { ReservationsView } from '../reservations/ReservationsView.jsx';
@@ -30,6 +31,7 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
   const [membershipsVersion, setMembershipsVersion] = useState(0);
   const [resetting, setResetting] = useState(() => typeof window !== 'undefined' &&
     new URLSearchParams(window.location.search).has('reset'));
+  const [profileOpened, setProfileOpened] = useState(false);
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   // F01.1: una sesión con cambio de clave pendiente solo puede completar ese paso.
@@ -189,6 +191,9 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
       onRegister={register} onLogin={login} onLogout={logout} onForgotPassword={() => setResetting(true)} />}
     {status === 'authenticated' && !restricted && !inventoryMode && !reservationsMode && !locationMode &&
       <MfaEnroll mode="enroll" api={identity} />}
+    {status === 'authenticated' && !restricted && !inventoryMode && !reservationsMode && !locationMode &&
+      <details className="account-panel" onToggle={event => { if (event.currentTarget.open) setProfileOpened(true); }}>
+        <summary>Mi perfil y seguridad</summary>{profileOpened && <Profile />}</details>}
     {status === 'authenticated' && !restricted && !inventoryMode && !reservationsMode && !locationMode &&
       <MyInvitations onAccepted={() => setMembershipsVersion(value => value + 1)} />}
     {status === 'authenticated' && !restricted && <PharmacySelector pharmacies={pharmacies}
