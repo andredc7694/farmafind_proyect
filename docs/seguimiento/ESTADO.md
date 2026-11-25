@@ -81,3 +81,11 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-25 · Revisión integrada: decisiones menores — se aplicaron migraciones pendientes a fixtures TEST persistentes marcadas (F01 demo, F02, F03, F04, F07), se refrescaron sesiones F07, se ajustaron selectores de E2E heredados por cambios de F04.1/F08.1, y la carga F04 usó la prueba AC05 en el clúster F025 (el script original apuntaba a la base persistente). Omisiones en `specs/018-revision-integrada-test-demo/omissions.md`.
 - 2026-11-25 · Revisión integrada (spec 018) ACEPTADA por Andre («ACEPTO»); DEMO apagada, fixture eliminado; PR a main.
 - 2026-11-25 · CI GitHub Actions (spec 019): spec en borrador, rama feat/ci-github-actions; espera aprobación de Andre.
+
+## Recordatorios y pendientes (2026-11-25)
+**Aceptados e integrados en `main`:** F02.1, F01.1, F04.1, F08.1, F01.2 y la revisión integrada TEST/DEMO (PR #4–#9). F02.5 sigue **sin aceptar**.
+1. **SEC-EXC-DEV-2026-001 vence el 2026-12-17.** Propuesta (sin aplicar) en `docs/evidencias/integration/security-exception-review-proposal.md`: hoy `npm audit` da 0 vulnerabilidades; recomendación A = cerrarla tras confirmar el aviso oficial.
+2. **Pendientes de `specs/018-revision-integrada-test-demo/omissions.md`:** MEJ-011 (asistente de solicitud), sugerencias 3, 4 y 11, resto de MEJ-002 fuera de la importación, `f05:rls` sin reejecutar, E2E heredado `f04` (fixture persistente con 404) y F06.1 T030/T044. Opciones de prioridad en el mensaje de entrega.
+3. **F02.5:** T046, T057 y T063 son verificaciones humanas (guía en `specs/012-f025-incorporacion-farmacias/closure-guide.md`). **Bloqueo técnico:** la protección de hashes del SQL aprobado falla al arrancar la DEMO (CRLF de Windows y `012_public_pharmacy_projection.sql` no coincide con el hash aprobado). F025-RF23 (suspensión de farmacias) sigue aplazada.
+4. **No iniciar** F09 (AWS), DNS/CDN ni recursos de pago sin autorización expresa de Andre.
+5. **CI GitHub Actions:** spec 019 en borrador (espera aprobación).
