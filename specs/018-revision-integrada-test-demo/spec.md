@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/integral-revision-test-demo`
 **Created**: 2026-11-24
-**Status**: Borrador, **espera aprobación de Andre**.
+**Status**: Spec aprobada el 2026-11-24 («apruebo», D-01..D-04 = A). Plan y tasks pendientes de aprobación.
 **Fuente**: `docs/roadmap-implementacion-v3.2.md` fila 6; `docs/trazabilidad-maestro-v3.2.md` (MEJ-001–019); Constitution XIV (16 criterios de la rúbrica, sin inventar puntajes).
 
 ## Situación (lenguaje sencillo)
