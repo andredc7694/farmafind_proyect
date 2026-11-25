@@ -1,0 +1,3 @@
+# Revisión integrada — Converge
+Contra la spec: RI-001 (solo TEST efímeras: se tocaron fixtures TEST marcadas; `farmafind_f01_test` no se modificó) ✔ · RI-002 matrices completas ✔ · RI-003 cero accesos cruzados en la matriz cruzada ✔ · RI-004 resultados registrados tal cual, un hallazgo serio corregido ✔ · RI-005 sin costos ni producción ✔ · RI-006 tareas humanas ajenas sin marcar ✔.
+Desvíos honestos: `f05:rls` y `f061 integration` aislado sin reejecutar; E2E `f04` heredado sin reproducir; carga F04 con la prueba AC05 en el clúster F025 (el script original apuntaba a la base persistente y fue rechazado por su guarda).
