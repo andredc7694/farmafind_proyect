@@ -91,7 +91,7 @@ export function PharmacyPanel({ sessionClient: injectedSession, reservationsClie
       {activeSection === 'resumen' && <PharmacySummary pharmacyId={pharmacyId} capabilities={codes} />}
       {activeSection === 'farmacia' && <LocationAdmin pharmacyId={pharmacyId} delegationCodes={codes} />}
       {activeSection === 'inventario' && <InventoryView pharmacyId={pharmacyId} capabilities={codes.filter(code => !importCapabilities.includes(code))} />}
-      {activeSection === 'importar' && <InventoryView pharmacyId={pharmacyId} capabilities={codes.filter(code => importCapabilities.includes(code))} />}
+      {activeSection === 'importar' && <InventoryView pharmacyId={pharmacyId} capabilities={codes.filter(code => code === 'inventory.read' || importCapabilities.includes(code))} />}
       {activeSection === 'reservas' && <PharmacyReservations client={reservationsClient} pharmacyId={pharmacyId} capabilities={codes} showSettings={false} showTabs={false} />}
       {activeSection === 'historial' && <PharmacyReservations client={reservationsClient} pharmacyId={pharmacyId} capabilities={codes} showSettings={false} showTabs={false} initialTab="history" />}
       {activeSection === 'personal' && <StaffAdmin pharmacyId={pharmacyId} />}

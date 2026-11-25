@@ -11,6 +11,13 @@ import { InventoryView } from '../../src/inventory/InventoryView.jsx';
 afterEach(cleanup);
 
 describe('controles de inventario F08', () => {
+  it('la sección Importar del panel (lectura + importación, sin escritura) muestra el formulario de importación', async () => {
+    render(<InventoryView pharmacyId="alfa" capabilities={['inventory.read', 'inventory.import.preview', 'inventory.import.confirm']} />);
+    expect(await screen.findByText('Importar inventario')).toBeTruthy();
+    expect(screen.getByLabelText('Archivo CSV o XLSX')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Guardar revisión' })).toBeNull();
+  });
+
   it('no presenta acciones privadas sin capacidad explícita aunque exista una farmacia en la URL', async () => {
     render(<InventoryView pharmacyId="alfa" capabilities={[]} />);
     expect(await screen.findByText('No tienes acceso al inventario de esta farmacia.')).toBeTruthy();
