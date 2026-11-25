@@ -5,7 +5,7 @@ import { createServer, connect } from 'node:net';
 
 assert.equal(process.platform, 'linux');
 assert.equal(process.env.F081_E2E_CONTAINER, '1');
-for (const key of ['F081_OWNER_EMAIL', 'F081_OWNER_PASSWORD', 'F081_CLIENT_EMAIL', 'F081_CLIENT_PASSWORD', 'F081_ALFA_ID', 'F081_WORKER_EMAIL', 'F081_REVIEWER_EMAIL']) {
+for (const key of ['F081_OWNER_EMAIL', 'F081_OWNER_PASSWORD', 'F081_CLIENT_EMAIL', 'F081_CLIENT_PASSWORD', 'F081_ALFA_ID', 'F081_BETA_ID', 'F081_WORKER_EMAIL', 'F081_REVIEWER_EMAIL']) {
   assert(process.env[key], `F08.1: falta ${key} TEST`);
 }
 const servers = [];

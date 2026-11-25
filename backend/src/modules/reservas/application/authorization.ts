@@ -7,7 +7,7 @@ export async function authorizeReservationContext(identity: IdentityTransaction,
   const pharmacy = await identity.findPharmacyReference(pharmacyId);
   const delegations = await identity.listOwnDelegations(membership.id);
   if (membership.state !== 'ACTIVA' || pharmacy?.state !== 'ACTIVA' ||
-      !['DUENO','ADMINISTRADOR'].includes(membership.roleCode) ||
+      !['DUENO','ADMINISTRADOR','TRABAJADOR'].includes(membership.roleCode) ||
       !delegations.some(item => item.state === 'ACTIVA' && item.capabilityCode === capability)) {
     throw new Error('No autorizado');
   }

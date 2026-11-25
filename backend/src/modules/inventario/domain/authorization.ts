@@ -18,10 +18,12 @@ export interface InventoryAuthorization {
   readonly capabilities: readonly string[];
 }
 
+const ELIGIBLE_ROLES: readonly string[] = ['DUENO', 'ADMINISTRADOR', 'TRABAJADOR'];
+
 /** A role identifies eligibility; only a live, scoped, explicit capability grants an action. */
 export function canUseInventory(context: InventoryAuthorization, capability: InventoryCapability): boolean {
   return context.authenticated && context.membershipActive && context.pharmacyActive &&
-    (context.actorRole === 'DUENO' || context.actorRole === 'ADMINISTRADOR') &&
+    ELIGIBLE_ROLES.includes(context.actorRole) &&
     context.selectedPharmacyId === context.resourcePharmacyId &&
     context.capabilities.includes(capability);
 }
