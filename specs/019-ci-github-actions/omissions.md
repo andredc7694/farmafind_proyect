@@ -1,0 +1,3 @@
+# CI — omisiones (2026-11-25)
+- **F04 y F07 RLS, F03 integración (Redis), E2E Playwright y k6:** no están en el CI. F04/F07 RLS exigen el clúster F02.5 (`cluster_name=farmafind-f025-test`, comentario de base marcado) y su preparación (`scripts/f025/*`, con hashes de revisión humana); F03 integración exige Redis; E2E/k6 son más pesados. Siguen ejecutándose localmente (`scripts/integration/review-all.ps1`). Mejora posible en otro incremento.
+- **Protección de rama (D-03 = A):** no activada. Propuesta: cuando haya varias ejecuciones verdes, exigir los dos jobs en `main` (cambia la configuración de GitHub; decisión tuya).
