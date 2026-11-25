@@ -34,6 +34,9 @@ jobs:
       - name: Comprobación estática
         run: npm run check
       - name: Compilación
+        env: # configuración pública del frontend (valores no secretos de frontend/.env.example)
+          VITE_APP_MODE: bootstrap
+          VITE_PUBLIC_SEARCH_PATH: /api/v1/busquedas
         run: npm run build
       - name: Contratos OpenAPI
         run: |
