@@ -18,4 +18,11 @@ const secret = randomBytes(32).toString('hex');
 console.log(`::add-mask::${secret}`);
 mkdirSync(dir, { recursive: true });
 writeFileSync(file, `${secret}\n`, { mode: 0o600 });
-console.log('Secreto efímero del runner preparado (no se imprime).');
+// Los scripts de fixture F03 también leen el secreto de Redis (no se usa Redis en este job; valor aleatorio y efímero).
+const redisDir = path.join(process.cwd(), '.cache/f03-docker');
+const redisSecret = randomBytes(32).toString('hex');
+console.log(`::add-mask::${redisSecret}`);
+mkdirSync(redisDir, { recursive: true });
+writeFileSync(path.join(redisDir, 'redis-password.txt'), `${redisSecret}
+`, { mode: 0o600 });
+console.log('Secretos efímeros del runner preparados (no se imprimen).');

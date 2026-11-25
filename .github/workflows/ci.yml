@@ -57,7 +57,7 @@ jobs:
         run: node node_modules/vitest/vitest.mjs run frontend/tests/ --exclude "**/*.spec.js"
 
   postgres-rls:
-    name: PostgreSQL efímero y RLS (F01, F02)
+    name: PostgreSQL efímero y RLS (F01, F02, F03)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
