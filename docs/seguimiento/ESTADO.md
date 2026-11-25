@@ -90,3 +90,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 4. **No iniciar** F09 (AWS), DNS/CDN ni recursos de pago sin autorización expresa de Andre.
 5. **CI GitHub Actions:** spec 019 en borrador (espera aprobación).
 - 2026-11-25 · CI GitHub Actions (spec 019): spec aprobada (D-01..D-04 = A); plan, research y tasks (11) creados, esperan aprobación.
+- 2026-11-25 · Andre eligió prioridad P1 (primero F02.5; excepción SEC-EXC-DEV-2026-001 en paralelo). La propuesta de la excepción se conserva SIN aplicar; la decide Andre antes del 2026-12-17.
