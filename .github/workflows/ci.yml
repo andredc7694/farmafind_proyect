@@ -93,7 +93,10 @@ jobs:
           export F01_TEST_DATABASE_URL="postgresql://f01_migrator:$(cat .cache/f01-docker/postgres-password.txt)@127.0.0.1:55431/farmafind_f01_test"
           node scripts/f01/migrate.mjs
           node scripts/f02/fixture.mjs prepare
+          node scripts/f03/fixture.mjs prepare
       - name: RLS F01
         run: node scripts/f01/check.mjs rls
       - name: RLS F02
         run: node scripts/f02/check.mjs rls
+      - name: RLS F03
+        run: node scripts/f03/check.mjs rls
