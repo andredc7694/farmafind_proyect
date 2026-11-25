@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/ci-github-actions`
 **Created**: 2026-11-25
-**Status**: Borrador, **espera aprobación de Andre**.
+**Status**: Spec aprobada el 2026-11-25 («apruebo», D-01..D-04 = A). Clarify: sin preguntas abiertas. Plan y tasks pendientes de aprobación.
 **Origen**: `specs/018-revision-integrada-test-demo/matrix-rubrica.md` fila 12 («sin pipeline GitHub Actions»); instrucción de Andre del 2026-11-25 (punto B).
 
 ## Qué se construye (lenguaje sencillo)

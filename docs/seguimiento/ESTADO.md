@@ -89,3 +89,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 3. **F02.5:** T046, T057 y T063 son verificaciones humanas (guía en `specs/012-f025-incorporacion-farmacias/closure-guide.md`). **Bloqueo técnico:** la protección de hashes del SQL aprobado falla al arrancar la DEMO (CRLF de Windows y `012_public_pharmacy_projection.sql` no coincide con el hash aprobado). F025-RF23 (suspensión de farmacias) sigue aplazada.
 4. **No iniciar** F09 (AWS), DNS/CDN ni recursos de pago sin autorización expresa de Andre.
 5. **CI GitHub Actions:** spec 019 en borrador (espera aprobación).
+- 2026-11-25 · CI GitHub Actions (spec 019): spec aprobada (D-01..D-04 = A); plan, research y tasks (11) creados, esperan aprobación.
