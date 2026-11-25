@@ -1,0 +1,4 @@
+# CI GitHub Actions — Evidencia (resultados reales)
+- **T001 (2026-11-25):** con la base de datos sin variables de fixture y sin `.cache`, pasan localmente sin base: unit F01 114, F02 15, F03 33, F04 48, F05 8, F06 24, F06.1 85, F07 19 (1 omitida); API con dobles F01 128, F04 25, F05 5, F06 5, F06.1 15. **No** corre sin base: `f07 api` (exige fixture `.cache/f07-fixture`) → pasa al Job 2/omisión; F03 integración (Redis) y todas las `rls`.
+- **T002 (2026-11-25):** SHA obtenidos de la API pública de GitHub (publicadas en 2026-07, >2 semanas): `actions/checkout` v7.0.1 → `3d3c42e5aac5ba805825da76410c181273ba90b1`; `actions/setup-node` v7.1.0 → `949feb2413d6458794dcd2491c4babbbce0c15c1`.
+- **T003:** `.github/workflows/ci.yml` con Job `static-unit` (permisos `contents: read`, concurrency, timeout 20 min, sin secretos).

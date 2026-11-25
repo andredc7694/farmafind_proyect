@@ -1,0 +1,54 @@
+# CI de FarmaFind (spec 019). Solo verifica: sin despliegue, sin secretos, sin servicios de pago.
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+# Solo lectura del repositorio; ningún permiso de escritura (CI-FR-005).
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-unit:
+    name: Estático y unitarias (sin base de datos)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node 24.17.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.17.0
+          cache: npm
+      - name: Dependencias
+        run: npm ci
+      - name: Comprobación estática
+        run: npm run check
+      - name: Compilación
+        run: npm run build
+      - name: Contratos OpenAPI
+        run: |
+          npm run verify:contracts
+          npm run verify:contracts:f011
+          npm run verify:contracts:f041
+          npm run verify:contracts:f081
+      - name: Pruebas unitarias y de API con dobles (F01–F07)
+        run: |
+          for suite in "f01 unit" "f02 unit" "f03 unit" "f04 unit" "f05 unit" "f06 unit" "f061 unit" "f07 unit" \
+                       "f01 api" "f04 api" "f05 api" "f06 api" "f061 api"; do
+            set -- $suite
+            echo "::group::$1 $2"
+            node "scripts/$1/check.mjs" "$2"
+            echo "::endgroup::"
+          done
+      - name: Frontend (Vitest)
+        run: node node_modules/vitest/vitest.mjs run frontend/tests/ --exclude "**/*.spec.js"
