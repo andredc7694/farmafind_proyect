@@ -1,0 +1,2 @@
+# Los scripts SQL se guardan y se descargan siempre con saltos de línea LF: los hashes de revisión humana de las migraciones se calculan sobre LF.
+*.sql text eol=lf

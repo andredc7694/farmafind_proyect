@@ -28,7 +28,8 @@ const reviewed = Object.freeze({
 });
 const files = Object.entries(reviewed).map(([name, expected]) => {
   const sql = readFileSync(path.join(root, 'backend/migrations/f025', name), 'utf8');
-  assert.equal(createHash('sha256').update(sql).digest('hex').toUpperCase(), expected, `${name}: cambió desde la revisión humana`);
+  // Solo la comparación normaliza CRLF→LF (checkout de Windows); el SQL ejecutado no se modifica.
+  assert.equal(createHash('sha256').update(sql.replaceAll('\r\n', '\n')).digest('hex').toUpperCase(), expected, `${name}: cambió desde la revisión humana`);
   return { name, sql };
 });
 function url(database) {
