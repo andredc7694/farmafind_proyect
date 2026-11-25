@@ -5,7 +5,7 @@ import { createServer, connect } from 'node:net';
 
 assert.equal(process.platform, 'linux');
 assert.equal(process.env.F081_E2E_CONTAINER, '1');
-for (const key of ['F081_OWNER_EMAIL', 'F081_OWNER_PASSWORD', 'F081_CLIENT_EMAIL', 'F081_CLIENT_PASSWORD', 'F081_ALFA_ID', 'F081_BETA_ID', 'F081_WORKER_EMAIL', 'F081_REVIEWER_EMAIL']) {
+for (const key of ['F081_OWNER_EMAIL', 'F081_OWNER_PASSWORD', 'F081_CLIENT_EMAIL', 'F081_CLIENT_PASSWORD', 'F081_ALFA_ID', 'F081_MED_ID', 'F081_BETA_ID', 'F081_WORKER_EMAIL', 'F081_REVIEWER_EMAIL']) {
   assert(process.env[key], `F08.1: falta ${key} TEST`);
 }
 const servers = [];
@@ -21,7 +21,7 @@ async function bridge(port) {
 }
 try {
   await bridge(3000); await bridge(5173);
-  const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', 'frontend/e2e/f081-experience.spec.js',
+  const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', process.env.F081_SPEC || 'frontend/e2e/f081-experience.spec.js',
     '--output=/results', '--workers=1'], { cwd: '/work', env: process.env, stdio: 'inherit' });
   process.exitCode = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', code => resolve(code ?? 1)); });
 } finally {

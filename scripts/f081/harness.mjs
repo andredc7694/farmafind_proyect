@@ -89,7 +89,7 @@ async function prepare() {
     const redisUrl = new URL('redis://127.0.0.1:56379/0'); redisUrl.password = redisSecret;
     mkdirSync(privateDir, { recursive: true });
     writeFileSync(stateFile, `${JSON.stringify({ kind: 'F081_TEST_DEMO_ONLY', database, authRole, runtimeRole, authUrl: authUrl.toString(), runtimeUrl: runtimeUrl.toString(),
-      redisUrl: redisUrl.toString(), csrfKey: hex(32), abuseKey: hex(32), accounts, pharmacies }, null, 2)}\n`, { flag: 'wx', mode: 0o600 });
+      redisUrl: redisUrl.toString(), csrfKey: hex(32), abuseKey: hex(32), accounts, pharmacies, meds }, null, 2)}\n`, { flag: 'wx', mode: 0o600 });
     console.log(`F08.1 TEST preparado: ${database}; 2 farmacias, 6 cuentas ficticias (2 propietarios, trabajador, revisor, 2 clientes) y 5 ofertas públicas.`);
   } finally { if (demo) await demo.end(); await base.end(); }
 }
