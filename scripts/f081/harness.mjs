@@ -53,6 +53,7 @@ async function prepare() {
     }
     demo = await connect(adminUrl(database));
     const hasher = new Argon2PasswordHasher(); const accounts = {}; const pharmacies = {};
+    let meds;
     await demo.query('BEGIN');
     try {
       for (const [key, name, address, latitude, longitude] of [['alfa', 'Farmacia Alfa', 'Av. Alfa 100, Lima', -12.0464, -77.0428], ['beta', 'Farmacia Beta', 'Av. Beta 200, Lima', -12.08, -77.06]]) {
@@ -73,7 +74,7 @@ async function prepare() {
       }
       const medication = async (name, active, concentration, presentation) => (await demo.query(`INSERT INTO f02.medicamento(nombre,principio_activo,concentracion,presentacion,clasificacion)
         VALUES($1,$2,$3,$4,'venta libre') RETURNING id`, [name, active, concentration, presentation])).rows[0].id;
-      const meds = { paracetamol: await medication('paracetamol ficticio', 'principio ficticio uno', '500 mg', 'tabletas'),
+      meds = { paracetamol: await medication('paracetamol ficticio', 'principio ficticio uno', '500 mg', 'tabletas'),
         paracetamolJarabe: await medication('paracetamol ficticio', 'principio ficticio uno', '120 mg', 'jarabe'), ibuprofeno: await medication('ibuprofeno ficticio', 'principio ficticio dos', '400 mg', 'capsulas') };
       for (const [pharmacy, medicationKey, cents, quantity] of [['alfa', 'paracetamol', 1250, 40], ['beta', 'paracetamol', 990, 25], ['alfa', 'paracetamolJarabe', 1800, 10], ['alfa', 'ibuprofeno', 2100, 30], ['beta', 'ibuprofeno', 1900, 12]]) {
         await demo.query('INSERT INTO f02.inventario(farmacia_id,medicamento_id,precio_centavos,cantidad_fisica,ultima_revision_at) VALUES($1,$2,$3,$4,now())', [pharmacies[pharmacy], meds[medicationKey], cents, quantity]);
@@ -89,7 +90,7 @@ async function prepare() {
     const redisUrl = new URL('redis://127.0.0.1:56379/0'); redisUrl.password = redisSecret;
     mkdirSync(privateDir, { recursive: true });
     writeFileSync(stateFile, `${JSON.stringify({ kind: 'F081_TEST_DEMO_ONLY', database, authRole, runtimeRole, authUrl: authUrl.toString(), runtimeUrl: runtimeUrl.toString(),
-      redisUrl: redisUrl.toString(), csrfKey: hex(32), abuseKey: hex(32), accounts, pharmacies }, null, 2)}\n`, { flag: 'wx', mode: 0o600 });
+      redisUrl: redisUrl.toString(), csrfKey: hex(32), abuseKey: hex(32), accounts, pharmacies, meds }, null, 2)}\n`, { flag: 'wx', mode: 0o600 });
     console.log(`F08.1 TEST preparado: ${database}; 2 farmacias, 6 cuentas ficticias (2 propietarios, trabajador, revisor, 2 clientes) y 5 ofertas públicas.`);
   } finally { if (demo) await demo.end(); await base.end(); }
 }

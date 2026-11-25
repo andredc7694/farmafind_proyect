@@ -1,0 +1,125 @@
+﻿Revision integrada - regresion (2026-11-24T21:49:50)
+== f00 all
+== f01 unit
+Test Files  18 passed (18)
+Tests  114 passed (114)
+Duration  12.18s (transform 829ms, setup 0ms, import 2.16s, tests 2.45s, environment 5ms)
+== f01 api
+Test Files  11 passed (11)
+Tests  128 passed (128)
+Duration  16.15s (transform 873ms, setup 0ms, import 8.04s, tests 3.18s, environment 25ms)
+== f01 rls
+Test Files  22 passed (22)
+Tests  142 passed (142)
+Duration  160.26s (transform 3.23s, setup 0ms, import 31.46s, tests 119.32s, environment 5ms)
+== f02 unit
+Test Files  5 passed (5)
+Tests  15 passed (15)
+Duration  3.44s (transform 248ms, setup 0ms, import 631ms, tests 196ms, environment 1ms)
+== f02 rls
+Test Files  1 passed (1)
+Tests  15 passed (15)
+Duration  4.10s (transform 468ms, setup 0ms, import 1.38s, tests 2.30s, environment 0ms)
+== f03 unit
+Test Files  13 passed (13)
+Tests  33 passed (33)
+Duration  8.67s (transform 479ms, setup 0ms, import 2.89s, tests 446ms, environment 3ms)
+== f03 integration
+Test Files  1 passed (1)
+Tests  3 passed (3)
+Duration  3.27s (transform 92ms, setup 0ms, import 1.62s, tests 1.25s, environment 0ms)
+== f03 rls
+Test Files  2 passed (2)
+Tests  9 passed (9)
+Duration  2.60s (transform 185ms, setup 0ms, import 468ms, tests 1.37s, environment 0ms)
+== f04 unit
+Test Files  10 passed (10)
+Tests  48 passed (48)
+Duration  12.74s (transform 680ms, setup 0ms, import 2.12s, tests 1.92s, environment 3.92s)
+== f04 api
+Test Files  4 passed (4)
+Tests  25 passed (25)
+Duration  6.69s (transform 351ms, setup 0ms, import 3.66s, tests 954ms, environment 1ms)
+== f05 unit
+Test Files  4 passed (4)
+Tests  8 passed (8)
+Duration  2.84s (transform 292ms, setup 0ms, import 478ms, tests 86ms, environment 1ms)
+== f05 api
+Test Files  1 passed (1)
+Tests  5 passed (5)
+Duration  1.69s (transform 210ms, setup 0ms, import 923ms, tests 295ms, environment 0ms)
+== f06 unit
+Test Files  5 passed (5)
+Tests  24 passed (24)
+Duration  3.26s (transform 210ms, setup 0ms, import 452ms, tests 75ms, environment 1ms)
+== f06 api
+Test Files  1 passed (1)
+Tests  5 passed (5)
+Duration  2.58s (transform 300ms, setup 0ms, import 1.49s, tests 375ms, environment 1ms)
+== f06 integration
+const files=mode==='all'?[...new Set(Object.values(groups).flat())]:groups[mode];if(!files)throw new Error('F06 modo inv├ílido');
+Error: F06 modo inv├ílido
+== f061 unit
+Test Files  11 passed (11)
+Tests  85 passed (85)
+Duration  19.88s (transform 2.88s, setup 0ms, import 8.52s, tests 1.62s, environment 4.03s)
+== f061 api
+Test Files  2 passed (2)
+Tests  15 passed (15)
+Duration  8.42s (transform 2.30s, setup 0ms, import 6.51s, tests 927ms, environment 1ms)
+== f061 integration
+throw new Error('F06.1: configurar F061_TEST_BASE_URL y SEARCH_REDIS_URL en entorno TEST aislado');
+Error: F06.1: configurar F061_TEST_BASE_URL y SEARCH_REDIS_URL en entorno TEST aislado
+== f07 unit
+Test Files  4 passed (4)
+Tests  19 passed | 1 skipped (20)
+Duration  5.39s (transform 406ms, setup 0ms, import 2.38s, tests 524ms, environment 1ms)
+== f07 api
+ÔØ» backend/tests/geolocation/location-api.test.ts (3 tests | 2 failed) 226ms
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 2 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+FAIL  backend/tests/geolocation/location-api.test.ts > F07 revisi├│n real en PostgreSQL TEST ef├¡mera > proponente crea pendiente; revisor distinto publica y audita; repetir es idempotente
+error: column s.restringida_motivo does not exist
+FAIL  backend/tests/geolocation/location-api.test.ts > F07 revisi├│n real en PostgreSQL TEST ef├¡mera > controla propuestas concurrentes y rechazo idempotente sin publicar versi├│n obsoleta
+error: column s.restringida_motivo does not exist
+Test Files  1 failed | 2 passed (3)
+Tests  2 failed | 9 passed (11)
+== f07 rls
+ÔØ» backend/tests/geolocation/rls.test.ts (9 tests | 2 failed) 306ms
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 2 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+FAIL  backend/tests/geolocation/rls.test.ts > F07 RLS PostgreSQL real ÔÇö base TEST ef├¡mera > Alfa ve solo Alfa y Beta solo Beta, incluso con identificador ajeno
+AssertionError: expected [] to deeply equal [ Array(1) ]
+FAIL  backend/tests/geolocation/rls.test.ts > F07 RLS PostgreSQL real ÔÇö base TEST ef├¡mera > el contexto local de una transacci├│n no se filtra al reutilizar la conexi├│n
+AssertionError: expected [] to have a length of 1 but got +0
+Test Files  1 failed (1)
+Tests  2 failed | 7 passed (9)
+== f021-rls
+Test Files  1 passed (1)
+Tests  3 passed (3)
+Duration  2.27s (transform 267ms, setup 0ms, import 602ms, tests 1.16s, environment 0ms)
+== check
+check F03: 294 archivos JS, TypeScript estricto y l├¡mites modulares correctos
+== build
+[32mÔ£ô built in 2.29s[39m
+== verify:contracts
+Contratos OpenAPI F00-F06/F06.1/F02.1: 41 operaciones documentadas con ruta Express.
+== verify:contracts:f011
+Contrato F01.1: 26 operaciones documentadas con ruta Express.
+== verify:contracts:f041
+Contrato F04.1: 3 operaciones documentadas con ruta Express.
+== verify:contracts:f081
+Contrato F08.1: 3 operaciones documentadas con ruta Express.
+== frontend
+Test Files  48 passed (48)
+Tests  208 passed (208)
+Duration  126.01s (transform 1.57s, setup 0ms, import 20.36s, tests 11.02s, environment 76.24s)
+== f04 rls (cluster F025)
+Test Files  5 passed (5)
+Tests  37 passed (37)
+Duration  8.54s (transform 465ms, setup 0ms, import 1.33s, tests 5.75s, environment 1ms)
+== END
+
+== NOTAS DE LA CORRIDA (2026-11-24)
+- f00 all: revision de sintaxis de scripts/frontend/tests sin errores (no imprime resumen).
+- f06 integration / f061 integration: la primera no existe como grupo (se uso verify:f06:integration -> {"groundedSources":2,"comparisonSources":2,"clinicalRefusal":true,"provider":"mock"}, OK); f061 integration exige servidor TEST y Redis configurados (F061_TEST_BASE_URL): NO ejecutada de forma aislada; el chat F06.1 se cubre en los E2E de F08.1 y F061.
+- f07 api/rls: la primera corrida fallo (2+2) por fixture TEST F07 vencida del 18-nov (sesiones expiradas y sin migraciones de F01.1: columna restringida_motivo). Se renovaron sesiones (prepare.mjs refresh-test-sessions) y se aplicaron migraciones F01 pendientes SOLO a esa base TEST marcada; segunda corrida: F07 api 11/11, rls 9/9, unit 19 (1 omitida). No es defecto del producto; base persistente farmafind_f01_test intacta (verificado por el propio script).
+- f05 rls: no reejecutado (base marcada); F02.5: ver seccion propia mas abajo cuando se ejecute.

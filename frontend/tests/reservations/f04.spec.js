@@ -100,7 +100,7 @@ test('cliente y farmacia recorren los estados autorizados de una reserva', async
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Sesión activa' })).toBeVisible();
   await page.getByRole('button', { name: 'Farmacia Alfa' }).click();
-  const pharmacyQueue = page.getByRole('heading', { name: 'Cola de la farmacia' }).locator('..');
+  const pharmacyQueue = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Centro de atención' }) }).last();
   await expect(pharmacyQueue).toContainText('PENDIENTE');
   await pharmacyQueue.getByRole('button', { name: 'Confirmar' }).click();
   await expect(pharmacyQueue).toContainText('CONFIRMADA');

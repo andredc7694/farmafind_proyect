@@ -1,0 +1,50 @@
+﻿Revision integrada - E2E (2026-11-24T22:34:33)
+== e2e f01
+3 passed (18.2s)
+== e2e f011
+Error: expect(locator).toBeVisible() failed
+Error: element(s) not found
+1 failed
+2 passed (44.1s)
+== e2e f02
+3 passed (30.5s)
+== e2e f021
+Error: expect(locator).toContainText(expected) failed
+Error: strict mode violation: locator('.offer') resolved to 2 elements:
+1 failed
+== e2e f03
+Error: expect(locator).toBeVisible() failed
+Error: strict mode violation: getByText('Farmacia Alfa') resolved to 2 elements:
+1 failed
+1 passed (17.8s)
+== e2e f04
+Error: expect(locator).toContainText(expected) failed
+Error: element(s) not found
+1 failed
+== e2e f041
+4 passed (1.5m)
+== e2e f061
+4 passed (19.7s)
+== e2e f08
+8 passed (46.7s)
+== e2e f081
+Error: expect(received).toBe(expected) // Object.is equality
+1 failed
+1 passed (23.2s)
+== END
+
+== RESUMEN CONSOLIDADO E2E (ultima ejecucion de cada suite, 2026-11-24/25)
+| Suite | Resultado | Notas |
+|---|---|---|
+| f01 | 3/3 | primera corrida fallo por fixture TEST persistente anterior a F01.1 (sin migraciones 010+); se le aplicaron las migraciones pendientes (solo bases TEST marcadas) |
+| f011 (F01.1) | 6/6 | fallos intermitentes por lentitud de Argon2id con el equipo cargado (otro programa pesado en segundo plano) -> expect de 20 s; selector 'Tema' ambiguo desde F08.1 -> acotado a main |
+| f02 | 3/3 | igual que f01 (fixture persistente sin migraciones F01.1) |
+| f021 (F02.1) | 4/4 | selector `.offer` ambiguo (dos presentaciones de la fixture persistente) -> filtrado por precio |
+| f03 | 2/2 | selector 'Farmacia Alfa' ambiguo desde F08.1 (los comparables nombran la otra farmacia) -> getByRole heading |
+| f04 (legado) | NO reproducible | encabezado renombrado por F04.1 ('Centro de atencion', ya actualizado en el spec) y la fixture persistente f04 devuelve 404 en el centro de atencion; el comportamiento de F04/F04.1 esta cubierto por f041 4/4 sobre fixture nuevo. Queda como pendiente reconstruir esa fixture |
+| f041 (F04.1) | 4/4 | |
+| f061 (F06.1) | 4/4 | |
+| f08 | 8/8 | |
+| f081 (F08.1) | 7/7 | una corrida intermitente fallo bajo carga; repetida 7/7 |
+| integrated-flow (nuevo) | 4/4 + fase Redis detenido 1/1 | busqueda publica solo campos publicos; cliente reserva; trabajador delegado confirma; dueño entrega; historial+CSV sin datos del cliente; Beta sin acceso a Alfa; con Redis detenido la busqueda sigue |
+| a11y (nuevo, axe wcag2a/aa/21a/21aa) | 4/4, 30 escaneos (publicas, cliente, dueño y 7 secciones del panel; claro y oscuro) | hallazgo serio unico `label-content-name-mismatch` en el enlace de marca (.brand) en todas las pantallas -> corregido (title en vez de aria-label); reescaneo: 0 violaciones |

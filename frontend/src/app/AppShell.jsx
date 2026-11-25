@@ -46,7 +46,7 @@ export function AppShell({ children, path = window.location.pathname }) {
     <a className="skip-link" href="#contenido">Saltar al contenido</a>
     <header className="site-header">
       <div className="site-header-inner">
-        <a className="brand" href="/" aria-label="FarmaFind, ir al inicio"><span className="brand-mark" aria-hidden="true">✚</span><span>farma<span>find</span><small>Salud cerca de ti</small></span></a>
+        <a className="brand" href="/" title="Ir al inicio de FarmaFind"><span className="brand-mark" aria-hidden="true">✚</span><span>farma<span>find</span><small>Salud cerca de ti</small></span></a>
         <nav className="site-nav" aria-label="Navegación principal">
           {links.map(link => <a key={link.href} href={link.href} aria-current={path === link.href ? 'page' : undefined}>{link.label}</a>)}
         </nav>

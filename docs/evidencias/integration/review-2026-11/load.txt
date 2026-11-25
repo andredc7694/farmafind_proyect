@@ -1,0 +1,14 @@
+Revision integrada - carga (2026-11-24/25). Equipo: Intel Core i5-10210U (8 hilos logicos), 16 GB RAM, Windows 10, Docker Desktop; otro programa pesado corria en segundo plano.
+Todas son cargas LOCALES sobre bases/fixtures TEST: no predicen capacidad productiva.
+
+== F03 busqueda publica (k6 1.8.2, 3 VUs, 15 s, umbrales originales p95<2000 ms, fallos<1 %)
+iteraciones 45 / checks 90 de 90 (100 %) / http_req_failed 0.00 % (0 de 45)
+http_req_duration avg 19.7 ms, med 13.24 ms, p90 57.28 ms, p95 68.43 ms, max 72.32 ms  -> umbrales cumplidos.
+
+== F04 reservas concurrentes (prueba AC05 del propio proyecto, ejecutada en el cluster F025 TEST)
+`scripts/f04/load.mjs` tal como esta apunta a la base persistente farmafind_f01_test y su guarda la rechaza ("F04 RLS solo base TEST efimera local"): NO se ejecuto contra la persistente (prohibido). Se ejecuto la misma prueba AC05 en la base TEST efimera del cluster F025:
+100 intentos concurrentes sobre stock de 10 -> exitos=10/100 (sin sobreventa), p95=1021.0 ms, p99=1024.4 ms, total=1046.0 ms. PASS.
+
+== F06 asistente (mock, sin red): 100 peticiones, p95 4.291 ms, p99 7.022 ms, 0 proveedores de red. PASS.
+
+== F07 geolocalizacion: 200 candidatos, 30 muestras, p95 12.01 ms (umbral 2000 ms). PASS.

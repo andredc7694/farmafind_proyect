@@ -4,7 +4,7 @@ test.beforeEach(async({page})=>{ await page.route('**/*',route=>['127.0.0.1','lo
 test('búsqueda y comparación pública sin sesión',async({page})=>{
   await page.goto('/search'); await page.getByLabel('Nombre comercial o principio activo').fill('paracetamol');
   await page.getByRole('button',{name:'Buscar',exact:true}).click();
-  await expect(page.getByText('Farmacia Alfa')).toBeVisible(); await expect(page.getByText('Farmacia Beta')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Farmacia Alfa' })).toBeVisible(); await expect(page.getByRole('heading', { name: 'Farmacia Beta' })).toBeVisible();
   await expect(page.getByText(/Precio y disponibilidad referenciales/)).toBeVisible();
 });
 test('estado vacío y ubicación no disponible conservan dirección',async({page})=>{
