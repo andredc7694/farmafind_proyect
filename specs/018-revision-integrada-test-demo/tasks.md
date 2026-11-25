@@ -10,4 +10,4 @@
 - [X] T009 `matrix-mej.md` (19/19) y `matrix-rubrica.md` (16/16, sin puntajes) (RI-002, SC-005)
 - [X] T010 `omissions.md`, `evidence.md`, `convergence.md`; actualizar ESTADO.md (RI-005/006, SC-006)
 - [X] T011 DEMO integrada y `demo-guide.md` por actor
-- [ ] T012 `acceptance.md` y solicitud de aceptación humana (nunca autoaprobar)
+- [X] T012 `acceptance.md` y solicitud de aceptación humana (nunca autoaprobar)
