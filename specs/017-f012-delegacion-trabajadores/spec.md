@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f012-delegacion-trabajadores`
 **Created**: 2026-11-24
-**Status**: Spec aprobada el 2026-11-24 («apruebo», D-01=A, D-02=A). Plan y tasks pendientes de aprobación.
+**Status**: Spec aprobada el 2026-11-24 («apruebo», D-01=A, D-02=A). Plan y tasks aprobados el 2026-11-24.
 **Origen**: hallazgo H-1 de F08.1 (`specs/016-f081-experiencia-integrada/convergence.md`). Andre eligió la opción A el 2026-11-24.
 
 ## Problema (lenguaje sencillo)

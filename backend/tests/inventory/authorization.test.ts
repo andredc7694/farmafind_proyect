@@ -21,8 +21,11 @@ describe('autorización de inventario F02', () => {
     expect(canUseInventory({ ...base, resourcePharmacyId: 'beta' }, 'inventory.read')).toBe(false);
   });
 
-  it('rechaza trabajador incluso si se le presenta una capacidad no aprobada', () => {
-    expect(canUseInventory({ ...base, actorRole: 'TRABAJADOR' }, 'inventory.read')).toBe(false);
+  it('trabajador solo opera con la capacidad delegada (F01.2)', () => {
+    expect(canUseInventory({ ...base, actorRole: 'TRABAJADOR' }, 'inventory.read')).toBe(true);
+    expect(canUseInventory({ ...base, actorRole: 'TRABAJADOR' }, 'inventory.import.confirm')).toBe(false);
+    expect(canUseInventory({ ...base, actorRole: 'TRABAJADOR', capabilities: [] }, 'inventory.read')).toBe(false);
+    expect(canUseInventory({ ...base, actorRole: 'OTRO' }, 'inventory.read')).toBe(false);
   });
 
   it('rechaza membresía, farmacia o sesión inactivas', () => {

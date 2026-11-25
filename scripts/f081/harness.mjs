@@ -62,7 +62,7 @@ async function prepare() {
       const allCapabilities = ['membership.manage', 'inventory.read', 'inventory.write', 'inventory.import.preview', 'inventory.import.confirm', 'inventory.history',
         'reservation.read', 'reservation.accept', 'reservation.deliver', 'reservation.settings', 'GEO_LOCATION_PROPOSE'];
       for (const [key, pharmacy, role, capabilities] of [['duenoAlfa', 'alfa', 'DUENO', allCapabilities], ['duenoBeta', 'beta', 'DUENO', allCapabilities],
-        ['trabajador', 'alfa', 'TRABAJADOR', ['inventory.read']], ['revisor', 'alfa', 'ADMINISTRADOR', ['GEO_LOCATION_REVIEW']], ['cliente', null, null, []], ['cliente2', null, null, []]]) {
+        ['trabajador', 'alfa', 'TRABAJADOR', ['inventory.read', 'reservation.read', 'reservation.accept']], ['revisor', 'alfa', 'ADMINISTRADOR', ['GEO_LOCATION_REVIEW']], ['cliente', null, null, []], ['cliente2', null, null, []]]) {
         const email = `f081-${key.toLowerCase()}-${suffix}@example.test`; const password = `${randomBytes(18).toString('base64url')}Aa1!`;
         const id = (await demo.query('INSERT INTO f01.usuario(email_canonico,password_hash) VALUES($1,$2) RETURNING id', [email, await hasher.hash(password)])).rows[0].id;
         accounts[key] = { id, email, password };

@@ -111,12 +111,13 @@ group('F08.1 PostgreSQL RLS: resúmenes de reservas e inventario', () => {
     await expect(inventory.summary(secrets.ownerA, ids.pharmacyA)).resolves.toMatchObject({ products: 3 });
   });
 
-  it('otra farmacia, un cliente y un trabajador sin la regla de gestión son denegados; nadie lee la farmacia ajena', async () => {
+  it('otra farmacia y un cliente son denegados; nadie lee la farmacia ajena', async () => {
     for (const [secret, pharmacy] of [[secrets.ownerB, ids.pharmacyA], [secrets.ownerA, ids.pharmacyB], [secrets.customer, ids.pharmacyA], [secrets.customer, ids.pharmacyB]]) {
       await expect(reservations.summary(secret, pharmacy)).rejects.toBeTruthy();
       await expect(inventory.summary(secret, pharmacy)).rejects.toBeTruthy();
     }
-    await expect(reservations.summary(secrets.workerA, ids.pharmacyA)).rejects.toBeTruthy(); // regla de F04: solo DUENO/ADMINISTRADOR con delegación
+    // F01.2: el trabajador con reservation.read delegada SÍ lee el resumen de su farmacia (ver f012-worker-delegation.rls.test.ts)
+    await expect(reservations.summary(secrets.workerA, ids.pharmacyA)).resolves.toMatchObject({ pending: 3 });
   });
 
   it('leer los resúmenes no cambia ninguna reserva ni inventario', async () => {

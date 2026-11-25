@@ -46,7 +46,7 @@
 | F01.1 | Spec borrador (014). |
 | F04.1 | **Aceptada** (PR #6). |
 | F08.1 | **Aceptada** (TEST/DEMO). |
-| F01.2 (propuesto) | **Pendiente:** que F02/F04 honren la delegación explícita de trabajadores (decisión H-1 = A, 2026-11-24). Requiere spec, plan y tasks para aprobar de Andre, después de cerrar F08.1. |
+| F01.2 | Técnica completa (T001–T011); DEMO esperando aceptación de Andre. |
 | F09 (AWS), F10 | Fuera de alcance. F09 solo manual con autorización expresa. |
 
 ## Git
@@ -74,4 +74,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-24 · F08.1 cierre técnico (T001–T021): regresión F01–F05/F06.1/frontend 208/208 verde (detalle en `specs/016-f081-experiencia-integrada/evidence.md`), E2E 7/7; `f05:rls` no reejecutado. Contrato del resumen de inventario corregido a 404. Andre decidió H-1 = A como incremento aparte (después de F08.1, SDD completo); mientras tanto rige C (trabajadores sin cifras, mensaje honesto en pantalla). Decisión menor: «Importar» e «Inventario» comparten vista filtrada por capacidades.
 - 2026-11-24 · F08.1 ACEPTADA por Andre («acepto»); DEMO apagada, fixture eliminado, contenedores detenidos; PR a main.
 - 2026-11-24 · F01.2 (spec 017) en borrador, rama feat/f012-delegacion-trabajadores; espera aprobación de Andre.
-- 2026-11-24 · F01.2: spec aprobada (D-01=A, D-02=A); plan y tasks (12) creados, esperan aprobación.
+- 2026-11-24 · F01.2: spec, plan y tasks aprobados; implementación T001–T011 verificada (evidence.md): regresión verde, matriz RLS trabajador +6, E2E 7/7. DEMO encendida, espera aceptación.

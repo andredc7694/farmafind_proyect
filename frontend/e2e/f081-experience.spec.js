@@ -8,6 +8,7 @@ const env = name => { const value = process.env[name]; if (!value) throw new Err
 const account = prefix => ({ email: env(`F081_${prefix}_EMAIL`), password: env(`F081_${prefix}_PASSWORD`) });
 const owner = account('OWNER'); const ownerB = account('OWNER_B'); const worker = account('WORKER'); const reviewer = account('REVIEWER'); const client = account('CLIENT');
 const alfaId = env('F081_ALFA_ID');
+const betaId = env('F081_BETA_ID');
 
 async function newPage(browser, options = {}) {
   const context = await browser.newContext({ baseURL: 'http://127.0.0.1:5173', serviceWorkers: 'block', ...options });
@@ -112,21 +113,20 @@ test('cliente: ve su cuenta y sus reservas, nunca paneles de farmacia, y su tema
   await second.context.close();
 });
 
-test('trabajador: solo las tareas de su permiso y el servidor deniega lo demás aunque se escriba la ruta', async ({ browser }) => {
+test('trabajador: usa lo que se le delegó (F01.2) y el servidor deniega lo demás aunque se escriba la ruta', async ({ browser }) => {
   const { page, context } = await newPage(browser);
   await login(page, worker);
   await expect(menu(page).getByRole('link', { name: 'Panel de farmacia' })).toBeVisible();
   await open(page, '/farmacias/panel');
   const sections = page.getByRole('navigation', { name: 'Secciones de la farmacia' });
-  await expect(sections.getByRole('button')).toHaveText(['Resumen', 'Inventario']);
-  // Hallazgo registrado: F02/F04 solo atienden a DUENO/ADMINISTRADOR, así que el servidor deniega las cifras de inventario al
-  // trabajador aunque F01.1 le haya delegado inventory.read. La pantalla lo dice sin inventar cifras.
-  await expect(page.getByRole('alert').filter({ hasText: 'No tienes autorización para ver estas cifras.' })).toBeVisible();
-  await expect(page.getByText('Productos en inventario')).toHaveCount(0);
-  await expect(page.getByText('Pendientes de responder')).toHaveCount(0);
+  await expect(sections.getByRole('button')).toHaveText(['Resumen', 'Inventario', 'Reservas', 'Historial']);
+  await expect(page.getByText('Productos en inventario')).toBeVisible();
+  await expect(page.getByText('Pendientes de responder')).toBeVisible();
+  await expect(page.getByRole('alert').filter({ hasText: 'No tienes autorización para ver estas cifras.' })).toHaveCount(0);
   expect(await status(page, `/api/v1/pharmacies/${alfaId}/staff`)).toBe(403);
-  expect(await status(page, `/api/v1/farmacias/${alfaId}/reservas/resumen`)).toBe(403);
-  expect(await status(page, `/api/v1/farmacias/${alfaId}/reservas/centro`)).toBe(403);
+  expect(await status(page, `/api/v1/farmacias/${alfaId}/reservas/resumen`)).toBe(200);
+  expect(await status(page, `/api/v1/farmacias/${alfaId}/inventario/resumen`)).toBe(200);
+  expect(await status(page, `/api/v1/farmacias/${betaId}/reservas/resumen`)).toBe(403);
   await context.close();
 });
 
