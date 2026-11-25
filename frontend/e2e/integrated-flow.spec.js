@@ -49,7 +49,7 @@ test.describe('flujo de reserva entre actores', () => {
 
   test('el cliente reserva en Alfa y el trabajador delegado la confirma desde su panel', async ({ browser }) => {
     shared.customer = await newPage(browser);
-    await open(shared.customer.page, `/reservations?pharmacyId=${alfaId}&medicationId=${medId}`); await login(shared.customer.page, client);
+    await login(shared.customer.page, client); await open(shared.customer.page, `/reservations?pharmacyId=${alfaId}&medicationId=${medId}`);
     await shared.customer.page.getByRole('button', { name: 'Solicitar reserva' }).click();
     await expect(shared.customer.page.getByText('PENDIENTE')).toBeVisible();
     shared.staff = await newPage(browser); await login(shared.staff.page, worker);

@@ -50,9 +50,9 @@ test('CSV con encabezado desplazado confirma solo tras revisión explícita', as
   await page.goto('/search');
   await page.getByLabel('Nombre comercial o principio activo').fill('producto ficticio');
   await page.getByRole('button', { name: 'Buscar', exact: true }).click();
-  await expect(page.locator('.offer')).toContainText('Farmacia Alfa');
-  await expect(page.locator('.offer')).toContainText('S/ 13.00');
-  await expect(page.locator('.offer')).not.toContainText('cantidad_fisica');
+  await expect(page.locator('.offer').filter({ hasText: 'S/ 13.00' })).toContainText('Farmacia Alfa');
+  await expect(page.locator('.offer').filter({ hasText: 'S/ 13.00' })).toBeVisible();
+  await expect(page.locator('.offer').filter({ hasText: 'S/ 13.00' })).not.toContainText('cantidad_fisica');
 });
 
 test('precio y cantidad vacíos muestran dos incidencias y bloquean confirmación', async ({ page }) => {

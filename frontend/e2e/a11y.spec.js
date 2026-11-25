@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 test.use({ baseURL: 'http://127.0.0.1:5173', serviceWorkers: 'block' });
-test.describe.configure({ mode: 'serial', timeout: 180000 });
+test.describe.configure({ mode: 'default', timeout: 90000 });
 
 const env = name => { const value = process.env[name]; if (!value) throw new Error(`Falta ${name}`); return value; };
 const account = prefix => ({ email: env(`F081_${prefix}_EMAIL`), password: env(`F081_${prefix}_PASSWORD`) });
@@ -16,7 +16,7 @@ async function newPage(browser) {
   await page.route('**/*', route => ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
   return { context, page };
 }
-async function open(page, path) { try { await page.goto(path); } catch { await page.goto(path); } await page.waitForLoadState('networkidle').catch(() => {}); }
+async function open(page, path) { try { await page.goto(path); } catch { await page.goto(path); } await page.waitForLoadState('load'); await page.waitForTimeout(500); }
 async function login(page, who) {
   await open(page, '/identity');
   const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Iniciar sesión' }) });
@@ -26,13 +26,14 @@ async function login(page, who) {
   await expect(page.getByRole('heading', { name: 'Sesión activa' })).toBeVisible();
 }
 async function scan(page, name, mode) {
+  console.log('SCAN ' + name + ' ' + mode);
   const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   const serious = result.violations.filter(v => ['critical', 'serious'].includes(v.impact));
-  report.push({ screen: name, theme: mode, total: result.violations.length, serious: serious.map(v => `${v.id} (${v.impact}, ${v.nodes.length})`),
+  report.push({ screen: name, theme: mode, total: result.violations.length, serious: serious.map(v => `${v.id} (${v.impact}) ${v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')}`),
     others: result.violations.filter(v => !serious.includes(v)).map(v => `${v.id} (${v.impact})`) });
   return serious;
 }
-async function setTheme(page, value) { await page.evaluate(v => { localStorage.setItem('ff-theme', v); }, value).catch(() => {}); const select = page.getByLabel('Tema'); if (await select.count()) await select.selectOption(value); }
+async function setTheme(page, value) { const select = page.getByLabel('Tema'); if (await select.first().isVisible()) { await select.first().selectOption(value); await page.waitForTimeout(200); } }
 
 const screens = [
   ['inicio', '/'], ['búsqueda pública', '/search'], ['farmacias cercanas', '/mapa'], ['identidad (entrar)', '/identity'],

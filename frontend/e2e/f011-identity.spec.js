@@ -1,5 +1,6 @@
 /** F01.1 — recorridos de navegador sobre un fixture TEST efímero con datos ficticios (T053). */
-import { test, expect } from '@playwright/test';
+import { test, expect as baseExpect } from '@playwright/test';
+const expect = baseExpect.configure({ timeout: 20000 }); // Argon2id (64 MiB) es lento si el equipo está cargado
 import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
@@ -167,7 +168,7 @@ test('perfil: editar datos, cambiar la clave y ver las sesiones propias', async 
   await open(page); await login(page, client.email, newClientPassword);
   await page.getByText('Mi perfil y seguridad').click();
   await page.getByLabel('Nombre', { exact: true }).fill('Cliente ficticio');
-  await page.getByLabel('Tema').selectOption('OSCURO');
+  await page.getByRole('main').getByLabel('Tema').selectOption('OSCURO');
   await page.getByRole('button', { name: 'Guardar datos' }).click();
   await expect(page.getByText('Datos guardados.')).toBeVisible();
   await expect(page.getByText(/rol|permiso/i)).toHaveCount(0);
