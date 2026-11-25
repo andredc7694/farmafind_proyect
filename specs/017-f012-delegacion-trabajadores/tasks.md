@@ -10,4 +10,4 @@
 - [X] T009 Regresión F01–F05, F06.1, check/build/contratos/frontend (SC-003)
 - [X] T010 E2E: trabajador de la DEMO ve cifras de Alfa y acepta una reserva; sin delegación no (SC-004)
 - [X] T011 Revisión de seguridad de las migraciones; `evidence.md`, `convergence.md`, `traceability.md`, ESTADO.md
-- [ ] T012 DEMO y `acceptance.md` (aceptación humana; nunca autoaprobar)
+- [X] T012 DEMO y `acceptance.md` (aceptación humana; nunca autoaprobar)

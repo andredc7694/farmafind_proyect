@@ -46,7 +46,7 @@
 | F01.1 | Spec borrador (014). |
 | F04.1 | **Aceptada** (PR #6). |
 | F08.1 | **Aceptada** (TEST/DEMO). |
-| F01.2 | Técnica completa (T001–T011); DEMO esperando aceptación de Andre. |
+| F01.2 | **Aceptada** (TEST/DEMO). |
 | F09 (AWS), F10 | Fuera de alcance. F09 solo manual con autorización expresa. |
 
 ## Git
@@ -75,3 +75,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-24 · F08.1 ACEPTADA por Andre («acepto»); DEMO apagada, fixture eliminado, contenedores detenidos; PR a main.
 - 2026-11-24 · F01.2 (spec 017) en borrador, rama feat/f012-delegacion-trabajadores; espera aprobación de Andre.
 - 2026-11-24 · F01.2: spec, plan y tasks aprobados; implementación T001–T011 verificada (evidence.md): regresión verde, matriz RLS trabajador +6, E2E 7/7. DEMO encendida, espera aceptación.
+- 2026-11-24 · F01.2 ACEPTADA por Andre («acepto»); DEMO apagada, fixture eliminado; PR a main.

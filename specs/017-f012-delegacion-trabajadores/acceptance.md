@@ -1,3 +1,3 @@
 # F01.2 — Aceptación humana
 
-**Estado: PENDIENTE.** Andre decide tras la DEMO (`demo-guide.md`).
+**Estado: ACEPTADA por Andre el 2026-11-24 («acepto»)**, alcance TEST/DEMO, sin observaciones. DEMO apagada y fixture eliminado.
