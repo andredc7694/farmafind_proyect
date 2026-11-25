@@ -55,3 +55,45 @@ jobs:
           done
       - name: Frontend (Vitest)
         run: node node_modules/vitest/vitest.mjs run frontend/tests/ --exclude "**/*.spec.js"
+
+  postgres-rls:
+    name: PostgreSQL efímero y RLS (F01, F02)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node 24.17.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.17.0
+          cache: npm
+      - name: Dependencias
+        run: npm ci
+      - name: Compilación del backend
+        run: npm run build --workspace @farmafind/backend
+      - name: Secreto efímero del runner
+        run: node scripts/ci/prepare-postgres.mjs
+      - name: PostgreSQL 18.6 efímero (mismo contenedor que compose.f01-postgres.yaml)
+        run: |
+          docker run -d --name ci-postgres -p 127.0.0.1:55431:5432 \
+            -e POSTGRES_DB=farmafind_f01_test -e POSTGRES_USER=f01_migrator \
+            -e POSTGRES_PASSWORD="$(cat .cache/f01-docker/postgres-password.txt)" \
+            -e POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 \
+            postgres:18.6-bookworm
+          for i in $(seq 1 40); do
+            docker exec ci-postgres pg_isready -U f01_migrator -d farmafind_f01_test && exit 0
+            sleep 2
+          done
+          docker logs ci-postgres | tail -20; exit 1
+      - name: Migraciones F01 y fixture F02 (base efímera del contenedor)
+        run: |
+          export F01_TEST_DATABASE_URL="postgresql://f01_migrator:$(cat .cache/f01-docker/postgres-password.txt)@127.0.0.1:55431/farmafind_f01_test"
+          node scripts/f01/migrate.mjs
+          node scripts/f02/fixture.mjs prepare
+      - name: RLS F01
+        run: node scripts/f01/check.mjs rls
+      - name: RLS F02
+        run: node scripts/f02/check.mjs rls
