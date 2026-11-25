@@ -12,3 +12,6 @@ Andre aprobó la spec sin elegir A/B/C; por su regla de trabajo continuo, **Clau
 
 ## Aprobación de plan.md y tasks.md
 **Fecha:** 2026-11-24. **Responsable:** Andre. **Fuente:** mensaje «apruebo» tras la entrega del plan y las 22 tareas (commit `dbd6db3`). Autoriza implementar por lotes hasta la aceptación humana.
+
+## Aceptación (2026-11-24)
+Andre respondió «acepto» tras la DEMO. Alcance TEST/DEMO. H-1 → incremento aparte.

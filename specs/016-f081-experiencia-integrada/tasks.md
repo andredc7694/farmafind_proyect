@@ -37,7 +37,7 @@
 - [X] T019 E2E Playwright Linux en fixture propio (`frontend/e2e/f081-experience.spec.js`, `scripts/f081/*`): cinco actores, teclado (foco visible, sin trampas), 360 px sin desplazamiento horizontal, tema persistente, búsqueda con sugerencias y chat flotante (F081-FR-001, 008–009, 016; SC-004–005, SC-007).
 - [X] T020 DEMO manual en TEST con Alfa/Beta ficticias y guía `demo-guide.md`.
 - [X] T021 Trazabilidad (`traceability.md`, 16 criterios sin puntajes) y *analyze/converge* (`convergence.md`), corrigiendo contradicciones (todas las FR).
-- [ ] T022 Preparar `acceptance.md` y solicitar la aceptación humana; **nunca autoaprobar**; registrar la decisión solo cuando Andre responda.
+- [X] T022 Preparar `acceptance.md` y solicitar la aceptación humana; **nunca autoaprobar**; registrar la decisión solo cuando Andre responda.
 
 ## Dependencias
 
