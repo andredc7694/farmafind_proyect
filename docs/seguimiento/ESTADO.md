@@ -12,7 +12,7 @@
 | 013 F02.1 | ✔ | ✔ | ✔ | ✔ | — | ✔ 38/38 | — | ✔ ACEPTO 2026-11-23 |
 | 014 F01.1 | ✔ aprobada 2026-11-23 | ✔ 5 respuestas 2026-11-23 | ✔ aprobado 2026-11-23 (D-06 = A) | ✔ aprobado 2026-11-23 (58 tareas) | — | ✔ lotes 1–7 (T001–T057); analyze/converge hechos; **ACEPTADA 2026-11-24 (T058)** | — | — |
 | 015 F04.1 | ✔ aprobada 2026-11-24 | ✔ D-01..D-03 = A (revisables) | ✔ aprobado 2026-11-24 | ✔ aprobado (19 tareas) | ✔ | ✔ T001–T018 verificadas | ✔ convergence.md | **ACEPTADA 2026-11-24 (T019)** |
-| F08.1 | no iniciado (siguiente número libre: 016) | | | | | | | |
+| 016 F08.1 | ✔ aprobada 2026-11-24 | ✔ D-01..D-04 = A | ✔ aprobado 2026-11-24 | ✔ aprobado (22 tareas) | ✔ | ✔ T001–T021 verificadas | ✔ convergence.md | **ACEPTADA 2026-11-24** |
 
 ## Qué se hizo en este bloque
 - Registrada la aceptación T038 y tarea marcada (commit `b33fbe5`).
@@ -44,7 +44,9 @@
 | F02.5 | 61/64; pendientes T046, T057, T063; F025-RF23 bloqueada. **No aceptada.** Suspendida desde 2026-11-22. |
 | F02.1 | **Aceptada** (TEST/DEMO). MEJ-002 fuera de importación sigue pendiente. |
 | F01.1 | Spec borrador (014). |
-| F04.1, F08.1 | No iniciadas. |
+| F04.1 | **Aceptada** (PR #6). |
+| F08.1 | **Aceptada** (TEST/DEMO). |
+| F01.2 (propuesto) | **Pendiente:** que F02/F04 honren la delegación explícita de trabajadores (decisión H-1 = A, 2026-11-24). Requiere spec, plan y tasks para aprobar de Andre, después de cerrar F08.1. |
 | F09 (AWS), F10 | Fuera de alcance. F09 solo manual con autorización expresa. |
 
 ## Git
@@ -67,3 +69,7 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-24 · F04.1: Andre aprobó la spec sin elegir A/B/C; apliqué mis recomendaciones D-01=A (sin horario semanal), D-02=A (CSV sin datos del cliente), D-03=A (sondeo 30 s). Revisables.
 - 2026-11-24 · F04.1: cierre técnico (T001–T018). Regresión F01–F05 verde salvo `f05:rls` no reejecutado; E2E 4/4; DEMO local encendida en http://127.0.0.1:5173/reservations; esperando aceptación.
 - 2026-11-24 · F04.1 ACEPTADA por Andre («acepto»); DEMO apagada y fixture eliminado; PR a main.
+- 2026-11-24 · F04.1 integrada en main (PR #6, merge commit). Rama activa feat/f081-experiencia-integrada; spec 016 en borrador (MEJ-011 y sugerencias 3/4/11 fuera por F02.5 sin aceptar y datos/licencias).
+- 2026-11-24 · F08.1: Andre aprobó la spec sin elegir A/B/C; apliqué D-01..D-04 = A (alcance por lotes sin MEJ-011; sugerencias 3/4/11 diferidas; tema en perfil o navegador; mapa F07 con punto a mano). Revisables.
+- 2026-11-24 · F08.1 cierre técnico (T001–T021): regresión F01–F05/F06.1/frontend 208/208 verde (detalle en `specs/016-f081-experiencia-integrada/evidence.md`), E2E 7/7; `f05:rls` no reejecutado. Contrato del resumen de inventario corregido a 404. Andre decidió H-1 = A como incremento aparte (después de F08.1, SDD completo); mientras tanto rige C (trabajadores sin cifras, mensaje honesto en pantalla). Decisión menor: «Importar» e «Inventario» comparten vista filtrada por capacidades.
+- 2026-11-24 · F08.1 ACEPTADA por Andre («acepto»); DEMO apagada, fixture eliminado, contenedores detenidos; PR a main.

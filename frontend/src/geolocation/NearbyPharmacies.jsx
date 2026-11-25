@@ -16,7 +16,8 @@ function devicePosition() {
 
 export function NearbyPharmacies({client=createGeolocationClient(),getPosition=devicePosition,loadLeaflet}) {
   const [city,setCity]=useState('');
-  const [term,setTerm]=useState('');
+  // F08.1: «Ver farmacias en el mapa» desde la búsqueda llega con ?q=<producto>.
+  const [term,setTerm]=useState(()=>{try{return (new URLSearchParams(window.location.search).get('q')??'').slice(0,120);}catch{return '';}});
   const [manualLatitude,setManualLatitude]=useState('');
   const [manualLongitude,setManualLongitude]=useState('');
   const [radius,setRadius]=useState('10');

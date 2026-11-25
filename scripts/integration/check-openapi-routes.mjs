@@ -79,7 +79,20 @@ function implementedOperations(file,prefix){
   return operations;
 }
 
-if (process.argv.includes('--f041-contract') || process.argv.includes('--f041-routes')) {
+if (process.argv.includes('--f081-contract') || process.argv.includes('--f081-routes')) {
+  // F08.1 (specs/016): tres lecturas nuevas; las rutas se exigen con --f081-routes.
+  const file='specs/016-f081-experiencia-integrada/contracts/experience.openapi.yaml';
+  const operations=contractOperations(file,'/api/v1');
+  assert.equal(operations.length,3,'El inventario propuesto F08.1 cambió; revisar contrato');
+  assert.equal(new Set(operations).size,operations.length,'Operación F08.1 duplicada');
+  if(process.argv.includes('--f081-routes')){
+    const files=['backend/src/modules/busqueda/presentation/public-suggest-router.ts','backend/src/modules/reservas/presentation/pharmacy-reservations-router.ts','backend/src/modules/inventario/presentation/inventory-router.ts'];
+    const implemented=new Set(files.flatMap(route=>existsSync(path.join(root,route))?implementedOperations(route,'/api/v1'):[]));
+    const missing=operations.filter(operation=>!implemented.has(operation));
+    assert.deepEqual(missing,[],`F08.1: rutas pendientes: ${missing.join(', ')}`);
+    console.log(`Contrato F08.1: ${operations.length} operaciones documentadas con ruta Express.`);
+  } else console.log(`Contrato F08.1: ${operations.length} operaciones documentadas; implementación pendiente.`);
+} else if (process.argv.includes('--f041-contract') || process.argv.includes('--f041-routes')) {
   // F04.1 (specs/015): tres operaciones nuevas de lectura; las rutas se exigen con --f041-routes.
   const file='specs/015-f041-operacion-reservas/contracts/reservations-ops.openapi.yaml';
   const operations=contractOperations(file,'/api/v1');

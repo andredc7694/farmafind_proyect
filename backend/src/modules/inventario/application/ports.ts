@@ -45,6 +45,8 @@ export interface ImportSelectionMetadata {
 }
 
 export interface InventoryRepositoryPort {
+  /** F08.1: cifras de solo lectura de la farmacia (productos y sin stock disponible). */
+  summary(): Promise<{ products: number; withoutStock: number }>;
   list(): Promise<readonly InventoryRow[]>;
   movements(): Promise<readonly Record<string, unknown>[]>;
   review(medicationId: string, input: InventoryReview): Promise<InventoryRow>;

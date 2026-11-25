@@ -23,6 +23,12 @@ export function decodeCursor(text: string): { createdAt: string; id: string } {
 export class AttentionCenter {
   constructor(private readonly uow: ReservationUnitOfWork, private readonly clock: Clock) {}
 
+  /** F08.1: cifras para el Resumen de la farmacia (exige `reservation.read`). */
+  async summary(secret: string, pharmacyId: string): Promise<{ generatedAt: string; pending: number; confirmed: number; expiringSoon: number }> {
+    const counts = await this.uow.run(secret, pharmacyId, 'reservation.read', ports => ports.reservations.summary(pharmacyId));
+    return { generatedAt: this.clock.now().toISOString(), ...counts };
+  }
+
   async snapshot(secret: string, pharmacyId: string, filters: AttentionFilters): Promise<{ generatedAt: string; items: readonly AttentionItem[] }> {
     const items = await this.uow.run(secret, pharmacyId, 'reservation.read', ports => ports.reservations.attention(pharmacyId, filters));
     return { generatedAt: this.clock.now().toISOString(), items };

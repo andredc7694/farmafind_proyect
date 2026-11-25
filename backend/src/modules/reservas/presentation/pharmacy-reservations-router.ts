@@ -5,7 +5,7 @@ import { authHttpSecurity,readSessionCookie,sendIdentityError,type AuthHttpOptio
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 interface Services { confirm:{list(secret:string,pharmacyId:string):Promise<unknown>;execute(secret:string,pharmacyId:string,id:string,key:string):Promise<unknown>}; settings:{get(secret:string,pharmacyId:string):Promise<unknown>;save(secret:string,pharmacyId:string,hours:number):Promise<unknown>}; shortage:{execute(secret:string,pharmacyId:string,id:string,key:string):Promise<unknown>}; deliver:{execute(secret:string,pharmacyId:string,id:string,key:string):Promise<unknown>};
   /** F04.1: lecturas de atención, historial y exportación (opcional: sin él las rutas no existen). */
-  center?:{snapshot(secret:string,pharmacyId:string,filters:{state?:'PENDIENTE'|'CONFIRMADA';from?:Date;to?:Date}):Promise<unknown>;
+  center?:{summary?(secret:string,pharmacyId:string):Promise<unknown>;snapshot(secret:string,pharmacyId:string,filters:{state?:'PENDIENTE'|'CONFIRMADA';from?:Date;to?:Date}):Promise<unknown>;
     history(secret:string,pharmacyId:string,filters:{state?:'ENTREGADA'|'CANCELADA'|'EXPIRADA';from?:Date;to?:Date;limit?:number;cursor?:string}):Promise<unknown>;
     exportCsv(secret:string,pharmacyId:string,filters:{state?:'ENTREGADA'|'CANCELADA'|'EXPIRADA';from?:Date;to?:Date}):Promise<{csv:string;truncated:boolean;rows:number}>} }
 /** F04.1: filtros de consulta estrictos; un valor inválido es 400 (nunca se ignora en silencio). */
@@ -26,6 +26,7 @@ export function createPharmacyReservationsRouter(s:Services,o:AuthHttpOptions):R
   router.get('/farmacias/:pharmacyId/reservas/configuracion',async(q,r)=>{const secret=auth(q,r),p=ids(q,r);if(!secret||!p)return;try{r.json(await s.settings.get(secret,p.pharmacyId));}catch(e){fail(r,e);}});
   router.put('/farmacias/:pharmacyId/reservas/configuracion',security.requireCsrf,async(q,r)=>{const secret=auth(q,r),p=ids(q,r),hours=(q.body as Record<string,unknown>)?.pickupWindowHours;if(!secret||!p)return;if(!Number.isInteger(hours)||(hours as number)<1||(hours as number)>8){sendIdentityError(r,422,'INVALID_INPUT','Plazo fuera de rango');return;}try{r.json(await s.settings.save(secret,p.pharmacyId,hours as number));}catch(e){fail(r,e);}});
   if(s.center){const center=s.center;
+    if(center.summary){const summary=center.summary.bind(center);router.get('/farmacias/:pharmacyId/reservas/resumen',async(q,r)=>{const secret=auth(q,r),p=ids(q,r);if(!secret||!p)return;try{r.json(await summary(secret,p.pharmacyId));}catch(e){fail(r,e);}});}
     router.get('/farmacias/:pharmacyId/reservas/centro',async(q,r)=>{const secret=auth(q,r),p=ids(q,r);if(!secret||!p)return;try{const f=parseFilters(q.query,['PENDIENTE','CONFIRMADA'],[]);r.json(await center.snapshot(secret,p.pharmacyId,{...(f.state?{state:f.state as 'PENDIENTE'|'CONFIRMADA'}:{}),...(f.from?{from:f.from}:{}),...(f.to?{to:f.to}:{})}));}catch(e){fail(r,e);}});
     router.get('/farmacias/:pharmacyId/reservas/historial',async(q,r)=>{const secret=auth(q,r),p=ids(q,r);if(!secret||!p)return;try{const f=parseFilters(q.query,['ENTREGADA','CANCELADA','EXPIRADA'],['limite','cursor']);const limit=f.one('limite'),cursor=f.one('cursor');
       if(limit!==undefined&&!/^\d{1,3}$/.test(limit))throw new AttentionFilterError('Límite inválido');

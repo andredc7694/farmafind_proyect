@@ -13,6 +13,13 @@ function mapRow(row: Record<string, unknown>): InventoryRow {
 export class PgInventoryRepository {
   constructor(private readonly client: SqlClient, private readonly pharmacyId: string) {}
 
+  async summary(): Promise<{ products: number; withoutStock: number }> {
+    const result = await this.client.query(`SELECT count(*)::int AS products,
+      (count(*) FILTER (WHERE cantidad_fisica - cantidad_comprometida <= 0))::int AS sin_stock
+      FROM f02.inventario WHERE farmacia_id=$1`, [this.pharmacyId]);
+    return { products: Number(result.rows[0].products), withoutStock: Number(result.rows[0].sin_stock) };
+  }
+
   async list(): Promise<readonly InventoryRow[]> {
     const result = await this.client.query(`SELECT id,farmacia_id,medicamento_id,precio_centavos,
       cantidad_fisica,cantidad_comprometida,ultima_revision_at,version

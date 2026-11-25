@@ -30,6 +30,15 @@ const optionalIso=(value:unknown):string|null=>value?iso(value):null;
 export class PgReservationRepository implements ReservationRepository {
   constructor(private readonly client:SqlClient){}
 
+  async summary(pharmacyId:string){
+    const result=await this.client.query(`SELECT
+      (count(*) FILTER (WHERE estado='PENDIENTE'))::int AS pendientes,
+      (count(*) FILTER (WHERE estado='CONFIRMADA'))::int AS confirmadas,
+      (count(*) FILTER (WHERE estado='CONFIRMADA' AND recogida_expira_en>now() AND recogida_expira_en<=now()+interval '60 minutes'))::int AS por_vencer
+      FROM f04.reserva WHERE farmacia_id=$1 AND estado IN ('PENDIENTE','CONFIRMADA')`,[pharmacyId]);
+    const row=result.rows[0];return {pending:Number(row.pendientes),confirmed:Number(row.confirmadas),expiringSoon:Number(row.por_vencer)};
+  }
+
   /** F04.1: cola de atención. El contexto de farmacia y la política RLS ya delimitan las filas; el filtro explícito es defensa en profundidad. */
   async attention(pharmacyId:string,filters:AttentionFilters):Promise<readonly AttentionItem[]>{
     const params:unknown[]=[pharmacyId];const where=["r.farmacia_id=$1","r.estado IN ('PENDIENTE','CONFIRMADA')"];

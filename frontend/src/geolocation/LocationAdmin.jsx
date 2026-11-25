@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createLocationAdminClient } from './location-admin-client.js';
+import { PointPicker } from './PointPicker.jsx';
 
 /** Presentation visibility follows F01 capabilities; every write is reauthorized by F07/RLS. */
 export function LocationAdmin({pharmacyId,delegationCodes=[],client=createLocationAdminClient()}) {
@@ -9,7 +10,10 @@ export function LocationAdmin({pharmacyId,delegationCodes=[],client=createLocati
   const [statusKind,setStatusKind]=useState('status');
   const [proposalId,setProposalId]=useState('');
   const [busy,setBusy]=useState(false);
-  useEffect(()=>{setProposalId('');setStatus('');setStatusKind('status');},[pharmacyId]);
+  const [latitude,setLatitude]=useState('');
+  const [longitude,setLongitude]=useState('');
+  const point=latitude!==''&&longitude!==''?{latitude:Number(latitude),longitude:Number(longitude)}:null;
+  useEffect(()=>{setProposalId('');setStatus('');setStatusKind('status');setLatitude('');setLongitude('');},[pharmacyId]);
   if(!pharmacyId||(!canPropose&&!canReview))return null;
   async function perform(action) {
     setBusy(true);setStatus('');
@@ -36,8 +40,10 @@ export function LocationAdmin({pharmacyId,delegationCodes=[],client=createLocati
       <h3>Proponer ubicación</h3>
       <label>Dirección pública <input name="direccionPublicable" required maxLength={240} /></label>
       <label>Ciudad <input name="ciudad" required minLength={2} maxLength={120} /></label>
-      <label>Latitud <input name="latitud" required type="number" step="any" min="-90" max="90" /></label>
-      <label>Longitud <input name="longitud" required type="number" step="any" min="-180" max="180" /></label>
+      <PointPicker value={point} onChange={next=>{setLatitude(String(next.latitude));setLongitude(String(next.longitude));}} />
+      <label>Latitud <input name="latitud" required type="number" step="any" min="-90" max="90" value={latitude} onChange={event=>setLatitude(event.target.value)} /></label>
+      <label>Longitud <input name="longitud" required type="number" step="any" min="-180" max="180" value={longitude} onChange={event=>setLongitude(event.target.value)} /></label>
+      <label><input name="confirmaDireccion" type="checkbox" required /> Confirmo que la dirección pública y el punto elegido son correctos</label>
       <label>Fuente <input name="fuente" required minLength={2} maxLength={120} /></label>
       <label>Referencia de evidencia no sensible <input name="evidenciaReferencia" required maxLength={240} /></label>
       <button disabled={busy}>Enviar propuesta</button>
