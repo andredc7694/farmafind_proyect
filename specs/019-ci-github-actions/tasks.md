@@ -9,4 +9,4 @@
 - [X] T008 Prueba negativa: rama efímera con fallo provocado debe dar rojo; descartarla (SC-002)
 - [X] T009 Revisión de seguridad del workflow y de `scripts/ci/`: sin secretos, sin escritura, sin `pull_request_target`, sin salida de credenciales (SC-004, CI-FR-005/009)
 - [X] T010 Actualizar matriz de rúbrica (criterio 12), ESTADO.md y `evidence.md`, `convergence.md`, `traceability.md` (SC-005)
-- [ ] T011 `acceptance.md` y solicitud de aceptación humana (nunca autoaprobar); propuesta posterior de protección de rama (D-03)
+- [X] T011 `acceptance.md` y solicitud de aceptación humana (nunca autoaprobar); propuesta posterior de protección de rama (D-03)
