@@ -29,3 +29,9 @@ Andre respondió «acepto» tras la DEMO. Alcance TEST/DEMO. H-1 → incremento 
 - Respuestas útiles con proveedor MOCK (US$0, Gemini desactivado): saludo, qué información muestra, comparar precios con ofertas públicas F03, farmacias cercanas, sin ofertas; rechazo clínico amable. Nunca stock privado ni datos de otra farmacia.
 - Corregir el cuadro gris en «Filtros de precio y orden».
 - No tocar RLS, permisos ni límites de F06. **Partes de MEJ-009 y MEJ-010; ninguna se declara completa.**
+
+## 2026-11-26 · Aceptación del lote del asistente virtual (FarmaFind AI)
+- **Andre: ACEPTO.** Lo probó en su DEMO y está bien (código hasta `bec8ff3`).
+- Alcance: enmienda F06.1/F08.1 (partes de MEJ-009 y MEJ-010; ninguna se declara completa).
+- Autoriza PR y fusión con «merge commit» solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
+- No acepta F02.5: T057 y T063 siguen pendientes.
