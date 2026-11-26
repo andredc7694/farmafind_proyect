@@ -3,7 +3,7 @@
 **Puerta previa**: la enmienda F02.1 integrada en `main` (T001).
 
 ## Preparación
-- [ ] T001 Confirmar que la enmienda F02.1 está en `main`, actualizar la rama y registrar la línea base de pruebas (dependencia)
+- [X] T001 Confirmar que la enmienda F02.1 está en `main`, actualizar la rama y registrar la línea base de pruebas (dependencia)
 - [ ] T002 Contrato OpenAPI y su verificación de rutas (`--f022-routes`) en `contracts/catalog.openapi.yaml` y `scripts/integration/check-openapi-routes.mjs` (FR-009)
 
 ## Datos y seguridad (bloquean el resto)
