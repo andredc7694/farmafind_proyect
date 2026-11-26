@@ -75,3 +75,11 @@
 T001 es puerta SDD. T002/T003 preceden cambios de contrato; T004/T005 pueden prepararse en archivos distintos, pero T006 bloquea persistencia de incidencias/perfiles. US1: T007/T008 paralelos tras fundamento, luego T009–T014. US2: T015 puede paralelizar con US1; T016–T020 dependen del parser/preview y SQL. US4 depende de US2 para validar múltiples incidencias; T021/T022 pueden prepararse en paralelo. US3 depende de T006 y del análisis US1; su backend y UI siguen orden secuencial. T033/T034 son paralelos solo después de funcionalidades necesarias; T035–T038 cierran en orden.
 
 **MVP sugerido**: US1 + US2 + US4 con pruebas de aislamiento y confirmación; US3 completa el perfil sin reducir criterios de aceptación finales. Ninguna casilla se marca sin prueba y evidencia; la aceptación humana T038 permanece separada.
+
+## Phase 8: Enmienda 2026-11-25 (importación en un paso)
+- [X] T039 Detector determinista por nombre y contenido en `backend/src/modules/inventario/domain/column-detector.ts` (FR-017)
+- [X] T040 Lectura tolerante de celdas no textuales en la hoja elegida e incidencias por celda; análisis que ignora hojas sin inventario en `file-parser.ts`, `inspect-import.ts`, `importacion.ts` (FR-018)
+- [X] T041 Mensajes específicos del lector y del cliente; vista previa repetible al reajustar (FR-020) en `preview-import.ts`, `import-router.ts`, `inventory-client.js`
+- [X] T042 Interfaz en un paso con «Ajustar columnas», preguntas puntuales y estado «Pendiente de catálogo» en `ImportPreview.jsx` (FR-016, FR-019)
+- [X] T043 Pruebas: archivo realista (3 hojas, 48 filas), encabezados inventados, empate, celda con fórmula, error específico, sin botón «Analizar» y recorridos de navegador F02/F02.1 (SC-008)
+- [ ] T044 Repetición de T046 por Andre en la DEMO (verificación humana; no marcar por Claude)

@@ -131,3 +131,12 @@ Como responsable autorizado quiero confirmar un archivo válido para actualizar 
 | Roadmap v3.2 y F02.5 | Cambio de prioridad con suspensión expresa | F02.5 no aceptada. |
 
 El responsable aprobó expresamente esta especificación en su mensaje «F02.1 — Especificación» del 2026-11-22, con MEJ-002 limitada a importación. El plan recibió aprobación humana posterior, registrada en [approval.md](approval.md). Ninguna de esas aprobaciones constituye aceptación de los resultados de F02.1.
+
+## Enmienda 2026-11-25 — Importación en un paso y detector por contenido
+Aprobada en [approval.md](approval.md). Precisa y, donde difiera, sustituye lo anterior sobre FR-001–004 y FR-006:
+- **F021-FR-016**: Al elegir el archivo el sistema DEBE analizarlo y mostrar la vista previa sin pasos manuales; el ajuste de columnas queda oculto y solo se pregunta por el dato imprescindible que falte o sea ambiguo.
+- **F021-FR-017**: El detector DEBE ser determinista y local, combinando nombre de columna normalizado (coincidencia flexible) y contenido; un empate real no se resuelve en silencio. `categoria_terapeutica` nunca es la clasificación (`condicion_venta`).
+- **F021-FR-018**: En la hoja elegida se leen solo texto y números; fecha, fórmula o enlace en una columna usada generan una incidencia con hoja, celda, causa y solución, sin evaluar. Las hojas sin datos de inventario se ignoran.
+- **F021-FR-019**: Los productos sin equivalencia en el catálogo se muestran como «pendientes de catálogo»; no se descartan ni equiparan, y la confirmación sigue siendo atómica por archivo.
+- **F021-FR-020**: Un archivo rechazado DEBE explicar causa y solución; nunca solo «No se pudo completar la solicitud».
+- **F021-SC-008**: Un archivo ficticio de 3 hojas, 40 o más filas y encabezados como los reales llega a la vista previa con los seis campos propuestos sin intervención.

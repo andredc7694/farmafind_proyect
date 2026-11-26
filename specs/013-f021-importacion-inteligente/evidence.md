@@ -95,3 +95,9 @@ Ejecutadas por Claude Code (PowerShell, Node 24.17.0) tras la aceptación de T03
 **Comprobación de la base persistente:** consulta de solo lectura antes y después: 3 usuarios, 3 sesiones, 0 farmacias, 0 membresías y la misma lista de bases; sin diferencias. Las suites no dejaron bases efímeras nuevas. Contenedores encendidos por Claude detenidos; sin borrar volúmenes.
 
 No se repitió Playwright. Esto cierra el pendiente «Pendientes de esta verificación» de la sección del 2026-11-23 anterior para las cuatro suites RLS.
+
+## Enmienda 2026-11-25 — resultados reales
+- Causa de T046: «Preparar vista previa» sin análisis usaba el importador F02 (una sola hoja) y la interfaz convertía cualquier 400 en un mensaje genérico; además una fecha/fórmula en cualquier hoja rechazaba todo el archivo.
+- Archivo real del usuario (leído localmente, no copiado al repositorio): **una sola hoja «Precios»** (1100 filas, 18 columnas), no tres; stock en la columna `stock_disponible`; `fecha_actualizacion` con 1100 fechas. Con el detector: hoja y seis columnas propuestas sin preguntas en ~0,3 s (`nombre_generico`, `concentracion`, `presentacion`, `condicion_venta`, `precio_regular_soles`, `stock_disponible`). Contra un catálogo vacío: 517 pendientes de catálogo y 583 filas duplicadas (mismo producto de distintos laboratorios: el catálogo no distingue laboratorio ni marca).
+- Pruebas: inventario unit 39/39 (nuevas 8 en `f021-detector.test.ts`), F02 RLS 15/15, F021 RLS 3/3, F03 unit 33 / RLS 9, F04 api 25, frontend 210/210, E2E F02 3/3, F02.1 5/5, F08.1 7/7, check, build y contratos. Sin cambios de RLS, permisos ni migraciones.
+- Pruebas ajustadas por cambio de requisito: la que exigía rechazar fórmulas en hojas no elegidas, y los recorridos que pulsaban «Analizar»/«Preparar vista previa».

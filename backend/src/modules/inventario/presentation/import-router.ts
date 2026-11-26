@@ -3,7 +3,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { authHttpSecurity, readSessionCookie, sendIdentityError,
   type AuthHttpOptions } from '../../usuarios/contracts/http-security.js';
-import { PreviewInputError, type PreviewImport } from '../application/preview-import.js';
+import { describeFileError, PreviewInputError, type PreviewImport } from '../application/preview-import.js';
 import { ImportConflictError, type ConfirmImport } from '../application/confirm-import.js';
 import type { ImportMapping } from '../domain/importacion.js';
 import type { InspectImport } from '../application/inspect-import.js';
@@ -80,6 +80,11 @@ async function readUpload(request: Request, requireMapping = true): Promise<{
   });
 }
 
+function uploadMessage(tooLarge: boolean): string {
+  return tooLarge ? 'El archivo pesa más de 5 MB. Divídelo en partes más pequeñas.'
+    : 'No se recibió un archivo válido. Elige un solo archivo .xlsx o .csv e inténtalo de nuevo.';
+}
+
 export function createImportRouter(preview: Pick<PreviewImport, 'authorize' | 'run'>,
   confirm: Pick<ConfirmImport, 'confirm' | 'history' | 'status'>,
   options: AuthHttpOptions, profiles?: Pick<ImportProfiles, 'list' | 'save'>,
@@ -103,8 +108,8 @@ export function createImportRouter(preview: Pick<PreviewImport, 'authorize' | 'r
         response.status(200).json(await inspect.run(secret, pharmacyId, upload.bytes, upload.filename));
       } catch (error) {
         if (error instanceof UploadError) {
-          sendIdentityError(response, error.tooLarge ? 413 : 400, 'BAD_REQUEST', 'Archivo no válido');
-        } else { sendIdentityError(response, 400, 'BAD_REQUEST', 'Archivo no válido'); }
+          sendIdentityError(response, error.tooLarge ? 413 : 400, 'BAD_REQUEST', uploadMessage(error.tooLarge));
+        } else { sendIdentityError(response, 400, 'BAD_REQUEST', describeFileError(error)); }
       }
     });
   router.post('/farmacias/:pharmacyId/importaciones/vista-previa', security.requireCsrf,
@@ -124,9 +129,9 @@ export function createImportRouter(preview: Pick<PreviewImport, 'authorize' | 'r
           upload.bytes, upload.filename, upload.mapping, upload.selection));
       } catch (error) {
         if (error instanceof UploadError) {
-          sendIdentityError(response, error.tooLarge ? 413 : 400, 'BAD_REQUEST', 'Archivo no válido');
+          sendIdentityError(response, error.tooLarge ? 413 : 400, 'BAD_REQUEST', uploadMessage(error.tooLarge));
         } else if (error instanceof PreviewInputError) {
-          sendIdentityError(response, 400, 'BAD_REQUEST', 'Archivo o mapeo no válido');
+          sendIdentityError(response, error.conflict ? 409 : 400, error.conflict ? 'CONFLICT' : 'BAD_REQUEST', error.message);
         } else if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
           sendIdentityError(response, 409, 'CONFLICT', 'Archivo repetido');
         } else { sendIdentityError(response, 404, 'NOT_VISIBLE', 'Recurso no visible'); }

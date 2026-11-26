@@ -172,7 +172,6 @@ try{
     await page.getByRole('navigation',{name:'Secciones de la farmacia'}).getByRole('button',{name:'Importar'}).click(); // F08.1: el panel abre en «Resumen»
     const invalid='nombre,concentracion,presentacion,clasificacion,precio,cantidad\nreferencia inexistente f025,10 mg,tabletas,venta libre,1.00,2\n';
     await page.locator('#inventory-file').setInputFiles({name:'invalido.csv',mimeType:'text/csv',buffer:Buffer.from(invalid)});
-    await page.getByRole('button',{name:'Preparar vista previa'}).click();
     await expect(page.getByText('1 filas; 1 incidencias.')).toBeVisible();
     await expect(page.getByRole('button',{name:'Confirmar archivo completo'})).toBeDisabled();checks+=2;
     const {default:ExcelJS}=await import('@excel.js/exceljs');
@@ -184,7 +183,6 @@ try{
     const xlsx=Buffer.from(await workbook.xlsx.writeBuffer());
     await page.locator('#inventory-file').setInputFiles({name:'inventario-ficticio.xlsx',
       mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:xlsx});
-    await page.getByRole('button',{name:'Preparar vista previa'}).click();
     await expect(page.getByText('1 filas; 0 incidencias.')).toBeVisible();
     await page.getByRole('button',{name:'Confirmar archivo completo'}).click();
     await expect(page.getByRole('row').filter({hasText:catalog.name})).toContainText('4');checks+=2;
@@ -224,7 +222,7 @@ try{
       await expect(page.getByRole('heading',{name:'Importar inventario'})).toBeVisible();
       const csv=`nombre,concentracion,presentacion,clasificacion,precio,cantidad\n${catalog.name},10 mg,tabletas,venta libre,${(index+1).toFixed(2)},${index+2}\n`;
       await page.locator('#inventory-file').setInputFiles({name:'inventario-ficticio.csv',mimeType:'text/csv',buffer:Buffer.from(csv)});
-      await page.getByRole('button',{name:'Preparar vista previa'}).click();
+      // Enmienda F02.1: la vista previa aparece sola al elegir el archivo.
       await expect(page.getByRole('heading',{name:/Vista previa:/})).toBeVisible();
       await expect(page.getByText('1 filas; 0 incidencias.')).toBeVisible();
       await page.getByRole('button',{name:'Confirmar archivo completo'}).click();

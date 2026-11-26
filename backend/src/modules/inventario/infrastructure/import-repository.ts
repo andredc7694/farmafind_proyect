@@ -47,6 +47,12 @@ export class PgImportRepository {
     return mapImport(created.rows[0]);
   }
 
+  async findByDigest(digest: Buffer): Promise<ImportRecord | null> {
+    const result = await this.client.query(`SELECT ${columns} FROM f02.importacion
+      WHERE farmacia_id=$1 AND actor_usuario_id=$2 AND digest=$3`, [this.pharmacyId, this.actorUserId, digest]);
+    return result.rows.length === 1 ? mapImport(result.rows[0]) : null;
+  }
+
   async profiles(): Promise<readonly ImportProfile[]> {
     const result = await this.client.query(`SELECT id,nombre,version,encode(huella_encabezados,'hex') AS huella,
       hoja,fila_encabezado,mapeo FROM f02.perfil_importacion

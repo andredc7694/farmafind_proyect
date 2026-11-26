@@ -120,7 +120,7 @@ export function InventoryView({ pharmacyId, capabilities = null }) {
       <td>S/ {item.precioReferencial.toFixed(2)}</td><td>{item.cantidadFisica}</td>
       <td>{item.cantidadComprometida}</td><td>{new Date(item.ultimaRevision).toLocaleString('es-PE')}</td>
     </tr>)}</tbody></table>}
-    {canImport && <ImportPreview preview={preview} busy={busy}
+    {canImport && <ImportPreview preview={preview} busy={busy} error={message}
       onReset={() => setPreview(null)}
       canConfirm={capabilities === null || capabilities.includes('inventory.import.confirm')}
       onInspect={inspectFile}

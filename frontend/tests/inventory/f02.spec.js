@@ -38,7 +38,6 @@ test('revisión manual, vista previa, confirmación e historial F02', async ({ p
   await page.getByLabel('Archivo CSV o XLSX').setInputFiles({
     name: 'inventario-ficticio.csv', mimeType: 'text/csv', buffer: Buffer.from(csv),
   });
-  await page.getByRole('button', { name: 'Preparar vista previa' }).click();
   await expect(page.getByText('Vista previa: VISTA_PREVIA')).toBeVisible();
   await page.getByRole('button', { name: 'Confirmar archivo completo' }).click();
   await expect(page.getByText(/CONFIRMADA/).first()).toBeVisible();
@@ -51,7 +50,6 @@ test('archivo inválido no habilita confirmación y Beta no revela inventario', 
   await page.getByLabel('Archivo CSV o XLSX').setInputFiles({
     name: 'inventario-invalido.csv', mimeType: 'text/csv', buffer: Buffer.from(csv),
   });
-  await page.getByRole('button', { name: 'Preparar vista previa' }).click();
   await expect(page.getByText(/VALOR_INVALIDO/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Confirmar archivo completo' })).toBeDisabled();
 
@@ -106,7 +104,6 @@ test('un conflicto en la segunda fila revierte la primera y rechaza el archivo',
   });
   const previewResponse = page.waitForResponse(response =>
     response.url().includes('/vista-previa') && response.request().method() === 'POST');
-  await page.getByRole('button', { name: 'Preparar vista previa' }).click();
   const preview = await (await previewResponse).json();
   expect(preview.errores).toHaveLength(0);
   await page.getByRole('button', { name: 'Confirmar archivo completo' }).click();

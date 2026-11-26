@@ -55,6 +55,7 @@ export interface InventoryRepositoryPort {
 export interface ImportRepositoryPort {
   create(digest: Buffer, rows: readonly ReconciledImportRow[],
     metadata?: ImportSelectionMetadata): Promise<ImportRecord>;
+  findByDigest(digest: Buffer): Promise<ImportRecord | null>;
   find(id: string, lock?: boolean): Promise<ImportRecord | null>;
   rows(id: string): Promise<readonly ReconciledImportRow[]>;
   incidents?(id: string): Promise<readonly ImportIncident[]>;
