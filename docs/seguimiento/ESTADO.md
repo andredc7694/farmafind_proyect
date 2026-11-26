@@ -95,3 +95,10 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 ## Cambios pedidos por Andre pendientes de su orden (no empezar sin ella)
 - 2026-11-25 · (Detectado por Claude, por decidir) Spec 020: al aprobar un producto nuevo debe exigirse su principio activo; si no, no aparece en la búsqueda pública.
 - 2026-11-25 · (Por confirmar con Andre) Dos mensajes anteriores sobre el menú que no llegaron a la conversación: contrastar con la tabla de la enmienda F08.1.
+- 2026-11-25 · **Lote «asistente y filtros» (pedido por Andre; va después de integrar `feat/f025-cierre-verificacion`, en rama propia desde `main`; enmienda F06.1/F08.1; partes de MEJ-009 y MEJ-010, sin declararlas completas). Sin empezar.**
+  1. Quitar «FarmaFind AI» del menú y «Asistente» del pie; el asistente queda solo como burbuja; la ruta antigua redirige a la búsqueda.
+  2. Burbuja: chat (usuario a la derecha, asistente a la izquierda), encabezado con icono, bienvenida con preguntas sugeridas (comparar precios, farmacia cercana, qué información da), aviso de salud una sola vez y fijo abajo, «Minimizar» como icono, desplazamiento al último mensaje, indicador «escribiendo», buen aspecto en celular, tema claro/oscuro y accesibilidad (foco, lector de pantalla).
+  3. Enter envía y Shift+Enter salta de línea en computadora; en táctil Enter salta de línea y se envía con el botón; respetar composición IME.
+  4. Intenciones sin IA externa (MOCK, US$0, Gemini apagado): saludo, qué información muestra (nombre, concentración, presentación, precio referencial, farmacias, disponibilidad referencial), comparar precios solo con ofertas públicas F03, farmacias cercanas, sin ofertas; rechazo clínico amable que sugiera al químico farmacéutico; nunca stock privado ni datos de otra farmacia. Verificar con «Aciclovir», «Paracetamol» y «hola».
+  5. Buscar medicamentos → «Filtros de precio y orden»: quitar el cuadro gris suelto sobre «Recordar estos filtros».
+  - Condiciones: no tocar RLS, permisos ni límites de F06; pruebas de navegador (Enter, Shift+Enter, burbuja, menú) y regresión aplicable; no marcar T057 ni T063.
