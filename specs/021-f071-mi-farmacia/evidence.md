@@ -18,3 +18,10 @@
 - T007 horario: dominio (`parseOpeningHours`), `ManageOpeningHours` (versión y conflicto), `ReadPublicOpeningHours` (cache-aside Redis, máximo 50 ids) y `opening-hours-router.ts`. Montado en la composición con geolocalización TEST.
 - Pruebas: `backend/tests/geolocation` 45 en verde (incluye 13 nuevas de `f071-server.test.ts` y 4 de `f071-migrations.test.ts`); 15 omitidas por necesitar PostgreSQL (después de T057). `tsc` correcto.
 - **Corrección:** en el commit `cc0d230` se anotó por error que `check` pasaba; en realidad falló por la regla de arquitectura (Redis solo en la infraestructura de búsqueda F03 y acceso entre módulos solo por contratos). Se movió la caché del horario a `busqueda/infrastructure/redis-opening-hours-cache.ts` con el contrato `farmacias/contracts/opening-hours.ts`. Ahora `check` es correcto (306 archivos) y las 45 pruebas siguen en verde.
+
+## T008–T011 · 2026-11-26 (pantalla, sin puertos)
+- T008 «Mi farmacia» (`MyPharmacy.jsx`): sustituye a «Farmacia y ubicación». Reúne el contacto (ya no aparece en `/inventory`), la dirección y la ubicación (`LocationAdmin` con estado, historial, límites del Perú y la lectura única del dispositivo de `PointPicker`) y el horario. Se quitó el enlace de menú «Ubicación de farmacia»: la ubicación vive en el panel y `/ubicacion` sigue por enlace directo.
+- T009 «Revisar ubicaciones» (`/admin/farmacias/ubicaciones`, `LocationReview.jsx`): solo datos públicos. El enlace aparece solo si el servidor responde 200.
+- T010 horario: editor (`OpeningHoursEditor`) y muestra pública «Hoy: …» en la búsqueda y en el mapa (`PublicOpeningHours`, hora de Lima).
+- T011 `/mi-perfil` (`ProfilePage.jsx`), enlazada desde «Mi cuenta». Las reglas del perfil no cambian.
+- Pruebas: frontend 246/246 (11 nuevas en `frontend/tests/f071`; 5 existentes actualizadas al cambio aprobado: nombre «Mi farmacia» y sin enlace «Ubicación de farmacia»). E2E `a11y` y `f081-experience` actualizados en el texto, **sin ejecutar** hasta después de T057. `check` correcto (312 archivos). Build del frontend correcto (en la copia de trabajo, con el modo de la app pasado como variable temporal).

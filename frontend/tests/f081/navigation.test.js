@@ -51,7 +51,7 @@ describe('F08.1 modelo de navegación por actor', () => {
     expect(hrefs({ session: u, canReview: true })).toEqual([...publicNavigation.map(link => link.href), '/admin/farmacias/solicitudes']);
     expect(account({ session: u, canReview: true })).toEqual(['Mi perfil']);
     const geo = { session: u, memberships: [{ roleCode: 'TRABAJADOR', delegationCodes: ['GEO_LOCATION_REVIEW'] }] };
-    expect(hrefs(geo)).toEqual([...publicNavigation.map(link => link.href), '/ubicacion']);
+    expect(hrefs(geo)).toEqual([...publicNavigation.map(link => link.href), '/farmacias/panel']); // F07.1: la ubicación vive en «Mi farmacia»
   });
 
   it('el propietario recibe las secciones en el orden de la spec', () => {

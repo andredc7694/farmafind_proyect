@@ -182,7 +182,7 @@ test('propietario: ocho secciones en orden, resumen de su farmacia, historial y 
   await openAccount(page); await expect(menu(page).getByRole('link', { name: 'Mis reservas' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible(); await openAccount(page);
   const sections = page.getByRole('navigation', { name: 'Secciones de la farmacia' });
-  await expect(sections.getByRole('button')).toHaveText(['Resumen', 'Farmacia y ubicación', 'Inventario', 'Importar', 'Reservas', 'Historial', 'Personal', 'Configuración']);
+  await expect(sections.getByRole('button')).toHaveText(['Resumen', 'Mi farmacia', 'Inventario', 'Importar', 'Reservas', 'Historial', 'Personal', 'Configuración']);
   await expect(page.getByText('Pendientes de responder')).toBeVisible();
   await expect(page.getByText('Productos en inventario')).toBeVisible();
   await expect(page.locator('.summary-grid').first()).toContainText('0'); // aún sin reservas
@@ -206,10 +206,11 @@ test('propietario: ocho secciones en orden, resumen de su farmacia, historial y 
 test('revisor de ubicaciones: ve solo lo suyo y el servidor deniega personal y reservas', async ({ browser }) => {
   const { page, context } = await newPage(browser);
   await login(page, reviewer);
-  await expect(menu(page).getByRole('link', { name: 'Ubicación de farmacia' })).toBeVisible();
-  await expect(menu(page).getByRole('link', { name: 'Panel de farmacia' })).toHaveCount(0);
+  // F07.1: la ubicación vive en «Mi farmacia» dentro del panel; ya no hay enlace propio.
+  await expect(menu(page).getByRole('link', { name: 'Panel de farmacia' })).toBeVisible();
+  await expect(menu(page).getByRole('link', { name: 'Ubicación de farmacia' })).toHaveCount(0);
   await open(page, '/farmacias/panel');
-  await expect(page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button')).toHaveText(['Farmacia y ubicación']);
+  await expect(page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button')).toHaveText(['Mi farmacia']);
   expect(await status(page, `/api/v1/pharmacies/${alfaId}/staff`)).toBe(403);
   expect(await status(page, `/api/v1/farmacias/${alfaId}/reservas/resumen`)).toBe(403);
   expect(await status(page, `/api/v1/farmacias/${alfaId}/inventario/resumen`)).not.toBe(200);
@@ -220,8 +221,8 @@ test('propietario: elegir el punto con la ubicación del dispositivo (una vez, c
   const { page, context } = await newPage(browser, { permissions: ['geolocation'], geolocation: { latitude: -12.0555, longitude: -77.0444 } });
   await login(page, owner);
   await open(page, '/farmacias/panel');
-  await page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button', { name: 'Farmacia y ubicación' }).click();
-  await expect(page.getByRole('heading', { name: 'Ubicación pública de la farmacia' })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button', { name: 'Mi farmacia' }).click();
+  await expect(page.getByRole('heading', { name: 'Dirección y ubicación en el mapa' })).toBeVisible();
   await expect(page.getByText(/verá tu dirección IP/)).toBeVisible();
   await expect(page.getByRole('application')).toHaveCount(0); // el mapa no se carga hasta consentir
   await page.getByRole('button', { name: 'Usar mi ubicación una vez' }).click();

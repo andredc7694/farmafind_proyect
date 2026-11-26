@@ -14,10 +14,10 @@
 - [X] T007 Horario: casos de uso, routers privado y público, caché Redis con invalidación al guardar. Pruebas (FR-008).
 
 ## Fase 3 · Pantalla (sin puertos: pruebas de componentes)
-- [ ] T008 Pestaña «Mi farmacia» que sustituye a «Farmacia y ubicación»: contacto (sale de `/inventory`), dirección y ubicación (pin, una sola lectura del dispositivo con permiso, coordenadas), estado e historial. Pruebas (FR-001 a FR-004, FR-006).
-- [ ] T009 Pantalla «Revisar ubicaciones» para el administrador de plataforma y enlace en el menú solo si el servidor lo permite. Pruebas (FR-005).
-- [ ] T010 Editor de horario y su muestra en la búsqueda y el mapa públicos (escritorio y 390 px). Pruebas (FR-008).
-- [ ] T011 Página `/mi-perfil` y enlace «Mi perfil» en «Mi cuenta», sin cambiar las reglas del perfil. Pruebas (FR-009).
+- [X] T008 Pestaña «Mi farmacia» que sustituye a «Farmacia y ubicación»: contacto (sale de `/inventory`), dirección y ubicación (pin, una sola lectura del dispositivo con permiso, coordenadas), estado e historial. Pruebas (FR-001 a FR-004, FR-006).
+- [X] T009 Pantalla «Revisar ubicaciones» para el administrador de plataforma y enlace en el menú solo si el servidor lo permite. Pruebas (FR-005).
+- [X] T010 Editor de horario y su muestra en la búsqueda y el mapa públicos (escritorio y 390 px). Pruebas (FR-008).
+- [X] T011 Página `/mi-perfil` y enlace «Mi perfil» en «Mi cuenta», sin cambiar las reglas del perfil. Pruebas (FR-009).
 
 ## Fase 4 · Base de datos y navegador [PUERTO]
 - [ ] T012 [PUERTO] Pruebas SQL de `f025/017` en la base TEST técnica: solo el dueño recibe el permiso; trabajador y administrador global no; insert directo rechazado; reparación idempotente que respeta revocaciones y atribuye al revisor (FR-007).
