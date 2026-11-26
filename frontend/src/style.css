@@ -99,6 +99,23 @@ a { color: var(--emerald-dark); }
 .pharmacy-choices li { margin: 0 !important; }
 .search-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: .8rem; }
 .notice, .status-notice { padding: .85rem 1rem; background: var(--tint); border-left: 4px solid var(--emerald); border-radius: 7px; line-height: 1.5; }
+/* F07.1: formulario con etiquetas encima y espacio para la burbuja del asistente. */
+.stacked-form { display: grid; gap: .9rem; }
+.stacked-form .form-field { display: grid; gap: .3rem; }
+.stacked-form .form-field > label { font-weight: 600; }
+.stacked-form .form-field input { width: 100%; max-width: 36rem; box-sizing: border-box; }
+.stacked-form .input-with-action { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.stacked-form .input-with-action input { flex: 1 1 16rem; }
+.stacked-form .check-field { display: flex; gap: .5rem; align-items: flex-start; }
+.stacked-form .advanced-options { border: 1px dashed var(--line, #c9d6d1); border-radius: 7px; padding: .5rem .8rem; }
+.stacked-form .advanced-options summary { cursor: pointer; font-weight: 600; }
+.stacked-form button[type="submit"] { justify-self: start; }
+.my-pharmacy { padding-bottom: 7rem; } /* la burbuja flotante no tapa «Enviar propuesta» */
+@media (max-width: 640px) { /* F07.1: con un formulario en pantalla, la burbuja queda solo como icono */
+  body:has(.stacked-form) .chat-toggle-label { display: none; }
+  body:has(.stacked-form) .chat-toggle { padding: .7rem; }
+}
+.point-marker { width: 22px; height: 22px; border-radius: 50%; background: #176b52; border: 3px solid #fff; box-shadow: 0 0 0 2px #176b52; cursor: grab; }
 .public-hours summary { cursor: pointer; }
 .public-hours ul { margin: .35rem 0 0; padding-left: 1.1rem; }
 .opening-day { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; }

@@ -66,3 +66,12 @@ export function describeDay(day) {
   if (!day) return 'Sin horario publicado';
   return day.cerrado ? 'Cerrado' : `${day.abre} a ${day.cierra}`;
 }
+
+/** F071-FR-013/014: sugerencias de dirección a través de nuestro servidor (POST; la dirección no va en la URL). */
+export function createAddressSuggestionClient(fetchImpl = fetch) {
+  const path = (pharmacyId, kind) => `/api/v1/farmacias/${enc(pharmacyId)}/ubicacion/sugerencias/${kind}`;
+  return {
+    search: async (pharmacyId, body) => (await send(fetchImpl, 'POST', path(pharmacyId, 'buscar'), body)).resultado ?? null,
+    reverse: async (pharmacyId, body) => (await send(fetchImpl, 'POST', path(pharmacyId, 'inversa'), body)).resultado ?? null,
+  };
+}

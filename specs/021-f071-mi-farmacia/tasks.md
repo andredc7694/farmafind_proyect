@@ -35,9 +35,9 @@
 T001–T002 → T003 → T013, T014 (y el código de T004 y T007 se ajusta al SQL aprobado). T004–T011 pueden avanzar en paralelo con T057 de Andre (sin puertos). T012–T016 después de T057. T018 después de T016. T019 al final.
 
 ## Enmienda 2026-11-26 · Sugerencia de dirección y ubicación (FR-013 a FR-016)
-- [ ] T020 Servidor: puerto `AddressSuggestions`, caso de uso con límite de 1/s, caché de 24 h y 500 entradas, tiempo máximo e interruptor apagado por defecto; adaptador Nominatim (Perú, sesgo por ciudad, User-Agent genérico, sin registros de direcciones). Pruebas con un `fetch` simulado (FR-013, FR-016).
-- [ ] T021 Rutas `POST /farmacias/:id/ubicacion/sugerencias/buscar` y `/inversa` con sesión, CSRF y `GEO_LOCATION_PROPOSE`. Interruptor encendido solo en la composición TEST/DEMO. Pruebas HTTP (FR-013, FR-014, FR-016).
-- [ ] T022 Lista interna de ciudades y distritos del Perú y centrado del mapa al escribir la ciudad, sin servicio externo. Pruebas (FR-015).
-- [ ] T023 Formulario: «Buscar en el mapa», marcador arrastrable con búsqueda inversa y aviso, fuente automática, evidencia opcional con advertencia, «Opciones avanzadas», etiquetas encima y espacio para la burbuja. Pruebas con servicio simulado (FR-013 a FR-015).
+- [X] T020 Servidor: puerto `AddressSuggestions`, caso de uso con límite de 1/s, caché de 24 h y 500 entradas, tiempo máximo e interruptor apagado por defecto; adaptador Nominatim (Perú, sesgo por ciudad, User-Agent genérico, sin registros de direcciones). Pruebas con un `fetch` simulado (FR-013, FR-016).
+- [X] T021 Rutas `POST /farmacias/:id/ubicacion/sugerencias/buscar` y `/inversa` con sesión, CSRF y `GEO_LOCATION_PROPOSE`. Interruptor encendido solo en la composición TEST/DEMO. Pruebas HTTP (FR-013, FR-014, FR-016).
+- [X] T022 Lista interna de ciudades y distritos del Perú y centrado del mapa al escribir la ciudad, sin servicio externo. Pruebas (FR-015).
+- [X] T023 Formulario: «Buscar en el mapa», marcador arrastrable con búsqueda inversa y aviso, fuente automática, evidencia opcional con advertencia, «Opciones avanzadas», etiquetas encima y espacio para la burbuja. Pruebas con servicio simulado (FR-013 a FR-015).
 - [ ] T024 Copia temporal (3001 y 5174) con el interruptor encendido y revisión manual de Andre con pocas consultas reales. No se toca la DEMO ni su Redis.
-- [ ] T025 Registro de la decisión (servicio nuevo, gratuito, límites, datos que salen y revisión en F09), evidencia y ESTADO.
+- [X] T025 Registro de la decisión (servicio nuevo, gratuito, límites, datos que salen y revisión en F09), evidencia y ESTADO.

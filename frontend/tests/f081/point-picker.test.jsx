@@ -81,13 +81,14 @@ describe('F08.1 propuesta de ubicación del propietario', () => {
     fireEvent.change(screen.getByLabelText(/Longitud/), { target: { value: '-77.03' } });
     const form = screen.getByRole('button', { name: 'Enviar propuesta' }).closest('form');
     expect(screen.getByLabelText(/Confirmo que la dirección pública y el punto/).required).toBe(true);
-    for (const [label, value] of [['Dirección pública', 'Av. Ficticia 100'], ['Ciudad', 'Lima'], ['Fuente', 'Visita ficticia'], ['Referencia de evidencia no sensible', 'acta-001']]) {
+    // F07.1 (FR-015): la fuente se rellena sola según el origen y la referencia es opcional.
+    for (const [label, value] of [['Dirección pública', 'Av. Ficticia 100'], ['Ciudad', 'Lima'], ['Referencia para encontrar la farmacia', 'acta-001']]) {
       fireEvent.change(screen.getByLabelText(new RegExp(label)), { target: { value } });
     }
     fireEvent.click(screen.getByLabelText(/Confirmo que la dirección pública y el punto/));
     fireEvent.submit(form);
     await waitFor(() => expect(client.propose).toHaveBeenCalledWith('alfa', { direccionPublicable: 'Av. Ficticia 100', ciudad: 'Lima', latitud: -12.04, longitud: -77.03,
-      fuente: 'Visita ficticia', evidenciaReferencia: 'acta-001' }));
+      fuente: 'Coordenadas escritas', evidenciaReferencia: 'acta-001' }));
     expect(Object.keys(client.propose.mock.calls[0][1])).not.toContain('confirmaDireccion');
   });
 
