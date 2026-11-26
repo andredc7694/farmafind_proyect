@@ -99,6 +99,7 @@ a { color: var(--emerald-dark); }
 .pharmacy-choices li { margin: 0 !important; }
 .search-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: .8rem; }
 .notice, .status-notice { padding: .85rem 1rem; background: var(--tint); border-left: 4px solid var(--emerald); border-radius: 7px; line-height: 1.5; }
+.field-warning { margin: .35rem 0 .75rem; padding: .55rem .8rem; border-left: 4px solid currentColor; border-radius: 6px; background: var(--tint); line-height: 1.45; }
 [role="alert"] { color: var(--danger); }
 .offer-grid { list-style: none; padding: 0 !important; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; }
 .offer, .surface-card { min-width: 0; padding: 1.25rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 3px 12px rgba(17,60,57,.04); }
