@@ -122,3 +122,25 @@ Como cualquier usuario con sesión quiero llegar a «Mi perfil» desde un acceso
 - TEST y DEMO con datos ficticios.
 - El revisor de plataforma es el de F02.5, con una concesión adicional explícita.
 - El mapa usa el proveedor ya revisado en F07.
+
+## Enmienda 2026-11-26 · Sugerencia de dirección y ubicación (aprobada por Andre, opción A)
+**Alcance exclusivo:** el formulario «Proponer dirección y ubicación» de «Mi farmacia». No amplía la geocodificación externa a ninguna otra parte del sistema (búsqueda pública, mapa público, asistente, solicitudes ni revisión).
+
+**Decisiones previas que modifica y por qué:**
+- **F07, plan** (`specs/010-f07-geolocalizacion/plan.md`, restricción «sin … geocodificación automática externa»): se exceptúa **solo** este formulario, para que el dueño ubique su farmacia sin conocer coordenadas.
+- **F07.1, spec** (F071-FR-012 «sin geocodificador» y «Fuera de alcance: geocodificador externo»): se sustituye por F071-FR-013 a FR-016 para este formulario. El resto de FR-012 sigue vigente: US$0, sin claves, sin proveedores de pago y sin servicios nuevos fuera de este.
+- La revisión humana de la plataforma no cambia: una sugerencia nunca publica nada por sí sola.
+
+- **F071-FR-013 · «Buscar en el mapa»:** un botón junto a la dirección consulta el servicio gratuito Nominatim (OpenStreetMap), restringido al Perú y sesgado por la ciudad escrita. Centra el mapa y coloca el marcador. La consulta pasa siempre por nuestro servidor y solo la puede pedir quien tiene `GEO_LOCATION_PROPOSE` en esa farmacia. Va por cuerpo POST, nunca en la URL. Sin autocompletado letra por letra: solo al pulsar el botón.
+- **F071-FR-014 · Completar al marcar:** el clic o el arrastre del marcador consulta la búsqueda inversa del mismo servicio y rellena la calle y la ciudad **sin número**, con el aviso «Ubicación aproximada: completa el número». Los campos siguen editables. Sin resultado, los campos quedan como estaban y no se muestra error.
+- **F071-FR-015 · Respaldo y formulario:**
+  - Al escribir la ciudad, el mapa se centra con una lista interna de ciudades y distritos del Perú (todas las capitales departamentales, el Callao, Ayacucho y distritos de Lima). Funciona aunque el servicio externo falle o esté apagado.
+  - La fuente se rellena sola según el origen: GPS del dispositivo, punto en el mapa, dirección buscada o coordenadas escritas.
+  - La evidencia es opcional, con el ejemplo «Ej.: frente a la Plaza Mayor» y la advertencia de no escribir datos personales, documentos ni teléfonos.
+  - Latitud y longitud pasan a «Opciones avanzadas».
+  - Etiquetas encima de cada campo, espaciado correcto, y la burbuja del asistente no tapa «Enviar propuesta».
+- **F071-FR-016 · Interruptor, datos y límites:**
+  - Interruptor de configuración: **encendido en TEST y DEMO; apagado por defecto** en cualquier otra composición o despliegue real hasta revisarlo en F09.
+  - **Datos que salen hacia OpenStreetMap:** solo la dirección y la ciudad escritas (búsqueda) o el punto del mapa (búsqueda inversa), enviados desde nuestro servidor. Nunca datos de usuarios, sesiones, inventario ni identificadores. Las direcciones y puntos consultados **no se guardan en registros** (solo cuentas agregadas).
+  - **Límites:** como máximo 1 consulta por segundo en todo el servidor, caché en memoria (24 h, máximo 500 entradas), tiempo máximo de 4 s, un resultado, User-Agent genérico «FarmaFind-DEMO/0.1 (proyecto local de pruebas)» sin correo ni repositorio, y atribución visible «© OpenStreetMap».
+  - Las pruebas automáticas **simulan** el servicio; las consultas reales se limitan a la revisión manual de Andre.

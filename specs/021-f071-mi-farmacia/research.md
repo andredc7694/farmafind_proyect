@@ -18,3 +18,9 @@ La API Geolocation del navegador con `getCurrentPosition` y `maximumAge: 0`, una
 
 ## R-05 · Horario fuera de la búsqueda
 La spec 020 prevé una `search_public_offers_v2`. Para no chocar, el horario se sirve con una función pública aparte, por lista de farmacias, con caché Redis.
+
+## R-06 · Decisión 2026-11-26: Nominatim solo para sugerir la dirección del formulario (enmienda aprobada)
+- **Servicio nuevo y gratuito:** Nominatim de OpenStreetMap (https://nominatim.openstreetmap.org), sin clave ni pago. Su política de uso exige como máximo 1 consulta por segundo, un User-Agent identificable, caché, sin autocompletado y la atribución ODbL. No garantiza disponibilidad.
+- **Respaldo:** la lista interna de ciudades centra el mapa aunque el servicio falle o esté apagado; el pin, el GPS y las coordenadas siguen disponibles.
+- **Privacidad:** solo salen la dirección y la ciudad escritas, o el punto, desde el servidor; nada se guarda en registros.
+- **Producción:** apagado por defecto; se revisa junto con Andre en F09 (volumen, política, posible instancia propia o proveedor alternativo).

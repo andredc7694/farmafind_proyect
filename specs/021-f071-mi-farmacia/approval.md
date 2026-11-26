@@ -26,3 +26,13 @@
   - el guion de concesión (T018) queda pendiente de su autorización expresa, con el comando y la aprobación que registra;
   - añadir a la matriz la comprobación explícita de columnas visibles;
   - avanzar con servidor y pantalla sin usar los puertos de la DEMO, sin apagarla ni reiniciarla, y avisar antes del único reinicio final.
+
+## 2026-11-26 · Enmienda «sugerencia de dirección y ubicación» aprobada
+- **Andre: «Apruebo la enmienda, opción A»** (User-Agent genérico «FarmaFind-DEMO/0.1 (proyecto local de pruebas)», sin su correo ni su GitHub).
+- Precisiones de Andre:
+  - solo cubre la sugerencia del formulario de F07.1 y no amplía la geocodificación externa a otras partes;
+  - debe decir qué decisión previa de F07 y de F07.1 modifica y por qué;
+  - interruptor encendido en TEST y DEMO y apagado por defecto en despliegues reales hasta F09;
+  - listar los datos que salen hacia OpenStreetMap, que no se guardan en registros, y los límites;
+  - FR-013 a FR-016, T020 a T025 y decisión registrada;
+  - pruebas simuladas y resultado en la copia temporal, sin tocar la DEMO ni su Redis.
