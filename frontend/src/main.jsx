@@ -16,12 +16,14 @@ import './design/tokens.css';
 import './style.css';
 
 initTheme(); // aplica el tema guardado antes de pintar
+// La ruta antigua del mapa vive ahora dentro de «Buscar medicamentos».
+if (window.location.pathname === '/mapa') window.history.replaceState(null, '', `/search/mapa${window.location.search}${window.location.hash}`);
 const screen = window.location.pathname === '/identity' ? <IdentityApp />
   : window.location.pathname === '/inventory' ? <IdentityApp inventoryMode />
   : window.location.pathname === '/reservations' ? <IdentityApp reservationsMode />
   : window.location.pathname === '/ubicacion' ? <IdentityApp locationMode />
   : window.location.pathname === '/search' ? <PublicSearch />
-  : window.location.pathname === '/mapa' ? <NearbyPharmacies />
+  : window.location.pathname === '/search/mapa' ? <NearbyPharmacies />
   : window.location.pathname === '/farmacias/solicitar' ? <PharmacyApplication />
   : window.location.pathname === '/admin/farmacias/solicitudes' ? <PlatformApplications />
   : window.location.pathname === '/farmacias/panel' ? <PharmacyDashboard />

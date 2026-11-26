@@ -8,7 +8,7 @@ for (const width of [360, 640, 768, 1280]) {
     for (const [path, heading] of [
       ['', 'Encuentra información para'],
       ['search', 'Buscar medicamentos'],
-      ['mapa', 'Farmacias cercanas'],
+      ['search/mapa', 'Farmacias cercanas'],
       ['assistant/conversation', 'FarmaFind AI'],
     ]) {
       await page.goto(`${services.url('frontend')}${path}`);

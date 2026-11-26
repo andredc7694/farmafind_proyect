@@ -186,3 +186,7 @@ a { color: var(--emerald-dark); }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th, .data-table td { padding: .55rem .65rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 .secondary-button { min-height: 40px; padding: .45rem .9rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; }
+.account-menu { position: relative; }
+.account-menu > summary { padding: .65rem .75rem; border-radius: 8px; color: var(--ink-muted); font-size: .91rem; font-weight: 650; cursor: pointer; }
+.account-menu-panel { position: absolute; right: 0; top: calc(100% + .35rem); z-index: 60; display: grid; gap: .5rem; min-width: 15rem; padding: .75rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+@media (max-width: 700px) { .account-menu-panel { right: auto; left: 0; } }

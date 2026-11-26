@@ -124,3 +124,10 @@ No se repitió Playwright. Esto cierra el pendiente «Pendientes de esta verific
 - **Repetir el archivo:** con el mismo resultado responde «ya se confirmó»; si los productos pendientes entran al catálogo o el archivo se corrige, se puede importar. Un duplicado exacto del mismo archivo no se importará hasta que se distinga (spec 020) o se corrija el archivo.
 - **Archivo original del usuario** en la base TEST técnica: 1100 filas, 517 listas, 583 por revisar; excluir y confirmar importó 517 en 5,5 s. **En 582 de las 583 filas repetidas el precio o el stock difiere** de la primera fila: son ofertas distintas que hoy no se pueden representar sin laboratorio (spec 020).
 - **Pruebas:** frontend e inventario sin RLS 266/266; F02 RLS 15/15; F021 RLS 12/12 (6 de exclusión, 3 de lecturas, 3 previas); navegador F02 3/3, F02.1 6/6, F08.1 7/7, flujo integrado 4/4, accesibilidad 4/4. Una corrida de F02.1 falló porque el detalle tardó más de 5 s; con espera registrada y dos repeticiones pasó 6/6, y se amplió esa espera a 20 s.
+
+## Búsqueda pública vacía tras confirmar (F021-SC-006) — 2026-11-25
+- **Observado por Andre:** importación confirmada (517) y búsqueda «Aciclovir»/«ac» sin ofertas.
+- **Causa (consultas de solo lectura en la DEMO):** F03 solo publica productos con principio activo; 517 de 518 referencias del catálogo TEST no lo tenían porque `load-demo-catalog.mjs` no lo cargaba. Proyección pública de la farmacia, estado, stock, caché y búsqueda parcial estaban bien.
+- **Corrección:** solo el script TEST (toma `nombre_generico`/`principio_activo`; completa los vacíos, nunca reemplaza). Sin cambios de contratos, reglas F03, RLS ni permisos.
+- **Verificado en la DEMO:** 475 ofertas publicables; «Aciclovir» devuelve 7 de la farmacia; la respuesta no incluye stock.
+- **Límite conocido:** un producto del catálogo sin principio activo no aparece en la búsqueda y la vista previa no lo avisa. La spec 020 debe exigirlo al aprobar productos nuevos (pendiente de decisión).

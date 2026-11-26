@@ -1,21 +1,43 @@
-import { accountNavigation, pharmacyNavigation, publicNavigation } from './routes.js';
+import { pharmacyNavigation, publicNavigation, reservationsLink } from './routes.js';
+
+const closedApplications = ['APROBADA', 'RECHAZADA', 'CANCELADA'];
 
 /** F08.1: modelo de navegación por actor. Es solo presentación: cada acción privada la revalida el servidor. */
-export function actorKind({ session = null, memberships = [], canReview = false } = {}) {
+export function actorKind({ session = null, memberships = [], canReview = false, applications = [] } = {}) {
   if (!session) return 'visitante';
-  const codes = memberships.flatMap(item => item.delegationCodes ?? []);
-  if (canReview || codes.includes('GEO_LOCATION_REVIEW')) return 'revisor';
+  if (canReview) return 'revisor';
   if (memberships.some(item => ['DUENO', 'ADMINISTRADOR'].includes(item.roleCode))) return 'propietario';
+  if (memberships.flatMap(item => item.delegationCodes ?? []).includes('GEO_LOCATION_REVIEW')) return 'revisor';
   if (memberships.length > 0) return 'trabajador';
+  if (applications.some(item => !closedApplications.includes(item.estado))) return 'solicitante';
   return 'cliente';
 }
 
-/** Enlaces del menú principal, sin duplicados. Misma salida que antes de F08.1 para los mismos datos. */
-export function navigationFor({ session = null, memberships = [], canReview = false } = {}) {
-  const links = [...publicNavigation, ...(session ? accountNavigation : [{ href: '/identity', label: 'Mi cuenta' }]),
-    ...pharmacyNavigation(memberships), ...(session && canReview ? [{ href: '/admin/farmacias/solicitudes', label: 'Revisar solicitudes' }] : [])];
+/** Enlaces del menú principal según el actor, sin duplicados. */
+export function navigationFor({ session = null, memberships = [], canReview = false, applications = [] } = {}) {
+  const kind = actorKind({ session, memberships, canReview, applications });
+  const pharmacy = pharmacyNavigation(memberships);
+  // El trabajador solo ve su panel (con las secciones que le delegaron).
+  if (kind === 'trabajador') {
+    const panel = pharmacy.filter(link => link.href === '/farmacias/panel');
+    return panel.length ? panel : pharmacy;
+  }
+  const open = kind === 'solicitante'
+    ? publicNavigation.map(link => (link.href === '/farmacias/solicitar' ? { ...link, label: 'Mi solicitud' } : link))
+    : publicNavigation;
+  const links = [...open,
+    ...(kind === 'cliente' || kind === 'solicitante' ? [reservationsLink] : []),
+    ...pharmacy,
+    ...(session && canReview ? [{ href: '/admin/farmacias/solicitudes', label: 'Revisar solicitudes' }] : [])];
   const seen = new Set();
   return links.filter(link => (seen.has(link.href) ? false : seen.add(link.href)));
+}
+
+/** Enlaces dentro de «Mi cuenta». El propietario ve ahí sus reservas como cliente. */
+export function accountLinksFor({ session = null, memberships = [], canReview = false } = {}) {
+  if (!session) return [{ href: '/identity', label: 'Entrar o crear cuenta' }];
+  return [{ href: '/identity', label: 'Mi perfil' },
+    ...(actorKind({ session, memberships, canReview }) === 'propietario' ? [reservationsLink] : [])];
 }
 
 const sections = [

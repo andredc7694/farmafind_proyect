@@ -88,3 +88,10 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-25 · Enmienda F02.1, pantallas del panel (T048–T052) implementadas y probadas en `feat/f025-cierre-verificacion`: inventario con nombres, importar en un paso, historial claro y movimientos. Regresión verde (detalle en evidence.md). Decisiones menores revisables: «Stock bajo» = 1 a 5 disponibles; Historial con vistas «Atendidas / Importaciones / Movimientos»; no se guarda el nombre del archivo.
 - **F02.5 sigue SIN ACEPTAR:** T046 (veredicto pendiente), T057 y T063 pendientes; F025-RF23 aplazada. Integrar esta rama en `main` no la acepta.
 - 2026-11-25 · Enmienda F02.1 (FR-026–029, T053–T056): exclusión explícita de duplicadas/pendientes e historial detallado, sin migración ni cambios de RLS/permisos; probado con el archivo ficticio original (517 importadas, 583 excluidas; 582 de ellas con precio o stock distinto). DEMO lista para repetir T046. Nombre de archivo: no se guarda (A). F02.5 sigue SIN ACEPTAR: T046, T057, T063.
+- 2026-11-25 · Búsqueda pública vacía (F021-SC-006): causa = catálogo TEST sin principio activo (script de carga); corregido y verificado en la DEMO sin cambiar contratos, reglas F03, RLS ni permisos.
+- 2026-11-25 · Menú por rol y «Farmacias cercanas» fuera de los menús (enmienda F08.1): **MEJ-003 parcial, MEJ-007 paso inicial; ninguna completa**. Integración de búsqueda, precios y cercanía pendiente (F08.1/F03).
+- 2026-11-25 · T046: veredicto pendiente. Sin autorización para PR/fusión a main ni para implementar la spec 020. F02.5 sigue SIN ACEPTAR (T046, T057, T063).
+
+## Cambios pedidos por Andre pendientes de su orden (no empezar sin ella)
+- 2026-11-25 · (Detectado por Claude, por decidir) Spec 020: al aprobar un producto nuevo debe exigirse su principio activo; si no, no aparece en la búsqueda pública.
+- 2026-11-25 · (Por confirmar con Andre) Dos mensajes anteriores sobre el menú que no llegaron a la conversación: contrastar con la tabla de la enmienda F08.1.
