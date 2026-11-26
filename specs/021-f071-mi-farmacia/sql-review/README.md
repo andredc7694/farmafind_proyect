@@ -1,6 +1,6 @@
 # F07.1 — Paquete de revisión del SQL (T001, T002)
 
-**Estado:** borradores **sin ejecutar**, fuera de `backend/migrations/` para que no se apliquen solos. Tras la aprobación de Andre se copian sin cambios a `backend/migrations/f07/` (T003).
+**Estado (2026-11-26):** **aprobados por Andre** (commit `89943f2`) y copiados sin cambios a `backend/migrations/f07/` (T003). Antes:, fuera de `backend/migrations/` para que no se apliquen solos. Tras la aprobación de Andre se copian sin cambios a `backend/migrations/f07/` (T003).
 
 | Archivo | SHA-256 (LF) | Alcance |
 |---|---|---|
@@ -57,6 +57,7 @@
 | 18 | Horario: cierre ≤ apertura, «Cerrado» con horas | Rechazado por `horario_tramo_valido` |
 | 19 | Horario público de una farmacia INACTIVA, o más de 50 ids | 0 filas |
 | 20 | Alfa → Beta con la misma conexión (GUC limpiados) | Sin filtración en todos los casos anteriores |
+| 22 | **Columnas visibles para R** (comprobación explícita con `information_schema.column_privileges` y un `SELECT *` bajo la sesión de R) | Propuesta (`f07.ubicacion_propuesta`): `id`, `farmacia_id`, `version`, `direccion_publicable`, `ciudad`, `latitud`, `longitud`, `precision_m`, `fuente`, `evidencia_referencia`, `estado`, `propuesta_por`, `propuesta_at`, `revisada_por`, `revisada_at`, `base_public_version`. Proyección (`f03.farmacia_publica`): `farmacia_id`, `direccion_texto`, `latitud`, `longitud`, `updated_at`, `ciudad`, `precision_m`, `fuente`, `estado_ubicacion`, `propuesta_por`, `revisada_por`, `fecha_verificacion`, `public_version`. Nada más: ni contacto, RUC, documentos, inventario ni reservas. `propuesta_por` y `revisada_por` son identificadores de usuario, sin nombre ni correo; la API **no** los devuelve al revisor. |
 | 21 | Regresión F07: la revisión por farmacia (`GEO_LOCATION_REVIEW`) sigue funcionando igual | Pruebas F07 existentes en verde |
 
 **Fuera del alcance de F07.1:** un revisor que además tenga capacidades F025 (como el de la DEMO) ya puede leer documentos de **solicitudes** por F02.5. F07.1 no amplía ni reduce ese acceso, y el caso 5 lo prueba con R sin capacidades F025.

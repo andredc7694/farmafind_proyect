@@ -16,3 +16,13 @@
 
 ## 2026-11-26 · Tasks aprobadas
 - **Andre: «apruebo»** `tasks.md` (19 tareas). Se empieza por T001 y T002 (SQL para revisión, sin puertos).
+
+## 2026-11-26 · SQL f07/007 y f07/008 aprobados
+- **Andre aprueba** `007_platform_location_review.sql` (`6D7E0C11…3BB0F9`) y `008_opening_hours.sql` (`0A6EB089…26D2EBF`), tal como están en `89943f2`.
+- Condiciones:
+  - confirmar en qué bases se ejecutan y que no tocan `farmafind_f01_test`;
+  - copiarlos sin cambios y registrar sus hashes si existe una lista;
+  - verificar que el administrador de la DEMO tiene `ADMINISTRADOR_PLATAFORMA`;
+  - el guion de concesión (T018) queda pendiente de su autorización expresa, con el comando y la aprobación que registra;
+  - añadir a la matriz la comprobación explícita de columnas visibles;
+  - avanzar con servidor y pantalla sin usar los puertos de la DEMO, sin apagarla ni reiniciarla, y avisar antes del único reinicio final.

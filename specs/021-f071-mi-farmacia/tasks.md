@@ -5,7 +5,7 @@
 ## Fase 1 · SQL para revisión (sin puertos)
 - [X] T001 Redactar el SQL completo de `f07/007_platform_location_review.sql` en `specs/021-f071-mi-farmacia/sql-review/` (fuera de la carpeta de migraciones, para que no se aplique solo): concesión de plataforma, funciones SECURITY DEFINER, políticas nuevas y la función de lista para el revisor con solo datos públicos. Incluir la **matriz de pruebas** que demuestra que el revisor no lee inventario, reservas, personal, contacto ni documentos (FR-005, FR-010). Si exige tocar políticas de F07 o la restricción de F025: detenerse y avisar.
 - [X] T002 Redactar el SQL de `f07/008_opening_hours.sql` (horario, RLS y proyección pública) en la misma carpeta, con su matriz (FR-008, FR-010).
-- [ ] T003 **[PUERTA]** Revisión y aprobación de Andre del SQL de T001 y T002 (hashes). Después, mover los archivos aprobados a `backend/migrations/f07/` sin cambiarlos.
+- [X] T003 **[PUERTA]** Revisión y aprobación de Andre del SQL de T001 y T002 (hashes). Después, mover los archivos aprobados a `backend/migrations/f07/` sin cambiarlos.
 
 ## Fase 2 · Servidor (sin puertos: unitarias y API con dobles)
 - [ ] T004 Casos de uso, repositorio y router de revisión de plataforma: lista y decisión (aprobar o rechazar con motivo, evidencia y versión; solo la última pendiente; 403 para miembros o autores; 409 ante versión obsoleta). Pruebas unitarias y de API (FR-005, D-04).
