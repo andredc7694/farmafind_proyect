@@ -56,3 +56,8 @@ Andre cargó `farma.xlsx` (hojas «Precios», «Farmacia», «Léeme»; encabeza
 - Pide ver el **bloque ampliado** antes de aplicarlo. Pide también confirmar el rol de la reparación y su comportamiento frente a RLS, que no se editan hashes aprobados, registrar el hash final en `migrate-f025.ts` y documentar la atribución al revisor original y a la migración.
 - Apagó la DEMO y **autorizó las pruebas de F01.1 y de navegador**. **No aplicar a su DEMO** hasta aprobar el bloque ampliado. Después: reiniciar la DEMO, aplicar, verificar en el navegador «Personal» y el perfil de la farmacia, e informar los permisos antes y después.
 - T057 y T063 sin marcar; F02.5 SIN ACEPTAR; spec 020 en opción A.
+
+## 2026-11-26 · Aprobación del bloque ampliado del SQL 016
+- **Andre: «Apruebo el bloque ampliado»** de `016_owner_staff_manage_test.sql` (hash `2667F61535861CB30852A3ACE1A867015A7AE68245EF254F9AFEBADCC7DF27AE`), tal como está en `fix/f025-propietario-gestiona-personal` (commit `9d978c2`).
+- Autoriza: reiniciar su DEMO, aplicar la migración y verificar en el navegador «Personal» y el perfil de HUAMANFAR; después, PR y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
+- **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre). Spec 020 en opción A.

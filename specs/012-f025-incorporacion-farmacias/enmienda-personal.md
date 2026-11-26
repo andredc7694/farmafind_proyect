@@ -1,6 +1,6 @@
 # Enmienda F02.5 · El propietario activado gestiona su personal (F025-FR-029)
 
-**Estado (2026-11-26):** SQL aprobado por Andre en lo esencial; **bloque ampliado de reparación pendiente de su aprobación**. Hash final `2667F61535861CB30852A3ACE1A867015A7AE68245EF254F9AFEBADCC7DF27AE`, registrado en `migrate-f025.ts`. Probado solo en bases TEST técnicas; **no aplicado a la DEMO**.
+**Estado (2026-11-26):** SQL aprobado por Andre en lo esencial; **bloque ampliado aprobado el 2026-11-26 (commit `9d978c2`)**. Hash final `2667F61535861CB30852A3ACE1A867015A7AE68245EF254F9AFEBADCC7DF27AE`, registrado en `migrate-f025.ts`. Probado solo en bases TEST técnicas; **no aplicado a la DEMO**.
 
 ## Hallazgo (2026-11-26)
 Los propietarios creados al activar una solicitud aprobada reciben permisos de inventario (009), reservas (013) y perfil (014), pero no `membership.manage`. Sin él, el panel oculta «Personal» y el servidor rechaza crear o invitar trabajadores. La gestión de personal (F01.1) ya existe y está aceptada. Solo la probaron las farmacias Alfa y Beta, que la DEMO crea por guion con ese permiso.
@@ -28,7 +28,7 @@ Los propietarios creados al activar una solicitud aprobada reciben permisos de i
 - **Observación (fuera de este alcance):** HUAMANFAR tampoco tiene `pharmacy.profile.read/write` (la 014). Probablemente se activó antes de que existiera esa migración. No lo corrijo sin tu orden.
 
 ## Tasks
-- [ ] T065 Aprobación de Andre del SQL `016` (hash `361365757C3CFB75354ACC0EBAF0825A26157B94214DAC5BC265981BE2DE9C4A`) y de este plan (FR-029).
+- [X] T065 Aprobación de Andre del SQL `016` (hash `361365757C3CFB75354ACC0EBAF0825A26157B94214DAC5BC265981BE2DE9C4A`) y de este plan (FR-029).
 - [X] T066 Registrar `016` en `migrate-f025.ts`. Pruebas SQL: la activación concede la capacidad de forma atómica; trabajador y administrador global no la obtienen; un insert directo del ejecutor con otra membresía se rechaza; la reparación es idempotente y respeta las revocaciones.
 - [X] T067 Recorrido HTTP/E2E en una base TEST efímera: solicitud → aprobación → el propietario abre «Personal» → crea un empleado → el empleado entra con la clave temporal. Aislamiento Alfa/Beta.
 - [X] T068 Regresión: F01.1, F02.5 (RLS, comandos, activación), spec 017, check, build y frontend. Evidencia en `evidence.md`.
