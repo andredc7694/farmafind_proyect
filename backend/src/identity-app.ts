@@ -80,8 +80,8 @@ import { PlatformLocationReview } from './modules/farmacias/application/platform
 import { PgPlatformLocationUnitOfWork } from './modules/farmacias/infrastructure/platform-location-repository.js';
 import { createPlatformLocationsRouter } from './modules/farmacias/presentation/platform-locations-router.js';
 import { ManageOpeningHours, ReadPublicOpeningHours } from './modules/farmacias/application/manage-opening-hours.js';
-import { PgOpeningHoursUnitOfWork, PgPublicOpeningHours,
-  RedisOpeningHoursCache } from './modules/farmacias/infrastructure/opening-hours-repository.js';
+import { PgOpeningHoursUnitOfWork, PgPublicOpeningHours } from './modules/farmacias/infrastructure/opening-hours-repository.js';
+import { RedisOpeningHoursCache } from './modules/busqueda/infrastructure/redis-opening-hours-cache.js';
 import { createOpeningHoursRouter } from './modules/farmacias/presentation/opening-hours-router.js';
 import { PgPharmacyUnitOfWork } from './modules/farmacias/infrastructure/pharmacy-unit-of-work.js';
 import { ManageApplications } from './modules/farmacias/application/manage-applications.js';

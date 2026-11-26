@@ -1,9 +1,8 @@
-import type { RedisClientType } from 'redis';
 import type { SqlClient, VerifiedTenantTransactions } from '../../usuarios/contracts/tenant.js';
 import { shortTime } from '../domain/opening-hours.js';
 import type { OpeningDay } from '../domain/opening-hours.js';
 import { OpeningHoursForbiddenError } from '../application/manage-opening-hours.js';
-import type { OpeningHoursCache, OpeningHoursRepository, OpeningHoursUnitOfWork, PublicOpeningHoursReader,
+import type { OpeningHoursRepository, OpeningHoursUnitOfWork, PublicOpeningHoursReader,
   StoredOpeningHours } from '../application/manage-opening-hours.js';
 
 interface Queryable { query(sql:string,values?:unknown[]):Promise<{rows:Array<Record<string,unknown>>}> }
@@ -61,23 +60,4 @@ export class PgPublicOpeningHours implements PublicOpeningHoursReader {
     for (const row of result.rows) (grouped[String(row.farmacia_id)] ??= []).push(row);
     return Object.fromEntries(Object.entries(grouped).map(([id,rows])=>[id,days(rows)]));
   }
-}
-
-const key=(id:string)=>`farmafind:f071:v1:horario:${id}`;
-/** Cache-aside con TTL corto; se borra la clave al guardar. */
-export class RedisOpeningHoursCache implements OpeningHoursCache {
-  constructor(private readonly client:RedisClientType,private readonly ttlSeconds=300) {}
-  private async ready() { if (!this.client.isOpen) await this.client.connect(); }
-  async get(pharmacyIds:readonly string[]):Promise<Record<string,OpeningDay[]>> {
-    await this.ready();
-    const values=await this.client.mGet(pharmacyIds.map(key));
-    return Object.fromEntries(pharmacyIds.flatMap((id,index)=>{
-      const value=values[index]; return value ? [[id,JSON.parse(value) as OpeningDay[]]] : [];
-    }));
-  }
-  async set(values:Record<string,OpeningDay[]>):Promise<void> {
-    await this.ready();
-    for (const [id,value] of Object.entries(values)) await this.client.set(key(id),JSON.stringify(value),{EX:this.ttlSeconds});
-  }
-  async forget(pharmacyId:string):Promise<void> { await this.ready(); await this.client.del(key(pharmacyId)); }
 }
