@@ -94,3 +94,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-25 · CI GitHub Actions (spec 019): implementado T001–T010; 2 jobs verdes (static-unit y postgres-rls F01/F02/F03), prueba negativa en rojo, 1 hallazgo real de portabilidad corregido (bootstrap.mjs). Espera aceptación de Andre (T011).
 - 2026-11-25 · CI GitHub Actions (spec 019) ACEPTADO por Andre («ACEPTO»); PR a main. Pendiente propuesta D-03 (protección de rama).
 - 2026-11-25 · F02.2 (spec 020): identidad con laboratorio/marca y propuestas de productos; spec en borrador en feat/f022-identidad-producto-catalogo; espera aprobación (D-01..D-05). Depende de integrar la enmienda F02.1.
+- 2026-11-25 · F02.2 (spec 020): spec APROBADA por Andre (D-01..D-05 = A; lote con revisión de muestra); plan, research, data-model, contrato y quickstart creados; espera aprobación del plan. Implementación tras integrar la enmienda F02.1.

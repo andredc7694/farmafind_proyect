@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info: { title: F02.2 propuestas de catálogo (borrador), version: 0.1.0 }
+paths:
+  /farmacias/{farmaciaId}/catalogo/propuestas:
+    get: { summary: Estado de las propuestas propias (paginado y filtrable), responses: { '200': { description: OK }, '404': { description: No visible } } }
+    post: { summary: Proponer los pendientes de una vista previa vigente, responses: { '201': { description: Lote creado }, '404': { description: No visible }, '409': { description: Vista previa vencida } } }
+  /plataforma/catalogo/lotes:
+    get: { summary: Lotes pendientes con conteos (CATALOG_REVIEW + segundo factor), responses: { '200': { description: OK }, '403': { description: Sin permiso } } }
+  /plataforma/catalogo/lotes/{loteId}/propuestas:
+    get: { summary: Propuestas del lote (paginado y filtrable), responses: { '200': { description: OK }, '403': { description: Sin permiso } } }
+  /plataforma/catalogo/lotes/{loteId}/muestra:
+    post: { summary: Obtener la muestra aleatoria obligatoria, responses: { '200': { description: Muestra }, '403': { description: Sin permiso } } }
+    put: { summary: Marcar la muestra como correcta o incorrecta, responses: { '204': { description: Registrada }, '403': { description: Sin permiso } } }
+  /plataforma/catalogo/decisiones:
+    post: { summary: Aprobar, rechazar o vincular (una o en lote), responses: { '200': { description: Resumen agrupado }, '403': { description: Sin permiso }, '409': { description: Muestra incompleta o con errores, o estado cambiado } } }

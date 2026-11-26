@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f022-identidad-producto-catalogo`
 **Created**: 2026-11-25
-**Status**: Borrador, **espera aprobación de Andre**.
+**Status**: Spec aprobada el 2026-11-25 (D-01..D-05 = A, ver [approval.md](approval.md)). Plan pendiente de aprobación.
 **Origen**: verificación T046 de F02.5. Con un archivo de 1100 filas salieron 517 productos pendientes y 583 «duplicados» que en realidad son el mismo producto de distintos laboratorios. Andre eligió la opción A (2026-11-25).
 **Dependencia**: se implementa después de integrar la enmienda F02.1 (importación en un paso), hoy en `feat/f025-cierre-verificacion`.
 

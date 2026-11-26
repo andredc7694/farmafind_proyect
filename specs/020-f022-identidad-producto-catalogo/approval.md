@@ -1,2 +1,3 @@
 # F02.2 — Aprobaciones
 - 2026-11-25 · Andre: abrir como incremento aparte (duplicados por laboratorio = opción A), con rama propia, SDD completo, migración aditiva, RLS intacto y pruebas Alfa/Beta; incluir la propuesta de productos nuevos (farmacia propone, revisor aprueba). La spec espera su aprobación.
+- 2026-11-25 · Andre: **aprueba la spec** con D-01..D-05 = A y condiciones: el revisor puede aprobar, rechazar o vincular en lote con revisión de muestra; la migración que reemplaza la unicidad conserva datos, es aditiva en lo posible y lleva regresión F02/F03/F04 y aislamiento Alfa/Beta; se implementa después de integrar la corrección de importación. Pide plan y tasks, deteniéndose en la aprobación de cada uno.
