@@ -188,3 +188,10 @@ La persona puede continuar una conversación breve, ver la procedencia de los da
 | F06 aprobado, IA-RF01 y AC-IA01/02 | Búsqueda pública fundamentada, MockAIProvider y rechazo clínico. | F06.1 amplía conversación y fuentes sin modificar la aceptación de F06. |
 
 **Decisión normativa y de especificación registradas**: la aprobación humana expresa del 2026-11-17 y la Constitution v1.2.0 resuelven F061-FR-009 como ampliación educativa limitada. El responsable aprobó después esta especificación mediante «sí» en la conversación, para avanzar a contratos, plan y tareas según los puntos de control SDD. Las fuentes, licencia, revisión profesional, proveedor real, privacidad, consentimiento y presupuesto requieren verificaciones o decisiones propias antes de cualquier activación. Ningún criterio de éxito se considera demostrado.
+
+## Enmienda 2026-11-25: burbuja e intenciones (partes de MEJ-009 y MEJ-010)
+- **F061-FR-030**: El asistente se ofrece solo como burbuja flotante; `/assistant` y `/assistant/conversation` redirigen a `/search`.
+- **F061-FR-031**: En modo determinista DEBE reconocer saludo, pregunta por la información disponible, comparación o búsqueda (también un nombre suelto), farmacias cercanas y petición sin nombre; las ofertas provienen solo de F03 y se muestran en soles, sin stock.
+- **F061-FR-032**: Las consultas sobre dosis, diagnóstico, tratamiento o uso se rechazan con un mensaje amable que remite al químico farmacéutico y ofrece lo que sí puede hacer. El rechazo se amplía respecto de lo anterior; no se relaja ningún límite.
+- **F061-FR-033**: Enter envía y Shift+Enter inserta salto de línea con puntero fino; en pantallas táctiles Enter inserta salto de línea; nunca se envía durante la composición IME.
+- Las preguntas sugeridas siguen solo rellenando el campo. MEJ-009 y MEJ-010 quedan parciales.

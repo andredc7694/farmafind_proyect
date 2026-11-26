@@ -61,7 +61,7 @@ export function AppShell({ children, path = window.location.pathname }) {
     <ChatBubble path={path} />
     <footer className="site-footer"><div className="site-footer-inner">
       <div><strong>FarmaFind</strong><p>Información farmacéutica pública y referencial. La disponibilidad se confirma con cada farmacia.</p></div>
-      <div><a href="/search">Buscar</a><a href="/assistant/conversation">Asistente</a></div>
+      <div><a href="/search">Buscar</a></div>
       <p className="footer-caveat">FarmaFind no sustituye una consulta profesional de salud.</p>
     </div></footer>
   </div>;

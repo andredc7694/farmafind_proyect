@@ -62,14 +62,51 @@ test('visitante: menú público mínimo, tema que se recuerda, búsqueda con sug
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await dialog.locator('.chat-suggestions button').first().click();
-  await expect(dialog.getByLabel('Tu consulta')).not.toHaveValue('');
+  const box = dialog.getByLabel('Tu consulta');
+  await expect(box).toHaveValue('Compara el precio de ');
+  await expect(dialog.locator('.chat-answer')).toHaveCount(0);
+  await box.fill('hola'); await box.press('Shift+Enter'); // salto de línea, no envía
+  await expect(box).toHaveValue('hola\n');
+  await expect(dialog.locator('.chat-answer')).toHaveCount(0);
+  await box.press('Enter'); // en computadora, Enter envía
+  await expect(dialog.locator('.chat-answer')).toHaveCount(1, { timeout: 20000 });
+  await expect(dialog.locator('.chat-answer').first()).toContainText('¡Hola!');
+  await expect(box).toHaveValue('');
+  await box.fill('Paracetamol'); await box.press('Enter');
+  await expect(dialog.locator('.chat-answer').nth(1)).toContainText(/Precios referenciales de «paracetamol»[\s\S]*S\/ 9\.90[\s\S]*Farmacia/, { timeout: 20000 });
+  await expect(dialog.locator('.chat-answer').nth(1)).not.toContainText(/stock|cantidad/i);
+  await box.fill('¿Qué dosis tomo?'); await box.press('Enter');
+  await expect(dialog.locator('.chat-answer').nth(2)).toContainText('químico farmacéutico', { timeout: 20000 });
+  await expect(dialog.getByText(/No da diagnósticos, tratamientos ni dosis/)).toHaveCount(1);
+  const mine = await dialog.locator('.chat-user').first().boundingBox();
+  const theirs = await dialog.locator('.chat-answer .chat-assistant').first().boundingBox();
+  expect(mine.x).toBeGreaterThan(theirs.x); // usuario a la derecha, asistente a la izquierda
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Preguntar a FarmaFind AI \(3\)/ })).toBeFocused();
+  // El asistente ya no está en el menú ni en el pie; sus rutas antiguas llevan a la búsqueda.
+  await expect(menu(page).getByRole('link', { name: 'FarmaFind AI' })).toHaveCount(0);
+  await expect(page.locator('footer').getByRole('link', { name: 'Asistente' })).toHaveCount(0);
+  for (const old of ['/assistant', '/assistant/conversation']) { await open(page, old); expect(new URL(page.url()).pathname).toBe('/search'); }
+  const remember = await page.getByRole('checkbox', { name: /Recordar estos filtros/ }).boundingBox();
+  expect(remember.width).toBeLessThan(24); expect(remember.height).toBeLessThan(24); // sin el cuadro gris suelto
+  await context.close();
+});
+
+test('pantalla táctil: Enter hace salto de línea y se envía con el botón', async ({ browser }) => {
+  const { page, context } = await newPage(browser, { viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true });
+  await open(page, '/search');
+  await page.getByRole('button', { name: /Preguntar a FarmaFind AI/ }).click();
+  const dialog = page.getByRole('dialog'); const box = dialog.getByLabel('Tu consulta');
+  await box.fill('hola'); await box.press('Enter');
+  await expect(box).toHaveValue('hola\n');
   await expect(dialog.locator('.chat-answer')).toHaveCount(0);
   await dialog.getByRole('button', { name: 'Enviar' }).click();
   await expect(dialog.locator('.chat-answer')).toHaveCount(1, { timeout: 20000 });
-  await expect(dialog.getByText(/diagnósticos, tratamientos, recetas ni dosis/)).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /Preguntar a FarmaFind AI \(1\)/ })).toBeFocused();
+  const panel = await dialog.boundingBox();
+  expect(panel.x).toBeGreaterThanOrEqual(0); expect(panel.x + panel.width).toBeLessThanOrEqual(391);
+  expect(panel.y).toBeGreaterThanOrEqual(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   await context.close();
 });
 

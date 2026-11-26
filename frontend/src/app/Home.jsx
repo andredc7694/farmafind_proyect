@@ -1,9 +1,12 @@
 import React from 'react';
+import { OPEN_CHAT_EVENT } from '../assistant/ChatBubble.jsx';
+
+const openChat = () => window.dispatchEvent(new Event(OPEN_CHAT_EVENT));
 
 const destinations = [
   { number: '01', label: 'Busca con claridad', description: 'Consulta productos publicados y compara información referencial de las farmacias.', href: '/search', action: 'Explorar búsqueda' },
   { number: '02', label: 'Encuentra una farmacia', description: 'Explora farmacias por ciudad en la demostración local. Comparte tu ubicación solo si decides hacerlo.', href: '/search/mapa', action: 'Ver farmacias' },
-  { number: '03', label: 'Pregunta al asistente', description: 'Recibe orientación informativa basada en datos públicos, con límites clínicos claros.', href: '/assistant/conversation', action: 'Abrir FarmaFind AI' },
+  { number: '03', label: 'Pregunta al asistente', description: 'Recibe orientación informativa basada en datos públicos, con límites clínicos claros.', chat: true, action: 'Abrir FarmaFind AI' },
 ];
 
 export function Home() {
@@ -21,10 +24,11 @@ export function Home() {
 
     <section className="section-width pathways" aria-labelledby="pathways-title">
       <div className="section-heading"><div><p className="eyebrow">Un camino sencillo</p><h2 id="pathways-title">¿Qué necesitas hacer hoy?</h2></div><p>Elige por dónde comenzar. Cada resultado proviene de información pública autorizada.</p></div>
-      <div className="pathway-grid">{destinations.map(item => <article className="pathway-card" key={item.number}><span className="pathway-number">{item.number}</span><h3>{item.label}</h3><p>{item.description}</p><a href={item.href}>{item.action} <span aria-hidden="true">↗</span></a></article>)}</div>
+      <div className="pathway-grid">{destinations.map(item => <article className="pathway-card" key={item.number}><span className="pathway-number">{item.number}</span><h3>{item.label}</h3><p>{item.description}</p>{item.chat ? <button type="button" className="link-button" onClick={openChat}>{item.action}</button>
+        : <a href={item.href}>{item.action} <span aria-hidden="true">↗</span></a>}</article>)}</div>
     </section>
 
-    <section className="section-width trust-band" aria-labelledby="trust-title"><div className="trust-icon" aria-hidden="true">✓</div><div><p className="eyebrow">Información responsable</p><h2 id="trust-title">Transparencia en cada consulta</h2><p>Los resultados muestran únicamente datos publicados y autorizados. FarmaFind AI no diagnostica, prescribe ni recomienda dosis.</p></div><a className="button button-light" href="/assistant">Conocer el asistente</a></section>
+    <section className="section-width trust-band" aria-labelledby="trust-title"><div className="trust-icon" aria-hidden="true">✓</div><div><p className="eyebrow">Información responsable</p><h2 id="trust-title">Transparencia en cada consulta</h2><p>Los resultados muestran únicamente datos publicados y autorizados. FarmaFind AI no diagnostica, prescribe ni recomienda dosis.</p></div><button type="button" className="button button-light" onClick={openChat}>Preguntar al asistente</button></section>
 
     <section className="bootstrap-check" aria-label="Comprobación técnica F00"><h2>FarmaFind — Bootstrap</h2><p>Modo técnico: sin funcionalidades de negocio</p><p>Frontend React y Vite disponible en el entorno local.</p></section>
   </main>;

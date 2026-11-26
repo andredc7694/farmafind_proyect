@@ -2,7 +2,6 @@ export const publicNavigation = [
   { href: '/', label: 'Inicio' },
   { href: '/search', label: 'Buscar medicamentos' },
   { href: '/farmacias/solicitar', label: 'Registrar mi farmacia' },
-  { href: '/assistant/conversation', label: 'FarmaFind AI' },
 ];
 
 export const reservationsLink = { href: '/reservations', label: 'Mis reservas' };

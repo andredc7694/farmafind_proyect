@@ -173,3 +173,8 @@ El ejecutor `scripts/f061/run-gemini-live.mjs` quedó **desarmado con una barrer
 Las pruebas de este cierre fueron `npm run test:f061:unit` **85/85**, `npm run test:f061:api` **14/14**, `npm run check:f06` **32/32**, `npm run check` correcto (124 JS, TypeScript estricto y límites modulares), `npm run build` correcto y `npm run verify:contracts` **38/38**. La prueba de configuración incluye clave ficticia, solicitud de proveedor externo por entorno y navegador, ausencia de llamadas `fetch` externas, F03 con cero resultados y aviso sin secreto. PostgreSQL, Redis y Playwright no se repitieron porque no cambiaron sus componentes; sus resultados TEST reales anteriores se conservan arriba. `git diff --check` y la revisión de secretos se ejecutan antes del commit.
 
 **Pendientes sin cambio:** T030/T044, permisos de reutilización y revisión profesional del corpus farmacéutico real; F061-SC-008 y aceptación humana completa. Gemini real está **desactivado y pospuesto**; no es dependencia para F07. Ningún resultado histórico F00–F06 se altera.
+
+## Burbuja e intenciones — 2026-11-25
+- Causa de las respuestas pobres: «¿Qué información puedes mostrarme?» se clasificaba como consulta de ficha; un nombre suelto o «hola» caían en la ayuda genérica; «…entre farmacias» se buscaba como parte del nombre.
+- Sin migraciones ni cambios de RLS, permisos, contratos o límites de F06 (tasa, tamaño, turnos, 20 fuentes). Gemini sigue desactivado.
+- Las páginas retiradas dejan sin uso `AssistantView.jsx` y `ConversationView.jsx` (se conservan con sus pruebas); `frontend/tests/assistant/f061.spec.js` queda omitida.
