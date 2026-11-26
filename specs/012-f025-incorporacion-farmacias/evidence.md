@@ -319,3 +319,9 @@ Ensayo automático con Playwright Linux (`mcr.microsoft.com/playwright:v1.65.0-n
 - **Salvedad:** las 583 filas excluidas quedan pendientes hasta implementar la spec 020.
 - Sustituye al «NO APROBADA» anterior del mismo día. **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre); F025-RF23 aplazada.
 - Resultado registrado por la verificación humana; las cifras de la importación son las del historial que describe Andre.
+
+## Enmienda F025-FR-029 · 2026-11-26 (rama `fix/f025-propietario-gestiona-personal`)
+- SQL `f025/016` (hash `2667F61535861CB30852A3ACE1A867015A7AE68245EF254F9AFEBADCC7DF27AE`) aplicado solo a la base TEST técnica `farmafind_f01_test_0e5a2f669e60`; la base de la DEMO sigue sin la 016 (comprobado en `f025.schema_migrations`).
+- T066: `verify-application-commands` 41/41. Casos nuevos: la activación concede `membership.manage` al dueño; el trabajador y el administrador global no la tienen; el insert directo del ejecutor para un trabajador se rechaza (42501); la reparación restaura lo que falta, respeta la revocación, atribuye al revisor, deja 2 auditorías y la segunda ejecución no añade nada. `verify-rls` 46, `verify-private-profile` 12/12, `check-f04-rls` correcto (incluye la matriz de la spec 017).
+- T067: navegador (`browser-five`, `F025_BROWSER_STAFF=1`, 2 farmacias): solicitud → aprobación → «Personal» → crear trabajador → clave temporal → cambio obligatorio. El trabajador tiene su permiso, no tiene `membership.manage` y recibe 403/404 en `/staff`. Aislamiento cruzado entre ambas farmacias (inventario 404, reservas 403/404). 23 comprobaciones, salida 0.
+- T068: F01 unitarias 114, API 128, RLS 142; F02 RLS correcto; F02.5 unitarias 33; `check` correcto.
