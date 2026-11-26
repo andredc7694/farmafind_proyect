@@ -123,3 +123,5 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-26 · **Lote del asistente virtual ACEPTADO por Andre** (probado en su DEMO); autorizada su integración a `main`. F02.5 sigue SIN ACEPTAR (T057, T063).
 - 2026-11-26 · Spec 020: Andre elige la opción A. Se continúa solo cuando termine T057 y T063 o avise de un rato sin usar la DEMO; mientras tanto no apagarla ni modificarla.
 - 2026-11-26 · Regla de Andre: las próximas correcciones se registran como pendientes con fecha, cada una por separado; no se empiezan sin su orden y cada una aprobada va en su propia rama.
+- 2026-11-26 · **Hallazgo:** los propietarios activados por F02.5 no reciben `membership.manage` (no ven «Personal»). Andre ordena corregirlo como enmienda F025-FR-029 en `fix/f025-propietario-gestiona-personal`, antes de T057. Plan y borrador SQL `f025/016` (sin ejecutar) **pendientes de su aprobación**; requiere una política RLS de alta nueva, limitada a esa capacidad (aviso dado).
+- 2026-11-26 · Observación pendiente, sin orden: HUAMANFAR tampoco tiene `pharmacy.profile.read/write` (la 014; probablemente se activó antes).

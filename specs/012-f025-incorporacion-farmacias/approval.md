@@ -44,3 +44,9 @@ Andre cargó `farma.xlsx` (hojas «Precios», «Farmacia», «Léeme»; encabeza
 - **Salvedad:** las 583 filas excluidas quedan pendientes hasta implementar la spec 020.
 - Sustituye al «NO APROBADA» anterior del mismo día. **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre); F025-RF23 aplazada.
 - Autoriza: PR de `feat/f025-cierre-verificacion` y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada; después, rama nueva desde `main`: primero el lote del asistente virtual y luego la spec 020, sin alterar los datos ni el esquema de la DEMO de F02.5 mientras hace T057 y T063 (base TEST separada). Al aprobar productos nuevos del catálogo se exige el principio activo.
+
+## 2026-11-26 · Hallazgo y decisión: el propietario activado no gestiona su personal
+- **Hallazgo** (consulta de solo lectura): la activación F02.5 no concede `membership.manage`; el dueño de HUAMANFAR no ve «Personal». La gestión de personal F01.1 existe y está aceptada.
+- **Decisión de Andre:** corregirlo como enmienda de F02.5 (F025-FR-029), en una rama propia desde `main`, con SDD abreviado y parada en la aprobación del plan. Migración nueva y aditiva, sin editar la 009 ni los hashes aprobados. Mostrar el SQL antes de ejecutarlo. Reparar las farmacias ya activadas, con auditoría. Tocar RLS solo si es imprescindible y avisar. Pruebas: recorrido completo, aislamiento Alfa/Beta, ni trabajador ni administrador global obtienen el permiso, y regresión F01.1, F02.5 y spec 017.
+- Migrar la base de su DEMO queda autorizado **solo después** de que Andre apruebe el SQL. Debe quedar lista antes de su verificación T057.
+- T046 aceptada; **T057 y T063 sin marcar; F02.5 sigue SIN ACEPTAR.** Spec 020 en opción A.
