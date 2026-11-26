@@ -30,6 +30,24 @@ function coordinate(value:unknown,min:number,max:number,name:string):number {
     throw new LocationValidationError(`${name} inválida`);
   return value;
 }
+/** F071-FR-004: límites aproximados del Perú (los mismos que la restricción f071_ubicacion_en_peru). */
+export const PERU_BOUNDS = Object.freeze({ minLatitude:-18.4, maxLatitude:0.1, minLongitude:-81.4, maxLongitude:-68.6 });
+export function insidePeru(latitude:number,longitude:number):boolean {
+  return latitude>=PERU_BOUNDS.minLatitude && latitude<=PERU_BOUNDS.maxLatitude &&
+    longitude>=PERU_BOUNDS.minLongitude && longitude<=PERU_BOUNDS.maxLongitude;
+}
+
+export interface PlatformLocationDecisionInput extends LocationReviewInput {
+  readonly version:number; readonly reason:string;
+}
+/** F07.1: la decisión de plataforma exige versión y motivo siempre. */
+export function parsePlatformLocationDecision(raw:unknown):PlatformLocationDecisionInput {
+  const input=object(raw); exactKeys(input,['decision','version','evidenciaConfirmada','motivo'],[]);
+  if (!Number.isSafeInteger(input.version) || (input.version as number)<1) throw new LocationValidationError('Versión inválida');
+  const review=parseLocationReview({decision:input.decision,evidenciaConfirmada:input.evidenciaConfirmada,motivo:input.motivo});
+  return {...review,version:input.version as number,reason:review.reason as string};
+}
+
 export function parseLocationProposal(raw:unknown):LocationProposalInput {
   const input=object(raw);
   exactKeys(input,['direccionPublicable','ciudad','latitud','longitud','fuente'],['precisionMetros','evidenciaReferencia']);
@@ -37,10 +55,12 @@ export function parseLocationProposal(raw:unknown):LocationProposalInput {
   if (precision!==null && (typeof precision!=='number' || !Number.isFinite(precision) || precision<=0))
     throw new LocationValidationError('Precisión inválida');
   const evidence=input.evidenciaReferencia===undefined ? null : string(input.evidenciaReferencia,1,240,'Evidencia');
+  const latitude=coordinate(input.latitud,-90,90,'Latitud'),longitude=coordinate(input.longitud,-180,180,'Longitud');
+  if (!insidePeru(latitude,longitude)) throw new LocationValidationError('Ubicación fuera del Perú');
   return {
     address:string(input.direccionPublicable,1,240,'Dirección'),
     city:string(input.ciudad,2,120,'Ciudad').toLocaleLowerCase('es'),
-    latitude:coordinate(input.latitud,-90,90,'Latitud'),longitude:coordinate(input.longitud,-180,180,'Longitud'),
+    latitude,longitude,
     precisionMeters:precision as number|null,source:string(input.fuente,2,120,'Fuente'),evidenceReference:evidence,
   };
 }

@@ -76,6 +76,13 @@ import { createGeolocationRouter } from './modules/busqueda/presentation/geoloca
 import { PgLocationUnitOfWork } from './modules/farmacias/infrastructure/location-unit-of-work.js';
 import { ManagePharmacyLocation } from './modules/farmacias/application/manage-pharmacy-location.js';
 import { createLocationRouter } from './modules/farmacias/presentation/location-router.js';
+import { PlatformLocationReview } from './modules/farmacias/application/platform-location-review.js';
+import { PgPlatformLocationUnitOfWork } from './modules/farmacias/infrastructure/platform-location-repository.js';
+import { createPlatformLocationsRouter } from './modules/farmacias/presentation/platform-locations-router.js';
+import { ManageOpeningHours, ReadPublicOpeningHours } from './modules/farmacias/application/manage-opening-hours.js';
+import { PgOpeningHoursUnitOfWork, PgPublicOpeningHours,
+  RedisOpeningHoursCache } from './modules/farmacias/infrastructure/opening-hours-repository.js';
+import { createOpeningHoursRouter } from './modules/farmacias/presentation/opening-hours-router.js';
 import { PgPharmacyUnitOfWork } from './modules/farmacias/infrastructure/pharmacy-unit-of-work.js';
 import { ManageApplications } from './modules/farmacias/application/manage-applications.js';
 import { createPharmacyApplicationRouter } from './modules/farmacias/presentation/application-router.js';
@@ -219,6 +226,13 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
     if (config.geolocationTest) {
       app.use('/api/v1', createLocationRouter(identity,
         new ManagePharmacyLocation(new PgLocationUnitOfWork(tenantTransactions), invalidator), http));
+      // F07.1: revisión de plataforma (solo datos públicos) y horario de atención.
+      app.use('/api/v1', createPlatformLocationsRouter(identity,
+        new PlatformLocationReview(new PgPlatformLocationUnitOfWork(tenantTransactions), invalidator), http));
+      const hoursCache = redisClient ? new RedisOpeningHoursCache(redisClient) : undefined;
+      app.use('/api/v1', createOpeningHoursRouter(identity,
+        new ManageOpeningHours(new PgOpeningHoursUnitOfWork(tenantTransactions), hoursCache),
+        new ReadPublicOpeningHours(new PgPublicOpeningHours(tenantPool), hoursCache), http));
     }
     app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));
     const previewImport = new PreviewImport(inventoryTransactions);

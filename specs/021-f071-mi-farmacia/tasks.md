@@ -8,10 +8,10 @@
 - [X] T003 **[PUERTA]** Revisión y aprobación de Andre del SQL de T001 y T002 (hashes). Después, mover los archivos aprobados a `backend/migrations/f07/` sin cambiarlos.
 
 ## Fase 2 · Servidor (sin puertos: unitarias y API con dobles)
-- [ ] T004 Casos de uso, repositorio y router de revisión de plataforma: lista y decisión (aprobar o rechazar con motivo, evidencia y versión; solo la última pendiente; 403 para miembros o autores; 409 ante versión obsoleta). Pruebas unitarias y de API (FR-005, D-04).
-- [ ] T005 Estado e historial de ubicación de la propia farmacia (`GET /farmacias/:id/ubicacion`), con «Reemplazada» calculada y autores mostrados sin identificadores internos. Pruebas (FR-006).
-- [ ] T006 Validación de límites del Perú en la propuesta (servidor). Pruebas (FR-004).
-- [ ] T007 Horario: casos de uso, routers privado y público, caché Redis con invalidación al guardar. Pruebas (FR-008).
+- [X] T004 Casos de uso, repositorio y router de revisión de plataforma: lista y decisión (aprobar o rechazar con motivo, evidencia y versión; solo la última pendiente; 403 para miembros o autores; 409 ante versión obsoleta). Pruebas unitarias y de API (FR-005, D-04).
+- [X] T005 Estado e historial de ubicación de la propia farmacia (`GET /farmacias/:id/ubicacion`), con «Reemplazada» calculada y autores mostrados sin identificadores internos. Pruebas (FR-006).
+- [X] T006 Validación de límites del Perú en la propuesta (servidor). Pruebas (FR-004).
+- [X] T007 Horario: casos de uso, routers privado y público, caché Redis con invalidación al guardar. Pruebas (FR-008).
 
 ## Fase 3 · Pantalla (sin puertos: pruebas de componentes)
 - [ ] T008 Pestaña «Mi farmacia» que sustituye a «Farmacia y ubicación»: contacto (sale de `/inventory`), dirección y ubicación (pin, una sola lectura del dispositivo con permiso, coordenadas), estado e historial. Pruebas (FR-001 a FR-004, FR-006).

@@ -5,7 +5,18 @@ export interface StoredLocationProposal extends LocationProposalInput {
   readonly reviewerId:string|null; readonly status:'PENDIENTE'|'PUBLICADA_VERIFICADA'|'RECHAZADA';
   readonly version:number; readonly basePublicVersion:number;
 }
+/** F07.1: lectura del estado e historial de la propia farmacia (RLS por GEO_LOCATION_PROPOSE). */
+export interface LocationHistoryRow {
+  readonly proposal:StoredLocationProposal; readonly proposedAt:string; readonly reviewedAt:string|null;
+  readonly reason:string|null;
+}
+export interface PublicLocationState {
+  readonly verified:boolean; readonly address:string; readonly city:string|null;
+  readonly latitude:number|null; readonly longitude:number|null; readonly verifiedAt:string|null;
+}
 export interface LocationRepository {
+  history?(pharmacyId:string,limit:number):Promise<LocationHistoryRow[]>;
+  publicState?(pharmacyId:string):Promise<PublicLocationState|null>;
   publicVersion(pharmacyId:string):Promise<number|null>;
   insert(pharmacyId:string,actorId:string,input:LocationProposalInput,basePublicVersion:number):Promise<StoredLocationProposal>;
   find(pharmacyId:string,proposalId:string):Promise<StoredLocationProposal|null>;

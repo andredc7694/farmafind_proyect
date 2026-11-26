@@ -1,6 +1,7 @@
 import { LocationConflictError, LocationForbiddenError, LocationNotVisibleError,
   parseLocationProposal, parseLocationReview } from '../domain/pharmacy-location.js';
 import type { LocationUnitOfWork } from './location-ports.js';
+import { buildLocationStatus } from './location-status.js';
 import type { SearchInvalidator } from '../../busqueda/contracts/search-invalidator.js';
 
 export class ManagePharmacyLocation {
@@ -14,6 +15,15 @@ export class ManagePharmacyLocation {
       const proposal=await repository.insert(pharmacyId,context.actorId,input,base);
       await repository.audit(pharmacyId,proposal.id,context.actorId,'PROPUESTA');
       return {id:proposal.id,estado:proposal.status,version:proposal.version};
+    });
+  }
+
+  /** F071-FR-006: estado e historial de la propia farmacia (quien puede proponer). */
+  status(secret:string,pharmacyId:string) {
+    return this.transactions.run(secret,pharmacyId,'GEO_LOCATION_PROPOSE',async(repository,context)=>{
+      if (!repository.history || !repository.publicState) throw new LocationNotVisibleError('Historial no disponible');
+      const [history,published]=await Promise.all([repository.history(pharmacyId,50),repository.publicState(pharmacyId)]);
+      return buildLocationStatus(history,published,context.actorId);
     });
   }
 
