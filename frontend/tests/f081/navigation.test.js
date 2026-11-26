@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { actorKind, navigationFor, panelSections } from '../../src/app/navigation.js';
-import { accountNavigation, pharmacyNavigation, publicNavigation } from '../../src/app/routes.js';
+import { actorKind, navigationFor, accountLinksFor, panelSections } from '../../src/app/navigation.js';
+import { pharmacyNavigation, publicNavigation } from '../../src/app/routes.js';
 
 const owner = [{ pharmacyId: 'a', roleCode: 'DUENO', delegationCodes: ['membership.manage', 'inventory.read', 'inventory.write', 'inventory.import.preview', 'inventory.import.confirm',
   'reservation.read', 'reservation.accept', 'reservation.deliver', 'reservation.settings', 'GEO_LOCATION_PROPOSE'] }];
@@ -16,22 +16,42 @@ describe('F08.1 modelo de navegación por actor', () => {
     expect(actorKind({ session: { id: 'u' }, memberships: [{ roleCode: 'TRABAJADOR', delegationCodes: ['GEO_LOCATION_REVIEW'] }] })).toBe('revisor');
   });
 
-  it('el visitante ve solo el menú público mínimo y el acceso', () => {
-    const links = navigationFor();
-    expect(links.map(link => link.href)).toEqual([...publicNavigation.map(link => link.href), '/identity']);
-    expect(links.some(link => /panel|ubicacion|reservations|admin/.test(link.href))).toBe(false);
+  const u = { id: 'u' };
+  const hrefs = actor => navigationFor(actor).map(link => link.href);
+  const account = actor => accountLinksFor(actor).map(link => link.label);
+
+  it('visitante: menú público sin «Farmacias cercanas» y acceso dentro de Mi cuenta', () => {
+    expect(hrefs()).toEqual(['/', '/search', '/farmacias/solicitar', '/assistant/conversation']);
+    expect(navigationFor().map(link => link.label)).not.toContain('Farmacias cercanas');
+    expect(account()).toEqual(['Entrar o crear cuenta']);
   });
 
-  it('un cliente ve su cuenta y sus reservas, nunca paneles de farmacia ni de revisión', () => {
-    const hrefs = navigationFor({ session: { id: 'u' } }).map(link => link.href);
-    expect(hrefs).toEqual([...publicNavigation, ...accountNavigation].map(link => link.href));
+  it('cliente y solicitante ven sus reservas; el solicitante ve «Mi solicitud»', () => {
+    expect(hrefs({ session: u })).toEqual([...publicNavigation.map(link => link.href), '/reservations']);
+    const applicant = { session: u, applications: [{ estado: 'ENVIADA' }] };
+    expect(actorKind(applicant)).toBe('solicitante');
+    expect(navigationFor(applicant).map(link => link.label)).toContain('Mi solicitud');
+    expect(navigationFor(applicant).map(link => link.label)).not.toContain('Registrar mi farmacia');
+    expect(actorKind({ session: u, applications: [{ estado: 'RECHAZADA' }] })).toBe('cliente');
+    expect(account({ session: u })).toEqual(['Mi perfil']);
   });
 
-  it('mantiene el resultado anterior para propietario y revisor (sin regresión) y no duplica enlaces', () => {
-    const hrefs = navigationFor({ session: { id: 'u' }, memberships: owner, canReview: true }).map(link => link.href);
-    expect(hrefs).toEqual([...publicNavigation, ...accountNavigation, ...pharmacyNavigation(owner), { href: '/admin/farmacias/solicitudes' }].map(link => link.href));
-    expect(new Set(hrefs).size).toBe(hrefs.length);
-    expect(navigationFor({ session: { id: 'u' }, memberships: [...owner, ...owner] }).map(link => link.href).filter(href => href === '/farmacias/panel')).toHaveLength(1);
+  it('propietario: su panel, y «Mis reservas» solo dentro de Mi cuenta', () => {
+    expect(hrefs({ session: u, memberships: owner })).toEqual([...publicNavigation.map(link => link.href), ...pharmacyNavigation(owner).map(link => link.href)]);
+    expect(account({ session: u, memberships: owner })).toEqual(['Mi perfil', 'Mis reservas']);
+    expect(hrefs({ session: u, memberships: [...owner, ...owner] }).filter(href => href === '/farmacias/panel')).toHaveLength(1);
+  });
+
+  it('trabajador: solo su panel, aunque no tenga inventario; sin reservas de cliente', () => {
+    expect(hrefs({ session: u, memberships: worker })).toEqual(['/farmacias/panel']);
+    expect(account({ session: u, memberships: worker })).toEqual(['Mi perfil']);
+  });
+
+  it('administrador o revisor: ni reservas ni panel de inventario', () => {
+    expect(hrefs({ session: u, canReview: true })).toEqual([...publicNavigation.map(link => link.href), '/admin/farmacias/solicitudes']);
+    expect(account({ session: u, canReview: true })).toEqual(['Mi perfil']);
+    const geo = { session: u, memberships: [{ roleCode: 'TRABAJADOR', delegationCodes: ['GEO_LOCATION_REVIEW'] }] };
+    expect(hrefs(geo)).toEqual([...publicNavigation.map(link => link.href), '/ubicacion']);
   });
 
   it('el propietario recibe las secciones en el orden de la spec', () => {

@@ -21,3 +21,9 @@ MEJ-001 queda técnicamente avanzada pero sin aceptación final. MEJ-002 conserv
 - El cambio de rendimiento de `file-parser.ts` (commit `c4c5f4e`) está aprobado por el responsable como cambio fuera de las tareas originales.
 - F02.5 (T046, T057, T063), F08 y F06.1 siguen **sin aceptar**; esta decisión no los afecta.
 - La aceptación no implica integración a `main`: push, PR o merge requieren confirmación aparte (Constitution XVI).
+
+## 2026-11-25 · T046 — ACEPTADA («A: T046 ACEPTO», Andre)
+- Andre verificó en su DEMO: `farma.xlsx` importado con exclusión explícita de las 583 filas por revisar (517 importadas, 0 errores); inventario e historial detallado correctos; la búsqueda pública de «Aciclovir» muestra ofertas de HUAMANFAR; el menú por rol funciona; el mapa abre desde Buscar medicamentos.
+- **Salvedad:** las 583 filas excluidas quedan pendientes hasta implementar la spec 020.
+- Sustituye al «NO APROBADA» anterior del mismo día. **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre); F025-RF23 aplazada.
+- Cubre la enmienda F02.1 (importación en un paso, pantallas del panel, exclusión explícita e historial).

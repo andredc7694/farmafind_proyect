@@ -35,3 +35,12 @@ El responsable aprobó expresamente en esta conversación que la activación F02
 | `plan.md`, adenda 2026-11-21 | `0B73B83EDD2BC283A866936E7362AA1114A2D27FB15F7147F91271D90D51557A` | Contrato interno separado F05, 30 días configurables TEST, RLS/capacidades tenant, migraciones TEST propuestas y fixtures efímeros. |
 
 Se preparan T031, T036, T037 y T064 sin marcarlas completas. La ejecución de código, SQL, migraciones, servicios o pruebas queda para la siguiente autorización expresa. Ninguna base persistente, DEMO manual o entorno productivo queda autorizado para estas operaciones. GLO-01/BOOT-01 conservan sus límites y F02.5 no queda aceptada.
+
+## 2026-11-25 · T046 — NO APROBADA (verificación humana de Andre)
+Andre cargó `farma.xlsx` (hojas «Precios», «Farmacia», «Léeme»; encabezados `medicamento, nombre_generico, concentracion, presentacion, categoria_terapeutica, precio_regular_sol…`): la pantalla mostró «No se pudo completar la solicitud.» y los campos de mapeo quedaron con los nombres por defecto del importador antiguo. Incumple F021-FR-001–004 y SC-001 (propuesta automática de hoja, encabezado y mapeo) y MEJ-002 (error preciso). **T046 sigue sin marcar. T057 y T063 sin marcar.** Corrección pendiente de aprobación de Andre; no se cambió código.
+
+## 2026-11-25 · T046 — ACEPTADA («A: T046 ACEPTO», Andre)
+- Andre verificó en su DEMO: `farma.xlsx` importado con exclusión explícita de las 583 filas por revisar (517 importadas, 0 errores); inventario e historial detallado correctos; la búsqueda pública de «Aciclovir» muestra ofertas de HUAMANFAR; el menú por rol funciona; el mapa abre desde Buscar medicamentos.
+- **Salvedad:** las 583 filas excluidas quedan pendientes hasta implementar la spec 020.
+- Sustituye al «NO APROBADA» anterior del mismo día. **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre); F025-RF23 aplazada.
+- Autoriza: PR de `feat/f025-cierre-verificacion` y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada; después, rama nueva desde `main`: primero el lote del asistente virtual y luego la spec 020, sin alterar los datos ni el esquema de la DEMO de F02.5 mientras hace T057 y T063 (base TEST separada). Al aprobar productos nuevos del catálogo se exige el principio activo.

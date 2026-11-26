@@ -1,9 +1,20 @@
 import { catalogKey, type MedicationReference } from '../../medicamentos/contracts/reference.js';
+import { detectColumns } from './column-detector.js';
 
 export interface ParsedInventoryFile {
   readonly headers: readonly string[];
   readonly rows: readonly (readonly string[])[];
   readonly sourceLines?: readonly number[];
+  /** Celdas que no son texto ni número (fecha, fórmula, enlace…): no se evalúan; se señalan si caen en una columna usada. */
+  readonly cellIssues?: readonly CellIssue[];
+}
+
+export interface CellIssue {
+  readonly sheet: string;
+  readonly line: number;
+  readonly column: number;
+  readonly address: string;
+  readonly kind: string;
 }
 
 export interface InspectedInventoryFile {
@@ -33,6 +44,8 @@ export interface ReconciledImportRow {
   readonly physicalQuantity: number | null;
   readonly errorCode: string | null;
   readonly incidents?: readonly ImportIncident[];
+  /** Solo en la respuesta de la vista previa (no se persiste): lo que el propio usuario envió. */
+  readonly producto?: { readonly nombre: string; readonly concentracion: string; readonly presentacion: string; readonly clasificacion: string };
 }
 
 export interface ImportIncident {
@@ -76,6 +89,29 @@ export function assessConfirmation(state: ImportState, expiresAt: string, now: s
   return 'CONFIRMABLE';
 }
 
+/** Lo único que el usuario puede dejar fuera de forma explícita. Los errores de datos siempre bloquean. */
+export const EXCLUDABLE_ROW_CODES = ['FILA_DUPLICADA', 'REFERENCIA_NO_CONCILIADA'] as const;
+
+/** Decisión explícita: cuántas filas de cada tipo vio y aceptó excluir el usuario. */
+export interface ImportExclusion { readonly duplicadas: number; readonly pendientes: number; }
+
+/**
+ * Filas que se aplicarán tras excluir. Devuelve null si los números no coinciden exactamente con la vista previa
+ * guardada, si no hay nada que excluir, si alguna fila tiene un error no excluible o si no queda ninguna lista.
+ */
+export function rowsAfterExclusion(rows: readonly ReconciledImportRow[], incidents: readonly ImportIncident[],
+  exclusion: ImportExclusion): readonly ReconciledImportRow[] | null {
+  const excludable: readonly string[] = EXCLUDABLE_ROW_CODES;
+  const excluded = new Set(rows.filter(row => row.errorCode !== null && excludable.includes(row.errorCode)).map(row => row.line));
+  const count = (code: string) => rows.filter(row => row.errorCode === code).length;
+  if (excluded.size === 0 || count('FILA_DUPLICADA') !== exclusion.duplicadas ||
+      count('REFERENCIA_NO_CONCILIADA') !== exclusion.pendientes) return null;
+  if (incidents.some(item => excluded.has(item.line) && !excludable.includes(item.code))) return null;
+  const included = rows.filter(row => !excluded.has(row.line));
+  if (included.length === 0 || included.some(row => row.errorCode !== null)) return null;
+  return included;
+}
+
 function normalizedHeader(value: string): string {
   return value.normalize('NFKC').trim().toLocaleLowerCase('es-PE');
 }
@@ -96,29 +132,14 @@ export function isImportProfileCompatible(profile: {
   return profile.version === IMPORT_ALIAS_VERSION && profile.headerDigest === headerDigest &&
     profile.sheet === sheet && profile.headerRow === headerRow;
 }
-const importAliases: Readonly<Record<keyof Omit<ImportMapping, 'farmaciaId'>, readonly string[]>> = {
-  nombre: ['nombre', 'medicamento', 'producto'],
-  concentracion: ['concentracion', 'concentración'],
-  presentacion: ['presentacion', 'presentación'],
-  clasificacion: ['clasificacion', 'clasificación'],
-  precioReferencial: ['precio', 'precio unitario', 'precio referencial'],
-  cantidadFisica: ['cantidad', 'cantidad fisica', 'cantidad física', 'stock', 'existencia'],
-};
-
-/** Dictionary v1: exact normalized labels only; uncertain clinical fields stay unmapped. */
-export function suggestImportMapping(headers: readonly string[]): {
+/** Delegado en el detector determinista (nombre + contenido). Con filas, el contenido desempata. */
+export function suggestImportMapping(headers: readonly string[], rows: readonly (readonly string[])[] = []): {
   readonly mapping: Partial<ImportMapping>;
   readonly ambiguous: readonly (keyof Omit<ImportMapping, 'farmaciaId'>)[];
+  readonly missing: readonly (keyof Omit<ImportMapping, 'farmaciaId'>)[];
+  readonly headerMatches: number;
 } {
-  const mapping: Partial<Record<keyof Omit<ImportMapping, 'farmaciaId'>, string>> = {};
-  const ambiguous: (keyof Omit<ImportMapping, 'farmaciaId'>)[] = [];
-  for (const [field, aliases] of Object.entries(importAliases) as
-      [keyof Omit<ImportMapping, 'farmaciaId'>, readonly string[]][]) {
-    const matches = headers.filter(header => aliases.some(alias => normalizedHeader(alias) === normalizedHeader(header)));
-    if (matches.length === 1) mapping[field] = matches[0];
-    else if (matches.length > 1) ambiguous.push(field);
-  }
-  return { mapping, ambiguous };
+  return detectColumns(headers, rows);
 }
 
 function priceCents(value: string): number | null {
@@ -148,7 +169,7 @@ export function reconcileImportRows(parsed: ParsedInventoryFile, mapping: Import
   const declaredPharmacy = mapping.farmaciaId === undefined ? headers.indexOf('farmacia_id')
     : headers.indexOf(normalizedHeader(mapping.farmaciaId));
   if (mapping.farmaciaId !== undefined && declaredPharmacy < 0) throw new Error('Mapeo de farmacia inválido');
-  const seen = new Set<string>();
+  const seen = new Map<string, number>(); // identidad del producto -> primera fila donde aparece
   return parsed.rows.map((row, index) => {
     const line = parsed.sourceLines?.[index] ?? index + 2;
     const incidents: ImportIncident[] = [];
@@ -165,9 +186,10 @@ export function reconcileImportRows(parsed: ParsedInventoryFile, mapping: Import
     } catch { errorCode = 'REFERENCIA_INVALIDA'; }
     if (errorCode) incidents.push(incident(line, 'nombre', mapping.nombre, errorCode));
     if (key && seen.has(key)) errorCode = 'FILA_DUPLICADA';
-    if (errorCode === 'FILA_DUPLICADA') incidents.push(incident(line, 'nombre', mapping.nombre, errorCode));
-    if (key) seen.add(key);
-    const price = priceCents(row[indexes.precioReferencial]);
+    if (errorCode === 'FILA_DUPLICADA') incidents.push({ ...incident(line, 'nombre', mapping.nombre, errorCode),
+      cause: `Repite el mismo producto, concentración, presentación y condición de venta de la fila ${seen.get(key)}` });
+    if (key && !seen.has(key)) seen.set(key, line);
+    const price = priceCents(row[indexes.precioReferencial].replace(/^\s*s\/\.?\s*/i, ''));
     const physical = quantity(row[indexes.cantidadFisica]);
     if (price === null) incidents.push(incident(line, 'precioReferencial', mapping.precioReferencial,
       row[indexes.precioReferencial].trim() ? 'PRECIO_INVALIDO' : 'PRECIO_REQUERIDO'));
@@ -178,6 +200,21 @@ export function reconcileImportRows(parsed: ParsedInventoryFile, mapping: Import
       errorCode = 'FARMACIA_AJENA';
       incidents.push(incident(line, 'farmaciaId', mapping.farmaciaId ?? 'farmacia_id', errorCode));
     }
-    return { line, medicationId, priceCents: price, physicalQuantity: physical, errorCode, incidents };
+    // Celdas no admitidas en columnas usadas: se señalan con hoja, celda, causa y solución (nunca se evalúan).
+    for (const issue of parsed.cellIssues ?? []) {
+      if (issue.line !== line) continue;
+      const field = required.find(key => indexes[key] === issue.column);
+      if (!field) continue;
+      const code = field === 'precioReferencial' ? 'PRECIO_INVALIDO' : field === 'cantidadFisica' ? 'CANTIDAD_INVALIDA' : 'REFERENCIA_INVALIDA';
+      const detail: ImportIncident = { line, field, column: mapping[field], code, title: 'Celda no admitida',
+        cause: `Hoja «${issue.sheet}», celda ${issue.address}: contiene ${issue.kind}`,
+        action: 'Escribe ese valor como texto o número y vuelve a cargar el archivo', supportCode: `IMP-${code}` };
+      const same = incidents.findIndex(item => item.field === field);
+      if (same >= 0) incidents.splice(same, 1, detail); else incidents.push(detail);
+      errorCode = field === 'precioReferencial' || field === 'cantidadFisica' ? 'VALOR_INVALIDO' : 'REFERENCIA_INVALIDA';
+    }
+    const producto = { nombre: row[indexes.nombre], concentracion: row[indexes.concentracion],
+      presentacion: row[indexes.presentacion], clasificacion: row[indexes.clasificacion] };
+    return { line, medicationId, priceCents: price, physicalQuantity: physical, errorCode, incidents, producto };
   });
 }

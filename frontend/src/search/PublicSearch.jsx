@@ -95,10 +95,11 @@ export function PublicSearch({ client = createPublicSearchClient() }) {
       <button type="submit" disabled={status === 'loading'}>{status === 'loading' ? 'Buscando…' : 'Buscar'}</button>
     </form>
     {message && <p role="alert">{message}</p>}
+    {!result && <p><a href="/search/mapa">Ver farmacias en el mapa</a></p>}
     {result && <section aria-live="polite"><p className="notice">{result.aviso}</p>
       <div className="search-view-toggle" role="group" aria-label="Vista de resultados">
         <button type="button" aria-pressed="true">Lista</button>
-        <a href={`/mapa${result.consulta ? `?q=${encodeURIComponent(result.consulta)}` : ''}`}>Ver farmacias en el mapa</a>
+        <a href={`/search/mapa${result.consulta ? `?q=${encodeURIComponent(result.consulta)}` : ''}`}>Ver farmacias en el mapa</a>
       </div>
       {result.ofertas.length === 0 ? <EmptyState title="Sin ofertas publicadas">No encontramos ofertas publicadas para esta consulta. Prueba con otro nombre o revisa los filtros.</EmptyState> :
         <ul className="offer-grid">{result.ofertas.map((offer, index) => {

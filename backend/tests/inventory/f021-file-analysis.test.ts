@@ -38,13 +38,16 @@ describe('F02.1: inspección acotada de archivos', () => {
     expect(parsed.sourceLines).toEqual([4]);
   });
 
-  it('mantiene límites y rechaza fórmulas aun en hojas no seleccionadas', async () => {
+  it('mantiene límites; fórmulas y fechas nunca se evalúan: se marcan solo en la hoja elegida (enmienda 2026-11-25)', async () => {
     const workbook = new ExcelJS.Workbook();
     workbook.addWorksheet('No seleccionada').addRow([{ formula: '1+1', result: 2 }]);
     const sheet = workbook.addWorksheet('Inventario');
-    sheet.addRow(['Producto', 'Precio']); sheet.addRow(['Ejemplo', 2]);
-    await expect(inspectInventoryFile(Buffer.from(await workbook.xlsx.writeBuffer()), 'formula.xlsx'))
-      .rejects.toThrow('Celda XLSX no permitida');
+    sheet.addRow(['Producto', 'Precio']); sheet.addRow(['Ejemplo', { formula: '1+1', result: 2 }]);
+    const bytes = Buffer.from(await workbook.xlsx.writeBuffer());
+    const inspected = await inspectInventoryFile(bytes, 'formula.xlsx');
+    const selected = await selectInventoryFile(bytes, 'formula.xlsx', inspected, { sheet: 'Inventario', headerRow: 1 });
+    expect(selected.rows).toEqual([['Ejemplo', '']]); // ni se evalúa ni se usa el valor guardado
+    expect(selected.cellIssues).toEqual([{ sheet: 'Inventario', line: 2, column: 1, address: 'B2', kind: 'una fórmula' }]);
     await expect(inspectInventoryFile(Buffer.alloc(5 * 1024 * 1024 + 1), 'grande.csv'))
       .rejects.toThrow('Archivo excede límites');
     const wide = new ExcelJS.Workbook();

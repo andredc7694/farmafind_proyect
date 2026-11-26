@@ -1,4 +1,9 @@
-function failure(response) {
+/** Mensaje específico: al leer un archivo (análisis y vista previa) se usa el del servidor (causa y solución). */
+async function failure(response, fileStep = false) {
+  if (fileStep && [400, 409, 413].includes(response.status)) {
+    const body = await response.json?.().catch(() => null);
+    if (typeof body?.message === 'string' && body.message.length > 0 && body.message.length <= 300) return new Error(body.message);
+  }
   if (response.status === 401) return new Error('La sesión terminó. Inicia sesión de nuevo.');
   if (response.status === 403) return new Error('La solicitud no pudo verificarse. Inténtalo de nuevo.');
   if (response.status === 404) return new Error('No tienes acceso a esta farmacia o recurso.');
@@ -9,13 +14,13 @@ function failure(response) {
 export function createInventoryClient(fetchImpl = fetch) {
   async function get(path) {
     const response = await fetchImpl(`/api/v1${path}`, { credentials: 'same-origin', cache: 'no-store' });
-    if (!response.ok) throw failure(response);
+    if (!response.ok) throw await failure(response);
     return response.json();
   }
 
   async function csrf() {
     const response = await fetchImpl('/api/v1/auth/csrf', { credentials: 'same-origin', cache: 'no-store' });
-    if (!response.ok) throw failure(response);
+    if (!response.ok) throw await failure(response);
     const data = await response.json();
     if (typeof data.csrfToken !== 'string') throw new Error('No se pudo verificar la solicitud.');
     return data.csrfToken;
@@ -28,7 +33,8 @@ export function createInventoryClient(fetchImpl = fetch) {
       headers: { 'X-CSRF-Token': token, ...(json ? { 'Content-Type': 'application/json' } : {}) },
       body: json ? JSON.stringify(body) : body,
     });
-    if (!response.ok) throw failure(response);
+    const fileStep = path.endsWith('/importaciones/analizar') || path.endsWith('/importaciones/vista-previa');
+    if (!response.ok) throw await failure(response, fileStep);
     return response.json();
   }
 
@@ -60,8 +66,9 @@ export function createInventoryClient(fetchImpl = fetch) {
     profiles: pharmacyId => get(`${path(pharmacyId)}/importaciones/perfiles`),
     saveProfile: (pharmacyId, importId, name) =>
       change(`${path(pharmacyId)}/importaciones/perfiles`, 'POST', { importacionId: importId, nombre: name }),
-    confirm: (pharmacyId, importId) =>
-      change(`${path(pharmacyId)}/importaciones/${encodeURIComponent(importId)}/confirmar`, 'POST'),
+    confirm: (pharmacyId, importId, exclusion) =>
+      change(`${path(pharmacyId)}/importaciones/${encodeURIComponent(importId)}/confirmar`, 'POST',
+        exclusion ? { excluir: exclusion } : undefined),
     imports: pharmacyId => get(`${path(pharmacyId)}/importaciones`),
     importStatus: (pharmacyId, importId) =>
       get(`${path(pharmacyId)}/importaciones/${encodeURIComponent(importId)}`),

@@ -1,42 +1,59 @@
 import React, { useState } from 'react';
+import { PreviewResults } from './PreviewResults.jsx';
+import { ExclusionConfirm } from './ExclusionConfirm.jsx';
 
-const initialMapping = { nombre: 'nombre', concentracion: 'concentracion',
-  presentacion: 'presentacion', clasificacion: 'clasificacion',
-  precioReferencial: 'precio', cantidadFisica: 'cantidad' };
+export const fieldLabels = { nombre: 'Producto', concentracion: 'Concentración', presentacion: 'Presentación',
+  clasificacion: 'Clasificación (condición de venta)', precioReferencial: 'Precio', cantidadFisica: 'Stock' };
+const fields = Object.keys(fieldLabels);
 
+/**
+ * Importación en un paso (enmienda F02.1): al elegir el archivo se analiza solo y se muestra la vista previa.
+ * Solo se pregunta por el dato que falte o sea ambiguo; el ajuste manual queda oculto en «Ajustar columnas».
+ */
 export function ImportPreview({ onInspect, onProfiles, onSaveProfile, onPreview, onConfirm, onReset,
-  preview, busy, canConfirm = true }) {
+  preview, busy, canConfirm = true, error = '' }) {
   const [file, setFile] = useState(null);
-  const [mapping, setMapping] = useState(initialMapping);
   const [inspection, setInspection] = useState(null);
-  const [candidateIndex, setCandidateIndex] = useState('');
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const [mapping, setMapping] = useState({});
+  const [adjusting, setAdjusting] = useState(false);
+  const [working, setWorking] = useState(false);
   const [profiles, setProfiles] = useState([]);
   const [profileName, setProfileName] = useState('');
   const [profileError, setProfileError] = useState('');
-  function update(key, value) { setMapping(current => ({ ...current, [key]: value })); }
-  async function inspect() {
-    if (!file || !onInspect) return;
+
+  const candidate = inspection?.candidatos[candidateIndex] ?? null;
+  const questions = candidate ? candidate.preguntas : [];
+  const complete = fields.every(field => mapping[field]);
+  const selectionFor = (analysis, item) => ({ sheet: item.sheet, headerRow: item.headerRow, digest: analysis.huella });
+  const compatibleProfiles = candidate ? profiles.filter(profile => profile.version === 1 &&
+    profile.headerDigest === candidate.headerDigest && profile.sheet === candidate.sheet && profile.headerRow === candidate.headerRow) : [];
+
+  async function choose(next) {
+    setFile(next); setInspection(null); setMapping({}); setAdjusting(false); setCandidateIndex(0); setProfileError('');
     onReset?.();
-    setInspection(null); setCandidateIndex('');
-    const result = await onInspect(file);
-    setInspection(result);
-    if (result && onProfiles) {
-      try { setProfiles(await onProfiles()); }
-      catch { setProfiles([]); }
-    }
+    if (!next || !onInspect) return;
+    setWorking(true);
+    try {
+      const analysis = await onInspect(next);
+      if (!analysis) return;
+      setInspection(analysis);
+      const first = analysis.candidatos[0];
+      if (!first) return;
+      setMapping(first.mapping);
+      if (onProfiles) { try { setProfiles(await onProfiles()); } catch { setProfiles([]); } }
+      if (first.preguntas.length === 0) await onPreview(next, first.mapping, selectionFor(analysis, first));
+    } finally { setWorking(false); }
   }
-  function chooseCandidate(index) {
-    setCandidateIndex(index);
-    const candidate = inspection?.candidatos[Number(index)];
-    if (candidate) setMapping(current => ({ ...current, ...candidate.mapping,
-      ...Object.fromEntries(candidate.ambiguous.map(field => [field, ''])) }));
+  async function revalidate(nextMapping = mapping) {
+    if (!file || !candidate) return;
+    setWorking(true);
+    try { await onPreview(file, nextMapping, selectionFor(inspection, candidate)); }
+    finally { setWorking(false); }
   }
-  const candidate = candidateIndex === '' ? null : inspection?.candidatos[Number(candidateIndex)];
-  const selection = candidate ? { sheet: candidate.sheet, headerRow: candidate.headerRow,
-    digest: inspection.huella } : undefined;
-  const compatibleProfiles = candidate ? profiles.filter(profile =>
-    profile.version === 1 && profile.headerDigest === candidate.headerDigest && profile.sheet === candidate.sheet &&
-    profile.headerRow === candidate.headerRow) : [];
+  function chooseSheet(index) {
+    setCandidateIndex(index); setMapping(inspection.candidatos[index].mapping); onReset?.();
+  }
   async function saveProfile() {
     if (!preview?.importacionId || !onSaveProfile || !profileName.trim()) return;
     setProfileError('');
@@ -45,79 +62,76 @@ export function ImportPreview({ onInspect, onProfiles, onSaveProfile, onPreview,
       setProfiles(current => [...current, saved]); setProfileName('');
     } catch (error) { setProfileError(error.message || 'No se pudo guardar el perfil.'); }
   }
+  const columnSelect = (field, label) => <label key={field}>{label}
+    <select aria-label={label} value={mapping[field] ?? ''} onChange={event => setMapping(current => ({ ...current, [field]: event.target.value }))}>
+      <option value="">Elegir columna…</option>
+      {candidate.headers.map(header => <option key={header} value={header}>{header}</option>)}
+    </select>
+  </label>;
+
+  const pending = preview ? preview.filas.filter(row => row.errorCode === 'REFERENCIA_NO_CONCILIADA').length : 0;
+
   return <section aria-labelledby="import-title">
     <h2 id="import-title">Importar inventario</h2>
-    <p>Revisa las filas antes de confirmar. Un error bloquea el archivo completo.</p>
-    <p><a href="/plantilla-inventario-demo.csv" download="plantilla-inventario-demo.csv">Descargar plantilla CSV de demostración</a></p>
-    <form onSubmit={event => { event.preventDefault(); if (file && (!inspection || selection))
-      void onPreview(file, mapping, selection); }}>
-      <label htmlFor="inventory-file">Archivo CSV o XLSX</label>
-      <input id="inventory-file" type="file" accept=".csv,.xlsx" required
-        onChange={event => { setFile(event.target.files?.[0] ?? null); setInspection(null);
-          setCandidateIndex(''); setProfiles([]); onReset?.(); }} />
-      {onInspect && <button type="button" disabled={busy || !file} onClick={() => void inspect()}>
-        Analizar hojas y encabezados</button>}
-      {inspection && <div role="status">
-        <label htmlFor="inventory-candidate">Hoja y fila de encabezado</label>
-        <select id="inventory-candidate" value={candidateIndex}
-          onChange={event => chooseCandidate(event.target.value)}>
-          <option value="">Selecciona una opción para revisar</option>
-          {inspection.candidatos.map((item, index) => <option key={`${item.sheet}-${item.headerRow}`}
-            value={index}>{item.sheet}, fila {item.headerRow} ({item.matchedFields} campos reconocidos)</option>)}
-        </select>
-        {candidate?.ambiguous.length > 0 && <p>Columnas ambiguas: {candidate.ambiguous.join(', ')}.
-          Corrige manualmente su correspondencia antes de continuar.</p>}
-        {compatibleProfiles.length > 0 && <label>Perfil compatible de esta farmacia
-          <select defaultValue="" onChange={event => {
-            const profile = compatibleProfiles.find(item => item.id === event.target.value);
-            if (profile) setMapping(profile.mapping);
-          }}>
-            <option value="">Elegir tras revisar columnas</option>
-            {compatibleProfiles.map(profile => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
-          </select>
-        </label>}
-        {inspection.candidatos.length === 0 && <p>No se identificaron encabezados utilizables.
-          Revisa el archivo o utiliza un formato admitido.</p>}
-      </div>}
-      <fieldset><legend>Correspondencia de columnas</legend>
-        {Object.keys(initialMapping).map(key => <label key={key}>{key}
-          <input value={mapping[key]} onChange={event => update(key, event.target.value)} required />
-        </label>)}
-        <label>Columna de farmacia (opcional)
-          <input value={mapping.farmaciaId ?? ''} onChange={event => {
-            const value = event.target.value;
-            setMapping(current => { const next = { ...current }; if (value) next.farmaciaId = value;
-              else delete next.farmaciaId; return next; });
-          }} />
-        </label>
-      </fieldset>
-      <button type="submit" disabled={busy || !file || (inspection && !selection)}>
-        Preparar vista previa</button>
-    </form>
+    <p>Elige tu archivo: lo analizamos solos y te mostramos los productos antes de guardar nada.</p>
+    <label htmlFor="inventory-file">Archivo CSV o XLSX</label>
+    <input id="inventory-file" type="file" accept=".csv,.xlsx" disabled={busy}
+      onChange={event => void choose(event.target.files?.[0] ?? null)} />
+    {working && <p role="status">Analizando el archivo…</p>}
+    {!working && error && <p role="status" className="import-error">{error}</p>}
+
+    {inspection && !candidate && <p role="alert">No encontramos columnas de inventario en ninguna hoja
+      ({inspection.hojasIgnoradas?.join(', ')}). La hoja debe tener una fila de encabezados con producto, concentración,
+      presentación, condición de venta, precio y stock.</p>}
+
+    {candidate && questions.length > 0 && !preview && <fieldset>
+      <legend>Solo falta esto para continuar</legend>
+      {questions.map(({ campo, motivo }) => <div key={campo}>
+        <p>{motivo === 'AMBIGUO' ? `Hay más de una columna posible para «${fieldLabels[campo]}».`
+          : `No encontramos la columna de «${fieldLabels[campo]}» en la hoja «${candidate.sheet}».`}</p>
+        {motivo === 'FALTA' && campo === 'cantidadFisica' && inspection.hojasConStock?.length > 0 && <p>
+          Hay stock en otra hoja: {inspection.hojasConStock.map(item => `«${item.hoja}», columna «${item.columna}»`).join('; ')}.
+          No lo combinamos automáticamente.</p>}
+        {columnSelect(campo, fieldLabels[campo])}
+      </div>)}
+      <button type="button" disabled={busy || working || !complete} onClick={() => void revalidate()}>Continuar</button>
+    </fieldset>}
+
+    {candidate && <p><button type="button" aria-expanded={adjusting} onClick={() => setAdjusting(open => !open)}>Ajustar columnas</button></p>}
+    {candidate && adjusting && <fieldset>
+      <legend>Ajuste manual</legend>
+      {inspection.candidatos.length > 1 && <label>Hoja
+        <select value={candidateIndex} onChange={event => chooseSheet(Number(event.target.value))}>
+          {inspection.candidatos.map((item, index) => <option key={`${item.sheet}-${item.headerRow}`} value={index}>{item.sheet}, fila {item.headerRow}</option>)}
+        </select></label>}
+      {compatibleProfiles.length > 0 && <label>Perfil compatible de esta farmacia
+        <select defaultValue="" onChange={event => {
+          const profile = compatibleProfiles.find(item => item.id === event.target.value);
+          if (profile) setMapping(profile.mapping);
+        }}>
+          <option value="">Elegir…</option>
+          {compatibleProfiles.map(profile => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
+        </select></label>}
+      {fields.map(field => columnSelect(field, fieldLabels[field]))}
+      <button type="button" disabled={busy || working || !complete} onClick={() => void revalidate()}>Actualizar vista previa</button>
+    </fieldset>}
+
     {preview && <div>
       <h3>Vista previa: {preview.estado}</h3>
+      {candidate && <p>Hoja «{candidate.sheet}» · {fields.map(field => `${fieldLabels[field]}: ${mapping[field]}`).join(' · ')}</p>}
       <p>Caduca: {new Date(preview.caducaEn).toLocaleString('es-PE')}</p>
       <p>{preview.filas.length} filas; {preview.incidencias?.length ?? preview.errores.length} incidencias.</p>
-      {Array.isArray(preview.incidencias) && preview.incidencias.length > 0 && <section
-        aria-label="Incidencias de importación">
-        <h4>Corrige estas filas y vuelve a validar el archivo</h4>
-        <ol>{preview.incidencias.map((item, index) => <li key={`${item.line}-${item.code}-${index}`}>
-          <strong>Fila {item.line}, columna {item.column}, campo {item.field}: {item.title}</strong>. {item.cause}.
-          {' '}{item.action}. Código {item.supportCode}.
-        </li>)}</ol>
-      </section>}
-      <ul>{preview.filas.map(row => <li key={row.line}>
-        Fila {row.line}: {row.errorCode ?? `Referencia ${row.medicationId}; cantidad ${row.physicalQuantity}; precio S/ ${(row.priceCents / 100).toFixed(2)}`}
-      </li>)}</ul>
+      {preview.errores.length > 0 && <p>Un error bloquea el archivo completo: no se guarda nada hasta que todas las filas estén listas.
+        {pending > 0 && ' Los pendientes de catálogo no existen todavía en el catálogo de FarmaFind; no se descartan ni se equiparan a otros.'}</p>}
+      <PreviewResults key={preview.importacionId} preview={preview} />
       {canConfirm && <button type="button" disabled={busy || preview.errores.length > 0}
-        onClick={() => void onConfirm(preview.importacionId)}>Confirmar archivo completo</button>
-      }
-      {canConfirm && onSaveProfile && selection && preview.errores.length === 0 && <div>
+        onClick={() => void onConfirm(preview.importacionId)}>Confirmar archivo completo</button>}
+      {canConfirm && preview.errores.length > 0 && <ExclusionConfirm key={`excluir-${preview.importacionId}`} rows={preview.filas}
+        busy={busy} onConfirm={exclusion => onConfirm(preview.importacionId, exclusion)} />}
+      {canConfirm && onSaveProfile && candidate && preview.errores.length === 0 && <div>
         <label htmlFor="import-profile-name">Nombre del perfil de columnas</label>
-        <input id="import-profile-name" maxLength={80} value={profileName}
-          onChange={event => setProfileName(event.target.value)} />
-        <button type="button" disabled={busy || !profileName.trim()} onClick={() => void saveProfile()}>
-          Guardar perfil para esta farmacia</button>
+        <input id="import-profile-name" maxLength={80} value={profileName} onChange={event => setProfileName(event.target.value)} />
+        <button type="button" disabled={busy || !profileName.trim()} onClick={() => void saveProfile()}>Guardar perfil para esta farmacia</button>
         {profileError && <p role="alert">{profileError}</p>}
       </div>}
     </div>}

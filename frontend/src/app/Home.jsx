@@ -2,7 +2,7 @@ import React from 'react';
 
 const destinations = [
   { number: '01', label: 'Busca con claridad', description: 'Consulta productos publicados y compara información referencial de las farmacias.', href: '/search', action: 'Explorar búsqueda' },
-  { number: '02', label: 'Encuentra una farmacia', description: 'Explora farmacias por ciudad en la demostración local. Comparte tu ubicación solo si decides hacerlo.', href: '/mapa', action: 'Ver farmacias' },
+  { number: '02', label: 'Encuentra una farmacia', description: 'Explora farmacias por ciudad en la demostración local. Comparte tu ubicación solo si decides hacerlo.', href: '/search/mapa', action: 'Ver farmacias' },
   { number: '03', label: 'Pregunta al asistente', description: 'Recibe orientación informativa basada en datos públicos, con límites clínicos claros.', href: '/assistant/conversation', action: 'Abrir FarmaFind AI' },
 ];
 
@@ -13,7 +13,7 @@ export function Home() {
         <p className="eyebrow"><span className="eyebrow-dot" /> Información farmacéutica a tu alcance</p>
         <h1 id="home-title">Encuentra información para <em>decidir con claridad.</em></h1>
         <p className="hero-lead">Busca medicamentos publicados, compara opciones referenciales y encuentra farmacias desde un solo lugar.</p>
-        <div className="hero-actions"><a className="button button-primary" href="/search">Buscar medicamentos <span aria-hidden="true">↗</span></a><a className="button button-outline" href="/mapa">Explorar farmacias</a></div>
+        <div className="hero-actions"><a className="button button-primary" href="/search">Buscar medicamentos <span aria-hidden="true">↗</span></a><a className="button button-outline" href="/search/mapa">Explorar farmacias</a></div>
         <p className="hero-note">Información pública y referencial. Confirma disponibilidad y precio directamente con la farmacia.</p>
       </div>
       <div className="hero-art" aria-hidden="true"><div className="hero-orbit orbit-one"/><div className="hero-orbit orbit-two"/><div className="hero-center"><span>✚</span><small>farmafind</small></div><span className="hero-chip chip-one">Búsqueda clara</span><span className="hero-chip chip-two">Farmacias cerca</span></div>

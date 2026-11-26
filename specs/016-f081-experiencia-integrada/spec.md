@@ -163,3 +163,15 @@ Como visitante quiero un botón flotante de chat minimizable (sobre F06.1 en mod
 | MEJ-006, HU15, RF28 | F081-FR-010–011 |
 | MEJ-009/010/012, HU17/18/20, RF30/31/33 | F081-FR-012–013, 017; SC-006 |
 | Transversal | F081-FR-014–016; SC-007, SC-008 |
+
+## Enmienda 2026-11-25: menú por rol (sustituye lo anterior donde difiera)
+| Actor | Menú principal | Dentro de «Mi cuenta» |
+|---|---|---|
+| Visitante | Inicio, Buscar medicamentos, Registrar mi farmacia, FarmaFind AI | Entrar o crear cuenta, tema |
+| Cliente | lo anterior + Mis reservas | Mi perfil, tema, cerrar sesión |
+| Solicitante | como cliente, con «Mi solicitud» en vez de «Registrar mi farmacia» | Mi perfil, tema, cerrar sesión |
+| Propietario | públicos + Panel de farmacia (y Ubicación) | Mi perfil, Mis reservas, tema, cerrar sesión |
+| Trabajador | Panel de farmacia | Mi perfil, tema, cerrar sesión |
+| Administrador o revisor | públicos + Revisar solicitudes (o Ubicación) | Mi perfil, tema, cerrar sesión |
+- **F081-FR-020**: El menú solo oculta opciones; cada acción sigue autorizada por el servidor.
+- **F081-FR-021**: El mapa vive en `/search/mapa`, enlazado desde Buscar medicamentos; `/mapa` redirige allí. MEJ-003 queda parcial y MEJ-007 apenas iniciada.

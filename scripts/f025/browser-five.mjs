@@ -2,7 +2,8 @@
 import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
 import {readFileSync} from 'node:fs';
-import {chromium,expect} from '@playwright/test';
+import {chromium,expect as baseExpect} from '@playwright/test';
+const expect=baseExpect.configure({timeout:20000}); // las pantallas cargan listas largas y el equipo puede estar ocupado
 
 assert.equal(process.platform,'linux');
 assert.equal(process.env.F025_E2E_CONTAINER,'1');
@@ -37,11 +38,14 @@ try{
   await reviewer.getByRole('button',{name:'Iniciar sesión'}).click();
   await expect(reviewer.getByRole('heading',{name:'Sesión activa'})).toBeVisible({timeout:15000});checks++;
   for(let number=1;number<=count;number++){
+    if(number>1&&process.env.F025_BROWSER_PACE_MS)await new Promise(done=>setTimeout(done,Number(process.env.F025_BROWSER_PACE_MS))); // evita el límite de peticiones por IP de la API
     const marker=randomBytes(5).toString('hex');
     const name=`Farmacia Navegador ${number} ${marker}`;
     const ownerContext=await browser.newContext();
     ownerContext.setDefaultNavigationTimeout(60000);
     const owner=await ownerContext.newPage();
+    owner.on('response',r=>{if(r.status()>=400)console.log(JSON.stringify({kind:'HTTP',number,status:r.status(),path:new URL(r.url()).pathname}));});
+    owner.on('requestfailed',r=>console.log(JSON.stringify({kind:'REQFAILED',number,path:new URL(r.url()).pathname,why:r.failure()?.errorText})));
     await owner.goto(`${root}/identity`);
     const account=browserUsers.accounts[number-1];
     await owner.locator('#login-email').fill(account.email);
@@ -54,7 +58,13 @@ try{
       const own=(await memberships.json()).filter(item=>
         item.pharmacyName.startsWith(`Farmacia Navegador ${number} `));
       assert(own.length>=1);
-      owners.push({context:ownerContext,id:own.at(-1).pharmacyId,name:own.at(-1).pharmacyName});
+      // Varias ejecuciones dejan varias farmacias por cuenta: se prefiere la última con inventario vacío (para importar sin choques).
+      let chosen=own.at(-1);
+      for(const item of [...own].reverse()){
+        const inventory=await ownerContext.request.get(`${root}/api/v1/farmacias/${item.pharmacyId}/inventario`);
+        if(inventory.status()===200&&(await inventory.json()).length===0){chosen=item;break;}
+      }
+      owners.push({context:ownerContext,id:chosen.pharmacyId,name:chosen.pharmacyName});
       continue;
     }
     await owner.goto(`${root}/farmacias/solicitar`);
@@ -85,7 +95,8 @@ try{
     const selector=owner.getByRole('button',{name});
     await expect(selector).toBeVisible();
     await selector.click();
-    await expect(owner.getByRole('heading',{name:'Catálogo e inventario de la farmacia'})).toBeVisible();
+    await owner.getByRole('navigation',{name:'Secciones de la farmacia'}).getByRole('button',{name:'Inventario'}).click(); // F08.1: el panel abre en «Resumen»
+    await expect(owner.getByRole('heading',{name:'Inventario de la farmacia'})).toBeVisible();
     const memberships=await ownerContext.request.get(`${root}/api/v1/me/memberships`);
     assert.equal(memberships.status(),200);
     const own=await memberships.json();
@@ -158,9 +169,9 @@ try{
     const page=await owner.context.newPage();
     await page.goto(`${root}/farmacias/panel`);
     await page.getByRole('button',{name:owner.name}).click();
+    await page.getByRole('navigation',{name:'Secciones de la farmacia'}).getByRole('button',{name:'Importar'}).click(); // F08.1: el panel abre en «Resumen»
     const invalid='nombre,concentracion,presentacion,clasificacion,precio,cantidad\nreferencia inexistente f025,10 mg,tabletas,venta libre,1.00,2\n';
     await page.locator('#inventory-file').setInputFiles({name:'invalido.csv',mimeType:'text/csv',buffer:Buffer.from(invalid)});
-    await page.getByRole('button',{name:'Preparar vista previa'}).click();
     await expect(page.getByText('1 filas; 1 incidencias.')).toBeVisible();
     await expect(page.getByRole('button',{name:'Confirmar archivo completo'})).toBeDisabled();checks+=2;
     const {default:ExcelJS}=await import('@excel.js/exceljs');
@@ -172,7 +183,6 @@ try{
     const xlsx=Buffer.from(await workbook.xlsx.writeBuffer());
     await page.locator('#inventory-file').setInputFiles({name:'inventario-ficticio.xlsx',
       mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:xlsx});
-    await page.getByRole('button',{name:'Preparar vista previa'}).click();
     await expect(page.getByText('1 filas; 0 incidencias.')).toBeVisible();
     await page.getByRole('button',{name:'Confirmar archivo completo'}).click();
     await expect(page.getByRole('row').filter({hasText:catalog.name})).toContainText('4');checks+=2;
@@ -187,7 +197,7 @@ try{
     await page.goto(`${root}/search`);
     await page.locator('#public-query').fill(catalog.name);
     await page.getByRole('button',{name:'Buscar',exact:true}).click();
-    const offer=page.locator('.offer').filter({hasText:owners[1].name});
+    const offer=page.locator('.offer').filter({has:page.getByRole('heading',{name:owners[1].name})});
     await offer.getByRole('link',{name:'Solicitar reserva'}).click();
     await expect(page.locator('#login-email')).toBeVisible();
     assert.equal(new URL(page.url()).searchParams.get('pharmacyId'),owners[1].id);
@@ -208,14 +218,15 @@ try{
       const page=await owner.context.newPage();
       await page.goto(`${root}/farmacias/panel`);
       await page.getByRole('button',{name:owner.name}).click();
+      await page.getByRole('navigation',{name:'Secciones de la farmacia'}).getByRole('button',{name:'Importar'}).click(); // F08.1: el panel abre en «Resumen»
       await expect(page.getByRole('heading',{name:'Importar inventario'})).toBeVisible();
       const csv=`nombre,concentracion,presentacion,clasificacion,precio,cantidad\n${catalog.name},10 mg,tabletas,venta libre,${(index+1).toFixed(2)},${index+2}\n`;
       await page.locator('#inventory-file').setInputFiles({name:'inventario-ficticio.csv',mimeType:'text/csv',buffer:Buffer.from(csv)});
-      await page.getByRole('button',{name:'Preparar vista previa'}).click();
+      // Enmienda F02.1: la vista previa aparece sola al elegir el archivo.
       await expect(page.getByRole('heading',{name:/Vista previa:/})).toBeVisible();
       await expect(page.getByText('1 filas; 0 incidencias.')).toBeVisible();
       await page.getByRole('button',{name:'Confirmar archivo completo'}).click();
-      await expect(page.getByRole('row').filter({hasText:catalog.name})).toBeVisible();
+      await expect(page.getByText(/Importación confirmada/)).toBeVisible();
       const ownInventory=await owner.context.request.get(`${root}/api/v1/farmacias/${owner.id}/inventario`);
       assert.equal(ownInventory.status(),200);
       assert((await ownInventory.json()).some(item=>item.medicamentoId===catalog.id));
@@ -247,7 +258,7 @@ try{
     await customer.goto(`${root}/search`);
     await customer.locator('#public-query').fill(catalog.name);
     await customer.getByRole('button',{name:'Buscar',exact:true}).click();
-    const otherOffer=customer.locator('.offer').filter({hasText:owners[1].name});
+    const otherOffer=customer.locator('.offer').filter({has:customer.getByRole('heading',{name:owners[1].name})});
     await otherOffer.getByRole('link',{name:'Solicitar reserva'}).click();
     await expect(customer.locator('#reservation-medication')).toHaveValue(catalog.id);
     await customer.getByRole('button',{name:'Solicitar reserva'}).click();

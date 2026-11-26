@@ -37,6 +37,24 @@ function PickupSettings({ client, pharmacyId }) {
   </section>;
 }
 
+/** Historial de la farmacia: reservas, importaciones y movimientos, cada vista solo con su capacidad. */
+function PharmacyHistory({ client, pharmacyId, capabilities }) {
+  const views = [
+    capabilities.includes('reservation.read') && { id: 'atendidas', label: 'Atendidas' },
+    capabilities.includes('inventory.history') && { id: 'importaciones', label: 'Importaciones' },
+    capabilities.includes('inventory.history') && { id: 'movimientos', label: 'Movimientos' },
+  ].filter(Boolean);
+  const [chosen, setChosen] = useState(null);
+  const active = views.some(view => view.id === chosen) ? chosen : views[0]?.id ?? null;
+  return <>
+    {views.length > 1 && <div role="group" aria-label="Tipo de historial">{views.map(view =>
+      <button type="button" key={view.id} aria-pressed={view.id === active} onClick={() => setChosen(view.id)}>{view.label}</button>)}</div>}
+    {active === 'atendidas' && <PharmacyReservations client={client} pharmacyId={pharmacyId} capabilities={capabilities} showSettings={false} showTabs={false} initialTab="history" />}
+    {(active === 'importaciones' || active === 'movimientos') &&
+      <InventoryView key={active} pharmacyId={pharmacyId} capabilities={capabilities} section={active} />}
+  </>;
+}
+
 /**
  * Panel de farmacia (F08.1): secciones por capacidad, en el orden de la spec, compuestas con los componentes existentes.
  * Es presentación: cada petición la autoriza el servidor y, si una capacidad se revoca, la siguiente lectura falla.
@@ -90,10 +108,10 @@ export function PharmacyPanel({ sessionClient: injectedSession, reservationsClie
     <div key={`${pharmacyId}:${activeSection}`}>
       {activeSection === 'resumen' && <PharmacySummary pharmacyId={pharmacyId} capabilities={codes} />}
       {activeSection === 'farmacia' && <LocationAdmin pharmacyId={pharmacyId} delegationCodes={codes} />}
-      {activeSection === 'inventario' && <InventoryView pharmacyId={pharmacyId} capabilities={codes.filter(code => !importCapabilities.includes(code))} />}
-      {activeSection === 'importar' && <InventoryView pharmacyId={pharmacyId} capabilities={codes.filter(code => importCapabilities.includes(code))} />}
+      {activeSection === 'inventario' && <InventoryView pharmacyId={pharmacyId} section="inventario" capabilities={codes.filter(code => !importCapabilities.includes(code))} />}
+      {activeSection === 'importar' && <InventoryView pharmacyId={pharmacyId} section="importar" capabilities={codes.filter(code => code === 'inventory.read' || importCapabilities.includes(code))} />}
       {activeSection === 'reservas' && <PharmacyReservations client={reservationsClient} pharmacyId={pharmacyId} capabilities={codes} showSettings={false} showTabs={false} />}
-      {activeSection === 'historial' && <PharmacyReservations client={reservationsClient} pharmacyId={pharmacyId} capabilities={codes} showSettings={false} showTabs={false} initialTab="history" />}
+      {activeSection === 'historial' && <PharmacyHistory client={reservationsClient} pharmacyId={pharmacyId} capabilities={codes} />}
       {activeSection === 'personal' && <StaffAdmin pharmacyId={pharmacyId} />}
       {activeSection === 'configuracion' && <PickupSettings client={reservationsClient} pharmacyId={pharmacyId} />}
     </div>

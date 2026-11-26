@@ -5,7 +5,7 @@ import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/re
 
 const api = vi.hoisted(() => ({
   catalog: vi.fn(), inventory: vi.fn(), movements: vi.fn(), imports: vi.fn(),
-  review: vi.fn(), preview: vi.fn(), confirm: vi.fn(),
+  review: vi.fn(), preview: vi.fn(), confirm: vi.fn(), inspect: vi.fn(), profiles: vi.fn(), previewSelected: vi.fn(),
 }));
 vi.mock('../../src/inventory/inventory-client.js', () => ({ createInventoryClient: () => api }));
 import { InventoryView } from '../../src/inventory/InventoryView.jsx';
@@ -22,12 +22,17 @@ beforeEach(() => {
     caducaEn: '2026-11-12T13:00:00Z', filas: [{ line: 2, medicationId: 'med1',
       physicalQuantity: 5, priceCents: 1250, errorCode: null }], errores: [] });
   api.confirm.mockResolvedValue({ estado: 'CONFIRMADA' });
+  api.profiles.mockResolvedValue([]);
+  const mapping = { nombre: 'nombre', concentracion: 'concentracion', presentacion: 'presentacion', clasificacion: 'clasificacion', precioReferencial: 'precio', cantidadFisica: 'cantidad' };
+  api.inspect.mockResolvedValue({ huella: 'a'.repeat(64), hojasConStock: [], hojasIgnoradas: [], candidatos: [{ sheet: 'CSV', headerRow: 1, headers: Object.values(mapping), headerDigest: 'b'.repeat(64), mapping, preguntas: [] }] });
+  api.previewSelected.mockImplementation((...args) => api.preview(...args));
 });
 
 describe('interacción React F02 sin navegador externo', () => {
   it('consulta y envía una revisión física manual de la farmacia seleccionada', async () => {
     render(<InventoryView pharmacyId="alfa" />);
-    await screen.findByText('Revisión física manual');
+    fireEvent.click(await screen.findByRole('button', { name: 'Revisión manual' }));
+    await screen.findByRole('option', { name: /Producto ficticio/ });
     fireEvent.change(screen.getByLabelText('Medicamento'), { target: { value: 'med1' } });
     fireEvent.change(screen.getByLabelText('Precio referencial (S/)'), { target: { value: '12.50' } });
     fireEvent.change(screen.getByLabelText('Cantidad física revisada'), { target: { value: '5' } });
@@ -42,8 +47,7 @@ describe('interacción React F02 sin navegador externo', () => {
     await screen.findByText('Importar inventario');
     const file = new File(['nombre\nProducto ficticio\n'], 'stock.csv', { type: 'text/csv' });
     fireEvent.change(screen.getByLabelText('Archivo CSV o XLSX'), { target: { files: [file] } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Preparar vista previa' }).closest('form'));
-    await waitFor(() => expect(api.preview).toHaveBeenCalled());
+    await waitFor(() => expect(api.previewSelected).toHaveBeenCalled()); // sin botón: la vista previa llega sola
     await screen.findByText('Vista previa: VISTA_PREVIA');
     fireEvent.click(screen.getByRole('button', { name: 'Confirmar archivo completo' }));
     await waitFor(() => expect(api.confirm).toHaveBeenCalledWith('alfa', 'imp1'));
@@ -54,6 +58,7 @@ describe('interacción React F02 sin navegador externo', () => {
     render(<InventoryView pharmacyId="alfa" />);
     await screen.findByText('Catálogo e inventario de la farmacia');
     expect(screen.getByText('Consulta de existencias no disponible para esta sesión.')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Buscar' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Historial de importaciones' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Importar inventario' })).toBeTruthy();
   });
 });

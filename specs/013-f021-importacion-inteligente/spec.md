@@ -131,3 +131,26 @@ Como responsable autorizado quiero confirmar un archivo válido para actualizar 
 | Roadmap v3.2 y F02.5 | Cambio de prioridad con suspensión expresa | F02.5 no aceptada. |
 
 El responsable aprobó expresamente esta especificación en su mensaje «F02.1 — Especificación» del 2026-11-22, con MEJ-002 limitada a importación. El plan recibió aprobación humana posterior, registrada en [approval.md](approval.md). Ninguna de esas aprobaciones constituye aceptación de los resultados de F02.1.
+
+## Enmienda 2026-11-25 — Importación en un paso y detector por contenido
+Aprobada en [approval.md](approval.md). Precisa y, donde difiera, sustituye lo anterior sobre FR-001–004 y FR-006:
+- **F021-FR-016**: Al elegir el archivo el sistema DEBE analizarlo y mostrar la vista previa sin pasos manuales; el ajuste de columnas queda oculto y solo se pregunta por el dato imprescindible que falte o sea ambiguo.
+- **F021-FR-017**: El detector DEBE ser determinista y local, combinando nombre de columna normalizado (coincidencia flexible) y contenido; un empate real no se resuelve en silencio. `categoria_terapeutica` nunca es la clasificación (`condicion_venta`).
+- **F021-FR-018**: En la hoja elegida se leen solo texto y números; fecha, fórmula o enlace en una columna usada generan una incidencia con hoja, celda, causa y solución, sin evaluar. Las hojas sin datos de inventario se ignoran.
+- **F021-FR-019**: Los productos sin equivalencia en el catálogo se muestran como «pendientes de catálogo»; no se descartan ni equiparan, y la confirmación sigue siendo atómica por archivo.
+- **F021-FR-020**: Un archivo rechazado DEBE explicar causa y solución; nunca solo «No se pudo completar la solicitud».
+- **F021-SC-008**: Un archivo ficticio de 3 hojas, 40 o más filas y encabezados como los reales llega a la vista previa con los seis campos propuestos sin intervención.
+- **F021-FR-021** (2026-11-25): La vista previa DEBE mostrar resumen con conteos, tabla con filtros y paginación, y avisos agrupados por tipo con detalle desplegable; nunca una lista de cientos de líneas. Cada duplicado indica su fila y la fila que repite.
+
+### Ampliación: pantallas del panel (2026-11-25)
+- **F021-FR-022**: La pestaña Inventario DEBE listar en solo lectura todos los productos de la farmacia activa con nombre legible, concentración, presentación, precio, stock físico, comprometido, disponible y última revisión, con búsqueda por nombre, filtros «Sin stock» (disponible 0) y «Stock bajo» (1 a 5 disponibles), paginación y detalle; la revisión manual queda en un botón secundario. El laboratorio se mostrará cuando exista el dato (spec 020).
+- **F021-FR-023**: La pestaña Importar DEBE contener solo elegir archivo, vista previa y confirmar.
+- **F021-FR-024**: El historial DEBE mostrar una tarjeta por importación (fecha y hora, autor, resultado en lenguaje claro, filas, listas, pendientes, con errores, agregados, actualizados y sin cambios) y el detalle de qué cambió; las vistas previas no confirmadas van agrupadas. El nombre del archivo no se guarda.
+- **F021-FR-025**: Los movimientos DEBEN verse en Historial con producto y motivo legibles. Estas lecturas no cambian RLS ni permisos y mantienen el aislamiento entre farmacias.
+
+### Ampliación: exclusión explícita e historial detallado (2026-11-25)
+Aplica la «decisión explícita» de los casos límite y la resolución manual de ambigüedades del Maestro.
+- **F021-FR-026**: El usuario PUEDE excluir las filas duplicadas y pendientes de catálogo, y solo esas, aceptando los conteos exactos; sin decisión explícita no se excluye nada. Cancelar no cambia nada. Si algún conteo no coincide o hay un error de datos o una ambigüedad de referencia, no se modifica el inventario ni la vista previa.
+- **F021-FR-027**: Tras excluir, la confirmación DEBE seguir siendo atómica sobre las filas restantes y revalidar sesión, permiso, farmacia, referencias y concurrencia. De un producto repetido se importa la primera fila. Las excluidas no crean productos ni stock.
+- **F021-FR-028**: El historial DEBE mostrar por importación filas del archivo, importadas, excluidas por decisión, pendientes, con errores, agregados y actualizados; el detalle de una confirmada muestra los cambios (con búsqueda y paginación) y las filas excluidas con número y motivo. Las vistas previas sin confirmar se agrupan y no muestran cambios.
+- **F021-FR-029**: No requiere migración ni cambios de RLS o permisos: en una importación confirmada, las filas guardadas con código «duplicada» o «pendiente» son exactamente las excluidas.

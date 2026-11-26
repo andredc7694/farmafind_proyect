@@ -77,3 +77,9 @@ La [matriz de trazabilidad](traceability.md) contiene la relación individual F0
 ### Matriz técnica Alfa/Beta de cinco farmacias (sin aceptación humana)
 
 `node scripts/f025/verify-sql-matrix.mjs` verificó las cinco membresías DUENO de la base técnica TEST: cada propietario tuvo inventario propio visible y permiso propio de lectura de reservas (10 controles positivos). Para cada uno de los 20 pares ordenados propietario→farmacia ajena, un `app.farmacia_id` manipulado no permitió leer el inventario privado ni obtener `reservation.read` (40 denegaciones SQL, transacción revertida). El verificador HTTP previo registró los mismos 20 pares y 45 denegaciones de inventario/reservas y revisor global sin inventario. Esta matriz acredita T055 en TEST, no sustituye la demostración personal de T057 ni la aceptación T063.
+
+## 2026-11-25 · T046 — ACEPTADA («A: T046 ACEPTO», Andre)
+- Andre verificó en su DEMO: `farma.xlsx` importado con exclusión explícita de las 583 filas por revisar (517 importadas, 0 errores); inventario e historial detallado correctos; la búsqueda pública de «Aciclovir» muestra ofertas de HUAMANFAR; el menú por rol funciona; el mapa abre desde Buscar medicamentos.
+- **Salvedad:** las 583 filas excluidas quedan pendientes hasta implementar la spec 020.
+- Sustituye al «NO APROBADA» anterior del mismo día. **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre); F025-RF23 aplazada.
+- Esto **no** es la aceptación final de F02.5 (T063).
