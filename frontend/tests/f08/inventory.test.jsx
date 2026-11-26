@@ -27,7 +27,7 @@ describe('controles de inventario F08', () => {
   it('presenta lectura, pero no escritura ni importación, con solo inventory.read', async () => {
     render(<InventoryView pharmacyId="alfa" capabilities={['inventory.read']} />);
     expect(await screen.findByText('Existencias propias')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Buscar' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Revisión manual' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Guardar revisión' })).toBeNull();
     expect(screen.queryByText('Importar inventario')).toBeNull();
   });

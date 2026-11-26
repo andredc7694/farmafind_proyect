@@ -85,3 +85,8 @@ T001 es puerta SDD. T002/T003 preceden cambios de contrato; T004/T005 pueden pre
 - [ ] T044 Repetición de T046 por Andre en la DEMO (verificación humana; no marcar por Claude)
 - [X] T045 Resumen, filtros, paginación y avisos agrupados con «Ver detalle» en `PreviewResults.jsx`; causa del duplicado con la fila repetida (FR-021); prueba con 600 filas
 - [X] T047 Script solo TEST `scripts/f025/load-demo-catalog.mjs` y comprobación de confirmación completa (517 filas) en la base técnica
+- [X] T048 Lecturas con nombre del producto, autor, conteos y cambios por importación, sin migraciones ni permisos nuevos (FR-022, FR-024, FR-025)
+- [X] T049 Inventario en tabla de solo lectura con búsqueda, filtros, paginación, detalle y revisión manual secundaria (FR-022)
+- [X] T050 Importar solo con archivo, vista previa y confirmar (FR-023)
+- [X] T051 Historial: tarjetas de importación, vistas previas agrupadas, detalle y movimientos legibles en la pestaña Historial (FR-024, FR-025)
+- [X] T052 Aislamiento Alfa/Beta de las nuevas lecturas, regresión y recorrido en navegador con el inventario importado desde el archivo ficticio

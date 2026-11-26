@@ -106,3 +106,14 @@ No se repitió Playwright. Esto cierra el pendiente «Pendientes de esta verific
 - Vista previa con resumen, filtros, páginas de 50 y avisos agrupados (detalle de 20 en 20). Frontend 211/211, inventario unit 39/39, build y check.
 - `load-demo-catalog.mjs` (guardas: clúster `farmafind-f025-test`, base marcada TEST, estado local; nunca producción ni `farmafind_f01_test`): 1100 filas → 517 productos distintos añadidos al catálogo en la base manual y en la técnica; copia local sin filas repetidas (`.cache/f025-docker/imports/farma-sin-duplicados.xlsx`, ignorada por Git).
 - Flujo completo por HTTP en la base **técnica**: análisis 0,4 s, vista previa 517 filas 1,2 s (repetirla reutiliza la misma), confirmación 200 en 4,8 s, 0 errores.
+
+## Pantallas del panel — 2026-11-25 (T048–T052)
+- **Verificación previa:** la lista de inventario no estaba implementada. «Existencias propias» mostraba el identificador porque buscaba el nombre solo entre las 50 primeras referencias del catálogo, y el listado cortaba en 500 filas.
+- **Cambios:** el listado, los movimientos y el historial unen el catálogo compartido (solo lectura); límite del inventario 5000. El historial añade autor y conteos; el detalle, los cambios aplicados. Sin migraciones, políticas ni permisos nuevos. La pestaña Historial aparece también con solo `inventory.history`.
+- **Nombre del archivo:** no se guarda hoy. Guardarlo exige columna y permiso de inserción nuevos, y el nombre puede contener datos personales; queda sin implementar hasta que Andre decida.
+- **Autor:** «Tú»; el nombre del trabajador solo para quien administra personal (mismo listado ya autorizado); en otro caso «Otra persona de tu farmacia».
+- **Laboratorio:** no existe todavía como dato (spec 020).
+- **Hallazgo del recorrido, corregido:** «Actualizados» contaba filas iguales; ahora solo cambios de precio o stock y se informa «Sin cambios».
+- **Pruebas:** frontend e inventario sin RLS 256/256; F02 RLS 15/15; F021 RLS 3/3 + lecturas nuevas Alfa/Beta 3/3 (misma conexión reutilizada, rol sin BYPASSRLS); navegador F02 3/3, F02.1 5/5, F08.1 7/7, flujo integrado 4/4, accesibilidad 4/4; `check`, contratos (41 operaciones) y build correctos. En la primera corrida de navegador fallaron 1 caso F02 (tiempo agotado) y 1 F02.1 (la página no cargó); ambos pasaron al repetir y en la corrida final.
+- **Recorrido en la base TEST técnica** con las 517 referencias derivadas del archivo de Andre: 517 productos con nombre (43 sin stock, 1 stock bajo), importación con 20 precios cambiados → 20 actualizados y 497 sin cambios, sin identificadores ni códigos en pantalla, sin desplazamiento horizontal a 390 px.
+- **No ejecutado:** el ensayo F02.5 `browser-five.mjs` (solo se ajustaron sus dos selectores).

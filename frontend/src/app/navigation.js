@@ -24,7 +24,7 @@ const sections = [
   { id: 'inventario', label: 'Inventario', anyOf: ['inventory.read'] },
   { id: 'importar', label: 'Importar', anyOf: ['inventory.import.preview', 'inventory.import.confirm'] },
   { id: 'reservas', label: 'Reservas', anyOf: ['reservation.read'] },
-  { id: 'historial', label: 'Historial', anyOf: ['reservation.read'] },
+  { id: 'historial', label: 'Historial', anyOf: ['reservation.read', 'inventory.history'] },
   { id: 'personal', label: 'Personal', anyOf: ['membership.manage'] },
   { id: 'configuracion', label: 'Configuración', anyOf: ['reservation.settings'] },
 ];

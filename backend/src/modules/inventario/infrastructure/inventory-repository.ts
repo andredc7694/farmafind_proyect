@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { SqlClient } from '../../usuarios/contracts/tenant.js';
 import { reviewInventory, type InventoryReview, type InventoryState } from '../domain/inventario.js';
-import type { InventoryRow } from '../application/ports.js';
+import type { InventoryRow, InventoryListRow } from '../application/ports.js';
 
 function mapRow(row: Record<string, unknown>): InventoryRow {
   return { id: String(row.id), farmaciaId: String(row.farmacia_id),
@@ -20,17 +20,23 @@ export class PgInventoryRepository {
     return { products: Number(result.rows[0].products), withoutStock: Number(result.rows[0].sin_stock) };
   }
 
-  async list(): Promise<readonly InventoryRow[]> {
-    const result = await this.client.query(`SELECT id,farmacia_id,medicamento_id,precio_centavos,
-      cantidad_fisica,cantidad_comprometida,ultima_revision_at,version
-      FROM f02.inventario WHERE farmacia_id=$1 ORDER BY medicamento_id LIMIT 500`, [this.pharmacyId]);
-    return result.rows.map(mapRow);
+  /** El catálogo es compartido y de solo lectura; la unión solo agrega el nombre de cada producto propio. */
+  async list(): Promise<readonly InventoryListRow[]> {
+    const result = await this.client.query(`SELECT i.id,i.farmacia_id,i.medicamento_id,i.precio_centavos,
+      i.cantidad_fisica,i.cantidad_comprometida,i.ultima_revision_at,i.version,
+      m.nombre,m.concentracion,m.presentacion,m.clasificacion
+      FROM f02.inventario i JOIN f02.medicamento m ON m.id=i.medicamento_id
+      WHERE i.farmacia_id=$1 ORDER BY m.nombre,m.concentracion,m.presentacion,i.id LIMIT 5000`, [this.pharmacyId]);
+    return result.rows.map(row => ({ ...mapRow(row), nombre: String(row.nombre), concentracion: String(row.concentracion),
+      presentacion: String(row.presentacion), clasificacion: String(row.clasificacion) }));
   }
 
   async movements(): Promise<readonly Record<string, unknown>[]> {
-    const result = await this.client.query(`SELECT id,inventario_id,medicamento_id,cantidad_antes,
-      cantidad_despues,precio_antes_centavos,precio_despues_centavos,motivo,occurred_at
-      FROM f02.movimiento WHERE farmacia_id=$1 ORDER BY occurred_at DESC,id LIMIT 500`, [this.pharmacyId]);
+    const result = await this.client.query(`SELECT v.id,v.inventario_id,v.medicamento_id,v.cantidad_antes,
+      v.cantidad_despues,v.precio_antes_centavos,v.precio_despues_centavos,v.motivo,v.occurred_at,
+      m.nombre,m.concentracion,m.presentacion
+      FROM f02.movimiento v JOIN f02.medicamento m ON m.id=v.medicamento_id
+      WHERE v.farmacia_id=$1 ORDER BY v.occurred_at DESC,v.id LIMIT 500`, [this.pharmacyId]);
     return result.rows;
   }
 

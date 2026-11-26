@@ -96,7 +96,7 @@ try{
     await expect(selector).toBeVisible();
     await selector.click();
     await owner.getByRole('navigation',{name:'Secciones de la farmacia'}).getByRole('button',{name:'Inventario'}).click(); // F08.1: el panel abre en «Resumen»
-    await expect(owner.getByRole('heading',{name:'Catálogo e inventario de la farmacia'})).toBeVisible();
+    await expect(owner.getByRole('heading',{name:'Inventario de la farmacia'})).toBeVisible();
     const memberships=await ownerContext.request.get(`${root}/api/v1/me/memberships`);
     assert.equal(memberships.status(),200);
     const own=await memberships.json();
@@ -226,7 +226,7 @@ try{
       await expect(page.getByRole('heading',{name:/Vista previa:/})).toBeVisible();
       await expect(page.getByText('1 filas; 0 incidencias.')).toBeVisible();
       await page.getByRole('button',{name:'Confirmar archivo completo'}).click();
-      await expect(page.getByRole('row').filter({hasText:catalog.name})).toBeVisible();
+      await expect(page.getByText(/Importación confirmada/)).toBeVisible();
       const ownInventory=await owner.context.request.get(`${root}/api/v1/farmacias/${owner.id}/inventario`);
       assert.equal(ownInventory.status(),200);
       assert((await ownInventory.json()).some(item=>item.medicamentoId===catalog.id));

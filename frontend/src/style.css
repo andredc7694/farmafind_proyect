@@ -182,3 +182,7 @@ a { color: var(--emerald-dark); }
 .chat-actions { display: flex; gap: .5rem; margin-top: .5rem; flex-wrap: wrap; }
 @media (min-width: 900px) { body[data-chat='open'] .site-content { margin-right: min(410px, 36vw); } }
 @media (max-width: 899px) { body[data-chat='open'] .site-content { padding-bottom: min(70vh, 640px); } .chat-bubble { left: 1rem; align-items: stretch; } .chat-panel { width: 100%; } }
+.table-scroll { max-width: 100%; overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: .55rem .65rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.secondary-button { min-height: 40px; padding: .45rem .9rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; }

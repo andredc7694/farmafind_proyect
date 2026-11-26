@@ -31,7 +31,8 @@ beforeEach(() => {
 describe('interacción React F02 sin navegador externo', () => {
   it('consulta y envía una revisión física manual de la farmacia seleccionada', async () => {
     render(<InventoryView pharmacyId="alfa" />);
-    await screen.findByText('Revisión física manual');
+    fireEvent.click(await screen.findByRole('button', { name: 'Revisión manual' }));
+    await screen.findByRole('option', { name: /Producto ficticio/ });
     fireEvent.change(screen.getByLabelText('Medicamento'), { target: { value: 'med1' } });
     fireEvent.change(screen.getByLabelText('Precio referencial (S/)'), { target: { value: '12.50' } });
     fireEvent.change(screen.getByLabelText('Cantidad física revisada'), { target: { value: '5' } });
@@ -57,6 +58,7 @@ describe('interacción React F02 sin navegador externo', () => {
     render(<InventoryView pharmacyId="alfa" />);
     await screen.findByText('Catálogo e inventario de la farmacia');
     expect(screen.getByText('Consulta de existencias no disponible para esta sesión.')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Buscar' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Historial de importaciones' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Importar inventario' })).toBeTruthy();
   });
 });

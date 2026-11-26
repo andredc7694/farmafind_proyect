@@ -43,7 +43,7 @@ test('CSV con encabezado desplazado confirma solo tras revisión explícita', as
   await page.getByRole('button', { name: 'Guardar perfil para esta farmacia' }).click();
   await expect(page.getByLabel('Nombre del perfil de columnas')).toHaveValue('');
   await page.getByRole('button', { name: 'Confirmar archivo completo' }).click();
-  await expect(page.getByText(/CONFIRMADA/).first()).toBeVisible();
+  await expect(page.getByText(/Importación confirmada/)).toBeVisible();
   await expect(page.getByRole('cell', { name: 'S/ 13.00' }).first()).toBeVisible();
   await page.goto('/search');
   await page.getByLabel('Nombre comercial o principio activo').fill('producto ficticio');

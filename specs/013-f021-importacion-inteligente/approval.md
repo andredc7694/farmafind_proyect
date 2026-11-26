@@ -27,3 +27,9 @@ No autoriza cambios de RLS, permisos ni esquema. T046, T057 y T063 de F02.5 sigu
 - **Catálogo de la DEMO:** cargarlo desde su archivo ficticio con un script, solo en el entorno TEST, para ver importación y confirmación; explicar cómo.
 - **Duplicados por laboratorio:** opción A (laboratorio y marca en la identidad del producto) como **incremento aparte** (spec 020) con rama propia y SDD completo; incluye la propuesta de productos nuevos (la farmacia propone, un revisor aprueba). Espera su aprobación.
 No marca T046, T057 ni T063.
+
+## Ajustes de pantalla del Panel de farmacia e integración — 2026-11-25 (decisiones de Andre)
+- **Ajustes dentro de la misma enmienda y rama:** (a) Inventario en solo lectura con nombre legible, laboratorio si existe, precio, stock físico, comprometido, disponible y última revisión; búsqueda por nombre, filtros «Sin stock» y «Stock bajo», paginación, detalle con un clic y revisión manual como botón secundario. (b) Importar: solo elegir archivo, vista previa y confirmar. (c) Historial de importaciones en tarjetas (fecha, autor, resultado en lenguaje claro, conteos y «Ver detalle»), con las vistas previas agrupadas; nombre del archivo solo si no vulnera la minimización. (d) Movimientos en la pestaña Historial con producto y motivo legibles.
+- **Condiciones:** reutilizar endpoints y datos; mantener la prueba de aislamiento Alfa/Beta; sin tocar RLS ni permisos; probar en navegador con el inventario importado desde su archivo.
+- **Integración (opción A):** PR de `feat/f025-cierre-verificacion` y fusión solo cuando (a) estén estos ajustes, (b) Andre haya repetido T046 y dado su veredicto y (c) el PR esté MERGEABLE y CLEAN, CI en verde, sin secretos y con la regresión aplicable aprobada. En `main` debe constar que **F02.5 sigue sin aceptar** (T057 y T063 pendientes). Después: actualizar `main` y crear la rama de la spec 020.
+- **Veredicto de T046: pendiente.** No marcar T046, T057 ni T063.

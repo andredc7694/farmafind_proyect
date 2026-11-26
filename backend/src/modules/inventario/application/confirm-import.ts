@@ -1,5 +1,6 @@
 import { assessConfirmation, type ReconciledImportRow, type ImportIncident } from '../domain/importacion.js';
-import { NO_INVENTORY_SEARCH_INVALIDATOR, type InventorySearchInvalidator, type InventoryUnitOfWork, type ImportRecord } from './ports.js';
+import { NO_INVENTORY_SEARCH_INVALIDATOR, type InventorySearchInvalidator, type InventoryUnitOfWork, type ImportRecord,
+  type ImportHistoryRecord, type ImportChange } from './ports.js';
 
 export class ImportConflictError extends Error {}
 class ApplyConflictError extends Error {}
@@ -16,6 +17,25 @@ export interface PublicImport {
 function publicRecord(record: ImportRecord): PublicImport {
   return { importacionId: record.id, estado: record.state, errores: record.errorCount,
     creadaEn: record.createdAt, caducaEn: record.expiresAt, confirmadaEn: record.confirmedAt };
+}
+
+/** Vista del historial: autor, conteos en filas y qué se agregó o actualizó. */
+export interface PublicImportHistory extends PublicImport {
+  readonly autorId: string;
+  readonly porMi: boolean;
+  readonly filas: number;
+  readonly listas: number;
+  readonly pendientes: number;
+  readonly conErrores: number;
+  readonly agregados: number;
+  readonly actualizados: number;
+}
+
+function historyRecord(record: ImportHistoryRecord, actorUserId: string): PublicImportHistory {
+  const { rows, ready, pending, added, updated } = record.counts;
+  return { ...publicRecord(record), autorId: record.actorUserId, porMi: record.actorUserId === actorUserId,
+    filas: rows, listas: ready, pendientes: pending, conErrores: Math.max(0, rows - ready - pending),
+    agregados: added, actualizados: updated };
 }
 
 function isApplyConflict(error: unknown): boolean {
@@ -92,20 +112,21 @@ export class ConfirmImport {
     return publicRecord(outcome);
   }
 
-  async history(secret: string, pharmacyId: string): Promise<readonly PublicImport[]> {
-    return this.transactions.run(secret, pharmacyId, 'inventory.history', async ports =>
-      (await ports.imports.history()).map(publicRecord));
+  async history(secret: string, pharmacyId: string): Promise<readonly PublicImportHistory[]> {
+    return this.transactions.run(secret, pharmacyId, 'inventory.history', async (ports, context) =>
+      (await ports.imports.history()).map(record => historyRecord(record, context.actorUserId)));
   }
 
   async status(secret: string, pharmacyId: string, importId: string): Promise<
-    PublicImport & { readonly incidencias: readonly ImportIncident[] }> {
+    PublicImport & { readonly incidencias: readonly ImportIncident[]; readonly cambios: readonly ImportChange[] }> {
     return this.transactions.run(secret, pharmacyId, 'inventory.history', async ports => {
       const imports = ports.imports;
       const record = await imports.find(importId);
       if (!record) throw new Error('No visible');
       const rows: readonly ReconciledImportRow[] = await imports.rows(importId);
       const incidents = await imports.incidents?.(importId);
-      return { ...publicRecord(record), incidencias: incidents ?? rows.filter(row => row.errorCode !== null)
+      const changes = record.state === 'CONFIRMADA' ? await imports.changes?.(importId) ?? [] : [];
+      return { ...publicRecord(record), cambios: changes, incidencias: incidents ?? rows.filter(row => row.errorCode !== null)
         .map(row => ({ line: row.line, field: 'nombre', column: 'nombre', code: row.errorCode!,
           title: 'Incidencia de importación', cause: 'Revisa el archivo',
           action: 'Corrige y vuelve a validar', supportCode: `F021-${row.errorCode}` })) };
