@@ -45,3 +45,8 @@
 ## 2026-11-26 · Mejora de pantalla aprobada: usuario para entrar visible en «Personal»
 - Origen: el trabajador «JOSE_01» (usuario real `jose`) no podía entrar porque escribía su nombre para mostrar; la consulta de solo lectura no encontró defecto del servidor.
 - **Andre aprueba** mostrar «Usuario para entrar: jose» en la lista y en el aviso de la clave temporal, y avisar si el nombre para mostrar se parece a un usuario. Rama y commit propios; prueba en navegador. Sin cambios de servidor, permisos ni RLS.
+
+## 2026-11-26 · Aceptación de la mejora «usuario visible» en «Personal»
+- **Andre: ACEPTO.** Verificó en su DEMO que la lista y el aviso de la clave temporal muestran «Usuario para entrar» (código `d90ac99`).
+- Pruebas: unitarias de Personal 39/39 (3 nuevas); frontend completo 235/235 (una corrida previa con un fallo intermitente no identificado); revisión en Chrome contra la DEMO con respuestas simuladas, en escritorio y celular, sin desbordamiento.
+- Autoriza PR y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
