@@ -1,6 +1,6 @@
 # Plan: F02.2 — Identidad del producto y propuestas de catálogo
 
-**Spec**: [spec.md](spec.md) (aprobada 2026-11-25, D-01..D-05 = A). **Estado**: espera aprobación de Andre.
+**Spec**: [spec.md](spec.md) (aprobada 2026-11-25, D-01..D-05 = A). **Estado**: aprobado por Andre el 2026-11-25.
 **Condición de inicio**: la corrección de importación (enmienda F02.1) integrada en `main`. US$0, sin IA ni servicios externos.
 
 ## Arquitectura (sin cambios de estilo)
