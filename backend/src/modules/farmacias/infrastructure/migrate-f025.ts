@@ -18,7 +18,7 @@ const reviewed = new Map<string,string>([
   ['009_owner_inventory_test.sql','4EECEDEFDDC98878F95E9BE28AEB0404FA4440307E4AB8B7C2822FB8DBD6D79D'],
   ['010_documents_test.sql','99B845D35A35B446762F3778D9AD6310FFC5E2E494BA1442142362DAE077E45B'],
   ['011_cancel_in_review.sql','D6EB9D78616C248A744FA180499E2DFACC927FF704E4F3C5536B318A21BDC8BD'],
-  ['012_public_pharmacy_projection.sql','0094DE9AE0BE7E08B6B9E929E4E2B7455F627733C0D14B6D5B8FA7870E33B132'],
+  ['012_public_pharmacy_projection.sql','7072F13B01AB24495D24A1CDF7CBC9B0DF34AA1C635A443CF0F22E96FEEC0A18'],
   ['013_owner_reservations_test.sql','7CDA3E12731E7A9F8156DD93B8D8A6A33FAA8F545919F7CECF57B110B983839D'],
   ['014_private_profile_test.sql','9A0F2801DDC4CBD1BB73C94DED841152E59B9B3B5FFC1EA38AAE36F9A3996FC7'],
   ['015_application_notifications_test.sql','BF5C3300B818223DD99BFDC728CBAE0B360339BC9CB38C568661DF7FD275F857'],
@@ -54,7 +54,8 @@ export async function migrateF025TestDatabase(urlText:string,
       const applied:string[]=[];
       for(const [filename,expected] of reviewed){
         const sql=readFileSync(new URL(`../../../../migrations/f025/${filename}`,import.meta.url),'utf8');
-        const actual=createHash('sha256').update(sql).digest('hex').toUpperCase();
+        // Solo la comparación normaliza CRLF→LF (checkout de Windows); el SQL ejecutado no se modifica.
+        const actual=createHash('sha256').update(sql.replaceAll('\r\n','\n')).digest('hex').toUpperCase();
         if(actual!==expected)throw new Error(`F02.5: SQL ${filename} cambió desde aprobación`);
         if(known.has(filename)){
           if(known.get(filename)!==expected)throw new Error(`F02.5: hash registrado de ${filename} no coincide`);

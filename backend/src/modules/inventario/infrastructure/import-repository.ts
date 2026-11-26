@@ -1,6 +1,6 @@
 import type { SqlClient } from '../../usuarios/contracts/tenant.js';
 import type { ReconciledImportRow, ImportIncident } from '../domain/importacion.js';
-import type { ImportRecord, ImportProfile, ImportSelectionMetadata } from '../application/ports.js';
+import type { ImportRecord, ImportProfile, ImportSelectionMetadata, ImportHistoryRecord, ImportChange } from '../application/ports.js';
 
 function mapImport(row: Record<string, unknown>): ImportRecord {
   return { id: String(row.id), pharmacyId: String(row.farmacia_id),
@@ -11,6 +11,10 @@ function mapImport(row: Record<string, unknown>): ImportRecord {
 }
 
 const columns = `id,farmacia_id,actor_usuario_id,estado,error_count,created_at,expires_at,confirmed_at`;
+
+const isNew = (alias: string) => `(${alias}.cantidad_antes=0 AND ${alias}.precio_antes_centavos=0 AND NOT EXISTS (
+  SELECT 1 FROM f02.movimiento p WHERE p.farmacia_id=${alias}.farmacia_id AND p.inventario_id=${alias}.inventario_id
+    AND p.occurred_at<${alias}.occurred_at))`;
 
 export class PgImportRepository {
   constructor(private readonly client: SqlClient, private readonly pharmacyId: string,
@@ -45,6 +49,12 @@ export class PgImportRepository {
       }
     }
     return mapImport(created.rows[0]);
+  }
+
+  async findByDigest(digest: Buffer): Promise<ImportRecord | null> {
+    const result = await this.client.query(`SELECT ${columns} FROM f02.importacion
+      WHERE farmacia_id=$1 AND actor_usuario_id=$2 AND digest=$3`, [this.pharmacyId, this.actorUserId, digest]);
+    return result.rows.length === 1 ? mapImport(result.rows[0]) : null;
   }
 
   async profiles(): Promise<readonly ImportProfile[]> {
@@ -113,10 +123,45 @@ export class PgImportRepository {
       errorCode: row.error_code === null ? null : String(row.error_code) }));
   }
 
-  async history(): Promise<readonly ImportRecord[]> {
-    const result = await this.client.query(`SELECT ${columns} FROM f02.importacion
-      WHERE farmacia_id=$1 ORDER BY created_at DESC,id LIMIT 100`, [this.pharmacyId]);
-    return result.rows.map(mapImport);
+  async history(): Promise<readonly ImportHistoryRecord[]> {
+    const result = await this.client.query(`WITH recientes AS (
+        SELECT ${columns} FROM f02.importacion WHERE farmacia_id=$1 ORDER BY created_at DESC,id LIMIT 100),
+      filas AS (
+        SELECT f.importacion_id,count(*)::int AS filas,
+          (count(*) FILTER (WHERE f.error_code IS NULL))::int AS listas,
+          (count(*) FILTER (WHERE f.error_code='REFERENCIA_NO_CONCILIADA'))::int AS pendientes,
+          (count(*) FILTER (WHERE f.error_code='FILA_DUPLICADA'))::int AS duplicadas
+        FROM f02.importacion_fila f
+        WHERE f.farmacia_id=$1 AND f.importacion_id IN (SELECT id FROM recientes) GROUP BY f.importacion_id),
+      cambios AS (
+        SELECT v.motivo,(count(*) FILTER (WHERE ${isNew('v')}))::int AS agregados,
+          (count(*) FILTER (WHERE NOT ${isNew('v')} AND (v.cantidad_antes IS DISTINCT FROM v.cantidad_despues
+            OR v.precio_antes_centavos IS DISTINCT FROM v.precio_despues_centavos)))::int AS actualizados
+        FROM f02.movimiento v
+        WHERE v.farmacia_id=$1 AND v.motivo IN (SELECT 'Importación ' || id::text FROM recientes WHERE estado='CONFIRMADA')
+        GROUP BY v.motivo)
+      SELECT r.*,COALESCE(f.filas,0) AS filas,COALESCE(f.listas,0) AS listas,COALESCE(f.pendientes,0) AS pendientes,
+        COALESCE(f.duplicadas,0) AS duplicadas,COALESCE(c.agregados,0) AS agregados,COALESCE(c.actualizados,0) AS actualizados
+      FROM recientes r LEFT JOIN filas f ON f.importacion_id=r.id
+      LEFT JOIN cambios c ON c.motivo='Importación ' || r.id::text
+      ORDER BY r.created_at DESC,r.id`, [this.pharmacyId]);
+    return result.rows.map(row => ({ ...mapImport(row), counts: { rows: Number(row.filas), ready: Number(row.listas),
+      pending: Number(row.pendientes), duplicated: Number(row.duplicadas), added: Number(row.agregados), updated: Number(row.actualizados) } }));
+  }
+
+  /** La confirmación registra cada movimiento con el motivo «Importación <id>» (ver ConfirmImport). */
+  async changes(id: string): Promise<readonly ImportChange[]> {
+    const result = await this.client.query(`SELECT m.nombre,m.concentracion,m.presentacion,${isNew('v')} AS agregado,
+        v.precio_antes_centavos,v.precio_despues_centavos,v.cantidad_antes,v.cantidad_despues
+      FROM f02.movimiento v JOIN f02.medicamento m ON m.id=v.medicamento_id
+      WHERE v.farmacia_id=$1 AND v.motivo=$2 ORDER BY m.nombre,m.concentracion,m.presentacion,v.id LIMIT 5000`,
+    [this.pharmacyId, `Importación ${id}`]);
+    return result.rows.map(row => ({ nombre: String(row.nombre), concentracion: String(row.concentracion),
+      presentacion: String(row.presentacion), added: row.agregado === true,
+      priceBeforeCents: row.precio_antes_centavos === null ? null : Number(row.precio_antes_centavos),
+      priceAfterCents: Number(row.precio_despues_centavos),
+      quantityBefore: row.cantidad_antes === null ? null : Number(row.cantidad_antes),
+      quantityAfter: Number(row.cantidad_despues) }));
   }
 
   async transition(id: string, state: 'CONFIRMADA' | 'RECHAZADA' | 'EXPIRADA'): Promise<boolean> {

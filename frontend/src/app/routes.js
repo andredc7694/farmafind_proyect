@@ -1,20 +1,20 @@
 export const publicNavigation = [
   { href: '/', label: 'Inicio' },
   { href: '/search', label: 'Buscar medicamentos' },
-  { href: '/mapa', label: 'Farmacias cercanas' },
   { href: '/farmacias/solicitar', label: 'Registrar mi farmacia' },
   { href: '/assistant/conversation', label: 'FarmaFind AI' },
 ];
 
-export const accountNavigation = [
-  { href: '/identity', label: 'Mi cuenta' },
-  { href: '/reservations', label: 'Mis reservas' },
-];
+export const reservationsLink = { href: '/reservations', label: 'Mis reservas' };
+
+/** Capacidades que abren alguna sección del panel de farmacia (la revisión de ubicaciones tiene su propio enlace). */
+const panelCapabilities = ['inventory.read', 'inventory.history', 'inventory.import.preview', 'inventory.import.confirm',
+  'reservation.read', 'reservation.settings', 'membership.manage', 'GEO_LOCATION_PROPOSE'];
 
 export function pharmacyNavigation(memberships = []) {
   if (!memberships.length) return [];
   const links = [];
-  if (memberships.some(item => item.delegationCodes?.includes('inventory.read'))) {
+  if (memberships.some(item => item.delegationCodes?.some(code => panelCapabilities.includes(code)))) {
     links.push({ href: '/farmacias/panel', label: 'Panel de farmacia' });
   }
   if (memberships.some(item => item.delegationCodes?.some(code =>

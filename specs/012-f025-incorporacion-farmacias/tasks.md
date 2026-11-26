@@ -76,7 +76,7 @@
 - [X] T043 [US4] Enlazar el panel F02 y plantilla CSV existente, sin cambiar contratos de importación, en `frontend/src/pharmacies/PharmacyDashboard.jsx` y `frontend/src/inventory/InventoryView.jsx` (FR-013/014/027).
 - [X] T044 [US4] Integrar actualización de proyección autorizada e invalidación Redis posterior a activación/importe en `backend/src/modules/farmacias/infrastructure/publication-invalidator.ts` (FR-015).
 - [X] T045 [US4] Verificar ofertas solo de farmacias activas, datos públicos depurados y fallback PostgreSQL mediante `backend/tests/pharmacies/publication.test.ts`, SQL TEST equivalente y recorrido HTTP TEST previo (FR-015/020; AC08).
-- [ ] T046 [US4] Registrar resultados reales de importación manual desde navegador y errores por fila en `specs/012-f025-incorporacion-farmacias/evidence.md` (FR-014; SC-005).
+- [X] T046 [US4] Registrar resultados reales de importación manual desde navegador y errores por fila en `specs/012-f025-incorporacion-farmacias/evidence.md` (FR-014; SC-005).
 
 ## Phase 7: US5 — Público y reservas (P2)
 

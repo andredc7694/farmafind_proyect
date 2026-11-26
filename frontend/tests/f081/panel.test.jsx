@@ -65,7 +65,7 @@ describe('F08.1 panel de farmacia', () => {
     expect(screen.getByTestId('inventory').getAttribute('data-caps')).not.toContain('inventory.import');
     expect(screen.getByTestId('inventory').getAttribute('data-caps')).toContain('inventory.write');
     fireEvent.click(screen.getByRole('button', { name: 'Importar' }));
-    expect(screen.getByTestId('inventory').getAttribute('data-caps')).toBe('inventory.import.preview,inventory.import.confirm');
+    expect(screen.getByTestId('inventory').getAttribute('data-caps')).toBe('inventory.read,inventory.import.preview,inventory.import.confirm'); // la vista exige inventory.read para mostrar el formulario de importación
     fireEvent.click(screen.getByRole('button', { name: 'Reservas' }));
     expect(screen.getByTestId('reservations').getAttribute('data-tab')).toBe('queue'); expect(screen.getByTestId('reservations').getAttribute('data-settings')).toBe('false');
     fireEvent.click(screen.getByRole('button', { name: 'Historial' }));

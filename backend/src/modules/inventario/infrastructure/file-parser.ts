@@ -1,7 +1,7 @@
 import ExcelJS from '@excel.js/exceljs';
 import { parse } from 'csv-parse/sync';
 import { createHash } from 'node:crypto';
-import type { ParsedInventoryFile, InspectedInventoryFile, InventoryFileSelection } from '../domain/importacion.js';
+import type { ParsedInventoryFile, InspectedInventoryFile, InventoryFileSelection, CellIssue } from '../domain/importacion.js';
 
 const maxBytes = 5 * 1024 * 1024;
 const maxRows = 5000;
@@ -55,6 +55,26 @@ function cellText(value: unknown): string {
   throw new Error('Celda XLSX no permitida');
 }
 
+/** Ruta F02.1 (hoja elegida): lee solo texto y números; lo demás se marca, nunca se evalúa ni se usa su valor guardado. */
+function readCell(value: unknown): { text: string; issue?: string } {
+  if (value === null || value === undefined) return { text: '' };
+  if (typeof value === 'string' || typeof value === 'number') return { text: String(value) };
+  if (value instanceof Date) return { text: '', issue: 'una fecha' };
+  if (typeof value === 'object') {
+    const rich = (value as { richText?: readonly { text?: unknown }[] }).richText;
+    if (Array.isArray(rich)) return { text: rich.map(part => typeof part.text === 'string' ? part.text : '').join('') };
+    if ('formula' in value || 'sharedFormula' in value) return { text: '', issue: 'una fórmula' };
+    if ('hyperlink' in value) return { text: '', issue: 'un enlace' };
+  }
+  return { text: '', issue: 'un tipo de dato no admitido' };
+}
+
+function columnLetter(column: number): string {
+  let letter = '';
+  for (let rest = column; rest > 0; rest = Math.floor((rest - 1) / 26)) letter = String.fromCharCode(65 + ((rest - 1) % 26)) + letter;
+  return letter;
+}
+
 function checkedRows(rows: readonly (readonly string[])[]): ParsedInventoryFile {
   if (rows.length < 2 || rows.length - 1 > maxRows) throw new Error('Archivo sin filas o excede límite');
   const width = rows[0].length;
@@ -72,7 +92,7 @@ function checkInput(bytes: Buffer): void {
 }
 
 async function readSheets(bytes: Buffer, filename: string): Promise<readonly {
-  name: string; rows: readonly string[][]; sourceLines: readonly number[] }[]> {
+  name: string; rows: readonly string[][]; sourceLines: readonly number[]; issues?: readonly CellIssue[] }[]> {
   checkInput(bytes);
   if (/\.csv$/i.test(filename)) {
     const content = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
@@ -95,6 +115,7 @@ async function readSheets(bytes: Buffer, filename: string): Promise<readonly {
   return workbook.worksheets.map(sheet => {
     if (sheet.rowCount > maxRows + 10 || sheet.columnCount > 50) throw new Error('XLSX excede límites');
     const rows: string[][] = [];
+    const issues: CellIssue[] = [];
     // rowCount/columnCount recorren la hoja en cada lectura: se calculan una sola vez (medición F02.1).
     const rowCount = sheet.rowCount;
     const columnCount = sheet.columnCount;
@@ -102,15 +123,16 @@ async function readSheets(bytes: Buffer, filename: string): Promise<readonly {
       const row = sheet.getRow(number);
       const cells: string[] = [];
       for (let column = 1; column <= columnCount; column++) {
-        const value = cellText(row.getCell(column).value);
-        if (value.length > 10000) throw new Error('Celda XLSX excede límites');
-        cells.push(value);
+        const read = readCell(row.getCell(column).value);
+        if (read.text.length > 10000) throw new Error('Celda XLSX excede límites');
+        if (read.issue) issues.push({ sheet: sheet.name, line: number, column: column - 1, address: `${columnLetter(column)}${number}`, kind: read.issue });
+        cells.push(read.text);
       }
       rows.push(cells);
     }
     totalRows += rows.length;
     if (totalRows > maxRows + 10) throw new Error('XLSX excede límite de filas');
-    return { name: sheet.name, rows, sourceLines: rows.map((_, index) => index + 1) };
+    return { name: sheet.name, rows, sourceLines: rows.map((_, index) => index + 1), issues };
   });
 }
 
@@ -137,12 +159,15 @@ export async function selectInventoryFile(bytes: Buffer, filename: string,
   if (!sheet || !Number.isInteger(selection.headerRow) || selection.headerRow < 1 ||
       headerIndex < 0 || !inspected.sheets.find(item => item.name === selection.sheet)
         ?.headerRows.includes(selection.headerRow)) throw new Error('Selección inválida');
-  const rows = sheet.rows.slice(headerIndex).filter(row => row.some(value => value.trim()));
+  const issues = sheet.issues ?? [];
+  const flagged = new Set(issues.map(issue => issue.line));
+  const keep = (row: readonly string[], index: number) => row.some(value => value.trim()) || flagged.has(sheet.sourceLines[index]);
+  const rows = [sheet.rows[headerIndex], ...sheet.rows.slice(headerIndex + 1).filter((row, index) => keep(row, headerIndex + 1 + index))];
   const parsed = checkedRows(rows);
   const sourceLines = sheet.rows.slice(headerIndex + 1).flatMap((row, index) =>
-    row.some(value => value.trim()) ? [sheet.sourceLines[headerIndex + index + 1]] : []);
+    keep(row, headerIndex + 1 + index) ? [sheet.sourceLines[headerIndex + index + 1]] : []);
   if (sourceLines.some(line => line > 5242880)) throw new Error('CSV excede límite de líneas');
-  return { ...parsed, sourceLines };
+  return { ...parsed, sourceLines, cellIssues: issues.filter(issue => issue.line > selection.headerRow) };
 }
 
 export async function parseInventoryFile(bytes: Buffer, filename: string): Promise<ParsedInventoryFile> {

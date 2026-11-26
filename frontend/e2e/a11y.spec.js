@@ -33,10 +33,15 @@ async function scan(page, name, mode) {
     others: result.violations.filter(v => !serious.includes(v)).map(v => `${v.id} (${v.impact})`) });
   return serious;
 }
-async function setTheme(page, value) { const select = page.getByLabel('Tema'); if (await select.first().isVisible()) { await select.first().selectOption(value); await page.waitForTimeout(200); } }
+async function setTheme(page, value) {
+  const menu = page.locator('.account-menu');
+  if (!await menu.count()) return;
+  await menu.locator('summary').click(); await page.getByLabel('Tema').first().selectOption(value);
+  await menu.locator('summary').click(); await page.waitForTimeout(200);
+}
 
 const screens = [
-  ['inicio', '/'], ['búsqueda pública', '/search'], ['farmacias cercanas', '/mapa'], ['identidad (entrar)', '/identity'],
+  ['inicio', '/'], ['búsqueda pública', '/search'], ['farmacias cercanas', '/search/mapa'], ['identidad (entrar)', '/identity'],
 ];
 for (const mode of ['CLARO', 'OSCURO']) {
   test(`axe: pantallas públicas en tema ${mode}`, async ({ browser }) => {

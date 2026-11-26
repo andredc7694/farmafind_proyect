@@ -15,3 +15,9 @@ Andre aprobó la spec sin elegir A/B/C; por su regla de trabajo continuo, **Clau
 
 ## Aceptación (2026-11-24)
 Andre respondió «acepto» tras la DEMO. Alcance TEST/DEMO. H-1 → incremento aparte.
+
+## Enmienda: menú por rol — 2026-11-25 (pedido de Andre)
+- Menú por actor (visitante, cliente, solicitante, propietario, trabajador, administrador o revisor) con «Mi cuenta» desplegable (perfil, tema, cerrar sesión). El propietario ve «Mis reservas» dentro de Mi cuenta; el trabajador solo ve su panel con las secciones delegadas; el administrador o revisor no ve reservas ni inventarios.
+- «Farmacias cercanas» sale de todos los menús; la página se conserva desde «Ver farmacias en el mapa» en Buscar medicamentos y la ruta antigua redirige allí.
+- Sin cambios de RLS ni permisos. **Entrega parcial de MEJ-003 y paso inicial de MEJ-007; ninguna se declara completa.** La integración de búsqueda, precios y cercanía queda pendiente (F08.1/F03).
+- Andre menciona dos mensajes anteriores con más detalle que no llegaron a esta conversación; se aplicó lo escrito en este pedido y lo no indicado se dejó como estaba.

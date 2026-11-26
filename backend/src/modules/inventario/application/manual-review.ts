@@ -1,10 +1,10 @@
-import { NO_INVENTORY_SEARCH_INVALIDATOR, type InventorySearchInvalidator, type InventoryUnitOfWork, type InventoryRow } from './ports.js';
+import { NO_INVENTORY_SEARCH_INVALIDATOR, type InventorySearchInvalidator, type InventoryUnitOfWork, type InventoryRow, type InventoryListRow } from './ports.js';
 
 export class ManualInventory {
   constructor(private readonly transactions: InventoryUnitOfWork,
     private readonly searchInvalidator: InventorySearchInvalidator = NO_INVENTORY_SEARCH_INVALIDATOR) {}
 
-  list(secret: string, pharmacyId: string): Promise<readonly InventoryRow[]> {
+  list(secret: string, pharmacyId: string): Promise<readonly InventoryListRow[]> {
     return this.transactions.run(secret, pharmacyId, 'inventory.read', async ports => ports.inventory.list());
   }
 

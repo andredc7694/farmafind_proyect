@@ -28,17 +28,22 @@ async function login(page, who) {
 const status = (page, url) => page.evaluate(async target => (await fetch(target, { credentials: 'same-origin' })).status, url);
 const menu = page => page.getByRole('navigation', { name: 'Navegación principal' });
 const theme = page => page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+const openAccount = page => page.locator('.account-menu summary').click();
 
 test('visitante: menú público mínimo, tema que se recuerda, búsqueda con sugerencias y comparables, y chat flotante', async ({ browser }) => {
   const { page, context } = await newPage(browser);
   await open(page, '/');
-  for (const label of ['Inicio', 'Buscar medicamentos', 'Farmacias cercanas', 'Mi cuenta']) await expect(menu(page).getByRole('link', { name: label })).toBeVisible();
+  for (const label of ['Inicio', 'Buscar medicamentos']) await expect(menu(page).getByRole('link', { name: label })).toBeVisible();
+  await expect(menu(page).getByRole('link', { name: 'Farmacias cercanas' })).toHaveCount(0);
+  await open(page, '/mapa'); // la ruta antigua lleva al mapa dentro de la búsqueda
+  expect(new URL(page.url()).pathname).toBe('/search/mapa');
+  await open(page, '/');
   for (const label of ['Mis reservas', 'Panel de farmacia', 'Ubicación de farmacia', 'Revisar solicitudes']) await expect(menu(page).getByRole('link', { name: label })).toHaveCount(0);
   // Tema: se aplica al instante y se recuerda tras recargar (sin sesión: solo en el navegador).
-  await page.getByLabel('Tema').selectOption('OSCURO');
+  await openAccount(page); await page.getByLabel('Tema').selectOption('OSCURO');
   expect(await theme(page)).toBe('dark');
   await page.reload();
-  expect(await theme(page)).toBe('dark'); await expect(page.getByLabel('Tema')).toHaveValue('OSCURO');
+  expect(await theme(page)).toBe('dark'); await openAccount(page); await expect(page.getByLabel('Tema')).toHaveValue('OSCURO');
   // Búsqueda con sugerencias: teclado para elegir, y buscar es una acción aparte.
   await open(page, '/search');
   const field = page.getByLabel('Nombre comercial o principio activo');
@@ -101,14 +106,14 @@ test('cliente: ve su cuenta y sus reservas, nunca paneles de farmacia, y su tema
   await login(first.page, client);
   await expect(menu(first.page).getByRole('link', { name: 'Mis reservas' })).toBeVisible();
   await expect(menu(first.page).getByRole('link', { name: 'Panel de farmacia' })).toHaveCount(0);
-  await first.page.getByLabel('Tema').selectOption('OSCURO');
+  await openAccount(first.page); await first.page.getByLabel('Tema').selectOption('OSCURO');
   await expect.poll(async () => (await first.page.evaluate(async () => (await (await fetch('/api/v1/me/profile', { credentials: 'same-origin' })).json()).theme))).toBe('OSCURO');
   await first.context.close();
   // Otro navegador (sin nada guardado): al iniciar sesión el perfil manda y el tema oscuro se aplica solo.
   const second = await newPage(browser);
   await login(second.page, client);
   await expect.poll(() => theme(second.page)).toBe('dark');
-  await expect(second.page.getByLabel('Tema')).toHaveValue('OSCURO');
+  await openAccount(second.page); await expect(second.page.getByLabel('Tema')).toHaveValue('OSCURO');
   expect(await status(second.page, `/api/v1/farmacias/${alfaId}/reservas/resumen`)).toBe(403);
   await second.context.close();
 });
@@ -117,6 +122,8 @@ test('trabajador: usa lo que se le delegó (F01.2) y el servidor deniega lo dem�
   const { page, context } = await newPage(browser);
   await login(page, worker);
   await expect(menu(page).getByRole('link', { name: 'Panel de farmacia' })).toBeVisible();
+  await expect(menu(page).getByRole('link', { name: 'Buscar medicamentos' })).toHaveCount(0);
+  await expect(menu(page).getByRole('link', { name: 'Mis reservas' })).toHaveCount(0);
   await open(page, '/farmacias/panel');
   const sections = page.getByRole('navigation', { name: 'Secciones de la farmacia' });
   await expect(sections.getByRole('button')).toHaveText(['Resumen', 'Inventario', 'Reservas', 'Historial']);
@@ -134,6 +141,9 @@ test('propietario: ocho secciones en orden, resumen de su farmacia, historial y 
   const { page, context } = await newPage(browser);
   await login(page, owner);
   await open(page, '/farmacias/panel');
+  await expect(menu(page).getByRole('link', { name: 'Mis reservas' })).toBeHidden();
+  await openAccount(page); await expect(menu(page).getByRole('link', { name: 'Mis reservas' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible(); await openAccount(page);
   const sections = page.getByRole('navigation', { name: 'Secciones de la farmacia' });
   await expect(sections.getByRole('button')).toHaveText(['Resumen', 'Farmacia y ubicación', 'Inventario', 'Importar', 'Reservas', 'Historial', 'Personal', 'Configuración']);
   await expect(page.getByText('Pendientes de responder')).toBeVisible();

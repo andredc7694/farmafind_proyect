@@ -21,7 +21,7 @@ test('zoom real de Chromium al 200 % conserva las rutas principales', async ({ s
       ['identity', 'Identidad'],
       ['reservations', 'Reservas'],
       ['inventory', 'Inventario'],
-      ['mapa', 'Farmacias cercanas'],
+      ['search/mapa', 'Farmacias cercanas'],
       ['assistant/conversation', 'FarmaFind AI'],
     ]) {
       await page.goto(`${services.url('frontend')}${route}`);

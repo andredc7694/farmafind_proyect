@@ -4,8 +4,8 @@
  */
 const general = ['¿Qué información pública puedes mostrarme sobre un medicamento?', '¿Cómo comparo precios entre farmacias?', '¿Qué significa «disponibilidad referencial»?'];
 const bySection = [
+  [/^\/(search\/)?mapa/, ['¿Qué farmacias hay en mi ciudad con ofertas públicas?', '¿Cómo se calcula la distancia a una farmacia?']],
   [/^\/search/, ['Compara el precio de paracetamol entre farmacias', '¿Qué farmacias publican ofertas de ibuprofeno?', '¿Cuál es la oferta más reciente de un medicamento?']],
-  [/^\/mapa/, ['¿Qué farmacias hay en mi ciudad con ofertas públicas?', '¿Cómo se calcula la distancia a una farmacia?']],
   [/^\/reservations/, ['¿Cómo funciona una reserva y cuánto tiempo la mantiene la farmacia?', '¿Qué pasa si no recojo mi reserva a tiempo?']],
 ];
 

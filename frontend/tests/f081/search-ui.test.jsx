@@ -69,7 +69,7 @@ describe('F08.1 búsqueda unificada', () => {
     expect(await screen.findByText(/S\/ 2\.00 más que el más bajo/)).toBeTruthy();
     expect(screen.getByText(/También en: Beta \(S\/ 10\.00\)/)).toBeTruthy();
     expect(screen.getByText('Es el precio más bajo de esta página.', { exact: false })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Ver farmacias en el mapa' }).getAttribute('href')).toBe('/mapa?q=paracetamol');
+    expect(screen.getByRole('link', { name: 'Ver farmacias en el mapa' }).getAttribute('href')).toBe('/search/mapa?q=paracetamol');
     expect(api.search).toHaveBeenCalledWith(expect.objectContaining({ q: 'paracetamol', orden: 'relevancia' }));
   });
 

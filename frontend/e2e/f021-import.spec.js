@@ -23,14 +23,13 @@ async function enterInventory(page) {
   await expect(page.getByRole('heading', { name: 'Importar inventario' })).toBeVisible();
 }
 
-async function inspectAndSelect(page, name, buffer, option) {
+/** Enmienda F02.1: al elegir el archivo la vista previa aparece sola (sin «Analizar» ni selección manual). */
+async function inspectAndSelect(page, name, buffer) {
   await page.getByLabel('Archivo CSV o XLSX').setInputFiles({ name,
     mimeType: name.endsWith('.csv') ? 'text/csv' :
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer });
-  await page.getByRole('button', { name: 'Analizar hojas y encabezados' }).click();
-  await page.getByLabel('Hoja y fila de encabezado').selectOption({ label: option });
-  await page.getByRole('button', { name: 'Preparar vista previa' }).click();
   await expect(page.getByText('Vista previa: VISTA_PREVIA')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Analizar/ })).toHaveCount(0);
 }
 
 test('CSV con encabezado desplazado confirma solo tras revisión explícita', async ({ page }) => {
@@ -38,15 +37,14 @@ test('CSV con encabezado desplazado confirma solo tras revisión explícita', as
   const csv = 'Documento ficticio\n' +
     'nombre,concentracion,presentacion,clasificacion,precio,cantidad,nonce\n' +
     `producto ficticio,10 mg,tabletas,venta libre,13.00,11,${randomUUID()}\n`;
-  await inspectAndSelect(page, 'desplazado.csv', Buffer.from(csv),
-    'CSV, fila 2 (6 campos reconocidos)');
+  await inspectAndSelect(page, 'desplazado.csv', Buffer.from(csv));
   await expect(page.getByText('0 incidencias.')).toBeVisible();
   await page.getByLabel('Nombre del perfil de columnas').fill(`Perfil TEST ${randomUUID()}`);
   await page.getByRole('button', { name: 'Guardar perfil para esta farmacia' }).click();
   await expect(page.getByLabel('Nombre del perfil de columnas')).toHaveValue('');
   await page.getByRole('button', { name: 'Confirmar archivo completo' }).click();
-  await expect(page.getByText(/CONFIRMADA/).first()).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'S/ 13.00' })).toBeVisible();
+  await expect(page.getByText(/Importación confirmada/)).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'S/ 13.00' }).first()).toBeVisible();
   await page.goto('/search');
   await page.getByLabel('Nombre comercial o principio activo').fill('producto ficticio');
   await page.getByRole('button', { name: 'Buscar', exact: true }).click();
@@ -59,16 +57,14 @@ test('precio y cantidad vacíos muestran dos incidencias y bloquean confirmació
   await enterInventory(page);
   const csv = 'nombre,concentracion,presentacion,clasificacion,precio,cantidad,nonce\n' +
     `producto ficticio,10 mg,tabletas,venta libre,,,${randomUUID()}\n`;
-  await inspectAndSelect(page, 'errores.csv', Buffer.from(csv),
-    'CSV, fila 1 (6 campos reconocidos)');
+  await inspectAndSelect(page, 'errores.csv', Buffer.from(csv));
   await expect(page.getByText('2 incidencias.')).toBeVisible();
   await expect(page.getByText(/campo precioReferencial/)).toBeVisible();
   await expect(page.getByText(/campo cantidadFisica/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Confirmar archivo completo' })).toBeDisabled();
   const corrected = 'nombre,concentracion,presentacion,clasificacion,precio,cantidad,nonce\n' +
     `producto ficticio,10 mg,tabletas,venta libre,15.00,13,${randomUUID()}\n`;
-  await inspectAndSelect(page, 'corregido.csv', Buffer.from(corrected),
-    'CSV, fila 1 (6 campos reconocidos)');
+  await inspectAndSelect(page, 'corregido.csv', Buffer.from(corrected));
   await expect(page.getByText('0 incidencias.')).toBeVisible();
 });
 
@@ -81,24 +77,62 @@ test('XLSX mult hoja exige elegir la hoja de inventario', async ({ page }) => {
   inventory.addRow(['nombre', 'concentracion', 'presentacion', 'clasificacion', 'precio', 'cantidad']);
   inventory.addRow(['producto ficticio', '10 mg', 'tabletas', 'venta libre', 14, 12]);
   await inspectAndSelect(page, 'multihoja.xlsx',
-    Buffer.from(await workbook.xlsx.writeBuffer()), 'Inventario, fila 2 (6 campos reconocidos)');
+    Buffer.from(await workbook.xlsx.writeBuffer()));
   await expect(page.getByText('0 incidencias.')).toBeVisible();
 });
 
-test('encabezados ambiguos exigen resolver la columna antes de conciliar', async ({ page }) => {
+test('excluir duplicadas es explícito: cancelar no guarda, aceptar confirma solo las listas y queda en el historial', async ({ page }) => {
+  await enterInventory(page);
+  const nonce = randomUUID();
+  const price = (10 + Math.floor(Math.random() * 8000) / 100).toFixed(2);
+  const csv = 'nombre,concentracion,presentacion,clasificacion,precio,cantidad,nonce\n' +
+    `producto ficticio,10 mg,tabletas,venta libre,${price},7,${nonce}\n` +
+    `producto ficticio,10 mg,tabletas,venta libre,99.90,1,${nonce}\n`;
+  await inspectAndSelect(page, 'repetidas.csv', Buffer.from(csv));
+  await expect(page.getByRole('button', { name: 'Confirmar archivo completo' })).toBeDisabled();
+  const button = page.getByRole('button', { name: 'Excluir la fila por revisar y confirmar la fila lista' });
+  await button.click();
+  await expect(page.getByText(/Se importarán 1 fila y quedarán fuera 1 fila/)).toBeVisible();
+  await page.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page.getByRole('cell', { name: `S/ ${price}` })).toHaveCount(1); // solo la vista previa: nada guardado
+  await button.click();
+  await page.getByRole('button', { name: 'Sí, excluir 1 y confirmar 1' }).click();
+  await expect(page.getByText(/Filas importadas: 1; excluidas por tu decisión: 1/)).toBeVisible();
+  const card = page.locator('li.surface-card').first();
+  await expect(card).toContainText('Excluidas por tu decisión: 1');
+  await card.getByRole('button', { name: 'Ver detalle' }).click();
+  await expect(card.getByRole('table', { name: 'Qué cambió' })).toContainText(`S/ ${price}`, { timeout: 20000 });
+  await card.getByText(/Filas excluidas por tu decisión: 1/).last().click();
+  await expect(card.getByRole('table', { name: 'Filas excluidas por decisión del usuario' })).toContainText('Duplicada');
+  const rejected = await page.evaluate(async () => {
+    const memberships = await (await fetch('/api/v1/me/memberships', { credentials: 'same-origin' })).json();
+    const { csrfToken } = await (await fetch('/api/v1/auth/csrf', { credentials: 'same-origin' })).json();
+    const id = memberships[0].pharmacyId;
+    const response = await fetch(`/api/v1/farmacias/${id}/importaciones/${crypto.randomUUID()}/confirmar`, { method: 'POST',
+      credentials: 'same-origin', headers: { 'X-CSRF-Token': csrfToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ excluir: { duplicadas: 1 }, otra: true }) });
+    return response.status;
+  });
+  expect(rejected).toBe(400);
+});
+
+test('ante una ambigüedad real pregunta solo por ese dato', async ({ page }) => {
   await enterInventory(page);
   const csv = 'Medicamento,Nombre,Concentración,Presentación,Clasificación,Precio,Stock,nonce\n' +
     `producto ficticio,producto ficticio,10 mg,tabletas,venta libre,16.00,14,${randomUUID()}\n`;
   await page.getByLabel('Archivo CSV o XLSX').setInputFiles({ name: 'ambiguo.csv',
     mimeType: 'text/csv', buffer: Buffer.from(csv) });
-  await page.getByRole('button', { name: 'Analizar hojas y encabezados' }).click();
-  await page.getByLabel('Hoja y fila de encabezado')
-    .selectOption({ label: 'CSV, fila 1 (5 campos reconocidos)' });
-  await expect(page.getByText(/Columnas ambiguas: nombre/)).toBeVisible();
-  await expect(page.getByLabel('nombre')).toHaveValue('');
-  await page.getByRole('button', { name: 'Preparar vista previa' }).click();
+  await expect(page.getByText(/más de una columna posible para «Producto»/)).toBeVisible();
   await expect(page.getByText('Vista previa: VISTA_PREVIA')).toHaveCount(0);
-  await page.getByLabel('nombre').fill('Medicamento');
-  await page.getByRole('button', { name: 'Preparar vista previa' }).click();
+  await page.getByLabel('Producto', { exact: true }).selectOption('Medicamento');
+  await page.getByRole('button', { name: 'Continuar' }).click();
   await expect(page.getByText('Vista previa: VISTA_PREVIA')).toBeVisible();
+});
+
+test('un archivo que no se puede abrir explica la causa y la solución', async ({ page }) => {
+  await enterInventory(page);
+  await page.getByLabel('Archivo CSV o XLSX').setInputFiles({ name: 'roto.xlsx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: Buffer.from('no es un libro') });
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo abrir el archivo' }).first()).toBeVisible();
+  await expect(page.getByText('No se pudo completar la solicitud.')).toHaveCount(0);
 });

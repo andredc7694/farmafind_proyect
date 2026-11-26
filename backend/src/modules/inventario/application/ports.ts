@@ -16,6 +16,37 @@ export interface InventoryRow {
   readonly version: number;
 }
 
+/** Lectura para pantalla: la fila de inventario con el nombre legible de su producto. */
+export interface InventoryListRow extends InventoryRow {
+  readonly nombre: string;
+  readonly concentracion: string;
+  readonly presentacion: string;
+  readonly clasificacion: string;
+}
+
+export interface ImportCounts {
+  readonly rows: number;
+  readonly ready: number;
+  readonly pending: number;
+  readonly duplicated: number;
+  readonly added: number;
+  readonly updated: number;
+}
+
+export interface ImportHistoryRecord extends ImportRecord { readonly counts: ImportCounts; }
+
+/** Qué cambió con una importación confirmada. */
+export interface ImportChange {
+  readonly nombre: string;
+  readonly concentracion: string;
+  readonly presentacion: string;
+  readonly added: boolean;
+  readonly priceBeforeCents: number | null;
+  readonly priceAfterCents: number;
+  readonly quantityBefore: number | null;
+  readonly quantityAfter: number;
+}
+
 export interface ImportRecord {
   readonly id: string;
   readonly pharmacyId: string;
@@ -47,7 +78,7 @@ export interface ImportSelectionMetadata {
 export interface InventoryRepositoryPort {
   /** F08.1: cifras de solo lectura de la farmacia (productos y sin stock disponible). */
   summary(): Promise<{ products: number; withoutStock: number }>;
-  list(): Promise<readonly InventoryRow[]>;
+  list(): Promise<readonly InventoryListRow[]>;
   movements(): Promise<readonly Record<string, unknown>[]>;
   review(medicationId: string, input: InventoryReview): Promise<InventoryRow>;
 }
@@ -55,12 +86,14 @@ export interface InventoryRepositoryPort {
 export interface ImportRepositoryPort {
   create(digest: Buffer, rows: readonly ReconciledImportRow[],
     metadata?: ImportSelectionMetadata): Promise<ImportRecord>;
+  findByDigest(digest: Buffer): Promise<ImportRecord | null>;
   find(id: string, lock?: boolean): Promise<ImportRecord | null>;
   rows(id: string): Promise<readonly ReconciledImportRow[]>;
   incidents?(id: string): Promise<readonly ImportIncident[]>;
   profiles?(): Promise<readonly ImportProfile[]>;
   saveProfile?(importId: string, name: string): Promise<ImportProfile>;
-  history(): Promise<readonly ImportRecord[]>;
+  history(): Promise<readonly ImportHistoryRecord[]>;
+  changes?(id: string): Promise<readonly ImportChange[]>;
   transition(id: string, state: 'CONFIRMADA' | 'RECHAZADA' | 'EXPIRADA'): Promise<boolean>;
 }
 

@@ -1,11 +1,11 @@
 import busboy from 'busboy';
-import { Router } from 'express';
-import type { Request, Response } from 'express';
+import { Router, json } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { authHttpSecurity, readSessionCookie, sendIdentityError,
   type AuthHttpOptions } from '../../usuarios/contracts/http-security.js';
-import { PreviewInputError, type PreviewImport } from '../application/preview-import.js';
+import { describeFileError, PreviewInputError, type PreviewImport } from '../application/preview-import.js';
 import { ImportConflictError, type ConfirmImport } from '../application/confirm-import.js';
-import type { ImportMapping } from '../domain/importacion.js';
+import type { ImportMapping, ImportExclusion } from '../domain/importacion.js';
 import type { InspectImport } from '../application/inspect-import.js';
 import type { ImportProfiles } from '../application/import-profiles.js';
 import type { InventoryFileSelection } from '../domain/importacion.js';
@@ -80,6 +80,26 @@ async function readUpload(request: Request, requireMapping = true): Promise<{
   });
 }
 
+const wholeNumber = (value: unknown) => Number.isInteger(value) && (value as number) >= 0 && (value as number) <= 5000;
+
+/** Sin cuerpo: confirmar el archivo completo. Con cuerpo, solo la exclusión explícita y sus dos conteos. */
+function readExclusion(body: unknown): ImportExclusion | undefined | null {
+  if (body === undefined || body === null) return undefined;
+  if (typeof body !== 'object' || Array.isArray(body)) return null;
+  const keys = Object.keys(body);
+  if (keys.length === 0) return undefined;
+  const value = (body as Record<string, unknown>).excluir as Record<string, unknown> | undefined;
+  if (keys.join(',') !== 'excluir' || !value || typeof value !== 'object' || Array.isArray(value) ||
+      Object.keys(value).sort().join(',') !== 'duplicadas,pendientes' ||
+      !wholeNumber(value.duplicadas) || !wholeNumber(value.pendientes)) return null;
+  return { duplicadas: value.duplicadas as number, pendientes: value.pendientes as number };
+}
+
+function uploadMessage(tooLarge: boolean): string {
+  return tooLarge ? 'El archivo pesa más de 5 MB. Divídelo en partes más pequeñas.'
+    : 'No se recibió un archivo válido. Elige un solo archivo .xlsx o .csv e inténtalo de nuevo.';
+}
+
 export function createImportRouter(preview: Pick<PreviewImport, 'authorize' | 'run'>,
   confirm: Pick<ConfirmImport, 'confirm' | 'history' | 'status'>,
   options: AuthHttpOptions, profiles?: Pick<ImportProfiles, 'list' | 'save'>,
@@ -103,8 +123,8 @@ export function createImportRouter(preview: Pick<PreviewImport, 'authorize' | 'r
         response.status(200).json(await inspect.run(secret, pharmacyId, upload.bytes, upload.filename));
       } catch (error) {
         if (error instanceof UploadError) {
-          sendIdentityError(response, error.tooLarge ? 413 : 400, 'BAD_REQUEST', 'Archivo no válido');
-        } else { sendIdentityError(response, 400, 'BAD_REQUEST', 'Archivo no válido'); }
+          sendIdentityError(response, error.tooLarge ? 413 : 400, 'BAD_REQUEST', uploadMessage(error.tooLarge));
+        } else { sendIdentityError(response, 400, 'BAD_REQUEST', describeFileError(error)); }
       }
     });
   router.post('/farmacias/:pharmacyId/importaciones/vista-previa', security.requireCsrf,
@@ -124,9 +144,9 @@ export function createImportRouter(preview: Pick<PreviewImport, 'authorize' | 'r
           upload.bytes, upload.filename, upload.mapping, upload.selection));
       } catch (error) {
         if (error instanceof UploadError) {
-          sendIdentityError(response, error.tooLarge ? 413 : 400, 'BAD_REQUEST', 'Archivo no válido');
+          sendIdentityError(response, error.tooLarge ? 413 : 400, 'BAD_REQUEST', uploadMessage(error.tooLarge));
         } else if (error instanceof PreviewInputError) {
-          sendIdentityError(response, 400, 'BAD_REQUEST', 'Archivo o mapeo no válido');
+          sendIdentityError(response, error.conflict ? 409 : 400, error.conflict ? 'CONFLICT' : 'BAD_REQUEST', error.message);
         } else if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
           sendIdentityError(response, 409, 'CONFLICT', 'Archivo repetido');
         } else { sendIdentityError(response, 404, 'NOT_VISIBLE', 'Recurso no visible'); }
@@ -190,14 +210,18 @@ export function createImportRouter(preview: Pick<PreviewImport, 'authorize' | 'r
   });
 
   router.post('/farmacias/:pharmacyId/importaciones/:importId/confirmar', security.requireCsrf,
-    async (request, response) => {
+    json({ limit: '1kb' }), (_error: unknown, _request: Request, response: Response, _next: NextFunction) => {
+      sendIdentityError(response, 400, 'BAD_REQUEST', 'Entrada no válida');
+    }, async (request: Request, response: Response) => {
       const current = scope(request, response);
       if (!current) return;
       if (typeof request.params.importId !== 'string' || !uuid.test(request.params.importId)) {
         sendIdentityError(response, 404, 'NOT_VISIBLE', 'Recurso no visible'); return;
       }
+      const exclusion = readExclusion(request.body);
+      if (exclusion === null) { sendIdentityError(response, 400, 'BAD_REQUEST', 'Entrada no válida'); return; }
       try { response.status(200).json(await confirm.confirm(current.secret, current.pharmacyId,
-        request.params.importId)); }
+        request.params.importId, exclusion)); }
       catch (error) {
         if (error instanceof ImportConflictError) {
           sendIdentityError(response, 409, 'CONFLICT', 'Importación no confirmable');
