@@ -66,8 +66,9 @@ export function createInventoryClient(fetchImpl = fetch) {
     profiles: pharmacyId => get(`${path(pharmacyId)}/importaciones/perfiles`),
     saveProfile: (pharmacyId, importId, name) =>
       change(`${path(pharmacyId)}/importaciones/perfiles`, 'POST', { importacionId: importId, nombre: name }),
-    confirm: (pharmacyId, importId) =>
-      change(`${path(pharmacyId)}/importaciones/${encodeURIComponent(importId)}/confirmar`, 'POST'),
+    confirm: (pharmacyId, importId, exclusion) =>
+      change(`${path(pharmacyId)}/importaciones/${encodeURIComponent(importId)}/confirmar`, 'POST',
+        exclusion ? { excluir: exclusion } : undefined),
     imports: pharmacyId => get(`${path(pharmacyId)}/importaciones`),
     importStatus: (pharmacyId, importId) =>
       get(`${path(pharmacyId)}/importaciones/${encodeURIComponent(importId)}`),

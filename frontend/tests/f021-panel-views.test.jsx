@@ -15,7 +15,7 @@ const row = (i, extra = {}) => ({ id: `inv${i}`, medicamentoId: `med${i}`, nombr
   concentracion: '10 mg', presentacion: 'tabletas', clasificacion: 'venta libre', precioReferencial: 2.5,
   cantidadFisica: 20, cantidadComprometida: 0, ultimaRevision: '2026-11-25T10:00:00Z', ...extra });
 const record = (id, estado, extra = {}) => ({ importacionId: id, estado, creadaEn: '2026-11-25T10:00:00Z', autorId: 'u1', porMi: true,
-  filas: 3, listas: 2, pendientes: 1, conErrores: 0, agregados: 0, actualizados: 0, ...extra });
+  filas: 3, listas: 2, pendientes: 1, duplicadas: 0, conErrores: 0, importadas: 0, excluidas: 0, agregados: 0, actualizados: 0, ...extra });
 
 beforeEach(() => {
   cleanup(); vi.clearAllMocks();
@@ -74,10 +74,10 @@ describe('Importar', () => {
 
 describe('Historial', () => {
   it('muestra una tarjeta clara por importación, agrupa las vistas previas y abre qué cambió', async () => {
-    api.imports.mockResolvedValue([record('a', 'CONFIRMADA', { porMi: false, autorId: 'u2', agregados: 1, actualizados: 1 }),
+    api.imports.mockResolvedValue([record('a', 'CONFIRMADA', { porMi: false, autorId: 'u2', importadas: 2, excluidas: 1, agregados: 1, actualizados: 1 }),
       record('b', 'RECHAZADA', { porMi: false, autorId: 'u9' }), record('c', 'VISTA_PREVIA'), record('d', 'EXPIRADA')]);
     staff.list.mockResolvedValue([{ userId: 'u2', displayName: 'Persona Ficticia', alias: 'pf' }]);
-    api.importStatus.mockResolvedValue({ incidencias: [], cambios: [
+    api.importStatus.mockResolvedValue({ incidencias: [], excluidas: [{ fila: 4, motivo: 'FILA_DUPLICADA' }, { fila: 5, motivo: 'REFERENCIA_NO_CONCILIADA' }], cambios: [
       { nombre: 'zinc', concentracion: '10 mg', presentacion: 'tabletas', added: false, priceBeforeCents: 100, priceAfterCents: 150, quantityBefore: 4, quantityAfter: 9 },
       { nombre: 'ácido', concentracion: '5 mg', presentacion: 'jarabe', added: true, priceBeforeCents: 0, priceAfterCents: 300, quantityBefore: 0, quantityAfter: 2 },
       { nombre: 'igual', concentracion: '1 mg', presentacion: 'gotas', added: false, priceBeforeCents: 100, priceAfterCents: 100, quantityBefore: 1, quantityAfter: 1 }] });
@@ -90,15 +90,34 @@ describe('Historial', () => {
     expect(container.querySelector('details').open).toBe(false);
     expect(container.querySelector('details').textContent).toContain('Solo vista previa, no se guardó');
     expect(container.textContent).not.toMatch(/CONFIRMADA|VISTA_PREVIA|EXPIRADA|RECHAZADA/);
-    expect(container.textContent).toContain('Filas: 3 · Listas: 2 · Pendientes de catálogo: 1 · Con errores: 0 · Agregados: 1 · Actualizados: 1 · Sin cambios: 0');
+    expect(container.textContent).toContain('Filas del archivo: 3 · Importadas: 2 · Excluidas por tu decisión: 1 · Pendientes de catálogo: 1 · Con errores: 0 · Productos agregados: 1 · Productos actualizados: 1 · Sin cambios: 0');
+    expect(container.querySelector('details').querySelectorAll('button')).toHaveLength(0); // las vistas previas no muestran cambios
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Ver detalle' })[0]);
     const table = await screen.findByRole('table', { name: 'Qué cambió' });
     expect(api.importStatus).toHaveBeenCalledWith('alfa', 'a');
     expect(within(table).getByText('Actualizado')).toBeTruthy(); expect(within(table).getByText('Agregado')).toBeTruthy();
-    expect(table.textContent).toContain('S/ 1.00S/ 1.5049');
+    expect(table.textContent).toContain('Zinc10 mgtabletasS/ 1.00S/ 1.5049Actualizado');
+    const excluded = screen.getByRole('table', { name: 'Filas excluidas por decisión del usuario', hidden: true });
+    expect(excluded.textContent).toContain('4Duplicada'); expect(excluded.textContent).toContain('5Pendiente de catálogo');
+    expect(container.textContent).not.toMatch(/FILA_DUPLICADA|REFERENCIA_NO_CONCILIADA/);
+    fireEvent.change(screen.getByLabelText('Buscar en los cambios por nombre'), { target: { value: 'acido' } });
+    expect(table.querySelectorAll('tbody tr')).toHaveLength(1); expect(table.textContent).toContain('Ácido');
+    fireEvent.change(screen.getByLabelText('Buscar en los cambios por nombre'), { target: { value: '' } });
     expect(table.textContent).not.toContain('Igual');
     expect(screen.getByText('1 producto venía con el mismo precio y stock: sin cambios.')).toBeTruthy();
+  });
+
+  it('pagina los cambios de una importación grande', async () => {
+    api.imports.mockResolvedValue([record('a', 'CONFIRMADA')]);
+    api.importStatus.mockResolvedValue({ incidencias: [], excluidas: [], cambios: Array.from({ length: 120 }, (_, i) => ({ nombre: `p${i}`, concentracion: '1 mg',
+      presentacion: 'tabletas', added: true, priceBeforeCents: 0, priceAfterCents: 100, quantityBefore: 0, quantityAfter: 1 })) });
+    render(<InventoryView pharmacyId="alfa" section="importaciones" capabilities={['inventory.history']} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Ver detalle' }));
+    const table = await screen.findByRole('table', { name: 'Qué cambió' });
+    expect(table.querySelectorAll('tbody tr')).toHaveLength(50);
+    fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
+    expect(screen.getByText('Página 2 de 3')).toBeTruthy(); expect(table.textContent).toContain('P50');
   });
 
   it('los movimientos muestran producto y motivo legibles, nunca identificadores', async () => {

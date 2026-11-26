@@ -184,7 +184,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/PharmacyId'
       responses:
-        '200': { description: 'Lista limitada de estados con autor (identificador y si es quien consulta) y conteos de filas, listas, pendientes, con errores, agregados y actualizados; no se guarda el nombre del archivo' }
+        '200': { description: 'Lista limitada de estados con autor (identificador y si es quien consulta) y conteos de filas, listas, importadas, excluidas, duplicadas, pendientes, con errores, agregados y actualizados; no se guarda el nombre del archivo' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
   /farmacias/{pharmacyId}/importaciones/{importacionId}:
@@ -194,16 +194,36 @@ paths:
         - $ref: '#/components/parameters/PharmacyId'
         - $ref: '#/components/parameters/ImportacionId'
       responses:
-        '200': { description: 'Estado, incidencias minimizadas y cambios aplicados (producto, precio y stock anterior y nuevo) de la farmacia autorizada' }
+        '200': { description: 'Estado, incidencias minimizadas cambios aplicados (producto, precio y stock anterior y nuevo) y filas excluidas (número y motivo) de la farmacia autorizada' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
   /farmacias/{pharmacyId}/importaciones/{importacionId}/confirmar:
     post:
-      summary: Confirmar todas las filas o ninguna
+      summary: Confirmar todas las filas aplicables o ninguna
       parameters:
         - $ref: '#/components/parameters/PharmacyId'
         - $ref: '#/components/parameters/ImportacionId'
         - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: false
+        description: >-
+          Sin cuerpo se confirma el archivo completo. Con «excluir» se dejan fuera, por decisión explícita, las filas
+          duplicadas y pendientes de catálogo; los conteos deben coincidir con la vista previa. Los errores de datos
+          nunca se excluyen.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [excluir]
+              properties:
+                excluir:
+                  type: object
+                  additionalProperties: false
+                  required: [duplicadas, pendientes]
+                  properties:
+                    duplicadas: { type: integer, minimum: 0, maximum: 5000 }
+                    pendientes: { type: integer, minimum: 0, maximum: 5000 }
       responses:
         '200': { description: Archivo confirmado una vez, movimientos y totales }
         '400': { $ref: '#/components/responses/BadRequest' }

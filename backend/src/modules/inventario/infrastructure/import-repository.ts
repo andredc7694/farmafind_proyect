@@ -129,7 +129,8 @@ export class PgImportRepository {
       filas AS (
         SELECT f.importacion_id,count(*)::int AS filas,
           (count(*) FILTER (WHERE f.error_code IS NULL))::int AS listas,
-          (count(*) FILTER (WHERE f.error_code='REFERENCIA_NO_CONCILIADA'))::int AS pendientes
+          (count(*) FILTER (WHERE f.error_code='REFERENCIA_NO_CONCILIADA'))::int AS pendientes,
+          (count(*) FILTER (WHERE f.error_code='FILA_DUPLICADA'))::int AS duplicadas
         FROM f02.importacion_fila f
         WHERE f.farmacia_id=$1 AND f.importacion_id IN (SELECT id FROM recientes) GROUP BY f.importacion_id),
       cambios AS (
@@ -140,12 +141,12 @@ export class PgImportRepository {
         WHERE v.farmacia_id=$1 AND v.motivo IN (SELECT 'Importación ' || id::text FROM recientes WHERE estado='CONFIRMADA')
         GROUP BY v.motivo)
       SELECT r.*,COALESCE(f.filas,0) AS filas,COALESCE(f.listas,0) AS listas,COALESCE(f.pendientes,0) AS pendientes,
-        COALESCE(c.agregados,0) AS agregados,COALESCE(c.actualizados,0) AS actualizados
+        COALESCE(f.duplicadas,0) AS duplicadas,COALESCE(c.agregados,0) AS agregados,COALESCE(c.actualizados,0) AS actualizados
       FROM recientes r LEFT JOIN filas f ON f.importacion_id=r.id
       LEFT JOIN cambios c ON c.motivo='Importación ' || r.id::text
       ORDER BY r.created_at DESC,r.id`, [this.pharmacyId]);
     return result.rows.map(row => ({ ...mapImport(row), counts: { rows: Number(row.filas), ready: Number(row.listas),
-      pending: Number(row.pendientes), added: Number(row.agregados), updated: Number(row.actualizados) } }));
+      pending: Number(row.pendientes), duplicated: Number(row.duplicadas), added: Number(row.agregados), updated: Number(row.actualizados) } }));
   }
 
   /** La confirmación registra cada movimiento con el motivo «Importación <id>» (ver ConfirmImport). */

@@ -75,7 +75,7 @@ export class PreviewImport {
         : createHash('sha256').update(bytes).digest();
       const previous = selection ? await ports.imports.findByDigest(digest) : null;
       if (previous?.state === 'CONFIRMADA') {
-        throw new PreviewInputError('Este archivo ya se confirmó con estos mismos datos. Para cambiar existencias, sube un archivo actualizado.', true);
+        throw new PreviewInputError('Este archivo ya se confirmó con estos mismos datos. Para cambiar existencias, sube un archivo actualizado. Las filas excluidas se podrán importar cuando corrijas el archivo o sus productos estén en el catálogo.', true);
       }
       const reusable = previous?.state === 'VISTA_PREVIA' && Date.parse(previous.expiresAt) > Date.now();
       if (previous && !reusable) digest = createHash('sha256').update(digest).update(randomUUID()).digest();

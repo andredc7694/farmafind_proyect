@@ -89,6 +89,29 @@ export function assessConfirmation(state: ImportState, expiresAt: string, now: s
   return 'CONFIRMABLE';
 }
 
+/** Lo único que el usuario puede dejar fuera de forma explícita. Los errores de datos siempre bloquean. */
+export const EXCLUDABLE_ROW_CODES = ['FILA_DUPLICADA', 'REFERENCIA_NO_CONCILIADA'] as const;
+
+/** Decisión explícita: cuántas filas de cada tipo vio y aceptó excluir el usuario. */
+export interface ImportExclusion { readonly duplicadas: number; readonly pendientes: number; }
+
+/**
+ * Filas que se aplicarán tras excluir. Devuelve null si los números no coinciden exactamente con la vista previa
+ * guardada, si no hay nada que excluir, si alguna fila tiene un error no excluible o si no queda ninguna lista.
+ */
+export function rowsAfterExclusion(rows: readonly ReconciledImportRow[], incidents: readonly ImportIncident[],
+  exclusion: ImportExclusion): readonly ReconciledImportRow[] | null {
+  const excludable: readonly string[] = EXCLUDABLE_ROW_CODES;
+  const excluded = new Set(rows.filter(row => row.errorCode !== null && excludable.includes(row.errorCode)).map(row => row.line));
+  const count = (code: string) => rows.filter(row => row.errorCode === code).length;
+  if (excluded.size === 0 || count('FILA_DUPLICADA') !== exclusion.duplicadas ||
+      count('REFERENCIA_NO_CONCILIADA') !== exclusion.pendientes) return null;
+  if (incidents.some(item => excluded.has(item.line) && !excludable.includes(item.code))) return null;
+  const included = rows.filter(row => !excluded.has(row.line));
+  if (included.length === 0 || included.some(row => row.errorCode !== null)) return null;
+  return included;
+}
+
 function normalizedHeader(value: string): string {
   return value.normalize('NFKC').trim().toLocaleLowerCase('es-PE');
 }

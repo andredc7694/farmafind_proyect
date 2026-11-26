@@ -90,3 +90,7 @@ T001 es puerta SDD. T002/T003 preceden cambios de contrato; T004/T005 pueden pre
 - [X] T050 Importar solo con archivo, vista previa y confirmar (FR-023)
 - [X] T051 Historial: tarjetas de importación, vistas previas agrupadas, detalle y movimientos legibles en la pestaña Historial (FR-024, FR-025)
 - [X] T052 Aislamiento Alfa/Beta de las nuevas lecturas, regresión y recorrido en navegador con el inventario importado desde el archivo ficticio
+- [X] T053 Confirmación con exclusión explícita: regla de dominio, servicio, cuerpo opcional en la ruta de confirmación y contrato (FR-026, FR-027, FR-029)
+- [X] T054 Botón y confirmación con números exactos en la vista previa (FR-026)
+- [X] T055 Historial con conteos, búsqueda en el detalle y filas excluidas (FR-028)
+- [X] T056 Pruebas: exclusión, bloqueo por errores, cancelación, historial, Alfa/Beta, regresión y recorrido con el archivo ficticio original

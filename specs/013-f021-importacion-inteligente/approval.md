@@ -33,3 +33,9 @@ No marca T046, T057 ni T063.
 - **Condiciones:** reutilizar endpoints y datos; mantener la prueba de aislamiento Alfa/Beta; sin tocar RLS ni permisos; probar en navegador con el inventario importado desde su archivo.
 - **Integración (opción A):** PR de `feat/f025-cierre-verificacion` y fusión solo cuando (a) estén estos ajustes, (b) Andre haya repetido T046 y dado su veredicto y (c) el PR esté MERGEABLE y CLEAN, CI en verde, sin secretos y con la regresión aplicable aprobada. En `main` debe constar que **F02.5 sigue sin aceptar** (T057 y T063 pendientes). Después: actualizar `main` y crear la rama de la spec 020.
 - **Veredicto de T046: pendiente.** No marcar T046, T057 ni T063.
+
+## Enmienda: exclusión explícita e historial detallado — 2026-11-25 (decisiones de Andre)
+- Nombre del archivo: opción A (no se guarda). «Stock bajo» = 1 a 5 disponibles.
+- **A) Exclusión explícita:** permitir excluir las filas duplicadas y las pendientes de catálogo para confirmar solo las listas, con botón y confirmación que muestren los números exactos. Los errores de datos siguen bloqueando. Confirmación atómica sobre el resto, revalidando identidad, permisos, referencias y concurrencia. Las excluidas no crean productos ni stock y se pueden importar después subiendo de nuevo el archivo.
+- **B) Historial detallado:** lista de la más reciente a la más antigua con fecha, autor y resultado; conteos; detalle de las confirmadas con búsqueda y paginación; bloque de filas excluidas (número y motivo); vistas previas agrupadas y sin cambios.
+- **Condiciones:** reutilizar endpoints y datos; si hiciera falta migración, avisar antes; no tocar RLS ni permisos. No marcar T046, T057 ni T063.

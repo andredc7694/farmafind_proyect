@@ -81,6 +81,41 @@ test('XLSX mult hoja exige elegir la hoja de inventario', async ({ page }) => {
   await expect(page.getByText('0 incidencias.')).toBeVisible();
 });
 
+test('excluir duplicadas es explícito: cancelar no guarda, aceptar confirma solo las listas y queda en el historial', async ({ page }) => {
+  await enterInventory(page);
+  const nonce = randomUUID();
+  const price = (10 + Math.floor(Math.random() * 8000) / 100).toFixed(2);
+  const csv = 'nombre,concentracion,presentacion,clasificacion,precio,cantidad,nonce\n' +
+    `producto ficticio,10 mg,tabletas,venta libre,${price},7,${nonce}\n` +
+    `producto ficticio,10 mg,tabletas,venta libre,99.90,1,${nonce}\n`;
+  await inspectAndSelect(page, 'repetidas.csv', Buffer.from(csv));
+  await expect(page.getByRole('button', { name: 'Confirmar archivo completo' })).toBeDisabled();
+  const button = page.getByRole('button', { name: 'Excluir la fila por revisar y confirmar la fila lista' });
+  await button.click();
+  await expect(page.getByText(/Se importarán 1 fila y quedarán fuera 1 fila/)).toBeVisible();
+  await page.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page.getByRole('cell', { name: `S/ ${price}` })).toHaveCount(1); // solo la vista previa: nada guardado
+  await button.click();
+  await page.getByRole('button', { name: 'Sí, excluir 1 y confirmar 1' }).click();
+  await expect(page.getByText(/Filas importadas: 1; excluidas por tu decisión: 1/)).toBeVisible();
+  const card = page.locator('li.surface-card').first();
+  await expect(card).toContainText('Excluidas por tu decisión: 1');
+  await card.getByRole('button', { name: 'Ver detalle' }).click();
+  await expect(card.getByRole('table', { name: 'Qué cambió' })).toContainText(`S/ ${price}`, { timeout: 20000 });
+  await card.getByText(/Filas excluidas por tu decisión: 1/).last().click();
+  await expect(card.getByRole('table', { name: 'Filas excluidas por decisión del usuario' })).toContainText('Duplicada');
+  const rejected = await page.evaluate(async () => {
+    const memberships = await (await fetch('/api/v1/me/memberships', { credentials: 'same-origin' })).json();
+    const { csrfToken } = await (await fetch('/api/v1/auth/csrf', { credentials: 'same-origin' })).json();
+    const id = memberships[0].pharmacyId;
+    const response = await fetch(`/api/v1/farmacias/${id}/importaciones/${crypto.randomUUID()}/confirmar`, { method: 'POST',
+      credentials: 'same-origin', headers: { 'X-CSRF-Token': csrfToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ excluir: { duplicadas: 1 }, otra: true }) });
+    return response.status;
+  });
+  expect(rejected).toBe(400);
+});
+
 test('ante una ambigüedad real pregunta solo por ese dato', async ({ page }) => {
   await enterInventory(page);
   const csv = 'Medicamento,Nombre,Concentración,Presentación,Clasificación,Precio,Stock,nonce\n' +

@@ -28,6 +28,7 @@ export interface ImportCounts {
   readonly rows: number;
   readonly ready: number;
   readonly pending: number;
+  readonly duplicated: number;
   readonly added: number;
   readonly updated: number;
 }

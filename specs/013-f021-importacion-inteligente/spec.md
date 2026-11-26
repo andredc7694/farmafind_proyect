@@ -147,3 +147,10 @@ Aprobada en [approval.md](approval.md). Precisa y, donde difiera, sustituye lo a
 - **F021-FR-023**: La pestaña Importar DEBE contener solo elegir archivo, vista previa y confirmar.
 - **F021-FR-024**: El historial DEBE mostrar una tarjeta por importación (fecha y hora, autor, resultado en lenguaje claro, filas, listas, pendientes, con errores, agregados, actualizados y sin cambios) y el detalle de qué cambió; las vistas previas no confirmadas van agrupadas. El nombre del archivo no se guarda.
 - **F021-FR-025**: Los movimientos DEBEN verse en Historial con producto y motivo legibles. Estas lecturas no cambian RLS ni permisos y mantienen el aislamiento entre farmacias.
+
+### Ampliación: exclusión explícita e historial detallado (2026-11-25)
+Aplica la «decisión explícita» de los casos límite y la resolución manual de ambigüedades del Maestro.
+- **F021-FR-026**: El usuario PUEDE excluir las filas duplicadas y pendientes de catálogo, y solo esas, aceptando los conteos exactos; sin decisión explícita no se excluye nada. Cancelar no cambia nada. Si algún conteo no coincide o hay un error de datos o una ambigüedad de referencia, no se modifica el inventario ni la vista previa.
+- **F021-FR-027**: Tras excluir, la confirmación DEBE seguir siendo atómica sobre las filas restantes y revalidar sesión, permiso, farmacia, referencias y concurrencia. De un producto repetido se importa la primera fila. Las excluidas no crean productos ni stock.
+- **F021-FR-028**: El historial DEBE mostrar por importación filas del archivo, importadas, excluidas por decisión, pendientes, con errores, agregados y actualizados; el detalle de una confirmada muestra los cambios (con búsqueda y paginación) y las filas excluidas con número y motivo. Las vistas previas sin confirmar se agrupan y no muestran cambios.
+- **F021-FR-029**: No requiere migración ni cambios de RLS o permisos: en una importación confirmada, las filas guardadas con código «duplicada» o «pendiente» son exactamente las excluidas.

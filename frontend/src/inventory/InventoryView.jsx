@@ -87,9 +87,13 @@ export function InventoryView({ pharmacyId, capabilities = null, section = null 
         setPreview(await (selection ? client.previewSelected(pharmacyId, file, mapping, selection)
           : client.preview(pharmacyId, file, mapping)));
       })}
-      onConfirm={importId => action(async () => {
-        await client.confirm(pharmacyId, importId); setPreview(null);
-        setNotice('Importación confirmada. Revisa los productos en «Inventario» y lo que cambió en «Historial».');
+      onConfirm={(importId, exclusion) => action(async () => {
+        const total = preview?.filas.length ?? 0;
+        await (exclusion ? client.confirm(pharmacyId, importId, exclusion) : client.confirm(pharmacyId, importId));
+        setPreview(null);
+        const left = exclusion ? exclusion.duplicadas + exclusion.pendientes : 0;
+        setNotice(`Importación confirmada. ${left ? `Filas importadas: ${total - left}; excluidas por tu decisión: ${left}. ` : ''}` +
+          'Revisa los productos en «Inventario» y lo que cambió en «Historial».');
       })} />}
     {shows('importaciones') && (data.imports.ok
       ? <ImportHistory records={data.imports.value} authorName={id => names[id] ?? null}

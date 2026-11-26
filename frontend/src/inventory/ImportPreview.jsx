@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PreviewResults } from './PreviewResults.jsx';
+import { ExclusionConfirm } from './ExclusionConfirm.jsx';
 
 export const fieldLabels = { nombre: 'Producto', concentracion: 'Concentración', presentacion: 'Presentación',
   clasificacion: 'Clasificación (condición de venta)', precioReferencial: 'Precio', cantidadFisica: 'Stock' };
@@ -125,6 +126,8 @@ export function ImportPreview({ onInspect, onProfiles, onSaveProfile, onPreview,
       <PreviewResults key={preview.importacionId} preview={preview} />
       {canConfirm && <button type="button" disabled={busy || preview.errores.length > 0}
         onClick={() => void onConfirm(preview.importacionId)}>Confirmar archivo completo</button>}
+      {canConfirm && preview.errores.length > 0 && <ExclusionConfirm key={`excluir-${preview.importacionId}`} rows={preview.filas}
+        busy={busy} onConfirm={exclusion => onConfirm(preview.importacionId, exclusion)} />}
       {canConfirm && onSaveProfile && candidate && preview.errores.length === 0 && <div>
         <label htmlFor="import-profile-name">Nombre del perfil de columnas</label>
         <input id="import-profile-name" maxLength={80} value={profileName} onChange={event => setProfileName(event.target.value)} />

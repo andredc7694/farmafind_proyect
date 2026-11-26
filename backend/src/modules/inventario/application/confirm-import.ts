@@ -1,4 +1,5 @@
-import { assessConfirmation, type ReconciledImportRow, type ImportIncident } from '../domain/importacion.js';
+import { assessConfirmation, rowsAfterExclusion, type ReconciledImportRow, type ImportIncident,
+  type ImportExclusion } from '../domain/importacion.js';
 import { NO_INVENTORY_SEARCH_INVALIDATOR, type InventorySearchInvalidator, type InventoryUnitOfWork, type ImportRecord,
   type ImportHistoryRecord, type ImportChange } from './ports.js';
 
@@ -26,16 +27,23 @@ export interface PublicImportHistory extends PublicImport {
   readonly filas: number;
   readonly listas: number;
   readonly pendientes: number;
+  readonly duplicadas: number;
   readonly conErrores: number;
+  /** Solo en confirmadas: filas aplicadas y filas que el usuario dejó fuera. */
+  readonly importadas: number;
+  readonly excluidas: number;
   readonly agregados: number;
   readonly actualizados: number;
 }
 
 function historyRecord(record: ImportHistoryRecord, actorUserId: string): PublicImportHistory {
-  const { rows, ready, pending, added, updated } = record.counts;
+  const { rows, ready, pending, duplicated, added, updated } = record.counts;
+  const confirmed = record.state === 'CONFIRMADA';
   return { ...publicRecord(record), autorId: record.actorUserId, porMi: record.actorUserId === actorUserId,
-    filas: rows, listas: ready, pendientes: pending, conErrores: Math.max(0, rows - ready - pending),
-    agregados: added, actualizados: updated };
+    filas: rows, listas: ready, pendientes: pending, duplicadas: duplicated,
+    conErrores: Math.max(0, rows - ready - pending - duplicated),
+    // Una confirmada con filas no listas solo pudo confirmarse excluyéndolas.
+    importadas: confirmed ? ready : 0, excluidas: confirmed ? rows - ready : 0, agregados: added, actualizados: updated };
 }
 
 function isApplyConflict(error: unknown): boolean {
@@ -49,7 +57,7 @@ export class ConfirmImport {
   constructor(private readonly transactions: InventoryUnitOfWork,
     private readonly searchInvalidator: InventorySearchInvalidator = NO_INVENTORY_SEARCH_INVALIDATOR) {}
 
-  async confirm(secret: string, pharmacyId: string, importId: string): Promise<PublicImport> {
+  async confirm(secret: string, pharmacyId: string, importId: string, exclusion?: ImportExclusion): Promise<PublicImport> {
     let outcome: ImportRecord;
     try {
       outcome = await this.transactions.run(secret, pharmacyId, 'inventory.import.confirm',
@@ -66,8 +74,16 @@ export class ConfirmImport {
           }
           const rows = await imports.rows(importId);
           const incidents = await imports.incidents?.(importId) ?? [];
-          let assessment = assessConfirmation(locked.state, locked.expiresAt, new Date().toISOString(), rows);
-          if (assessment === 'CONFIRMABLE' && incidents.length > 0) assessment = 'RECHAZADA';
+          // Con exclusión explícita, una decisión que no calza no cambia nada: ni el inventario ni la vista previa.
+          let applied = rows; let blocking = incidents;
+          if (exclusion && locked.state === 'VISTA_PREVIA') {
+            const included = rowsAfterExclusion(rows, incidents, exclusion);
+            if (!included) throw new ImportConflictError('Exclusión no válida');
+            const lines = new Set(included.map(row => row.line));
+            applied = included; blocking = incidents.filter(item => lines.has(item.line));
+          }
+          let assessment = assessConfirmation(locked.state, locked.expiresAt, new Date().toISOString(), applied);
+          if (assessment === 'CONFIRMABLE' && blocking.length > 0) assessment = 'RECHAZADA';
           if (assessment === 'ALREADY_CONFIRMED') return locked;
           if (assessment === 'CONFLICT') throw new ImportConflictError('Importación no confirmable');
           if (assessment === 'EXPIRADA' || assessment === 'RECHAZADA') {
@@ -77,7 +93,7 @@ export class ConfirmImport {
             return changed;
           }
           const inventory = ports.inventory;
-          const ordered = [...rows].sort((a, b) => a.medicationId!.localeCompare(b.medicationId!));
+          const ordered = [...applied].sort((a, b) => a.medicationId!.localeCompare(b.medicationId!));
           for (const row of ordered) {
             try {
               await inventory.review(row.medicationId!, {
@@ -118,7 +134,8 @@ export class ConfirmImport {
   }
 
   async status(secret: string, pharmacyId: string, importId: string): Promise<
-    PublicImport & { readonly incidencias: readonly ImportIncident[]; readonly cambios: readonly ImportChange[] }> {
+    PublicImport & { readonly incidencias: readonly ImportIncident[]; readonly cambios: readonly ImportChange[];
+      readonly excluidas: readonly { readonly fila: number; readonly motivo: string }[] }> {
     return this.transactions.run(secret, pharmacyId, 'inventory.history', async ports => {
       const imports = ports.imports;
       const record = await imports.find(importId);
@@ -126,7 +143,9 @@ export class ConfirmImport {
       const rows: readonly ReconciledImportRow[] = await imports.rows(importId);
       const incidents = await imports.incidents?.(importId);
       const changes = record.state === 'CONFIRMADA' ? await imports.changes?.(importId) ?? [] : [];
-      return { ...publicRecord(record), cambios: changes, incidencias: incidents ?? rows.filter(row => row.errorCode !== null)
+      const excluded = record.state === 'CONFIRMADA'
+        ? rows.filter(row => row.errorCode !== null).map(row => ({ fila: row.line, motivo: row.errorCode! })) : [];
+      return { ...publicRecord(record), cambios: changes, excluidas: excluded, incidencias: incidents ?? rows.filter(row => row.errorCode !== null)
         .map(row => ({ line: row.line, field: 'nombre', column: 'nombre', code: row.errorCode!,
           title: 'Incidencia de importación', cause: 'Revisa el archivo',
           action: 'Corrige y vuelve a validar', supportCode: `F021-${row.errorCode}` })) };
