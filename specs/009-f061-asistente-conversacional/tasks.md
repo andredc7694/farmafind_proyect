@@ -122,6 +122,6 @@
 La base local T001–T012, las historias US1/US2 y las partes desbloqueadas de US3–US5 tienen pruebas y evidencias en `evidence-traceability.md`. La composición runtime mantiene vacío el catálogo farmacéutico; no se expone contenido real antes de la revisión profesional. T034, T035, T046 y T047 se verificaron con PostgreSQL/Redis TEST y Playwright Linux; T030 y T044 siguen pendientes de permiso de reutilización y revisión profesional. No hay despliegue ni aceptación F06.1.
 
 ## Enmienda 2026-11-25
-- [X] T045 Intenciones del proveedor MOCK, textos amables y rechazo clínico ampliado (FR-031, FR-032)
-- [X] T046 Burbuja tipo chat, teclado y navegación sin la página del asistente (FR-030, FR-033)
-- [X] T047 Pruebas unitarias y de navegador, y corrección de la casilla de filtros
+- [X] T050 Intenciones del proveedor MOCK, textos amables y rechazo clínico ampliado (FR-031, FR-032)
+- [X] T051 Burbuja tipo chat, teclado y navegación sin la página del asistente (FR-030, FR-033)
+- [X] T052 Pruebas unitarias y de navegador, y corrección de la casilla de filtros
