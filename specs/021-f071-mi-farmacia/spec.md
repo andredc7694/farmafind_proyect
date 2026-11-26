@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f071-mi-farmacia`
 **Created**: 2026-11-26
-**Status**: Borrador **pendiente de aprobación de Andre** (Spec Kit: *specify*). Sin plan, tasks ni código.
+**Status**: Spec **aprobada por Andre el 2026-11-26** («apruebo»; ver [approval.md](approval.md)). D-01 a D-05 y T057 con la opción recomendada (A), pendientes de confirmar con el plan. Plan pendiente de aprobación.
 **Input**: pedido de Andre del 2026-11-26, tras la consulta de solo lectura del mismo día. Parte de **MEJ-006** y **RF21** (perfil y datos de la farmacia); **MEJ-006 no se declara completa**.
 
 ## Problema (lenguaje sencillo)
