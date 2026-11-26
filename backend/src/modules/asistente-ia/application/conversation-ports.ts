@@ -35,7 +35,8 @@ export interface ReviewedSourceCatalog {
   lookup(term: string, now: Date): ReviewedSource | null;
 }
 
-export type ConversationIntent = 'SOURCE' | 'PUBLIC_SEARCH' | 'PUBLIC_COMPARE' | 'SYMPTOM' | 'HELP';
+export type ConversationIntent = 'SOURCE' | 'PUBLIC_SEARCH' | 'PUBLIC_COMPARE' | 'SYMPTOM' | 'HELP'
+  | 'GREETING' | 'CAPABILITIES' | 'NEARBY' | 'ASK_TERM';
 export interface ConversationDecision { readonly intent: ConversationIntent; readonly term: string | null; }
 export interface ConversationProvider { classify(query: string): Promise<ConversationDecision>; }
 export type ConversationPublicTools = PublicKnowledgeTools;

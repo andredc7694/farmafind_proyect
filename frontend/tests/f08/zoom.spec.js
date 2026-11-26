@@ -22,7 +22,6 @@ test('zoom real de Chromium al 200 % conserva las rutas principales', async ({ s
       ['reservations', 'Reservas'],
       ['inventory', 'Inventario'],
       ['search/mapa', 'Farmacias cercanas'],
-      ['assistant/conversation', 'FarmaFind AI'],
     ]) {
       await page.goto(`${services.url('frontend')}${route}`);
       const result = await worker.evaluate(async url => {
@@ -54,10 +53,6 @@ test('zoom real de Chromium al 200 % conserva las rutas principales', async ({ s
       if (route === 'search') {
         await page.getByLabel('Nombre comercial o principio activo').fill('producto ficticio');
         await expect(page.getByLabel('Nombre comercial o principio activo')).toHaveValue('producto ficticio');
-      }
-      if (route === 'assistant/conversation') {
-        await page.getByLabel('¿Qué información deseas consultar?').fill('Consulta ficticia');
-        await expect(page.getByLabel('¿Qué información deseas consultar?')).toHaveValue('Consulta ficticia');
       }
     }
     await page.goto(`${services.url('frontend')}search`);

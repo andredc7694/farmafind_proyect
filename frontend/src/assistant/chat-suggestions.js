@@ -1,20 +1,14 @@
 /**
- * F08.1: preguntas sugeridas por reglas locales (sin modelo de lenguaje). Solo RELLENAN el campo de texto; enviar sigue
- * siendo una acción de la persona. Informativas: sin diagnósticos, tratamientos, recetas ni dosis.
+ * Preguntas sugeridas de la bienvenida. Solo RELLENAN el campo de texto; enviar sigue siendo una acción de la persona.
+ * Informativas: sin diagnósticos, tratamientos, recetas ni dosis.
  */
-const general = ['¿Qué información pública puedes mostrarme sobre un medicamento?', '¿Cómo comparo precios entre farmacias?', '¿Qué significa «disponibilidad referencial»?'];
-const bySection = [
-  [/^\/(search\/)?mapa/, ['¿Qué farmacias hay en mi ciudad con ofertas públicas?', '¿Cómo se calcula la distancia a una farmacia?']],
-  [/^\/search/, ['Compara el precio de paracetamol entre farmacias', '¿Qué farmacias publican ofertas de ibuprofeno?', '¿Cuál es la oferta más reciente de un medicamento?']],
-  [/^\/reservations/, ['¿Cómo funciona una reserva y cuánto tiempo la mantiene la farmacia?', '¿Qué pasa si no recojo mi reserva a tiempo?']],
+export const SUGGESTIONS = [
+  { label: 'Comparar precios de un medicamento', fill: 'Compara el precio de ' },
+  { label: 'Buscar una farmacia cercana', fill: '¿Dónde hay una farmacia cercana?' },
+  { label: '¿Qué información puedes darme?', fill: '¿Qué información puedes darme?' },
 ];
 
-export function suggestedQuestions(path = '/') {
-  const match = bySection.find(([pattern]) => pattern.test(path));
-  return [...(match ? match[1] : []), ...general].slice(0, 4);
-}
-
-/** Pantallas donde no se muestra la burbuja (el asistente ya es la pantalla, o es técnica/de administración). */
+/** Pantallas donde no se muestra la burbuja (técnicas o de administración). */
 export function bubbleHiddenOn(path = '/') {
-  return /^\/(assistant|bootstrap|admin)/.test(path);
+  return /^\/(bootstrap|admin)/.test(path);
 }

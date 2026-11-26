@@ -1,5 +1,6 @@
 import type { ConversationRequest, ConversationResponse, ConversationCitation } from '../domain/conversation-contract.js';
 import { classifyConversationSafety, EDUCATIONAL_NOTICE } from '../domain/conversation-policy.js';
+import { REPLIES, offersReply, noOffersReply } from '../domain/friendly-replies.js';
 import type { ConversationProvider, ConversationPublicTools, ConversationStore, ReviewedSourceCatalog } from './conversation-ports.js';
 
 const ABSTAIN = 'No dispongo de una fuente revisada y vigente para responder con seguridad.';
@@ -27,10 +28,10 @@ export class ConverseAssistant {
     // A context must belong to this origin before any provider or tool is called.
     const prior = request.conversacionId ? this.contexts.get(origin, request.conversacionId) : null;
     const decision = await bounded(this.provider.classify(request.consulta));
-    if (!['SOURCE', 'SYMPTOM', 'PUBLIC_SEARCH', 'PUBLIC_COMPARE', 'HELP'].includes(decision?.intent) ||
+    if (!['SOURCE', 'SYMPTOM', 'PUBLIC_SEARCH', 'PUBLIC_COMPARE', 'HELP', 'GREETING', 'CAPABILITIES', 'NEARBY', 'ASK_TERM'].includes(decision?.intent) ||
         (decision.term !== null && typeof decision.term !== 'string')) throw new Error('invalid provider decision');
     let estado: ConversationResponse['estado'] = 'AYUDA';
-    let respuesta = 'Modo DEMO: puedo consultar información pública de FarmaFind. La IA generativa externa no está habilitada; sin fichas revisadas me abstengo de dar información farmacológica.';
+    let respuesta: string = decision.intent in REPLIES ? REPLIES[decision.intent as keyof typeof REPLIES] : REPLIES.HELP;
     let fuentes: readonly ConversationCitation[] = [];
     let referent = prior?.referent ?? null;
 
@@ -52,10 +53,10 @@ export class ConverseAssistant {
       const result = await bounded(decision.intent === 'PUBLIC_COMPARE'
         ? this.tools.compare(decision.term) : this.tools.search(decision.term));
       const offers = result.ofertas.slice(0, 20);
-      if (offers.length === 0) { estado = 'ABSTENCION'; respuesta = 'No hay ofertas públicas verificables para esta consulta.'; }
+      if (offers.length === 0) { estado = 'ABSTENCION'; respuesta = noOffersReply(decision.term); }
       else {
         estado = 'BUSQUEDA_PUBLICA';
-        respuesta = offers.map(offer => `${offer.medicamento.nombreComercial}: ${offer.farmacia.nombre}; precio referencial ${offer.precioReferencialCentavos} céntimos; disponibilidad referencial ${offer.disponibilidadReferencial}; revisado ${offer.ultimaRevision}.`).join(' ');
+        respuesta = offersReply(decision.term, offers, decision.intent === 'PUBLIC_COMPARE');
         fuentes = offers.map(offer => ({ tipo: 'OFERTA_PUBLICA', titulo: offer.medicamento.nombreComercial,
           referencia: `farmafind://oferta/${offer.medicamento.id}/${offer.farmacia.id}`, revisadoEl: offer.ultimaRevision }));
       }

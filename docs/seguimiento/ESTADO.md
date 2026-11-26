@@ -117,3 +117,9 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Condiciones: no tocar RLS, permisos ni límites de F06; pruebas de navegador (Enter, Shift+Enter, burbuja, menú) y regresión aplicable; no marcar T057 ni T063.
 - 2026-11-25 · **T046 ACEPTADA por Andre** (salvedad: 583 filas excluidas pendientes hasta la spec 020). Autorizada la integración de `feat/f025-cierre-verificacion` a `main`; después, lote del asistente y luego spec 020, sin alterar datos ni esquema de la DEMO F02.5 (base TEST separada).
 - **F02.5 SIGUE SIN ACEPTAR:** T057 y T063 pendientes (solo Andre); F025-RF23 aplazada. Integrar la rama en `main` no la acepta.
+- 2026-11-26 · PR #11 fusionado en main (`f270bbf`); F02.5 sigue SIN ACEPTAR (T057, T063).
+- 2026-11-26 · Lote del asistente virtual implementado y probado en `feat/f061-asistente-burbuja` (enmienda F06.1/F08.1; partes de MEJ-009 y MEJ-010, sin declararlas completas). **Pendiente de revisión y aceptación de Andre; sin PR.**
+- 2026-11-26 · Spec 020: autorizada su implementación después del lote. Aviso a Andre: las bases TEST son separadas, pero las pruebas de base de datos y navegador usan el mismo puerto que la DEMO F02.5; hay que apagarla mientras corren.
+- 2026-11-26 · **Lote del asistente virtual ACEPTADO por Andre** (probado en su DEMO); autorizada su integración a `main`. F02.5 sigue SIN ACEPTAR (T057, T063).
+- 2026-11-26 · Spec 020: Andre elige la opción A. Se continúa solo cuando termine T057 y T063 o avise de un rato sin usar la DEMO; mientras tanto no apagarla ni modificarla.
+- 2026-11-26 · Regla de Andre: las próximas correcciones se registran como pendientes con fecha, cada una por separado; no se empiezan sin su orden y cada una aprobada va en su propia rama.

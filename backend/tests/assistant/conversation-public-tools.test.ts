@@ -33,10 +33,10 @@ describe('frontera pública F03/F06.1', () => {
     const result = await assistant.execute({ consulta: 'busca Producto Ficticio Alfa' }, 'TEST', 'corr');
     expect(tools.search).toHaveBeenCalledOnce();
     expect(result.estado).toBe('BUSQUEDA_PUBLICA');
-    expect(result.respuesta).toContain('1234');
+    expect(result.respuesta).toContain('S/ 12.34');
     expect(result.respuesta).toContain('Farmacia Ficticia Alfa');
-    expect(result.respuesta).toContain(offer.ultimaRevision);
-    expect(result.respuesta).toContain(offer.disponibilidadReferencial);
+    expect(result.respuesta).toContain('17/11/2026');
+    expect(result.respuesta).toContain('disponibilidad referencial');
     expect(result.fuentes).toHaveLength(1);
     expect(tools.pharmacy).not.toHaveBeenCalled();
   });
@@ -46,7 +46,7 @@ describe('frontera pública F03/F06.1', () => {
       tools, new InMemoryConversationStore());
     const result = await assistant.execute({ consulta: 'busca Producto Ficticio Alfa' }, 'TEST', 'corr');
     expect(result).toMatchObject({ estado: 'ABSTENCION', fuentes: [] });
-    expect(result.respuesta).not.toContain('1234');
+    expect(result.respuesta).not.toContain('12.34');
   });
   it('limita la comparación a veinte DTO públicos y una sola herramienta', async () => {
     const many = Array.from({ length: 25 }, (_, index) => ({ ...offer,

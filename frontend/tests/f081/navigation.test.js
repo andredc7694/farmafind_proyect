@@ -21,7 +21,7 @@ describe('F08.1 modelo de navegación por actor', () => {
   const account = actor => accountLinksFor(actor).map(link => link.label);
 
   it('visitante: menú público sin «Farmacias cercanas» y acceso dentro de Mi cuenta', () => {
-    expect(hrefs()).toEqual(['/', '/search', '/farmacias/solicitar', '/assistant/conversation']);
+    expect(hrefs()).toEqual(['/', '/search', '/farmacias/solicitar']);
     expect(navigationFor().map(link => link.label)).not.toContain('Farmacias cercanas');
     expect(account()).toEqual(['Entrar o crear cuenta']);
   });
