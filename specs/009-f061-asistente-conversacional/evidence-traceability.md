@@ -178,3 +178,6 @@ Las pruebas de este cierre fueron `npm run test:f061:unit` **85/85**, `npm run t
 - Causa de las respuestas pobres: «¿Qué información puedes mostrarme?» se clasificaba como consulta de ficha; un nombre suelto o «hola» caían en la ayuda genérica; «…entre farmacias» se buscaba como parte del nombre.
 - Sin migraciones ni cambios de RLS, permisos, contratos o límites de F06 (tasa, tamaño, turnos, 20 fuentes). Gemini sigue desactivado.
 - Las páginas retiradas dejan sin uso `AssistantView.jsx` y `ConversationView.jsx` (se conservan con sus pruebas); `frontend/tests/assistant/f061.spec.js` queda omitida.
+- **Pruebas (2026-11-26):** asistente 145/145 (23 de intenciones), F06 unit/api, F03 unit, frontend e inventario 271/271, `check`, contratos y build. Navegador: F081 8/8 (Enter, Shift+Enter, táctil, burbuja, menú, redirecciones, casilla), F02 3/3, flujo integrado 4/4, accesibilidad 4/4.
+- **F02.1 en navegador:** con el puente Docker↔equipo falló de forma intermitente (carga de página o petición sin respuesta), igual en `main` sin el lote (2 de 4) que con él; en el Chrome del equipo, sin ese puente, pasó 10 de 10 corridas (60/60).
+- **Revisión visual** en la base TEST técnica (claro, oscuro, 390 px): «hola», «Aciclovir» y «Paracetamol» responden; sin desbordamiento; sin stock.
