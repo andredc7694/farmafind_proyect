@@ -34,3 +34,6 @@
 - Pruebas, todas con el servicio **simulado**: backend geolocalización 55/55 (10 nuevas de sugerencias) y frontend 253/253 (7 nuevas; 2 existentes actualizadas al formulario enmendado). En una corrida intermedia el frontend reportó 52 archivos y 250 pruebas sin fallos; al repetirla dio 53/253. `check` correcto (314 archivos) y build correcto.
 - T025: decisión registrada en `research.md` (R-06), en la enmienda de `spec.md` y en `approval.md`.
 - Copia temporal: solo se reinició su API (3001), con el interruptor encendido; la revisión en Chrome no hizo ninguna consulta a Nominatim. DEMO (3000/5173) y su Redis intactos.
+
+## T024 · 2026-11-26
+- **Andre revisó la copia temporal y da conforme** la mejora del formulario de dirección y ubicación (búsqueda, completar al marcar, respaldo de ciudades y formulario ordenado). La copia sigue encendida a pedido suyo.

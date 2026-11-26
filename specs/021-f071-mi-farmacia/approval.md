@@ -36,3 +36,6 @@
   - listar los datos que salen hacia OpenStreetMap, que no se guardan en registros, y los límites;
   - FR-013 a FR-016, T020 a T025 y decisión registrada;
   - pruebas simuladas y resultado en la copia temporal, sin tocar la DEMO ni su Redis.
+
+## 2026-11-26 · T024 conforme
+- Andre: «doy conforme la mejora del formulario de dirección y ubicación». Pide además el historial en «Revisar ubicaciones» (propuesta de enmienda en `enmienda-historial-propuesta.md`, pendiente de su aprobación).
