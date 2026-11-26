@@ -35,3 +35,6 @@ El responsable aprobó expresamente en esta conversación que la activación F02
 | `plan.md`, adenda 2026-11-21 | `0B73B83EDD2BC283A866936E7362AA1114A2D27FB15F7147F91271D90D51557A` | Contrato interno separado F05, 30 días configurables TEST, RLS/capacidades tenant, migraciones TEST propuestas y fixtures efímeros. |
 
 Se preparan T031, T036, T037 y T064 sin marcarlas completas. La ejecución de código, SQL, migraciones, servicios o pruebas queda para la siguiente autorización expresa. Ninguna base persistente, DEMO manual o entorno productivo queda autorizado para estas operaciones. GLO-01/BOOT-01 conservan sus límites y F02.5 no queda aceptada.
+
+## 2026-11-25 · T046 — NO APROBADA (verificación humana de Andre)
+Andre cargó `farma.xlsx` (hojas «Precios», «Farmacia», «Léeme»; encabezados `medicamento, nombre_generico, concentracion, presentacion, categoria_terapeutica, precio_regular_sol…`): la pantalla mostró «No se pudo completar la solicitud.» y los campos de mapeo quedaron con los nombres por defecto del importador antiguo. Incumple F021-FR-001–004 y SC-001 (propuesta automática de hoja, encabezado y mapeo) y MEJ-002 (error preciso). **T046 sigue sin marcar. T057 y T063 sin marcar.** Corrección pendiente de aprobación de Andre; no se cambió código.
