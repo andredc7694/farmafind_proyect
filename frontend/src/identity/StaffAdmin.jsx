@@ -16,6 +16,22 @@ const capabilityLabels = [
 
 const stateLabel = { PENDIENTE: 'pendiente', ACEPTADA: 'aceptada', RECHAZADA: 'rechazada', VENCIDA: 'vencida', REVOCADA: 'revocada' };
 
+/**
+ * El nombre para mostrar «parece un usuario» cuando es una sola palabra con dígitos, punto, guion o
+ * guion bajo (p. ej. «JOSE_01») y no coincide con el usuario real: el trabajador podría confundirlos al entrar.
+ */
+export function nameLooksLikeUsername(displayName, alias) {
+  const name = String(displayName ?? '').trim();
+  return /^[A-Za-z0-9][A-Za-z0-9._-]{2,39}$/.test(name) && /[0-9._-]/.test(name) &&
+    name.toLowerCase() !== String(alias ?? '').trim().toLowerCase();
+}
+
+function LoginHint({ alias }) {
+  return alias
+    ? <>Usuario para entrar: <code>{alias}</code></>
+    : <>Entra con su correo</>;
+}
+
 function CapabilityChecklist({ selected, onToggle, idPrefix }) {
   return <>{capabilityLabels.map(([code, label]) => <label key={code} htmlFor={`${idPrefix}-${code}`}>
     <input id={`${idPrefix}-${code}`} type="checkbox" checked={selected.includes(code)} onChange={() => onToggle(code)} /> {label}
@@ -30,7 +46,7 @@ function MemberRow({ member, busy, onSave, onRevoke, onReissue }) {
   const toggle = code => setSelected(current => current.includes(code) ? current.filter(item => item !== code) : [...current, code]);
   const active = member.state === 'ACTIVA';
   return <li>
-    <strong>{member.alias ?? member.userId}</strong> — {member.displayName ?? 'sin nombre'} — {member.state}
+    <strong>{member.displayName ?? 'sin nombre'}</strong> — <LoginHint alias={member.alias} /> — {member.state}
     {member.pendingTemporaryKey && ' — clave temporal pendiente de usar'}
     {active && <>{' '}
       <button type="button" disabled={busy} onClick={() => setEditing(value => !value)}>
@@ -85,7 +101,7 @@ export function StaffAdmin({ pharmacyId, api = client }) {
     setBusy(true); setMessage(null); setNotice(null);
     try {
       const created = await api.create(pharmacyId, { alias: alias.trim(), displayName: displayName.trim(), capabilities });
-      setIssued({ alias: created.alias, temporaryPassword: created.temporaryPassword, expiresAt: created.expiresAt });
+      setIssued({ alias: created.alias, displayName: displayName.trim(), temporaryPassword: created.temporaryPassword, expiresAt: created.expiresAt });
       setAlias(''); setDisplayName(''); setCapabilities([]);
       await refresh();
     } catch (error) {
@@ -117,7 +133,7 @@ export function StaffAdmin({ pharmacyId, api = client }) {
     setBusy(true); setMessage(null); setNotice(null);
     try {
       const created = await api.issueTemporaryKey(pharmacyId, member.userId);
-      setIssued({ alias: member.alias, temporaryPassword: created.temporaryPassword, expiresAt: created.expiresAt });
+      setIssued({ alias: member.alias, displayName: member.displayName, temporaryPassword: created.temporaryPassword, expiresAt: created.expiresAt });
       await refresh();
     } catch { setMessage('No se pudo emitir la clave. Solo aplica a trabajadores sin correo de tu farmacia.'); }
     finally { setBusy(false); }
@@ -128,9 +144,12 @@ export function StaffAdmin({ pharmacyId, api = client }) {
   return <section aria-labelledby="staff-admin-title">
     <h2 id="staff-admin-title">Personal de la farmacia</h2>
     {issued && <div role="alert" className="notice">
-      <p>Cuenta creada: <strong>{issued.alias}</strong>. Entrega esta clave temporal en persona. <strong>Se muestra una sola vez</strong>{' '}
+      <p>Clave temporal para <strong>{issued.displayName ?? issued.alias}</strong>. Entrega esta clave en persona. <strong>Se muestra una sola vez</strong>{' '}
         y vence el {new Date(issued.expiresAt).toLocaleString('es-PE')}.</p>
+      <p className="login-hint"><LoginHint alias={issued.alias} /></p>
       <p><code aria-label="Clave temporal">{issued.temporaryPassword}</code></p>
+      {nameLooksLikeUsername(issued.displayName, issued.alias) &&
+        <p>Recuérdale que entra con el usuario <code>{issued.alias}</code>, no con su nombre «{issued.displayName}».</p>}
       <button type="button" onClick={() => setIssued(null)}>Ya la entregué; ocultar</button>
     </div>}
     <form onSubmit={submit}>
@@ -138,7 +157,12 @@ export function StaffAdmin({ pharmacyId, api = client }) {
       <input id="staff-alias" value={alias} onChange={event => setAlias(event.target.value)} required
         minLength={3} maxLength={40} pattern="[A-Za-z0-9][A-Za-z0-9._\-]{2,39}" autoComplete="off" />
       <label htmlFor="staff-name">Nombre para mostrar</label>
-      <input id="staff-name" value={displayName} onChange={event => setDisplayName(event.target.value)} required maxLength={120} autoComplete="off" />
+      <input id="staff-name" value={displayName} onChange={event => setDisplayName(event.target.value)} required maxLength={120} autoComplete="off"
+        aria-describedby={nameLooksLikeUsername(displayName, alias) ? 'staff-name-warning' : undefined} />
+      {nameLooksLikeUsername(displayName, alias) && <p id="staff-name-warning" className="field-warning" aria-live="polite">
+        Este nombre parece un usuario. Para entrar, el trabajador usará el usuario
+        {alias.trim() ? <> <code>{alias.trim().toLowerCase()}</code></> : ' que escribas arriba'}, no este nombre.
+        Puedes usar su nombre real, por ejemplo «José Pérez».</p>}
       <fieldset><legend>Permisos iniciales</legend>
         <CapabilityChecklist selected={capabilities} onToggle={toggle} idPrefix="new-cap" />
       </fieldset>

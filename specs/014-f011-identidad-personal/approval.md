@@ -41,3 +41,7 @@
 ## Aceptación humana de F01.1 (T058)
 
 **Fecha:** 2026-11-24. **Responsable:** Andre. **Fuente:** mensaje «acepto» tras la entrega de la DEMO. Decisión: ACEPTO. Autoriza, por su regla permanente de PR, abrir y fusionar con merge commit el PR de F01.1 si está MERGEABLE y CLEAN, sin secretos y con regresión pasada.
+
+## 2026-11-26 · Mejora de pantalla aprobada: usuario para entrar visible en «Personal»
+- Origen: el trabajador «JOSE_01» (usuario real `jose`) no podía entrar porque escribía su nombre para mostrar; la consulta de solo lectura no encontró defecto del servidor.
+- **Andre aprueba** mostrar «Usuario para entrar: jose» en la lista y en el aviso de la clave temporal, y avisar si el nombre para mostrar se parece a un usuario. Rama y commit propios; prueba en navegador. Sin cambios de servidor, permisos ni RLS.
