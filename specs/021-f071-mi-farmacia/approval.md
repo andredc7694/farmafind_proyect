@@ -4,3 +4,12 @@
 - **Andre: «apruebo»** la spec `spec.md` de «Mi farmacia: datos, ubicación y horario» (F07.1; parte de MEJ-006 y RF21, sin declarar MEJ-006 completa).
 - Andre no respondió por separado las decisiones D-01 a D-05 ni la opción de T057. **Se aplican las recomendaciones (A en todas)** y quedan señaladas en el plan para que las confirme al aprobarlo: D-01 tabla propia de F07.1; D-02 se conserva la revisión por farmacia de F07, sin asignarla; D-03 un tramo por día y «Cerrado»; D-04 la propuesta nueva reemplaza a la pendiente; D-05 página propia «Mi perfil»; T057 opción A (hacerla ya, con el mapa como omisión pendiente de F07.1).
 - Condiciones vigentes: no tocar la DEMO ni lo aprobado de F07 hasta aprobar spec **y plan**. El SQL de `GEO_LOCATION_PROPOSE` se muestra antes de ejecutarlo. F02.5 sigue SIN ACEPTAR (T057 y T063 sin marcar). Spec 020 en opción A.
+
+## 2026-11-26 · Plan y SQL f025/017 aprobados
+- **Andre aprueba el plan** de F07.1 y el SQL `f025/017_owner_location_test.sql` (hash `CC87C9880E82DAC6796F11A0755FA8E880ED45CB68EECF35A93C6FCE7F131B9A`, verificado por él contra el archivo de la rama). **Confirma D-01, D-02, D-03, D-04 y D-05 en opción A, y T057 en opción A.**
+- Hash de la 017 registrado en `migrate-f025.ts` tras esta aprobación. **No se edita ninguna migración ni hash aprobado** (solo se añade la línea de la 017).
+- Condiciones:
+  - Antes de escribir o aplicar `f07/007` y `f07/008`, mostrar el SQL completo (funciones SECURITY DEFINER, políticas nuevas y matriz de pruebas que demuestre que el revisor no lee inventario, reservas, personal, contacto ni documentos). Si exige tocar políticas de F07 o la restricción de F025: detenerse y avisar.
+  - Generar `tasks.md` y detenerse en su aprobación.
+  - Mientras Andre hace T057: no apagar, reiniciar ni modificar su DEMO, ni correr pruebas en sus puertos. Un único reinicio al final, con todo el SQL aprobado.
+- La spec 020 usará `f025/018`. F02.5 sigue SIN ACEPTAR (T057 y T063 sin marcar).

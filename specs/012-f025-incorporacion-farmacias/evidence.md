@@ -325,3 +325,6 @@ Ensayo automático con Playwright Linux (`mcr.microsoft.com/playwright:v1.65.0-n
 - T066: `verify-application-commands` 41/41. Casos nuevos: la activación concede `membership.manage` al dueño; el trabajador y el administrador global no la tienen; el insert directo del ejecutor para un trabajador se rechaza (42501); la reparación restaura lo que falta, respeta la revocación, atribuye al revisor, deja 2 auditorías y la segunda ejecución no añade nada. `verify-rls` 46, `verify-private-profile` 12/12, `check-f04-rls` correcto (incluye la matriz de la spec 017).
 - T067: navegador (`browser-five`, `F025_BROWSER_STAFF=1`, 2 farmacias): solicitud → aprobación → «Personal» → crear trabajador → clave temporal → cambio obligatorio. El trabajador tiene su permiso, no tiene `membership.manage` y recibe 403/404 en `/staff`. Aislamiento cruzado entre ambas farmacias (inventario 404, reservas 403/404). 23 comprobaciones, salida 0.
 - T068: F01 unitarias 114, API 128, RLS 142; F02 RLS correcto; F02.5 unitarias 33; `check` correcto.
+
+## 2026-11-26 · T057: omisión conocida (decisión de Andre, opción A)
+- **Ubicación en mapa pendiente de F07.1** (`specs/021-f071-mi-farmacia`). Las farmacias dadas de alta en el recorrido de T057 no tendrán ubicación verificada ni aparecerán en el mapa público, aunque sí en la búsqueda. Andre hace T057 sin el mapa. T057 sigue sin marcar.
