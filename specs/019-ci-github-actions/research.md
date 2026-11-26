@@ -1,0 +1,8 @@
+# Investigación (2026-11-25)
+- **Repositorio público** → los minutos de GitHub Actions en runners estándar son gratuitos; US$0.
+- **Node**: `engines.node = 24.17.0`; `actions/setup-node` con `node-version: 24.17.0` y `cache: npm`. `packageManager: npm@11.13.0` (Node 24 trae npm 11).
+- **Qué corre sin base de datos** (comprobado localmente en el plan de implementación, T001): `npm run check`, `build`, `verify:contracts*`, `check.mjs unit` de F01–F07 y Vitest del frontend. Las suites `api` que usan dobles se confirman en T001; las que exigen PostgreSQL/Redis pasan al job 2.
+- **PostgreSQL en CI**: las guardas de las suites RLS exigen puerto `55431`, `cluster_name` `farmafind-f025-test` (F02.5) o fixture marcado TEST, base `farmafind_f01_test_<12 hex>` y comentario de base (`FarmaFind F07 TEST efimera`). Un *service container* de Actions no admite argumentos de comando (`-c cluster_name=...`), así que el job usará `docker run` del runner (Docker viene en `ubuntu-24.04`) con `postgres:18.6-bookworm`, el mismo del `compose.*.yaml`, publicando `127.0.0.1:55431`.
+- **Fixtures**: hoy las crea `scripts/*/prepare*.mjs` leyendo secretos de `.cache/` (ignorado por Git). En CI se generarán secretos aleatorios **dentro del runner** (no son secretos de repositorio) con un script nuevo `scripts/ci/prepare-postgres.mjs`.
+- **Seguridad del pipeline**: `permissions: contents: read`; sin `secrets.*`; sin `pull_request_target`; acciones por SHA; `timeout-minutes`; `concurrency` con cancelación; `persist-credentials: false` en checkout.
+- **SHAs**: se obtienen de la API pública de GitHub (`gh api repos/<owner>/<repo>/git/ref/tags/<tag>`) en T002 y se anotan con su versión.

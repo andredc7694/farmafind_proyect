@@ -15,7 +15,7 @@
 | 9 | Escalabilidad de base de datos | Índices y restricciones por migración (F02–F04), RLS/FORCE RLS, pool único con aislamiento Alfa/Beta probado | Solo PostgreSQL local de TEST; sin volumen real ni réplicas |
 | 10 | Dominio/subdominio DNS y CDN | — | **No realizado** (F09 manual y con autorización expresa de costos) |
 | 11 | Implementación de caché | Redis Cache-Aside F03 (TTL, invalidación tras commit); búsqueda pública con Redis detenido en `integrated-flow` y F03 integración 3/3 | Redis local de TEST |
-| 12 | CI/CD | Controles locales reutilizables: `npm run check`, `build`, `verify:contracts*`, runner `scripts/integration/review-all.ps1` | **Sin pipeline GitHub Actions** (`.github/workflows` no existe) |
+| 12 | CI/CD | Workflow `.github/workflows/ci.yml` (spec 019): Job estático+unitarias y Job PostgreSQL efímero con RLS de F01/F02/F03, ejecuciones verdes y prueba negativa en rojo (`specs/019-ci-github-actions/evidence.md`) | Sin despliegue (CD); F04/F07 RLS, E2E y k6 fuera del CI; protección de rama sin activar |
 | 13 | Pruebas de carga k6 | `load.txt` (F03, F04, F06 mock, F07) con umbrales originales | Cargas locales de TEST; no predicen producción; ver resultados reales |
 | 14 | Código fuente y base de datos en GitHub | Repositorio `andredc7694/farmafind_proyect`, rama `main` con PR #4–#8 fusionados (merge commit); migraciones versionadas en `backend/migrations/` | Ramas de trabajo de la revisión pendientes de fusionar al aceptarse |
 | 15 | Informe final | Evidencia consolidada en `docs/evidencias/integration/review-2026-11/` y esta matriz | El informe final del curso no está redactado |

@@ -1,0 +1,102 @@
+# CI de FarmaFind (spec 019). Solo verifica: sin despliegue, sin secretos, sin servicios de pago.
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+# Solo lectura del repositorio; ningún permiso de escritura (CI-FR-005).
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-unit:
+    name: Estático y unitarias (sin base de datos)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node 24.17.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.17.0
+          cache: npm
+      - name: Dependencias
+        run: npm ci
+      - name: Comprobación estática
+        run: npm run check
+      - name: Compilación
+        env: # configuración pública del frontend (valores no secretos de frontend/.env.example)
+          VITE_APP_MODE: bootstrap
+          VITE_PUBLIC_SEARCH_PATH: /api/v1/busquedas
+        run: npm run build
+      - name: Contratos OpenAPI
+        run: |
+          npm run verify:contracts
+          npm run verify:contracts:f011
+          npm run verify:contracts:f041
+          npm run verify:contracts:f081
+      - name: Pruebas unitarias y de API con dobles (F01–F07)
+        run: |
+          for suite in "f01 unit" "f02 unit" "f03 unit" "f04 unit" "f05 unit" "f06 unit" "f061 unit" "f07 unit" \
+                       "f01 api" "f04 api" "f05 api" "f06 api" "f061 api"; do
+            set -- $suite
+            echo "::group::$1 $2"
+            node "scripts/$1/check.mjs" "$2"
+            echo "::endgroup::"
+          done
+      - name: Frontend (Vitest)
+        run: node node_modules/vitest/vitest.mjs run frontend/tests/ --exclude "**/*.spec.js"
+
+  postgres-rls:
+    name: PostgreSQL efímero y RLS (F01, F02, F03)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node 24.17.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.17.0
+          cache: npm
+      - name: Dependencias
+        run: npm ci
+      - name: Compilación del backend
+        run: npm run build --workspace @farmafind/backend
+      - name: Secreto efímero del runner
+        run: node scripts/ci/prepare-postgres.mjs
+      - name: PostgreSQL 18.6 efímero (mismo contenedor que compose.f01-postgres.yaml)
+        run: |
+          docker run -d --name ci-postgres -p 127.0.0.1:55431:5432 \
+            -e POSTGRES_DB=farmafind_f01_test -e POSTGRES_USER=f01_migrator \
+            -e POSTGRES_PASSWORD="$(cat .cache/f01-docker/postgres-password.txt)" \
+            -e POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 \
+            postgres:18.6-bookworm
+          for i in $(seq 1 40); do
+            docker exec ci-postgres pg_isready -U f01_migrator -d farmafind_f01_test && exit 0
+            sleep 2
+          done
+          docker logs ci-postgres | tail -20; exit 1
+      - name: Migraciones F01 y fixture F02 (base efímera del contenedor)
+        run: |
+          export F01_TEST_DATABASE_URL="postgresql://f01_migrator:$(cat .cache/f01-docker/postgres-password.txt)@127.0.0.1:55431/farmafind_f01_test"
+          node scripts/f01/migrate.mjs
+          node scripts/f02/fixture.mjs prepare
+          node scripts/f03/fixture.mjs prepare
+      - name: RLS F01
+        run: node scripts/f01/check.mjs rls
+      - name: RLS F02
+        run: node scripts/f02/check.mjs rls
+      - name: RLS F03
+        run: node scripts/f03/check.mjs rls

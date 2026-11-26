@@ -80,6 +80,19 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-24 · Revisión integrada (spec 018): T001–T011 verificadas (regresión, E2E cruzado, axe, k6, matrices MEJ 19/19 y rúbrica 16/16 sin puntajes, omisiones); 1 hallazgo serio de accesibilidad corregido; DEMO integrada encendida, espera aceptación de Andre.
 - 2026-11-25 · Revisión integrada: decisiones menores — se aplicaron migraciones pendientes a fixtures TEST persistentes marcadas (F01 demo, F02, F03, F04, F07), se refrescaron sesiones F07, se ajustaron selectores de E2E heredados por cambios de F04.1/F08.1, y la carga F04 usó la prueba AC05 en el clúster F025 (el script original apuntaba a la base persistente). Omisiones en `specs/018-revision-integrada-test-demo/omissions.md`.
 - 2026-11-25 · Revisión integrada (spec 018) ACEPTADA por Andre («ACEPTO»); DEMO apagada, fixture eliminado; PR a main.
+- 2026-11-25 · CI GitHub Actions (spec 019): spec en borrador, rama feat/ci-github-actions; espera aprobación de Andre.
+
+## Recordatorios y pendientes (2026-11-25)
+**Aceptados e integrados en `main`:** F02.1, F01.1, F04.1, F08.1, F01.2 y la revisión integrada TEST/DEMO (PR #4–#9). F02.5 sigue **sin aceptar**.
+1. **SEC-EXC-DEV-2026-001 vence el 2026-12-17.** Propuesta (sin aplicar) en `docs/evidencias/integration/security-exception-review-proposal.md`: hoy `npm audit` da 0 vulnerabilidades; recomendación A = cerrarla tras confirmar el aviso oficial.
+2. **Pendientes de `specs/018-revision-integrada-test-demo/omissions.md`:** MEJ-011 (asistente de solicitud), sugerencias 3, 4 y 11, resto de MEJ-002 fuera de la importación, `f05:rls` sin reejecutar, E2E heredado `f04` (fixture persistente con 404) y F06.1 T030/T044. Opciones de prioridad en el mensaje de entrega.
+3. **F02.5:** T046 aceptada el 2026-11-25; quedan T057 y T063, verificaciones humanas (guía en `specs/012-f025-incorporacion-farmacias/closure-guide.md`). **Bloqueo técnico:** la protección de hashes del SQL aprobado falla al arrancar la DEMO (CRLF de Windows y `012_public_pharmacy_projection.sql` no coincide con el hash aprobado). F025-RF23 (suspensión de farmacias) sigue aplazada.
+4. **No iniciar** F09 (AWS), DNS/CDN ni recursos de pago sin autorización expresa de Andre.
+5. **CI GitHub Actions:** aceptado e integrado (PR #10); pendiente la propuesta de protección de rama.
+- 2026-11-25 · CI GitHub Actions (spec 019): spec aprobada (D-01..D-04 = A); plan, research y tasks (11) creados, esperan aprobación.
+- 2026-11-25 · Andre eligió prioridad P1 (primero F02.5; excepción SEC-EXC-DEV-2026-001 en paralelo). La propuesta de la excepción se conserva SIN aplicar; la decide Andre antes del 2026-12-17.
+- 2026-11-25 · CI GitHub Actions (spec 019): implementado T001–T010; 2 jobs verdes (static-unit y postgres-rls F01/F02/F03), prueba negativa en rojo, 1 hallazgo real de portabilidad corregido (bootstrap.mjs). Espera aceptación de Andre (T011).
+- 2026-11-25 · CI GitHub Actions (spec 019) ACEPTADO por Andre («ACEPTO»); PR a main. Pendiente propuesta D-03 (protección de rama).
 - 2026-11-25 · F02.5: hash de 012 actualizado con permiso de Andre tras comprobar equivalencia con la versión instalada (manual y técnica; sin diferencias de permisos/RLS/grants); comparación normaliza CRLF; .gitattributes *.sql eol=lf. DEMO de F02.5 encendida en http://127.0.0.1:5173/ esperando T046, T057, T063 de Andre (no marcadas).
 - 2026-11-25 · F02.5 T046 NO APROBADA por Andre: farma.xlsx (3 hojas) da error genérico y no propone hoja/encabezado/mapeo (F021-FR-001–004, SC-001, MEJ-002). Diagnóstico entregado; corrección sin iniciar, espera aprobación. T057/T063 sin marcar.
 - 2026-11-25 · Enmienda F02.1 (importación en un paso + detector por contenido) implementada y probada (T039–T043). F02.5 T046 pendiente de que Andre la repita; T057/T063 sin marcar. Nota: archivo del usuario con 1 hoja; catálogo sin laboratorio genera duplicados.

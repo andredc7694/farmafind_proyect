@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { Client } from 'pg';
 
 function canonical(request) {
@@ -48,6 +49,7 @@ async function main() {
   } catch(error) { await client.query('ROLLBACK'); throw error; } finally { await client.end(); }
 }
 
-if (process.argv[1] && import.meta.url===new URL(`file:///${process.argv[1].replaceAll('\\','/')}`).href) {
+// pathToFileURL funciona igual en Windows y Linux (la versión anterior solo coincidía en Windows; hallazgo del CI).
+if (process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href) {
   main().catch(error=>{ console.error(error instanceof Error ? error.message : 'BOOT-01 fallo'); process.exitCode=1; });
 }
