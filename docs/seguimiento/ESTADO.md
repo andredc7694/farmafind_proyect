@@ -96,3 +96,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-25 · F02.2 (spec 020): identidad con laboratorio/marca y propuestas de productos; spec en borrador en feat/f022-identidad-producto-catalogo; espera aprobación (D-01..D-05). Depende de integrar la enmienda F02.1.
 - 2026-11-25 · F02.2 (spec 020): spec APROBADA por Andre (D-01..D-05 = A; lote con revisión de muestra); plan, research, data-model, contrato y quickstart creados; espera aprobación del plan. Implementación tras integrar la enmienda F02.1.
 - 2026-11-25 · F02.2 (spec 020): plan APROBADO por Andre; tasks (22) creadas, esperan aprobación. f025/016 = A (por defecto).
+- 2026-11-25 · F02.2 (spec 020): TASKS APROBADAS por Andre (22). Sin implementar: espera la integración de la enmienda F02.1.
