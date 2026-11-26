@@ -36,7 +36,9 @@ if(existsSync(redisSecretFile)){
 }
 delete process.env.FARMAFIND_AI_PROVIDER;
 const composed=await createLocalIdentityApp({...config,pharmaciesTest:true,
-  reservations:loadReservationConfig(process.env),search,geolocationTest:search?true:undefined},
+  reservations:loadReservationConfig(process.env),search,geolocationTest:search?true:undefined,
+  // F071-FR-016: sugerencia de dirección encendida en TEST/DEMO; FARMAFIND_ADDRESS_SUGGESTIONS=off la apaga.
+  addressSuggestions:search&&process.env.FARMAFIND_ADDRESS_SUGGESTIONS!=='off'?'nominatim':undefined},
   url=>new Pool({connectionString:url,max:6}));
 const server=composed.app.listen(3000,'127.0.0.1',
   ()=>console.log('F02.5 TEST API: http://127.0.0.1:3000/health'));

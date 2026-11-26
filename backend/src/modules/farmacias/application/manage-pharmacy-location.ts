@@ -18,6 +18,11 @@ export class ManagePharmacyLocation {
     });
   }
 
+  /** F071-FR-013: comprueba que el actor puede proponer en esa farmacia (sin escribir nada). */
+  async authorizePropose(secret:string,pharmacyId:string):Promise<void> {
+    await this.transactions.run(secret,pharmacyId,'GEO_LOCATION_PROPOSE',async()=>undefined);
+  }
+
   /** F071-FR-006: estado e historial de la propia farmacia (quien puede proponer). */
   status(secret:string,pharmacyId:string) {
     return this.transactions.run(secret,pharmacyId,'GEO_LOCATION_PROPOSE',async(repository,context)=>{
