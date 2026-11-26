@@ -14,11 +14,11 @@ const capital = (text: string) => text.charAt(0).toLocaleUpperCase('es-PE') + te
 const date = (iso: string) => new Date(iso).toLocaleDateString('es-PE', { timeZone: 'America/Lima', day: '2-digit', month: '2-digit', year: 'numeric' });
 
 export function offersReply(term: string, offers: readonly PublicOffer[], byPrice: boolean): string {
-  const lines = offers.slice(0, listed).map(offer => `• ${capital(offer.medicamento.nombreComercial)} ${offer.medicamento.concentracion}, `
-    + `${offer.medicamento.presentacion} — ${offer.farmacia.nombre}: S/ ${(offer.precioReferencialCentavos / 100).toFixed(2)} `
-    + `(disponibilidad referencial; revisado ${date(offer.ultimaRevision)})`);
+  const lines = offers.slice(0, listed).map(offer => `• S/ ${(offer.precioReferencialCentavos / 100).toFixed(2)} · ${offer.farmacia.nombre}\n`
+    + `  ${capital(offer.medicamento.nombreComercial)} ${offer.medicamento.concentracion}, ${offer.medicamento.presentacion} · revisado ${date(offer.ultimaRevision)}`);
   const more = offers.length - lines.length;
-  return [byPrice ? `Precios referenciales de «${term}», de menor a mayor:` : `Ofertas públicas de «${term}»:`, ...lines,
+  return [byPrice ? `Precios referenciales de «${term}», de menor a mayor (disponibilidad referencial):`
+    : `Ofertas públicas de «${term}» (disponibilidad referencial):`, ...lines,
     ...(more > 0 ? [`Hay ${more} ${more === 1 ? 'oferta más' : 'ofertas más'} en las fuentes y en Buscar medicamentos.`] : []),
     'Confirma precio y existencias con la farmacia.'].join('\n');
 }

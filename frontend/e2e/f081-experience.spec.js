@@ -73,7 +73,7 @@ test('visitante: menú público mínimo, tema que se recuerda, búsqueda con sug
   await expect(dialog.locator('.chat-answer').first()).toContainText('¡Hola!');
   await expect(box).toHaveValue('');
   await box.fill('Paracetamol'); await box.press('Enter');
-  await expect(dialog.locator('.chat-answer').nth(1)).toContainText(/Precios referenciales de «paracetamol»[\s\S]*S\/ 9\.90[\s\S]*Farmacia/, { timeout: 20000 });
+  await expect(dialog.locator('.chat-answer').nth(1)).toContainText(/Precios referenciales de «paracetamol»[\s\S]*S\/ 9\.90[\s\S]*Farmacia/, { timeout: 20000 }); // la más barata primero
   await expect(dialog.locator('.chat-answer').nth(1)).not.toContainText(/stock|cantidad/i);
   await box.fill('¿Qué dosis tomo?'); await box.press('Enter');
   await expect(dialog.locator('.chat-answer').nth(2)).toContainText('químico farmacéutico', { timeout: 20000 });
