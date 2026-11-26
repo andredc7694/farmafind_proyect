@@ -54,9 +54,28 @@ describe('F02.1 (enmienda 2026-11-25): importación en un paso', () => {
     const row = (line, errorCode, nombre) => ({ line, errorCode, priceCents: 450, physicalQuantity: 3, producto: { nombre, concentracion: '10 mg', presentacion: 'caja x 10' } });
     render(<ImportPreview busy={false} onPreview={() => {}} onConfirm={() => {}} preview={{ importacionId: 'p', estado: 'VISTA_PREVIA', caducaEn: new Date().toISOString(),
       filas: [row(2, null, 'conocido'), row(3, 'REFERENCIA_NO_CONCILIADA', 'nuevo')], errores: [{ fila: 3, codigo: 'REFERENCIA_NO_CONCILIADA' }], incidencias: [] }} />);
-    expect(screen.getByText('2 productos: 1 listos, 1 pendientes de catálogo, 0 con error.')).toBeTruthy();
+    expect(screen.getByText('2 filas en total · 1 listas · 1 pendientes de catálogo · 0 por revisar · 0 con errores.')).toBeTruthy();
     expect(screen.getByText('Pendiente de catálogo')).toBeTruthy(); expect(screen.getByText('nuevo')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Confirmar archivo completo' }).disabled).toBe(true);
+  });
+
+  it('con cientos de duplicados: resumen, filtros, tabla paginada y avisos agrupados con «Ver detalle», nunca cientos de líneas', () => {
+    const filas = Array.from({ length: 600 }, (_, i) => ({ line: i + 2, errorCode: i < 500 ? 'FILA_DUPLICADA' : 'REFERENCIA_NO_CONCILIADA', priceCents: 100, physicalQuantity: 1, producto: { nombre: `p${i}` },
+      incidents: i < 500 ? [{ code: 'FILA_DUPLICADA', title: 'Fila duplicada' }] : [] }));
+    const incidencias = Array.from({ length: 500 }, (_, i) => ({ line: i + 2, column: 'nombre', field: 'nombre', code: 'FILA_DUPLICADA', title: 'Fila duplicada',
+      cause: 'Repite el mismo producto de la fila 1', action: 'Elimina o corrige la fila repetida', supportCode: 'IMP-FILA_DUPLICADA' }));
+    const { container } = render(<ImportPreview busy={false} onPreview={() => {}} onConfirm={() => {}}
+      preview={{ importacionId: 'p', estado: 'VISTA_PREVIA', caducaEn: new Date().toISOString(), filas, errores: filas.map(f => ({ fila: f.line, codigo: f.errorCode })), incidencias }} />);
+    expect(screen.getByText('600 filas en total · 0 listas · 100 pendientes de catálogo · 500 por revisar · 0 con errores.')).toBeTruthy();
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(50);
+    expect(container.querySelectorAll('details')).toHaveLength(1);
+    expect(container.querySelector('details').open).toBe(false);
+    expect(container.querySelectorAll('details li')).toHaveLength(20);
+    expect(screen.getByText(/Ver más \(480 restantes\)/)).toBeTruthy();
+    expect(container.querySelector('details li').textContent).toContain('Fila 2');
+    expect(container.querySelector('details li').textContent).toContain('Repite el mismo producto');
+    fireEvent.click(screen.getByRole('button', { name: 'Pendientes de catálogo (100)' }));
+    expect(screen.getByText('p500')).toBeTruthy(); expect(screen.queryByText('p0')).toBeNull();
   });
 
   it('el cliente muestra el error específico del servidor en vez del genérico', async () => {

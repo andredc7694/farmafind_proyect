@@ -83,3 +83,5 @@ T001 es puerta SDD. T002/T003 preceden cambios de contrato; T004/T005 pueden pre
 - [X] T042 Interfaz en un paso con «Ajustar columnas», preguntas puntuales y estado «Pendiente de catálogo» en `ImportPreview.jsx` (FR-016, FR-019)
 - [X] T043 Pruebas: archivo realista (3 hojas, 48 filas), encabezados inventados, empate, celda con fórmula, error específico, sin botón «Analizar» y recorridos de navegador F02/F02.1 (SC-008)
 - [ ] T044 Repetición de T046 por Andre en la DEMO (verificación humana; no marcar por Claude)
+- [X] T045 Resumen, filtros, paginación y avisos agrupados con «Ver detalle» en `PreviewResults.jsx`; causa del duplicado con la fila repetida (FR-021); prueba con 600 filas
+- [X] T046 Script solo TEST `scripts/f025/load-demo-catalog.mjs` y comprobación de confirmación completa (517 filas) en la base técnica

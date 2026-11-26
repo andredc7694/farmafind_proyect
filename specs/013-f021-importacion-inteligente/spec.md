@@ -140,3 +140,4 @@ Aprobada en [approval.md](approval.md). Precisa y, donde difiera, sustituye lo a
 - **F021-FR-019**: Los productos sin equivalencia en el catálogo se muestran como «pendientes de catálogo»; no se descartan ni equiparan, y la confirmación sigue siendo atómica por archivo.
 - **F021-FR-020**: Un archivo rechazado DEBE explicar causa y solución; nunca solo «No se pudo completar la solicitud».
 - **F021-SC-008**: Un archivo ficticio de 3 hojas, 40 o más filas y encabezados como los reales llega a la vista previa con los seis campos propuestos sin intervención.
+- **F021-FR-021** (2026-11-25): La vista previa DEBE mostrar resumen con conteos, tabla con filtros y paginación, y avisos agrupados por tipo con detalle desplegable; nunca una lista de cientos de líneas. Cada duplicado indica su fila y la fila que repite.

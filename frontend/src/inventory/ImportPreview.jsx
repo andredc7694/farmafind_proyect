@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { PreviewResults } from './PreviewResults.jsx';
 
 export const fieldLabels = { nombre: 'Producto', concentracion: 'Concentración', presentacion: 'Presentación',
   clasificacion: 'Clasificación (condición de venta)', precioReferencial: 'Precio', cantidadFisica: 'Stock' };
 const fields = Object.keys(fieldLabels);
-const isPending = row => row.errorCode === 'REFERENCIA_NO_CONCILIADA';
 
 /**
  * Importación en un paso (enmienda F02.1): al elegir el archivo se analiza solo y se muestra la vista previa.
@@ -68,10 +68,7 @@ export function ImportPreview({ onInspect, onProfiles, onSaveProfile, onPreview,
     </select>
   </label>;
 
-  const ready = preview ? preview.filas.filter(row => row.errorCode === null).length : 0;
-  const pending = preview ? preview.filas.filter(isPending).length : 0;
-  const failed = preview ? preview.filas.length - ready - pending : 0;
-  const incidents = (preview?.incidencias ?? []).filter(item => item.code !== 'REFERENCIA_NO_CONCILIADA');
+  const pending = preview ? preview.filas.filter(row => row.errorCode === 'REFERENCIA_NO_CONCILIADA').length : 0;
 
   return <section aria-labelledby="import-title">
     <h2 id="import-title">Importar inventario</h2>
@@ -123,28 +120,11 @@ export function ImportPreview({ onInspect, onProfiles, onSaveProfile, onPreview,
       {candidate && <p>Hoja «{candidate.sheet}» · {fields.map(field => `${fieldLabels[field]}: ${mapping[field]}`).join(' · ')}</p>}
       <p>Caduca: {new Date(preview.caducaEn).toLocaleString('es-PE')}</p>
       <p>{preview.filas.length} filas; {preview.incidencias?.length ?? preview.errores.length} incidencias.</p>
-      <p role="status">{preview.filas.length} productos: {ready} listos, {pending} pendientes de catálogo, {failed} con error.</p>
       {preview.errores.length > 0 && <p>Un error bloquea el archivo completo: no se guarda nada hasta que todas las filas estén listas.
         {pending > 0 && ' Los pendientes de catálogo no existen todavía en el catálogo de FarmaFind; no se descartan ni se equiparan a otros.'}</p>}
+      <PreviewResults key={preview.importacionId} preview={preview} />
       {canConfirm && <button type="button" disabled={busy || preview.errores.length > 0}
         onClick={() => void onConfirm(preview.importacionId)}>Confirmar archivo completo</button>}
-      {incidents.length > 0 && <section aria-label="Incidencias de importación">
-        <h4>Corrige estos datos y vuelve a cargar el archivo</h4>
-        <ol>{incidents.map((item, index) => <li key={`${item.line}-${item.code}-${index}`}>
-          <strong>Fila {item.line}, columna {item.column}, campo {item.field}: {item.title}</strong>. {item.cause}.
-          {' '}{item.action}. Código {item.supportCode}.
-        </li>)}</ol>
-      </section>}
-      <div className="table-scroll"><table>
-        <caption>Productos del archivo</caption>
-        <thead><tr><th>Fila</th><th>Producto</th><th>Concentración</th><th>Presentación</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead>
-        <tbody>{preview.filas.map(row => <tr key={row.line}>
-          <td>{row.line}</td><td>{row.producto?.nombre ?? '—'}</td><td>{row.producto?.concentracion ?? '—'}</td><td>{row.producto?.presentacion ?? '—'}</td>
-          <td>{row.priceCents === null || row.priceCents === undefined ? '—' : `S/ ${(row.priceCents / 100).toFixed(2)}`}</td>
-          <td>{row.physicalQuantity ?? '—'}</td>
-          <td>{row.errorCode === null ? 'Listo' : isPending(row) ? 'Pendiente de catálogo' : (row.incidents?.[0]?.title ? `${row.incidents[0].title} (${row.errorCode})` : row.errorCode)}</td>
-        </tr>)}</tbody>
-      </table></div>
       {canConfirm && onSaveProfile && candidate && preview.errores.length === 0 && <div>
         <label htmlFor="import-profile-name">Nombre del perfil de columnas</label>
         <input id="import-profile-name" maxLength={80} value={profileName} onChange={event => setProfileName(event.target.value)} />

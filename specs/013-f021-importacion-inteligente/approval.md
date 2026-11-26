@@ -21,3 +21,9 @@ Andre aprobó la corrección con estas decisiones (y un complemento al punto 6):
 5. **Productos ausentes del catálogo:** mostrarlos como «pendientes de catálogo», sin descartarlos ni equipararlos.
 6. Diccionario ampliado y mensajes específicos en lugar del genérico. **Complemento:** detector determinista (sin IA ni APIs externas) que combina nombre normalizado con coincidencia flexible, análisis del contenido (precio, concentración, presentación, condición de venta, enteros) y puntuación combinada; ante empate real pregunta solo por ese campo y no asigna en silencio un campo clínico dudoso; pruebas con encabezados inventados.
 No autoriza cambios de RLS, permisos ni esquema. T046, T057 y T063 de F02.5 siguen sin marcar.
+
+## Ampliación de la enmienda — 2026-11-25 (decisiones de Andre)
+- **Avisos agrupados:** la vista previa muestra primero un resumen con conteos (filas totales, pendientes de catálogo, por revisar, errores), después la tabla con filtros y al final los avisos agrupados por tipo con «Ver detalle»; nunca cientos de líneas. Los duplicados reales siguen indicando fila y causa.
+- **Catálogo de la DEMO:** cargarlo desde su archivo ficticio con un script, solo en el entorno TEST, para ver importación y confirmación; explicar cómo.
+- **Duplicados por laboratorio:** opción A (laboratorio y marca en la identidad del producto) como **incremento aparte** (spec 020) con rama propia y SDD completo; incluye la propuesta de productos nuevos (la farmacia propone, un revisor aprueba). Espera su aprobación.
+No marca T046, T057 ni T063.

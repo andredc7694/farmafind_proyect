@@ -146,7 +146,7 @@ export function reconcileImportRows(parsed: ParsedInventoryFile, mapping: Import
   const declaredPharmacy = mapping.farmaciaId === undefined ? headers.indexOf('farmacia_id')
     : headers.indexOf(normalizedHeader(mapping.farmaciaId));
   if (mapping.farmaciaId !== undefined && declaredPharmacy < 0) throw new Error('Mapeo de farmacia inválido');
-  const seen = new Set<string>();
+  const seen = new Map<string, number>(); // identidad del producto -> primera fila donde aparece
   return parsed.rows.map((row, index) => {
     const line = parsed.sourceLines?.[index] ?? index + 2;
     const incidents: ImportIncident[] = [];
@@ -163,8 +163,9 @@ export function reconcileImportRows(parsed: ParsedInventoryFile, mapping: Import
     } catch { errorCode = 'REFERENCIA_INVALIDA'; }
     if (errorCode) incidents.push(incident(line, 'nombre', mapping.nombre, errorCode));
     if (key && seen.has(key)) errorCode = 'FILA_DUPLICADA';
-    if (errorCode === 'FILA_DUPLICADA') incidents.push(incident(line, 'nombre', mapping.nombre, errorCode));
-    if (key) seen.add(key);
+    if (errorCode === 'FILA_DUPLICADA') incidents.push({ ...incident(line, 'nombre', mapping.nombre, errorCode),
+      cause: `Repite el mismo producto, concentración, presentación y condición de venta de la fila ${seen.get(key)}` });
+    if (key && !seen.has(key)) seen.set(key, line);
     const price = priceCents(row[indexes.precioReferencial].replace(/^\s*s\/\.?\s*/i, ''));
     const physical = quantity(row[indexes.cantidadFisica]);
     if (price === null) incidents.push(incident(line, 'precioReferencial', mapping.precioReferencial,
