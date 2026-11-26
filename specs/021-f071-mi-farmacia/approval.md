@@ -13,3 +13,6 @@
   - Generar `tasks.md` y detenerse en su aprobación.
   - Mientras Andre hace T057: no apagar, reiniciar ni modificar su DEMO, ni correr pruebas en sus puertos. Un único reinicio al final, con todo el SQL aprobado.
 - La spec 020 usará `f025/018`. F02.5 sigue SIN ACEPTAR (T057 y T063 sin marcar).
+
+## 2026-11-26 · Tasks aprobadas
+- **Andre: «apruebo»** `tasks.md` (19 tareas). Se empieza por T001 y T002 (SQL para revisión, sin puertos).

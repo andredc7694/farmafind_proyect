@@ -1,10 +1,10 @@
 # Tasks: F07.1 — Mi farmacia (casilla solo con evidencia real en `evidence.md`)
 
-**Estado:** pendiente de aprobación de Andre. Leyenda: **[PUERTO]** = necesita PostgreSQL, API o el navegador en los puertos de la DEMO; se hace **solo después de que Andre termine T057** (o en un rato libre que él indique). **[PUERTA]** = me detengo a esperar su aprobación.
+**Estado:** aprobado por Andre el 2026-11-26 («apruebo»). Leyenda: **[PUERTO]** = necesita PostgreSQL, API o el navegador en los puertos de la DEMO; se hace **solo después de que Andre termine T057** (o en un rato libre que él indique). **[PUERTA]** = me detengo a esperar su aprobación.
 
 ## Fase 1 · SQL para revisión (sin puertos)
-- [ ] T001 Redactar el SQL completo de `f07/007_platform_location_review.sql` en `specs/021-f071-mi-farmacia/sql-review/` (fuera de la carpeta de migraciones, para que no se aplique solo): concesión de plataforma, funciones SECURITY DEFINER, políticas nuevas y la función de lista para el revisor con solo datos públicos. Incluir la **matriz de pruebas** que demuestra que el revisor no lee inventario, reservas, personal, contacto ni documentos (FR-005, FR-010). Si exige tocar políticas de F07 o la restricción de F025: detenerse y avisar.
-- [ ] T002 Redactar el SQL de `f07/008_opening_hours.sql` (horario, RLS y proyección pública) en la misma carpeta, con su matriz (FR-008, FR-010).
+- [X] T001 Redactar el SQL completo de `f07/007_platform_location_review.sql` en `specs/021-f071-mi-farmacia/sql-review/` (fuera de la carpeta de migraciones, para que no se aplique solo): concesión de plataforma, funciones SECURITY DEFINER, políticas nuevas y la función de lista para el revisor con solo datos públicos. Incluir la **matriz de pruebas** que demuestra que el revisor no lee inventario, reservas, personal, contacto ni documentos (FR-005, FR-010). Si exige tocar políticas de F07 o la restricción de F025: detenerse y avisar.
+- [X] T002 Redactar el SQL de `f07/008_opening_hours.sql` (horario, RLS y proyección pública) en la misma carpeta, con su matriz (FR-008, FR-010).
 - [ ] T003 **[PUERTA]** Revisión y aprobación de Andre del SQL de T001 y T002 (hashes). Después, mover los archivos aprobados a `backend/migrations/f07/` sin cambiarlos.
 
 ## Fase 2 · Servidor (sin puertos: unitarias y API con dobles)
