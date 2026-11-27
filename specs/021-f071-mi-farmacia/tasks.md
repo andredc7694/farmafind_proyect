@@ -28,7 +28,7 @@
 
 ## Fase 5 · Cierre
 - [X] T017 Revisión de seguridad de las migraciones; `evidence.md`, `convergence.md`, `traceability.md` y `ESTADO.md`.
-- [ ] T018 **[PUERTA]** Aplicación a la DEMO en un único reinicio con todo el SQL aprobado (`f025/017`, `f07/007`, `f07/008`). Incluye conceder la revisión de ubicaciones al revisor TEST de la DEMO (alta de datos, con autorización expresa de Andre). Reporte de HUAMANFAR antes y después, con inventario, importaciones y reservas intactos.
+- [X] T018 **[PUERTA]** Aplicación a la DEMO en un único reinicio con todo el SQL aprobado (`f025/017`, `f07/007`, `f07/008`). Incluye conceder la revisión de ubicaciones al revisor TEST de la DEMO (alta de datos, con autorización expresa de Andre). Reporte de HUAMANFAR antes y después, con inventario, importaciones y reservas intactos.
 - [ ] T019 **[PUERTA]** `acceptance.md`: aceptación humana de Andre (nunca autoaprobar). Con su ACEPTO: PR y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
 
 ## Dependencias

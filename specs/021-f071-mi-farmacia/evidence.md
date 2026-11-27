@@ -126,3 +126,31 @@ Todo se ejecutó en bases TEST efímeras y marcadas del clúster `farmafind-f025
   - La 009 solo añade dos políticas SELECT. La 017 tiene una guarda de clúster, base y marca TEST.
   - Ningún rol de aplicación tiene BYPASSRLS.
 - **Guion de T018** (`scripts/f07/grant-platform-location-review.mjs`): exige `F025_DEMO_SLOT=manual` y `--autorizado-por-andre=AAAA-MM-DD`, y es idempotente. **No se ha ejecutado.**
+
+## T018 · 2026-11-26 (reinicio de la DEMO y concesión, autorizados por Andre)
+- **Copia de seguridad previa** (condición de Andre): `pg_dump -Fc` de `farmafind_f01_test_d0570879cf41` en `.cache/f025-docker/backups/farmafind_f01_test_d0570879cf41_antes-f071_20261126.dump`, ignorada por Git. Ocupa 594 522 bytes. `pg_restore --list` la valida y muestra 57 tablas de datos.
+- **Reinicio:**
+  - La carpeta principal se dejó separada de la rama en `a7c5f01`, sin dependencias nuevas.
+  - Luego se ejecutaron `demo-stop.ps1` y `demo-run.ps1`.
+  - f07/007, 008 y 009 y f025/017 se aplicaron solo en las dos bases TEST marcadas: la técnica `0e5a2f669e60` y la de la DEMO `d0570879cf41`.
+  - Comprobaciones del arranque en la técnica, todas correctas: verify-rls 46, verify-application-commands 51 (incluye la 017) y F04 RLS 37/37.
+  - 3000/health, 5173 y 5173/api/v1/auth/csrf respondieron 200.
+- **T018:** se ejecutó el comando exacto `$env:F025_DEMO_SLOT='manual'; node scripts/f07/grant-platform-location-review.mjs --autorizado-por-andre=2026-11-26`.
+  - Resultado: CONCEDIDA, con la concesión `52bf5d63-f318-43d7-80c9-9139ace77d52` y la aprobación `c4b23cb2-e61b-4979-ad41-d7f93f0a6760`.
+  - El revisor no tiene membresías en ninguna farmacia.
+- **Antes y después, en solo lectura** (transacción READ ONLY revertida):
+
+  | Dato | Antes | Después |
+  |---|---|---|
+  | HUAMANFAR | ACTIVA, 518 de inventario | ACTIVA, 518 de inventario |
+  | Movimientos / medicamentos | 518 / 518 | 518 / 518 |
+  | Importaciones / reservas | 4 / 0 | 4 / 0 |
+  | Usuarios / membresías | 4 / 2 | 4 / 2 |
+  | Capacidades del dueño | 12, sin GEO_LOCATION_PROPOSE | **13, con GEO_LOCATION_PROPOSE** (reparación 017) |
+  | Capacidades del trabajador | 6 | 6 |
+  | Delegaciones en total | 18 | 19 |
+  | Concesión de revisión del revisor | la tabla no existía | **1, ACTIVA** |
+  | Búsqueda pública «para» | 7 | 7 |
+
+  La ubicación pública de HUAMANFAR sigue PENDIENTE con «Urb. Primavera»: no ha cambiado.
+- **`farmafind_f01_test`:** no se tocó. Su contenedor (`farmafind-f01-postgres`) sigue apagado desde antes del reinicio, y en el clúster F02.5 no existe ninguna base con ese nombre.

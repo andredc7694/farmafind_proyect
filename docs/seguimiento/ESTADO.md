@@ -173,3 +173,11 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Foto «antes» de la DEMO, en solo lectura: HUAMANFAR con 518 de inventario, 4 importaciones, 0 reservas, 4 usuarios y 2 membresías; el dueño tiene 12 capacidades, sin GEO_LOCATION_PROPOSE.
   - **Pendiente:** autorización de Andre para el reinicio y para T018; después, la aceptación (T019) y el PR.
   - La corrección de márgenes sigue pendiente y fuera de este PR. T057 y T063 sin marcar, F02.5 sin aceptar, spec 020 en opción A.
+- 2026-11-26 · F07.1 **T018 hecha** con la autorización de Andre:
+  - Copia de seguridad previa: `.cache/f025-docker/backups/…antes-f071_20261126.dump`, de 594 522 bytes.
+  - Reinicio con f07/007–009 y f025/017 solo en las bases TEST marcadas.
+  - Concesión de revisión ACTIVA para el revisor de la DEMO.
+  - HUAMANFAR intacto: 518 de inventario, 4 usuarios y 2 membresías. Su dueño tiene ahora GEO_LOCATION_PROPOSE.
+  - `farmafind_f01_test` no se tocó.
+  - La carpeta principal está separada de la rama en `a7c5f01` y sirve la DEMO.
+  - **Pendiente:** aceptación de Andre (T019) y, después, el PR.

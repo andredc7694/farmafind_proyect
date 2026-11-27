@@ -42,3 +42,8 @@
 
 ## 2026-11-26 · Enmienda del historial aprobada
 - **Andre: «si»** a la enmienda F071-FR-017/018, D-06 A («Tú» / «Otro revisor de FarmaFind», sin correos) y el SQL `f07/009` (hash `21B8A3F6…45BF`). Debe probarse con datos simulados y mostrarse en la copia temporal, sin tocar la DEMO.
+
+## 2026-11-26 · Reinicio de la DEMO y T018
+- Andre: «AUTORIZO REINICIO Y T018», con condición previa: copia de seguridad (pg_dump) de la base de la DEMO en `.cache/f025-docker/backups/` (fuera de git); si falla, no reiniciar.
+- Alcance: reinicio con f07/007–009 y f025/017 solo en bases TEST marcadas (nunca `farmafind_f01_test`); comando exacto de T018: `$env:F025_DEMO_SLOT='manual'; node scripts/f07/grant-platform-location-review.mjs --autorizado-por-andre=2026-11-26`.
+- PR solo tras la aceptación de Andre (T019). Corrección de márgenes fuera.
