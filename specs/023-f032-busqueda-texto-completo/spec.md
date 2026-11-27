@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f032-busqueda-texto-completo` (creada desde `main` `288d72a`)
 **Created**: 2026-11-27
-**Status**: Borrador, **pendiente de aprobación de Andre** (decisiones D-01 a D-05).
+**Status**: **Aprobada por Andre el 2026-11-27** (commit `e4c6116`, D-01 a D-05 en A, con condiciones en `approval.md`). Ampliada con FR-013 (ayuda «falta el nombre») a su pedido.
 **Input**: corrección prioritaria pedida por Andre el 2026-11-27, registrada como observación en la aceptación de F03.1 (`specs/022-f031-busqueda-mapa/acceptance.md`).
 **Trazabilidad**: F03-FR-002, F03-SC-001 y el caso límite de F03 sobre «acentos, mayúsculas o espacios»; F08.1 (sugerencias, `suggest-public.ts`); F03.1 (búsqueda y mapa).
 
@@ -39,6 +39,7 @@
 ### User Story 2 — Sin coincidencia exacta, otras presentaciones con aviso (P1)
 1. **Given** solo hay paracetamol 500 mg, **When** busca «paracetamol 750 mg», **Then** ve los paracetamoles disponibles y el aviso «No encontramos esa presentación exacta; estas son otras disponibles».
 2. **When** busca algo cuyo nombre no existe («xyzol 500 mg»), **Then** ve el estado vacío de siempre, sin aviso.
+3. **When** busca solo una presentación o concentración («tabletas», «500 mg»), **Then** en vez de un «0 resultados» a secas ve la ayuda «Escribe también el nombre del medicamento, por ejemplo: paracetamol 500 mg» (FR-013).
 
 ### User Story 3 — Las sugerencias nunca llevan al vacío (P1)
 1. **Given** cualquier sugerencia del buscador (nombre o presentación), **When** la elige, **Then** la búsqueda devuelve al menos un resultado.
@@ -49,7 +50,7 @@
 - «x10» y «x 10» son iguales; «500mg», «500 mg» y «500 MG» también.
 - Singular y plural: «tableta» y «tabletas», «capsula» y «cápsulas».
 - Palabras de relleno («de», «x», «en», «con», «para», «por», «y») no cuentan.
-- Solo concentración o presentación («500 mg», «tabletas»): 0 resultados, como hoy (regla de la Constitution).
+- Solo concentración o presentación («500 mg», «tabletas»): no se buscan productos (regla de la Constitution), pero se muestra la ayuda de FR-013.
 - Los filtros de precio se aplican igual; si dejan la lista vacía, es el estado vacío normal (no es «sugerencia vacía»).
 - Equivalencias de unidades («1 g» = «1000 mg») y errores de tipeo («paracetmol») quedan fuera.
 
@@ -62,6 +63,7 @@
 - **F032-FR-004**: **Coincidencia exacta** = todas las palabras útiles coinciden en algún campo del producto. Los resultados DEBEN ordenarse primero por parecido (palabras que coinciden) y después por el orden elegido (precio, cercanía, etc.). Qué se muestra cuando hay exactos lo define D-02.
 - **F032-FR-005**: Si hay candidatos pero ninguno exacto, DEBEN mostrarse los productos del medicamento con el aviso «No encontramos esa presentación exacta; estas son otras disponibles».
 - **F032-FR-006**: Sin candidatos, DEBE mostrarse el estado vacío actual.
+- **F032-FR-013** (agregado por Andre el 2026-11-27): Si el texto no trae ninguna palabra que pueda ser un nombre (solo números, unidades o palabras de presentación como «tabletas», «cápsulas» o «jarabe»), la respuesta DEBE indicarlo y la pantalla DEBE mostrar «Escribe también el nombre del medicamento, por ejemplo: paracetamol 500 mg» en lugar del vacío genérico. Es un estado vacío explícito, compatible con F03-FR-002.
 - **F032-FR-007**: Ninguna sugerencia del buscador DEBE llevar a una búsqueda con 0 resultados (sin filtros). Prueba automática obligatoria.
 - **F032-FR-008**: No cambia qué se publica: solo farmacias activas, ofertas con stock disponible, campos públicos y coordenadas solo verificadas. Sin datos internos.
 - **F032-FR-009**: La caché DEBE seguir funcionando (hit, miss, caída con respaldo en PostgreSQL). Si cambia la forma de la respuesta, las entradas viejas se descartan sin error.
@@ -72,7 +74,7 @@
 ### Key Entities
 - **Término normalizado**: texto sin tildes, en minúsculas, con número y unidad separados y espacios simples.
 - **Palabras útiles**: palabras del término sin las de relleno.
-- **Coincidencia**: `EXACTA` (todas las palabras) o `APROXIMADA` (solo el nombre u otras parciales).
+- **Coincidencia**: `EXACTA` (todas las palabras), `APROXIMADA` (solo el nombre u otras parciales), `NINGUNA` (sin resultados) o `FALTA_NOMBRE` (sin resultados y sin palabra que pueda ser nombre).
 
 ## Success Criteria
 - **F032-SC-001**: «paracetamol 500 mg tabletas x 10», «paracetamol 500», «amoxicilina capsulas» e «ibuprofeno 400mg» encuentran los productos esperados, con los más parecidos primero.
@@ -90,7 +92,7 @@
   - **A) Solo los exactos.** Si no hay ninguno, todos los del medicamento con el aviso. Así «Más barato» ordena solo lo que pediste.
   - B) Todos los del medicamento, exactos primero y el resto debajo.
 - **D-03 · Cómo sabe la pantalla que debe mostrar el aviso**
-  - **A) Campo nuevo en la respuesta `coincidencia: "EXACTA" | "APROXIMADA"`** (contrato 0.3.0). Se actualizan el validador de caché y la versión de la clave (`v1` → `v2`), y las entradas viejas se ignoran.
+  - **A) Campo nuevo en la respuesta `coincidencia: "EXACTA" | "APROXIMADA" | "NINGUNA" | "FALTA_NOMBRE"`** (los dos últimos agregados por FR-013) (contrato 0.3.0). Se actualizan el validador de caché y la versión de la clave (`v1` → `v2`), y las entradas viejas se ignoran.
   - B) Sin cambiar el contrato: la pantalla compara por su cuenta. Frágil y duplica la lógica.
 - **D-04 · Datos para medir con los 518 productos**
   - **A) Restaurar la copia de seguridad ya guardada** (`…antes-f031_20261126.dump`) en una base TEST efímera y marcada, medir antes/después, y borrarla. La DEMO no se toca ni se lee.

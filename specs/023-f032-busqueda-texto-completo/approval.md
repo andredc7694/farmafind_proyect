@@ -7,3 +7,14 @@
 
 ## Pendiente
 - Aprobación de `spec.md` y de las decisiones D-01 a D-05.
+
+## 2026-11-27 · Spec aprobada
+- Andre: «Apruebo la spec de la búsqueda con texto completo (commit e4c6116) con las cinco decisiones en A (D-01 a D-05)».
+- Condiciones:
+  - D-01: presentar el SQL de la función nueva antes de aplicarlo; migración nueva, sin editar SQL aprobado y sin extensiones.
+  - D-04: la base restaurada desde la copia de seguridad de la DEMO va solo en el servidor de pruebas, sin publicar puertos nuevos ni copiar sus datos fuera de `.cache`. Se borra al terminar y se le confirma. La DEMO no se toca.
+  - Agregar a la spec: si se busca solo una presentación o concentración sin nombre («tabletas», «500 mg»), mostrar la ayuda «Escribe también el nombre del medicamento, por ejemplo: paracetamol 500 mg». Hecho como **F032-FR-013**; no exige enmendar otra spec (es un estado vacío explícito, compatible con F03-FR-002, y viaja en el campo `coincidencia` ya aprobado en D-03).
+- Siguiente: plan, tasks y SQL para su aprobación antes de aplicar nada.
+
+## Pendiente
+- Aprobación de `plan.md`, `tasks.md` y del SQL de `sql/`.

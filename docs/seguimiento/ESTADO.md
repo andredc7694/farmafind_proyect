@@ -240,3 +240,7 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-27 · **F03.2 — Búsqueda con texto completo** (corrección prioritaria pedida por Andre). Rama `feat/f032-busqueda-texto-completo` creada desde `main` `288d72a`; spec en `specs/023-f032-busqueda-texto-completo/`.
   - Paso Spec Kit: **specify**. Spec redactada; espera la aprobación de Andre (decisiones D-01 a D-05). No se programa ni se aplica SQL antes.
   - Sin cambios en la DEMO, su base ni su Redis.
+- 2026-11-27 · F03.2: **spec aprobada por Andre** (commit `e4c6116`, D-01 a D-05 en A). Condiciones en `approval.md` (SQL antes de aplicar; base de medición solo en el servidor de pruebas, sin puertos nuevos ni datos fuera de `.cache`, y borrada al terminar).
+  - Agregado a su pedido F032-FR-013: ayuda «Escribe también el nombre del medicamento…» cuando solo se escribe presentación o concentración. No exige otra enmienda.
+  - Paso Spec Kit: **plan y tasks** redactados con el SQL propuesto en `specs/023-f032-busqueda-texto-completo/sql/`; esperan aprobación. Nada aplicado.
+  - Observación: la DEMO estaba apagada al revisar (contenedores detenidos hace ~14 h, sin intervención mía). No se encendió.
