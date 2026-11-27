@@ -1,6 +1,6 @@
 # Tasks: F07.2 — Revisión de ubicaciones
 
-**Estado**: **pendiente de aprobación de Andre** (junto con `plan.md`). Ninguna tarea empieza antes. Sin SQL.
+**Estado**: **aprobadas por Andre el 2026-11-27** (commit `c85dab4`). Sin SQL.
 Formato: `T000: descripción (requisitos)`. Una casilla se marca solo con evidencia real en `evidence.md`.
 
 ## Fase 1 · Regla de «Reemplazada» (D-01 A)
@@ -13,7 +13,7 @@ Formato: `T000: descripción (requisitos)`. Una casilla se marca solo con eviden
 - [ ] T005: Pantalla: guarda contra doble clic y «Enviar propuesta» desactivado tras el éxito mientras no cambie el formulario. Pruebas. (FR-001)
 
 ## Fase 3 · Búsqueda limitada y aviso (D-02, D-04, D-06 A)
-- [ ] T006: Servidor: `centro` opcional validado en la búsqueda de direcciones; `viewbox` ±0,27° y `bounded=1` en Nominatim; mensaje sin resultados en la zona. Pruebas con `fetch` falso. (FR-006)
+- [ ] T006: Servidor: `centro` opcional validado en la búsqueda de direcciones; `viewbox` ±0,27° y `bounded=1` en Nominatim; mensaje sin resultados en la zona: «No encontramos esa dirección en Ciudad. Revisa cómo está escrita o marca el punto tocando el mapa» (pedido de Andre, con prueba). Pruebas con `fetch` falso. (FR-006)
 - [ ] T007: `distance-check.js` (lista interna + distritos de Huamanga, haversine, umbral 30 km, ciudad desconocida). Pruebas. (FR-007, FR-010)
 - [ ] T008: «Mi farmacia»: envía `centro`, aviso de distancia junto al botón y aviso de ciudad no limitada. Pruebas. (FR-006, FR-007, FR-009)
 - [ ] T009: «Revisar ubicaciones»: aviso en pendientes e historial; filtro «Reemplazadas». Pruebas. (FR-005, FR-008, FR-009)

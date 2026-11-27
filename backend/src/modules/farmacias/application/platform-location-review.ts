@@ -13,7 +13,7 @@ export interface PendingLocationView {
 export interface PlatformLocationRepository {
   /** Verdadero solo con rol de plataforma activo y concesión F07.1 activa (RLS en la base). */
   isReviewer():Promise<boolean>;
-  /** La última propuesta pendiente de cada farmacia visible para el revisor. */
+  /** F07.2: la propuesta más reciente de cada farmacia, solo si sigue pendiente (sin ninguna más nueva). */
   listLatestPending(limit:number):Promise<PendingLocationView[]>;
   find(proposalId:string):Promise<StoredLocationProposal|null>;
   isLatestPending(proposal:StoredLocationProposal):Promise<boolean>;
@@ -23,16 +23,17 @@ export interface PlatformLocationRepository {
   listHistory?(status:HistoryStatus,actorId:string,limit:number,offset:number):Promise<{total:number;rows:LocationHistoryView[]}>;
 }
 
-export type HistoryStatus='PENDIENTE'|'PUBLICADA_VERIFICADA'|'RECHAZADA';
+export type HistoryStatus='PENDIENTE'|'PUBLICADA_VERIFICADA'|'RECHAZADA'|'REEMPLAZADA';
 /** Fila del historial: solo datos de ubicación y decisión (FR-017). */
 export interface LocationHistoryView {
   readonly propuestaId:string; readonly farmaciaNombre:string; readonly direccion:string; readonly ciudad:string;
-  readonly latitud:number; readonly longitud:number; readonly decision:'PENDIENTE'|'APROBADA'|'RECHAZADA';
+  readonly latitud:number; readonly longitud:number; readonly decision:'PENDIENTE'|'APROBADA'|'RECHAZADA'|'REEMPLAZADA';
   readonly motivo:string|null; readonly enviadaAt:string; readonly decididaAt:string|null;
   readonly decididoPor:'Tú'|'Otro revisor de FarmaFind'|null;
 }
 export const HISTORY_PAGE_SIZE=20;
-const historyFilter:Record<string,HistoryStatus>={PENDIENTE:'PENDIENTE',APROBADA:'PUBLICADA_VERIFICADA',RECHAZADA:'RECHAZADA'};
+const historyFilter:Record<string,HistoryStatus>={PENDIENTE:'PENDIENTE',APROBADA:'PUBLICADA_VERIFICADA',RECHAZADA:'RECHAZADA',
+  REEMPLAZADA:'REEMPLAZADA'};
 export interface PlatformLocationUnitOfWork {
   run<T>(secret:string,work:(repository:PlatformLocationRepository,actorId:string)=>Promise<T>):Promise<T>;
 }

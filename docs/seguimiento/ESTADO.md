@@ -285,3 +285,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Hallazgos en solo lectura de la DEMO: STUART-FAR tiene la propuesta de 17:33:42 PENDIENTE y la de 17:33:46 aprobada (mismas coordenadas). La ubicación aprobada de HUAMANFAR (-17,195; -70,936) coincide con el centro de Moquegua, a unos 500 km de Ayacucho.
 - 2026-11-27 · F07.2: **spec aprobada por Andre** (commit `f602f95`, D-01 a D-06 en A). Condiciones: «Reemplazada» igual para dueño y revisor con prueba del caso real; STUART-FAR sin borrar ni modificar, comprobada en solo lectura tras actualizar la DEMO; HUAMANFAR la corrige Andre después.
   - Paso Spec Kit: **plan y tasks** redactados (15 tareas, **sin SQL**); esperan aprobación. DEMO sin cambios.
+- 2026-11-27 · F07.2: **plan y tasks aprobados por Andre** (commit `c85dab4`); agrega el mensaje orientador cuando «Buscar en el mapa» no encuentra la dirección en la ciudad. Paso Spec Kit: **implement**.

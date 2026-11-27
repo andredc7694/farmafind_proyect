@@ -12,6 +12,11 @@ export class ManagePharmacyLocation {
     return this.transactions.run(secret,pharmacyId,'GEO_LOCATION_PROPOSE',async(repository,context)=>{
       const base=await repository.publicVersion(pharmacyId);
       if (base===null) throw new LocationNotVisibleError('Farmacia no visible');
+      // F07.2 (FR-002, D-05 A): de a uno por farmacia; un envío idéntico al instante devuelve la misma propuesta
+      // sin crear otra ni otro registro de auditoría.
+      await repository.lockProposals?.(pharmacyId);
+      const same=await repository.findRecentIdentical?.(pharmacyId,context.actorId,input);
+      if (same) return {id:same.id,estado:same.status,version:same.version};
       const proposal=await repository.insert(pharmacyId,context.actorId,input,base);
       await repository.audit(pharmacyId,proposal.id,context.actorId,'PROPUESTA');
       return {id:proposal.id,estado:proposal.status,version:proposal.version};

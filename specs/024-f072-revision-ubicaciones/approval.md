@@ -17,5 +17,8 @@
   - La ubicación de HUAMANFAR la corregirá Andre cuando la mejora esté en su DEMO, probando la búsqueda limitada y el aviso.
 - Siguiente: plan y tasks para su aprobación antes de programar. No tocar la DEMO.
 
-## Pendiente
-- Aprobación de `plan.md` y `tasks.md` (sin SQL).
+
+## 2026-11-27 · Plan y tasks aprobados
+- Andre: «Apruebo plan y tasks de F07.2 (commit c85dab4). Puedes empezar a programar».
+- Agrega: si «Buscar en el mapa» no encuentra la dirección dentro de la ciudad, el mensaje debe orientar, p. ej. «No encontramos esa dirección en Ayacucho. Revisa cómo está escrita o marca el punto tocando el mapa», con prueba.
+- Cuando la copia esté lista: recorrido exacto y credenciales ficticias. No tocar la DEMO.

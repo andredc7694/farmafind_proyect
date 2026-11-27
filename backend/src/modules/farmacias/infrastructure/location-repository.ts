@@ -2,6 +2,10 @@ import type { SqlClient } from '../../usuarios/contracts/tenant.js';
 import type { LocationProposalInput } from '../domain/pharmacy-location.js';
 import type { LocationHistoryRow, LocationRepository, PublicLocationState,
   StoredLocationProposal } from '../application/location-ports.js';
+import { NEWER_PROPOSAL_EXISTS } from './location-sql.js';
+
+/** F07.2 (D-05 A): ventana en la que un envío idéntico se considera el mismo. */
+export const IDENTICAL_WINDOW_SECONDS = 10;
 
 function row(value:Record<string,unknown>):StoredLocationProposal {
   return {id:String(value.id),pharmacyId:String(value.farmacia_id),proposerId:String(value.propuesta_por),
@@ -30,6 +34,26 @@ export class PgLocationRepository implements LocationRepository {
       [pharmacyId,input.address,input.city,input.latitude,input.longitude,input.precisionMeters,
         input.source,input.evidenceReference,actorId,basePublicVersion]);
     return row(result.rows[0]);
+  }
+  async lockProposals(pharmacyId:string):Promise<void> {
+    this.scope(pharmacyId);
+    // Bloqueo de transacción estándar de PostgreSQL (sin permisos nuevos); se libera al terminar la transacción.
+    await this.client.query("SELECT pg_advisory_xact_lock(hashtextextended('f072:propuesta:'||$1::text,0))",[pharmacyId]);
+  }
+  async findRecentIdentical(pharmacyId:string,actorId:string,input:LocationProposalInput):Promise<StoredLocationProposal|null> {
+    this.scope(pharmacyId);
+    const result=await this.client.query(`SELECT p.* FROM f07.ubicacion_propuesta p
+      WHERE p.farmacia_id=$1 AND p.propuesta_por=$2 AND p.estado='PENDIENTE'
+        AND p.direccion_publicable=$3 AND p.ciudad=$4
+        AND p.latitud=round($5::numeric,6) AND p.longitud=round($6::numeric,6)
+        AND p.precision_m IS NOT DISTINCT FROM round($7::numeric,2) AND p.fuente=$8
+        AND p.evidencia_referencia IS NOT DISTINCT FROM $9::text
+        AND p.propuesta_at > clock_timestamp() - make_interval(secs => $10)
+        AND NOT ${NEWER_PROPOSAL_EXISTS}
+      ORDER BY p.propuesta_at DESC,p.id DESC LIMIT 1`,
+      [pharmacyId,actorId,input.address,input.city,input.latitude,input.longitude,input.precisionMeters,
+        input.source,input.evidenceReference,IDENTICAL_WINDOW_SECONDS]);
+    return result.rows.length===1 ? row(result.rows[0]) : null;
   }
   async find(pharmacyId:string,proposalId:string):Promise<StoredLocationProposal|null> {
     this.scope(pharmacyId);

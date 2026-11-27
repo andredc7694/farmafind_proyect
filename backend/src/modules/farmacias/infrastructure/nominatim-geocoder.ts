@@ -1,4 +1,4 @@
-import type { AddressMatch, GeocoderPort, ReverseMatch } from '../application/address-suggestions.js';
+import type { AddressMatch, GeocoderPort, ReverseMatch, SearchArea } from '../application/address-suggestions.js';
 
 /** F071-FR-016: identificación genérica aprobada por Andre (opción A); sin correo ni repositorio. */
 export const NOMINATIM_USER_AGENT = 'FarmaFind-DEMO/0.1 (proyecto local de pruebas)';
@@ -28,8 +28,11 @@ export class NominatimGeocoder implements GeocoderPort {
     return response.json();
   }
 
-  async search(address:string,city:string):Promise<AddressMatch|null> {
-    const body=await this.get('/search',{q:`${address}, ${city}, Perú`,limit:'1',addressdetails:'0'});
+  async search(address:string,city:string,area:SearchArea|null=null):Promise<AddressMatch|null> {
+    // F07.2 (D-02 A): con zona, Nominatim devuelve solo resultados dentro del recuadro (viewbox + bounded).
+    const zone:Record<string,string>=area ? {viewbox:[area.longitude-area.halfSideDegrees,area.latitude+area.halfSideDegrees,
+      area.longitude+area.halfSideDegrees,area.latitude-area.halfSideDegrees].map(value=>value.toFixed(4)).join(','),bounded:'1'} : {} as Record<string,string>;
+    const body=await this.get('/search',{q:`${address}, ${city}, Perú`,limit:'1',addressdetails:'0',...zone});
     const row=Array.isArray(body) ? body[0] as Record<string,unknown>|undefined : undefined;
     const latitude=Number(row?.lat), longitude=Number(row?.lon);
     if (!row || !Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;

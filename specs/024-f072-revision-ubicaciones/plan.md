@@ -1,7 +1,7 @@
 # Implementation Plan: F07.2 — Revisión de ubicaciones
 
 **Branch**: `feat/f072-revision-ubicaciones` | **Spec**: `spec.md` (aprobada 2026-11-27, D-01 a D-06 en A)
-**Status**: **pendiente de aprobación de Andre** (plan y tasks). No se programa antes.
+**Status**: **Aprobado por Andre el 2026-11-27** (commit `c85dab4`).
 **SQL**: **ninguno.** Sin migraciones, sin cambios de restricciones, RLS ni permisos (D-01 A).
 
 ## Resumen
@@ -35,7 +35,7 @@
 
 ### Búsqueda limitada (D-02 A)
 - **Pantalla:** si la ciudad escrita está en la lista interna (`peru-cities.js` + distritos de Huamanga de `search-places.js`), envía `centro: { latitud, longitud }` junto con dirección y ciudad. Si no está, envía como hoy y muestra «No pudimos limitar la búsqueda a "X": no está en nuestra lista de ciudades».
-- **Servidor (`address-suggestions.ts`, router y `nominatim-geocoder.ts`):** valida `centro` (opcional, dentro del Perú), arma `viewbox` de ±0,27° (~30 km) y `bounded=1`. Sin centro, igual que hoy. Sin resultados en la zona: «No encontramos esa dirección en Ciudad. Marca el punto en el mapa.»
+- **Servidor (`address-suggestions.ts`, router y `nominatim-geocoder.ts`):** valida `centro` (opcional, dentro del Perú), arma `viewbox` de ±0,27° (~30 km) y `bounded=1`. Sin centro, igual que hoy. Sin resultados en la zona: «No encontramos esa dirección en Ciudad. Revisa cómo está escrita o marca el punto tocando el mapa» (texto pedido por Andre).
 - La búsqueda inversa (clic en el mapa) no cambia.
 
 ### Aviso de distancia (FR-007 a FR-009, D-04 A, D-06 A)
