@@ -45,3 +45,9 @@
 - Andre: «Doy visto bueno a los hashes v2 de F03.2: f03_003_search_terms.sql FDCBBD7F0A7381D7C9A8700406C3A0D4C4CF84384E85B50C10AC4736E003E5BB y f07_010_search_terms_location.sql 005D52E14820CEA02DC431AE9B8CFD1240B5BB8305D753B39A43CF5F5E1A3F6D (commit d588b8f)».
 - Se reemplazaron los archivos de `backend/migrations` y las listas cerradas. **La v1 se reemplazó porque nunca llegó a `main` ni a la DEMO.**
 - Instrucciones: repetir en base efímera las pruebas de PostgreSQL real, la comparación v1/v2 y la regresión completa (si algo falla, detenerse); actualizar la copia temporal a la v2 y avisar. Nada en la base de la DEMO hasta su aceptación; el reinicio será al final, con copia de seguridad y aviso previo.
+
+## 2026-11-27 · Aceptación
+- Andre: «ACEPTO F03.2 (búsqueda con texto completo, v2 optimizada). Lo revisé en la copia temporal.»
+- Autoriza: apagar la copia y borrar solo su base y sus dos usuarios técnicos; abrir el PR de `feat/f032-busqueda-texto-completo` y hacer merge a `main` con merge commit solo si está MERGEABLE, CLEAN, con CI en verde, sin secretos y con la regresión correcta (sin force push; si algo falla, detenerse).
+- Después del merge: **avisar antes de reiniciar la DEMO**; hacer antes la copia de seguridad; aplicar `f03/003` y `f07/010` solo en bases TEST marcadas (nunca en `farmafind_f01_test`) y verificar en solo lectura.
+- Al terminar: resumen corto del estado de F02.1 (con T038), F01.1, F04.1, F08.1, pruebas integrales y F09, sin empezar nada.

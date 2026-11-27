@@ -266,3 +266,7 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - **Mejora futura (sin empezar):** opción C, guardar el texto limpio en el catálogo, a evaluar junto con la spec 020.
 - 2026-11-27 · F03.2: **v2 aprobada y en `backend/migrations`** (hashes `FDCBBD7F…E5BB` y `005D52E1…3F6D`; la v1 se reemplazó porque nunca llegó a `main` ni a la DEMO). PostgreSQL real 35/35; comparación v1/v2 sin diferencias (120 casos, 518 y 5180 ofertas; peor p95 v2 10.45 / 19.43 ms); regresión: backend 646 pasan + 2 fallos de entorno conocidos, frontend 282/282, `check` correcto. Bases efímeras borradas; DEMO sin cambios.
 - 2026-11-27 · F03.2: copia temporal **recreada con la v2** (base `farmafind_f01_test_1285f97c8984`; la anterior y sus dos usuarios técnicos se borraron). E2E igual que con la v1, axe sin violaciones graves y 0 llamadas externas reales. Lista para la revisión de Andre.
+- 2026-11-27 · **F03.2 ACEPTADA por Andre** (v2 optimizada), registrada en `acceptance.md` y `approval.md`. T001–T015 marcadas con evidencia.
+  - Copia temporal apagada; borradas solo su base y sus dos usuarios técnicos. DEMO revisada en solo lectura: idéntica y sin F03.2.
+  - Siguiente: PR y merge a `main`; luego aviso a Andre antes de reiniciar la DEMO (copia de seguridad, `f03/003` y `f07/010` solo en bases TEST marcadas).
+  - Pendientes sin empezar: márgenes, ayuda de dirección en el registro (después de T063), corrida de pruebas por investigar, opción C (con la spec 020). T057 y T063 sin marcar, F02.5 sin aceptar, spec 020 en opción A.

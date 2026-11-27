@@ -111,3 +111,16 @@
 - Nueva base `farmafind_f01_test_1285f97c8984` (marca TEST), con la v2 confirmada en la función y los mismos datos ficticios: 4 farmacias y 9 productos. Sin Redis compartido ni servicio externo de direcciones.
 - E2E con Chrome: los mismos resultados que con la v1 en los 12 textos de la API y en la pantalla (aviso con APROXIMADA en lista y mapa, ayuda con FALTA_NOMBRE, vacío con NINGUNA); 13 sugerencias, todas EXACTAS y con resultados; axe sin violaciones graves; 0 llamadas externas reales (solo se bloquearon las teselas de OpenStreetMap).
 - Lista para la revisión de Andre en http://localhost:5174/search.
+
+## T014 · Revisión de seguridad y converge · 2026-11-27
+- **Qué se publica:** sin cambios. La función nueva aplica las mismas condiciones que F03 (farmacia ACTIVA, medicamento ACTIVO con principio activo, stock disponible, fila pública) y las mismas columnas; coordenadas solo verificadas y solo con F07. Probado con PostgreSQL real (35/35).
+- **Permisos:** `SECURITY DEFINER` del dueño `f03_projection_owner` (NOBYPASSRLS), `search_path` fijo, sin EXECUTE para PUBLIC; `f01_runtime` solo ejecuta la búsqueda. El RLS forzado del inventario sigue aplicándose.
+- **Entrada:** texto de 2 a 120 caracteres (como antes); como máximo 8 palabras y 8 números o unidades, de hasta 40 caracteres cada uno; la función ignora palabras de menos de 2 letras y listas de más de 8. Las palabras viajan como parámetros (arreglos), sin SQL dinámico.
+- **Caché:** clave `v2` sin el término visible ni datos personales; una entrada vieja se descarta y se recalcula.
+- **Costo y dependencias:** sin librerías, extensiones ni servicios nuevos. US$0.
+- **Converge contra la spec:** FR-001 a FR-010, FR-012 y FR-013 cumplidos con las pruebas citadas. FR-011: p95 ≤ 100 ms cumplido (≤ 10 ms con 518 y ≤ 19 ms con 5180 ofertas). La meta «≤ 2× la búsqueda anterior» se cumple con 5180 ofertas; con 518 queda un costo fijo de unos 6 ms («paracetamol»: ≈ 6 ms frente a ≈ 2–3 ms). Andre lo conoció antes de aceptar. Las presentaciones reales («caja x N») hacen que «… tabletas» dé APROXIMADA con aviso, como pide la spec.
+
+## T015 · Aceptación · 2026-11-27
+- Andre: **ACEPTO F03.2** (v2 optimizada), revisada en la copia temporal. Registrada en `acceptance.md`.
+- Copia apagada; se borraron solo su base `farmafind_f01_test_1285f97c8984` y sus dos usuarios técnicos. En el clúster quedan solo las dos bases de la DEMO.
+- DEMO revisada en solo lectura: idéntica a la foto de esta mañana (518 productos de inventario, 4 importaciones, 0 reservas, 4 usuarios, 2 membresías) y **sin** la función de F03.2.

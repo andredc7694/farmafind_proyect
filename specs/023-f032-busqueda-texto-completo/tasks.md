@@ -20,8 +20,8 @@ Formato: `T000: descripción (requisitos)`. Una casilla se marca solo con eviden
 - [X] T010: `PublicSearch.jsx`: aviso de `APROXIMADA` sobre lista y mapa (`role="status"`), ayuda de `FALTA_NOMBRE` en el vacío, sin cambios si falta el campo. Pruebas en `frontend/tests/f032/`. (FR-005, FR-013)
 
 ## Fase 4 · Medición, regresión y copia
-- [ ] T011: Medición con los 518 productos (D-04 A): base efímera restaurada desde la copia de seguridad en el clúster de pruebas, sin puertos nuevos ni datos fuera de `.cache`; p50/p95 antes/después en `evidence.md`; borrar la base y confirmarlo a Andre. Si supera la meta, presentar índice como enmienda (D-05). (FR-011)
-- [ ] T012: Regresión: backend y frontend completos, `check`, verificadores de RLS y permisos que correspondan; registrar resultados reales (incluidos fallos de entorno ya conocidos). (SC-003)
-- [ ] T013: Copia temporal 3001/5174 con los datos ficticios del plan, sin el Redis compartido; E2E de los casos de `quickstart.md` y axe. Andre la revisa. (FR-012)
-- [ ] T014: Revisión de seguridad (sin datos nuevos publicados, entrada limitada, sin SQL dinámico) y converge contra la spec. (FR-008, FR-010)
-- [ ] T015: Aceptación de Andre en `acceptance.md` (**solo Andre decide**). Después: apagar la copia, borrar su base y usuarios, PR y merge con las condiciones de siempre. La DEMO recibe `f03/003` y `f07/010` solo con su autorización y copia de seguridad.
+- [X] T011: Medición con los 518 productos (D-04 A): base efímera restaurada desde la copia de seguridad en el clúster de pruebas, sin puertos nuevos ni datos fuera de `.cache`; p50/p95 antes/después en `evidence.md`; borrar la base y confirmarlo a Andre. Si supera la meta, presentar índice como enmienda (D-05). (FR-011)
+- [X] T012: Regresión: backend y frontend completos, `check`, verificadores de RLS y permisos que correspondan; registrar resultados reales (incluidos fallos de entorno ya conocidos). (SC-003)
+- [X] T013: Copia temporal 3001/5174 con los datos ficticios del plan, sin el Redis compartido; E2E de los casos de `quickstart.md` y axe. Andre la revisa. (FR-012)
+- [X] T014: Revisión de seguridad (sin datos nuevos publicados, entrada limitada, sin SQL dinámico) y converge contra la spec. (FR-008, FR-010)
+- [X] T015: Aceptación de Andre en `acceptance.md` (**solo Andre decide**). Después: apagar la copia, borrar su base y usuarios, PR y merge con las condiciones de siempre. La DEMO recibe `f03/003` y `f07/010` solo con su autorización y copia de seguridad.
