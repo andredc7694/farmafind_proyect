@@ -105,3 +105,9 @@
 - **PostgreSQL real** (`verify-f032-search.mjs`, migraciones del repo): **35/35**; base efímera borrada; la DEMO no se tocó.
 - **Comparación v1/v2** con la v2 aplicada por las migraciones y la v1 recuperada de git (solo en la base efímera restaurada desde la copia de seguridad, borrada al final): 120 casos, **0 diferencias** con 518 ofertas (2062 filas) y con 5180 (21458 filas). Peor p95 de la v2: 10.45 ms con 518 y 19.43 ms con 5180; «paracetamol» con 5180: v2 13.9 ms, actual 31.09 ms y v1 102.17 ms.
 - **Regresión:** backend 646 pasan (2 fallos de entorno conocidos de F06.1, que necesitan su base madre); frontend 282/282; `check` correcto (329 archivos); contratos OpenAPI con 41 operaciones con ruta.
+
+## T013 · Copia temporal recreada con la v2 · 2026-11-27
+- Se detuvieron sus dos procesos (comprobando que eran los de la copia) y se borraron solo su base anterior `farmafind_f01_test_61bb0323dcfc` (tenía la v1) y sus dos usuarios técnicos. La DEMO siguió respondiendo (3000 y 5173).
+- Nueva base `farmafind_f01_test_1285f97c8984` (marca TEST), con la v2 confirmada en la función y los mismos datos ficticios: 4 farmacias y 9 productos. Sin Redis compartido ni servicio externo de direcciones.
+- E2E con Chrome: los mismos resultados que con la v1 en los 12 textos de la API y en la pantalla (aviso con APROXIMADA en lista y mapa, ayuda con FALTA_NOMBRE, vacío con NINGUNA); 13 sugerencias, todas EXACTAS y con resultados; axe sin violaciones graves; 0 llamadas externas reales (solo se bloquearon las teselas de OpenStreetMap).
+- Lista para la revisión de Andre en http://localhost:5174/search.
