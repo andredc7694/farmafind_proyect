@@ -300,3 +300,5 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Siguiente: Andre corrige la ubicación de HUAMANFAR.
 - 2026-11-27 · **Pendientes para una segunda etapa del asistente (pedido de Andre), sin empezar:** consultar «mis reservas» con sesión; asistente para dueños y trabajadores en el panel (poco stock, reservas pendientes); botones «útil / no útil».
 - 2026-11-27 · **F06.2 — Asistente FarmaFind AI mejorado**: rama `feat/f062-asistente-mejorado` desde `main` `66c5f96`; spec en `specs/025-f062-asistente-mejorado/`. Paso Spec Kit: **specify**, espera aprobación. Proveedor sigue en MOCK. Sin cambios en la DEMO.
+- 2026-11-27 · F06.2: **spec aprobada por Andre** (commit `69ef164`, D-01 a D-10 en A) con ajustes: alternativas solo con misma forma farmacéutica conocida y etiqueta «Mismo principio activo y concentración»; emergencia primero y sin tarjetas; panel que no tape resultados (minimizado recordado en la visita).
+  - Paso Spec Kit: **plan y tasks** redactados (17 tareas, **sin SQL**); esperan aprobación. DEMO sin cambios.

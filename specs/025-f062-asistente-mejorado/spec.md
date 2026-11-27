@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f062-asistente-mejorado` (creada desde `main` `66c5f96`)
 **Created**: 2026-11-27
-**Status**: Borrador, **pendiente de aprobación de Andre** (decisiones D-01 a D-10).
+**Status**: **Aprobada por Andre el 2026-11-27** (commit `69ef164`, D-01 a D-10 en A, con ajustes en D-04, D-06 y D-08; ver `approval.md`).
 **Input**: pedido de Andre del 2026-11-27 (panel más grande, frases naturales, tarjetas, aclaraciones, «¿Quisiste decir…?», memoria mientras está abierto, contexto de pantalla y reglas de seguridad visibles).
 **Trazabilidad**: Maestro v3.2 **MEJ-009** (HU17, RF30: chat flotante minimizable que no pierde contexto, móvil en cajón, privacidad y mensajes claros) y **MEJ-010** (HU18, RF31: herramientas públicas restringidas, cita resultados, compara formulaciones compatibles, nunca prescribe ni hace commit de reservas); F06.1 (spec 009) y su enmienda del 2026-11-25; F03.2; F03.1; F07.1.
 
@@ -108,13 +108,13 @@
   - **A) Sin SQL ni librerías:** la palabra desconocida se compara con candidatos obtenidos buscando sus primeras letras (F03.2) y una distancia de edición escrita en el proyecto. Límite: si el error está en las primeras letras («ivuprofeno»), puede no sugerir.
   - B) Comparar con la lista completa de nombres públicos (requiere el SQL de D-02 B).
 - **D-04 · «Algo más barato que Panadol»** (enmienda de F061-FR-007, que prohíbe la sustitución)
-  - **A) Formulación compatible e informativa:** mismo principio activo **y** misma concentración, solo precios publicados, con el aviso «Mismo principio activo y concentración. Consulta al químico farmacéutico antes de cambiar de producto.» No dice «puedes cambiar» ni «es equivalente».
+  - **A) Formulación compatible e informativa (aprobada con ajuste):** mismo principio activo, misma concentración **y misma forma farmacéutica** (tableta con tableta, jarabe con jarabe…). Si la forma no está clara en el catálogo, **no** se muestra como alternativa. Tarjetas con la etiqueta «Mismo principio activo y concentración» (nunca «genérico») y el aviso «Consulta al químico farmacéutico antes de cambiar de producto». Nunca «es equivalente» ni «puedes reemplazarlo».
   - B) Solo mismo principio activo (puede mezclar concentraciones distintas).
   - C) No responder esta pregunta y remitir al químico farmacéutico.
 - **D-05 · Contrato de respuesta:** **A) versión nueva con campos estructurados** (`tarjetas` ≤ 3, `opciones`, `sugerencia`, `verTodas`) y el texto `respuesta` siempre presente. B) Solo texto con formato.
-- **D-06 · Panel en computadora:** **A) panel lateral derecho de ~420 px a alto completo, encima del contenido, con «Minimizar»** (desde 1024 px de ancho). B) Ventana flotante más grande, centrada.
+- **D-06 · Panel en computadora:** **A) panel lateral derecho de ~420 px a alto completo, con «Minimizar»** (desde 1024 px de ancho). **Ajuste aprobado:** no debe tapar los resultados de la búsqueda de forma que no se puedan usar; si los tapa, se minimiza con un clic y recuerda estar minimizado mientras dure la visita. B) Ventana flotante más grande, centrada.
 - **D-07 · «Reservar» en la tarjeta:** **A) enlace a la pantalla de reserva existente** con farmacia y producto ya elegidos; quien reserva confirma allí.
-- **D-08 · Emergencias:** **A) «Si puede ser una emergencia, llama gratis al SAMU 106 (Minsa). Bomberos: 116. Policía: 105.»** con fuente gob.pe y fecha de verificación 2026-11-27, botón de llamada (`tel:`) en celular.
+- **D-08 · Emergencias:** **A) «Si puede ser una emergencia, llama gratis al SAMU 106 (Minsa). Bomberos: 116. Policía: 105.»** con fuente gob.pe y fecha de verificación 2026-11-27, botón de llamada (`tel:`) en celular. **Ajuste aprobado:** aparece antes que cualquier otra respuesta y nunca se mezcla con tarjetas de productos.
 - **D-09 · «Abierta ahora» sin distrito elegido:** **A) preguntar «¿En qué distrito?» con botones de la lista (Huamanga).** B) Mostrar todas las farmacias abiertas.
 - **D-10 · Botones rápidos y de aclaración:** **A) envían al pulsar** (enmienda de F061-FR-033); los que necesitan nombre rellenan el campo y ponen el foco. B) Siempre solo rellenan el campo.
 
