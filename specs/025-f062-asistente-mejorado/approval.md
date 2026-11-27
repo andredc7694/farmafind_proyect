@@ -15,5 +15,11 @@
   - **D-06:** el panel en computadora no debe tapar los resultados de forma que no se puedan usar; si los tapa, se minimiza con un clic y recuerda estar minimizado durante la visita.
 - Siguiente: plan y tasks para su aprobación antes de programar. No tocar la DEMO.
 
-## Pendiente
+## Pendiente (resuelto el 2026-11-27)
 - Aprobación de `plan.md` y `tasks.md` (sin SQL).
+
+## 2026-11-27 · Plan y tasks aprobados
+- Andre: «Apruebo plan y tasks del asistente mejorado (F06.2, commit 0767cbd). Puedes empezar a programar.» Condiciones:
+  - El resumen de conversación que envía el navegador **no es texto libre**: solo datos estructurados y limitados (último medicamento, concentración, forma y distrito), con tamaño máximo. El servidor los valida, descarta lo que no reconoce y **no los guarda en registros**. Pruebas de un resumen manipulado y de uno demasiado largo. Incorporado en `plan.md`, `data-model.md` y T005.
+  - Pendiente para evaluar con la spec 020: campo explícito de forma farmacéutica en el catálogo (tableta, cápsula, jarabe…) para que las alternativas funcionen con datos reales como «caja x 30». Registrado en `ESTADO.md`.
+  - Al tener lista la copia temporal: recorrido exacto y credenciales ficticias. No tocar la DEMO.

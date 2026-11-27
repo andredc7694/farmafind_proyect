@@ -1,7 +1,7 @@
 # Implementation Plan: F06.2 — Asistente FarmaFind AI mejorado
 
 **Branch**: `feat/f062-asistente-mejorado` | **Spec**: `spec.md` (aprobada 2026-11-27, D-01 a D-10 en A, con ajustes en D-04, D-06 y D-08)
-**Status**: **pendiente de aprobación de Andre** (plan y tasks). No se programa antes.
+**Status**: **Aprobado por Andre el 2026-11-27** (commit `0767cbd`), con condiciones sobre el `contexto` (ver `approval.md`).
 **SQL**: **ninguno.** Sin migraciones, RLS ni permisos nuevos. Proveedor en **MOCK**. Sin librerías nuevas.
 
 ## Resumen
@@ -27,7 +27,7 @@ El servidor pasa a ser **sin estado** para la conversación (D-01 A): cada pregu
 - **`domain/dosage-form.ts`** (nuevo, ajuste D-04): forma farmacéutica desde la presentación: tableta/comprimido, cápsula, jarabe, suspensión, solución, gotas, crema, gel, ungüento, inyectable, supositorio, óvulo, polvo/sobre, parche, spray/inhalador. **«caja x 30», «frasco 120 ml» u otras → forma desconocida → no se ofrece como alternativa.**
 - **`domain/edit-distance.ts`** (nuevo): distancia Damerau-Levenshtein acotada (código propio). Sugerencia si distancia ≤ 2 (palabras ≥ 6 letras) o ≤ 1 (más cortas).
 - **`domain/emergency.ts`** (nuevo, D-08): números verificados (SAMU 106 Minsa, Bomberos 116, Policía 105), fuente gob.pe y fecha 2026-11-27. La urgencia se evalúa **antes que todo** y la respuesta **no lleva tarjetas ni opciones**.
-- **`domain/conversation-contract.ts`**: versión 2.0: petición `{ consulta, contexto? }` con `contexto` cerrado y validado (intención, medicamento ≤ 120, variante ≤ 120, distrito de la lista o punto redondeado a 3 decimales dentro del Perú); respuesta con `tarjetas` (≤ 3), `opciones` (≤ 6), `sugerencia`, `verTodas`, `emergencia` y `contexto` nuevo. `conversacionId` deja de usarse.
+- **`domain/conversation-contract.ts`**: versión 2.0: petición `{ consulta, contexto? }` con `contexto` **estructurado, nunca texto libre** (condición de Andre): intención de una lista cerrada, medicamento (solo letras, números y espacios, ≤ 60), concentración (formato `500 mg`, ≤ 20), forma de la lista de `dosage-form.ts`, distrito de la lista de lugares o punto redondeado a 3 decimales dentro del Perú; el JSON del contexto ≤ 1 KB. El servidor **descarta en silencio** las claves y valores que no reconoce (el contexto queda vacío, la pregunta sigue) y **nunca escribe el contexto en registros**; respuesta con `tarjetas` (≤ 3), `opciones` (≤ 6), `sugerencia`, `verTodas`, `emergencia` y `contexto` nuevo. `conversacionId` deja de usarse.
 - **`application/converse-assistant.ts`**: flujo sin almacén:
   1. Seguridad: urgencia → respuesta de emergencia sola; clínica/inyección → rechazo amable (F06.1).
   2. Intención + contexto (seguimiento usa el contexto recibido).

@@ -1,6 +1,6 @@
 # Tasks: F06.2 — Asistente FarmaFind AI mejorado
 
-**Estado**: **pendiente de aprobación de Andre** (junto con `plan.md`). Sin SQL. Ninguna tarea empieza antes.
+**Estado**: **Aprobadas por Andre el 2026-11-27** (commit `0767cbd`) con condiciones (ver `approval.md`). Sin SQL.
 Formato: `T000: descripción (requisitos)`. Una casilla se marca solo con evidencia real en `evidence.md`.
 
 ## Fase 1 · Dominio
@@ -10,7 +10,7 @@ Formato: `T000: descripción (requisitos)`. Una casilla se marca solo con eviden
 - [ ] T004: `emergency.ts` (106/116/105, fuente y fecha) y prioridad absoluta de la urgencia sin tarjetas. Pruebas. (FR-012, D-08)
 
 ## Fase 2 · Contrato, herramientas y caso de uso
-- [ ] T005: Contrato 2.0: petición con `contexto` cerrado y validado; respuesta con `tarjetas`, `opciones`, `sugerencia`, `verTodas`, `emergencia`, `contexto`. Pruebas de validación. (D-01, D-05)
+- [ ] T005: Contrato 2.0: petición con `contexto` estructurado (sin texto libre: intención, medicamento, concentración, forma, distrito/punto; ≤ 1 KB); el servidor descarta lo que no reconoce y no lo registra; respuesta con `tarjetas`, `opciones`, `sugerencia`, `verTodas`, `emergencia`, `contexto`. Pruebas de validación, **de contexto manipulado y de contexto demasiado largo**, y de que el contexto no aparece en los registros. (D-01, D-05, condición de Andre)
 - [ ] T006: Herramientas públicas de solo lectura: búsqueda con orden y lugar, farmacias públicas por distrito y horario público; composición. Pruebas. (FR-013)
 - [ ] T007: Caso de uso sin almacén: seguridad → intención → medicamento → datos → aclaración → tarjetas; ruta de descarte compatible (204). Pruebas con herramientas falsas. (FR-003 a FR-012)
 - [ ] T008: Regresión F06.1 adaptada (clínica, inyección, límites, búsqueda) y contrato `conversation.openapi.yaml` 2.0.0 con `check-openapi-routes.mjs`. (F061-FR-020, SC-004)

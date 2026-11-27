@@ -4,11 +4,13 @@
 
 ## Contrato de conversación 2.0 (borrador, `contracts/conversation.openapi.yaml`)
 - **Petición:** `{ consulta: string(1..500), contexto?: Contexto }`.
-- **Contexto** (cerrado, validado; vive solo en la memoria de la página):
-  - `intencion`: `PRECIO | CERCANIA | HORARIO | ALTERNATIVA | null`
-  - `medicamento`: string ≤ 120 | null
-  - `variante`: string ≤ 120 | null (concentración y presentación elegidas)
-  - `lugar`: `{ distrito: string de la lista }` | `{ latitud, longitud }` (3 decimales, dentro del Perú) | null
+- **Contexto** (estructurado, **nunca texto libre**; JSON ≤ 1 KB; vive solo en la memoria de la página; el servidor descarta lo que no reconoce y no lo escribe en registros):
+  - `intencion`: `PRECIO | CERCANIA | HORARIO | ALTERNATIVA` | ausente
+  - `medicamento`: solo letras, números y espacios, ≤ 60 | ausente
+  - `concentracion`: patrón `número + unidad` (p. ej. `500 mg`), ≤ 20 | ausente
+  - `forma`: valor de la lista cerrada de `dosage-form.ts` | ausente
+  - `distrito`: valor de la lista de lugares | ausente
+  - `punto`: `{ latitud, longitud }` (3 decimales, dentro del Perú) | ausente
 - **Respuesta:** `{ version: '2.0', estado, respuesta, aviso, fuentes, correlationId, proveedor: 'mock', contexto, tarjetas?, opciones?, sugerencia?, verTodas?, emergencia? }`
   - `tarjetas` (≤ 3): `{ etiqueta?, farmacia: { id, nombre, direccion }, producto: { id, nombre, concentracion, presentacion }, precioCentavos, distanciaKm|null, horarioHoy|null, reservarUrl }`
   - `opciones` (≤ 6): `{ texto, consulta }`
