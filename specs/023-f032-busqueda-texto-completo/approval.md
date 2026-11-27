@@ -28,5 +28,8 @@
 - Autoriza encender el contenedor del servidor de pruebas para T011, y encender la DEMO con `demo-run.ps1` sin borrar datos, verificando en solo lectura que siguen intactos. **Nada de F03.2 se aplica en la base de la DEMO.**
 - Siguiente: mostrarle el SQL corregido y su hash **antes** de copiarlo a `backend/migrations`.
 
-## Pendiente
-- Visto bueno de Andre al SQL corregido (hashes de arriba) para copiarlo a `backend/migrations` (T001).
+
+## 2026-11-27 · Visto bueno al SQL
+- Andre: «Doy visto bueno a los dos SQL de F03.2 con estos hashes: f03_003_search_terms.sql 374AEED785DA2AFB2C73A82406857D2C5F3B28B6E730C13F782707B6058BD922 y f07_010_search_terms_location.sql C5F0D8F990767E2DC37DCB3C0A02665B946533DF449DAB48E572882256BB873B (commit 1b2e100)».
+- Instrucciones: copiarlos sin cambios a `backend/migrations` y registrarlos en las listas cerradas de hashes; probarlos primero en una base efímera y, si hay error, detenerse y mostrar la corrección con hash nuevo sin editar los aprobados; seguir con T002, T003, la medición T011 (base temporal restaurada desde la copia y borrada al terminar) y la copia 3001/5174 para su revisión.
+- **Nada se aplica en la base de la DEMO hasta su aceptación.** El reinicio será al final, con copia de seguridad antes y aviso previo.

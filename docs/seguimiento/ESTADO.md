@@ -254,3 +254,7 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - `domain/search-terms.ts` (limpieza, palabras/tokens, singular, relleno, una letra fuera, falta de nombre); caso de uso con `coincidencia` (EXACTA/APROXIMADA/NINGUNA/FALTA_NOMBRE), solo exactos si existen, caché `v2`; repositorio y sugerencias con la función nueva.
   - Hallazgos en pruebas: «para» no puede descartarse como relleno si es la única palabra (comienzo de «paracetamol»); la sugerencia armaba «null» si faltaba una parte (corregido). En la base, concentración y presentación son `NOT NULL` (F02 002), así que un producto sin ellas no puede existir; `concat_ws` queda como protección.
   - Pruebas: `f032-full-text.test.ts` 20/20 (incluye «toda sugerencia lleva a ≥ 1 resultado» en memoria); backend completo 646 pasan, 2 fallos de entorno conocidos de F06.1.
+- 2026-11-27 · F03.2: **visto bueno de Andre al SQL** (hashes `374AEED7…D922` y `C5F0D8F9…873B`, commit `1b2e100`). Copiado sin cambios a `backend/migrations` y registrado en las listas cerradas (`F07_APPROVED` y la nueva `F03_APPROVED`).
+  - Base efímera: **sin errores** al aplicarlo; verificación con PostgreSQL real 35/35; base borrada; DEMO intacta y sin F03.2.
+  - T001–T010 hechas (backend, contrato 0.3.0, pantalla). Pruebas: backend 645 pasan + 2 fallos de entorno conocidos (F06.1); frontend 282/282; `check` correcto.
+  - Siguiente: medición T011 y copia temporal 3001/5174.

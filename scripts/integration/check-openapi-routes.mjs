@@ -9,7 +9,7 @@ const contracts=[
   ['specs/002-f01-identidad-multitenant/contracts/identity.openapi.yaml','/api/v1'],
   ['specs/003-f02-catalogo-inventario/contracts/inventory.openapi.yaml','/api/v1'],
   // F03.1 (spec 022): versión enmendada del contrato F03 (la carpeta 004 aprobada no se edita).
-  ['specs/022-f031-busqueda-mapa/contracts/public-search.openapi.yaml','/api/v1'],
+  ['specs/023-f032-busqueda-texto-completo/contracts/public-search.openapi.yaml','/api/v1'],
   ['specs/005-f04-reservas/contracts/reservations.openapi.yaml',''],
   ['specs/006-f05-notificaciones/contracts/notifications.openapi.yaml',''],
   ['specs/007-f06-asistente-ia/contracts/assistant.openapi.yaml',''],

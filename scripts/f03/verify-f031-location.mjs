@@ -6,6 +6,7 @@ import { Client } from 'pg';
 import { assertF07EphemeralDatabase } from '../f07/fixtures.mjs';
 import { PgPublicOfferRepository } from '../../backend/dist/modules/busqueda/infrastructure/public-offer-repository.js';
 import { parsePublicQuery } from '../../backend/dist/modules/busqueda/domain/public-query.js';
+import { searchTerms } from '../../backend/dist/modules/busqueda/domain/search-terms.js';
 
 const state = JSON.parse(readFileSync(new URL('../../.cache/f07-fixture/state.local.json', import.meta.url), 'utf8'));
 assert.equal(state.kind, 'F07_TEST_ONLY');
@@ -33,15 +34,17 @@ try {
   ok('fixture: alfa-norte conserva coordenadas guardadas', stored === 1);
   await client.query('SET LOCAL ROLE f01_runtime');
   const query = parsePublicQuery({ q: 'producto ficticio' });
-  const byPharmacy = offers => Object.fromEntries(offers.map(offer => [offer.farmacia.id, offer.farmacia.ubicacion]));
-  const on = byPharmacy(await new PgPublicOfferRepository(client, { exposeVerifiedLocation: true }).search(query, 200));
+  // F03.2: el repositorio recibe las palabras y devuelve { offer, matches }.
+  const byPharmacy = matched => Object.fromEntries(matched.map(({ offer }) => [offer.farmacia.id, offer.farmacia.ubicacion]));
+  const terms = searchTerms(query.term);
+  const on = byPharmacy(await new PgPublicOfferRepository(client, { exposeVerifiedLocation: true }).search(terms, query, 200));
   ok('verificada (alfa-centro) trae coordenadas', on[ids['alfa-centro']] && Number.isFinite(on[ids['alfa-centro']].latitud));
   ok('verificada (gamma-sur) trae coordenadas', on[ids['gamma-sur']] && Number.isFinite(on[ids['gamma-sur']].longitud));
   ok('PENDIENTE con coordenadas guardadas → null', Object.hasOwn(on, ids['alfa-norte']) && on[ids['alfa-norte']] === null);
   ok('RECHAZADA → null', Object.hasOwn(on, ids['beta-centro']) && on[ids['beta-centro']] === null);
   ok('farmacia INACTIVA no aparece', !Object.hasOwn(on, ids['delta-arequipa']));
   ok('solo las claves aprobadas', Object.values(on).every(value => value === null || Object.keys(value).sort().join() === 'latitud,longitud'));
-  const off = byPharmacy(await new PgPublicOfferRepository(client).search(query, 200));
+  const off = byPharmacy(await new PgPublicOfferRepository(client).search(terms, query, 200));
   ok('opción apagada (sin F07) → todo null', Object.keys(off).length === Object.keys(on).length && Object.values(off).every(value => value === null));
   console.log(JSON.stringify({ database: state.database, passed, results, rolledBack: true }, null, 1));
 } finally { await client.query('ROLLBACK').catch(() => undefined); await client.end(); }
