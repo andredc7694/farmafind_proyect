@@ -200,3 +200,7 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Pantalla: buscador simplificado, «¿Dónde buscas?», tarjetas, mapa conectado y estilos.
   - Pruebas: frontend 266/266, búsqueda backend 36, `check` y build correctos.
   - Siguiente: T012–T016 (base efímera, copia 3001/5174, E2E y regresión).
+- 2026-11-26 · F03.1: T012–T015 hechas.
+  - Pruebas: base de datos 8/8, E2E en la copia 20/20 sin llamadas externas reales y regresión en verde.
+  - El E2E destapó 3 fallos, ya corregidos: texto alternativo de los marcadores, contraste y lista de sugerencias.
+  - La copia 3001/5174 está encendida para T016.

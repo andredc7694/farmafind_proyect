@@ -160,3 +160,29 @@ describe('F03.1 · página completa (T007, T008, T010)', () => {
     expect(screen.getByText(/Sin ubicación/)).toBeTruthy(); expect(api.search).not.toHaveBeenCalled();
   });
 });
+
+describe('F03.1 · sugerencias', () => {
+  it('un valor inicial desde la URL no abre la lista de sugerencias; al escribir sí', async () => {
+    window.history.replaceState(null, '', '/search?q=paracetamol');
+    const api = { search: vi.fn().mockResolvedValue(page(OFFERS)), suggest: vi.fn().mockResolvedValue([{ text: 'paracetamol', kind: 'NOMBRE' }]) };
+    render(<PublicSearch client={api} />);
+    await new Promise(resolve => setTimeout(resolve, 350));
+    expect(api.suggest).not.toHaveBeenCalled(); expect(screen.getByLabelText('Nombre comercial o principio activo').getAttribute('aria-expanded')).toBe('false');
+    fireEvent.change(screen.getByLabelText('Nombre comercial o principio activo'), { target: { value: 'paracet' } });
+    await waitFor(() => expect(screen.getByLabelText('Nombre comercial o principio activo').getAttribute('aria-expanded')).toBe('true'));
+  });
+});
+
+describe('F03.1 · sugerencias tardías', () => {
+  it('si la respuesta llega después de salir del campo, la lista no se abre', async () => {
+    let release; const api = { search: vi.fn().mockResolvedValue(page(OFFERS)),
+      suggest: vi.fn(() => new Promise(resolve => { release = () => resolve([{ text: 'paracetamol', kind: 'NOMBRE' }]); })) };
+    render(<PublicSearch client={api} />);
+    const input = screen.getByLabelText('Nombre comercial o principio activo');
+    fireEvent.focus(input); fireEvent.change(input, { target: { value: 'paracetamol' } });
+    await waitFor(() => expect(api.suggest).toHaveBeenCalled());
+    fireEvent.blur(input); release();
+    await new Promise(resolve => setTimeout(resolve, 200));
+    expect(input.getAttribute('aria-expanded')).toBe('false');
+  });
+});

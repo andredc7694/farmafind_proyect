@@ -57,7 +57,9 @@ export function ResultsMap({ offers, hours = {}, selectedId = null, onSelect, us
         attribution: `<a href="${F07_MAP_SOURCE.copyright}">${F07_MAP_SOURCE.attribution}</a>`, referrerPolicy: 'strict-origin-when-cross-origin' });
       tiles.on('tileerror', () => { if (!disposed) setStatus('failed'); });
       tiles.addTo(map);
-      const points = [];
+      // Leaflet solo crea los iconos cuando el mapa ya tiene vista: primero se encuadra (solo farmacias), luego los marcadores.
+      const points = entries.map(entry => [entry.point.latitud, entry.point.longitud]);
+      if (points.length === 1) map.setView(points[0], 15); else map.fitBounds(points, { padding: [40, 40], maxZoom: 16 });
       for (const entry of entries) {
         const label = `${entry.name}, ${money(entry.offer.precioReferencialCentavos)}`;
         // El HTML del icono solo contiene el precio formateado a partir de un número.
@@ -71,9 +73,7 @@ export function ResultsMap({ offers, hours = {}, selectedId = null, onSelect, us
         const element = marker.getElement?.();
         if (element) { element.setAttribute('aria-label', label); element.setAttribute('role', 'button'); }
         markersRef.current.set(entry.id, marker);
-        points.push([entry.point.latitud, entry.point.longitud]);
       }
-      if (points.length === 1) map.setView(points[0], 15); else map.fitBounds(points, { padding: [40, 40], maxZoom: 16 });
       if (userPoint && Number.isFinite(userPoint.latitude) && Number.isFinite(userPoint.longitude)) {
         // Solo se dibuja; no centra el mapa, no se guarda y no se envía a nadie.
         L.circle([userPoint.latitude, userPoint.longitude], { radius: 120, color: '#0b5c8a', fillColor: '#0b5c8a', fillOpacity: 0.25,

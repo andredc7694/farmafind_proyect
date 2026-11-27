@@ -3,9 +3,10 @@ export function createFakeLeaflet() {
   const log = { maps: [], markers: [], circles: [], tiles: [], fitBounds: [], setView: [], panTo: [] };
   const L = {
     map(container, options) {
-      const map = { container, options, handlers: {},
-        setView(center, zoom) { log.setView.push({ center, zoom }); return map; },
-        fitBounds(points, opts) { log.fitBounds.push({ points, opts }); return map; },
+      // Como Leaflet real: sin vista (setView/fitBounds) el mapa no está «cargado» y los iconos no existen aún.
+      const map = { container, options, handlers: {}, loaded: false,
+        setView(center, zoom) { map.loaded = true; log.setView.push({ center, zoom }); return map; },
+        fitBounds(points, opts) { map.loaded = true; log.fitBounds.push({ points, opts }); return map; },
         panTo(point) { log.panTo.push(point); return map; },
         on(event, fn) { map.handlers[event] = fn; return map; },
         remove() { map.removed = true; } };
@@ -18,6 +19,8 @@ export function createFakeLeaflet() {
         bindPopup(fn) { marker.popup = fn; return marker; },
         on(event, fn) { marker.handlers[event] = fn; return marker; },
         addTo(map) {
+          marker.map = map;
+          if (!map.loaded) return marker; // Leaflet difiere el icono hasta tener vista
           const element = document.createElement('div'); element.className = options.icon.className; element.innerHTML = options.icon.html;
           if (options.keyboard) { element.tabIndex = 0; } if (options.title) element.title = options.title;
           element.addEventListener('click', () => marker.handlers.click?.());

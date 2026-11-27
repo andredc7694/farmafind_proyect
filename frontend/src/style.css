@@ -300,3 +300,8 @@ a { color: var(--emerald-dark); }
   .results-map { height: 65vh; }
   .search-hero-row .search-submit { width: 100%; }
 }
+/* F03.1: contraste (axe) de la tarjeta del mapa y de los botones de la tarjeta en hover/pulsado. */
+.results-map .leaflet-popup-content-wrapper, .results-map .leaflet-popup-tip { background: var(--surface); color: var(--ink); }
+.results-map .leaflet-popup-content .map-card strong, .results-map .leaflet-popup-content .map-card p { color: var(--ink); }
+.results-map .map-card .button-link, .results-map .map-card .button-link:visited { color: var(--on-accent); background: var(--emerald-dark); }
+.bootstrap .offer-actions button:hover:not(:disabled), .bootstrap .offer-actions button[aria-pressed="true"] { color: var(--emerald-dark); background: var(--mint); border-color: var(--emerald-dark); }

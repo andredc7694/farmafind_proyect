@@ -51,3 +51,46 @@
   - Frontend: **266/266** (55 archivos), con 10 nuevas en `frontend/tests/f031`.
   - Asistente: 146 correctas; siguen los dos fallos de entorno de F06.1, sin relación con este cambio.
   - `check` correcto (324 archivos) y build correcto.
+
+## T012–T015 · 2026-11-26 (base de datos, copia temporal, E2E y regresión)
+- **T012 · `scripts/f03/verify-f031-location.mjs`** con PostgreSQL real, en el fixture F07 efímero `farmafind_f01_test_c8f90caa7c42` del clúster de pruebas. No se usó `farmafind_f01_test` ni la DEMO, y la transacción se revirtió. **8/8**:
+  - Una farmacia verificada trae coordenadas.
+  - Una PENDIENTE con coordenadas guardadas da `null`, y una RECHAZADA también.
+  - Una farmacia INACTIVA no aparece.
+  - Solo se devuelven las claves `latitud` y `longitud`.
+  - Con la opción apagada, todo da `null`.
+- **T013 · Copia temporal en 3001/5174:**
+  - Base efímera `farmafind_f01_test_6b49fe963285`, sin el Redis compartido.
+  - Datos ficticios: 4 farmacias de Ayacucho, 3 verificadas y 1 sin verificar, con paracetamol y horario.
+  - La API devuelve `ubicacion: null` para la farmacia sin verificar.
+- **T014 · E2E en Chrome:** todas las peticiones externas se bloquearon; la única intentada fue `tile.openstreetmap.org`, así que hubo 0 llamadas reales. **20/20 comprobaciones**:
+  - Orden por precio sin ubicación y sin campos de coordenadas.
+  - «Más cercano» abre el diálogo con sus tres opciones; con Ayacucho aparece «Cerca de: Ayacucho (aproximado)», con distancias y la farmacia sin verificar marcada.
+  - Horario visible y «Filtros» completo.
+  - Exactamente 3 marcadores con texto alternativo, aviso de privacidad y tarjeta con Reservar.
+  - Lista y mapa conectados en los dos sentidos; el teclado abre la tarjeta (Enter sobre un marcador).
+  - axe: sin violaciones graves.
+  - A 390 px se ve una sola vista, sin desplazamiento lateral. Escape cierra el diálogo.
+- **Fallos encontrados por el E2E y corregidos (con prueba nueva cada uno):**
+  1. Con Leaflet real, el `aria-label` de los marcadores no se aplicaba porque se agregaban antes de encuadrar el mapa. Ahora se encuadra primero. El Leaflet falso imita ese comportamiento y falla con el código anterior.
+  2. axe detectó dos fallos de contraste: la tarjeta del mapa y el botón «Ver en el mapa» en hover o pulsado. Se pusieron colores explícitos con los tokens; se verificó también en modo oscuro.
+  3. La lista de sugerencias se abría con el texto que trae la URL o con respuestas tardías, y tapaba «Elegir» en el celular. Ahora solo sugiere después de escribir y con el campo activo.
+- **T015 · Regresión:**
+  - Contratos OpenAPI (general, f011, f041 y f081) correctos.
+  - Suites del CI con dobles (unitarias / API):
+
+    | Módulo | Unitarias | API |
+    |---|---|---|
+    | f01 | 114 | 128 |
+    | f02 | 15 | — |
+    | f03 | 34 | — |
+    | f04 | 48 | 25 |
+    | f05 | 8 | 5 |
+    | f06 | 24 | 5 |
+    | f061 | 108 | 15 |
+    | f07 | 19 | — |
+
+  - Backend completo: 626 correctas y 237 omitidas. Siguen los dos fallos de entorno de F06.1.
+  - Frontend: **268/268**.
+  - F07 con PostgreSQL: 23 correctas. Sigue fallando, por entorno, la prueba de migración que necesita el clúster F01.
+  - `check` correcto (325 archivos) y build correcto.

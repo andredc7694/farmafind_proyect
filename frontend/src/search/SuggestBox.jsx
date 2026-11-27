@@ -7,17 +7,20 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 export function SuggestBox({ id = 'public-query', label, value, onChange, suggest, delayMs = 250, minLength = 2, required = false }) {
   const listId = useId(); const [items, setItems] = useState([]); const [open, setOpen] = useState(false); const [active, setActive] = useState(-1);
   const latest = useRef(0); const skip = useRef(false);
+  // F03.1: solo se sugiere después de que la persona escriba; un valor inicial (p. ej. de la URL) no abre la lista.
+  const typed = useRef(false);
+  const active$ = useRef(false); // el campo tiene el foco (o se acaba de escribir): una respuesta tardía no reabre la lista
 
   useEffect(() => {
     if (skip.current) { skip.current = false; return undefined; }
     const text = value.trim();
-    if (!suggest || text.length < minLength) { setItems([]); setOpen(false); return undefined; }
+    if (!suggest || text.length < minLength || !typed.current) { setItems([]); setOpen(false); return undefined; }
     const ticket = ++latest.current;
     const timer = setTimeout(async () => {
       try {
         const found = await suggest(text);
         if (ticket !== latest.current) return; // respuesta vieja: se descarta
-        setItems(found.slice(0, 8)); setActive(-1); setOpen(found.length > 0);
+        setItems(found.slice(0, 8)); setActive(-1); setOpen(found.length > 0 && active$.current);
       } catch { if (ticket === latest.current) { setItems([]); setOpen(false); } }
     }, delayMs);
     return () => clearTimeout(timer);
@@ -35,7 +38,7 @@ export function SuggestBox({ id = 'public-query', label, value, onChange, sugges
     <label htmlFor={id}>{label}</label>
     <input id={id} role="combobox" aria-autocomplete="list" aria-expanded={open} aria-controls={listId} aria-haspopup="listbox"
       aria-activedescendant={open && active >= 0 ? `${listId}-${active}` : undefined} autoComplete="off" required={required} minLength={2} maxLength={120}
-      value={value} onChange={event => { onChange(event.target.value); }} onKeyDown={keyDown} onBlur={() => setTimeout(() => setOpen(false), 120)} />
+      value={value} onChange={event => { typed.current = true; active$.current = true; onChange(event.target.value); }} onFocus={() => { active$.current = true; }} onKeyDown={keyDown} onBlur={() => { active$.current = false; setTimeout(() => setOpen(false), 120); }} />
     <ul id={listId} role="listbox" aria-label="Sugerencias" hidden={!open}>{items.map((item, index) =>
       <li key={`${item.kind}-${item.text}`} id={`${listId}-${index}`} role="option" aria-selected={index === active}
         onMouseDown={event => { event.preventDefault(); choose(index); }}>{item.text}<small> · {item.kind === 'NOMBRE' ? 'nombre' : 'presentación'}</small></li>)}</ul>
