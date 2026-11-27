@@ -22,9 +22,9 @@ AS $body$
       CASE WHEN p.estado_ubicacion='PUBLICADA_VERIFICADA' THEN p.latitud ELSE NULL END AS lat,
       CASE WHEN p.estado_ubicacion='PUBLICADA_VERIFICADA' THEN p.longitud ELSE NULL END AS lon,
       i.precio_centavos AS precio, i.ultima_revision_at,
-      f03.normalize_search_text(m.nombre || ' ' || m.principio_activo) AS hay_nombre,
-      f03.normalize_search_text(m.nombre || ' ' || m.principio_activo || ' ' ||
-        m.concentracion || ' ' || m.presentacion) AS hay_todo
+      f03.normalize_search_text(concat_ws(' ', m.nombre, m.principio_activo)) AS hay_nombre,
+      f03.normalize_search_text(concat_ws(' ', m.nombre, m.principio_activo,
+        m.concentracion, m.presentacion)) AS hay_todo
     FROM f02.inventario i
     JOIN f02.medicamento m ON m.id=i.medicamento_id
     JOIN f01.farmacia_referencia f ON f.id=i.farmacia_id
@@ -35,11 +35,11 @@ AS $body$
       AND (p_max_price IS NULL OR i.precio_centavos<=p_max_price)
   ), puntaje AS (
     SELECT b.*,
-      ((SELECT count(*) FROM unnest(e.words) w WHERE position(w IN b.hay_todo)>0) +
+      ((SELECT count(*) FROM unnest(e.words) w WHERE length(w)>=2 AND position(w IN b.hay_todo)>0) +
        (SELECT count(*) FROM unnest(e.tokens) t WHERE t = ANY (string_to_array(b.hay_todo, ' '))))::integer AS puntos
     FROM base b CROSS JOIN entrada e
     WHERE cardinality(e.words) BETWEEN 1 AND 8 AND cardinality(e.tokens) <= 8
-      AND EXISTS (SELECT 1 FROM unnest(e.words) w WHERE w <> '' AND position(w IN b.hay_nombre)>0)
+      AND EXISTS (SELECT 1 FROM unnest(e.words) w WHERE length(w)>=2 AND position(w IN b.hay_nombre)>0)
   )
   SELECT m_id,nombre,principio,concentracion,presentacion,clasificacion,f_id,nombre_publico,
     direccion_texto,lat,lon,precio,ultima_revision_at,puntos
