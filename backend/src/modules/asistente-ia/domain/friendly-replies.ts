@@ -5,7 +5,8 @@ export const REPLIES = {
   HELP: 'Escribe el nombre de un medicamento (por ejemplo «Paracetamol») y comparo sus precios referenciales. Modo DEMO: la IA generativa externa no está habilitada; sin fichas revisadas me abstengo de dar información farmacológica.',
   GREETING: '¡Hola! Soy el asistente de FarmaFind. Puedo comparar precios referenciales de un medicamento, decirte qué farmacias lo ofrecen y llevarte al mapa de farmacias. Escribe, por ejemplo, «Paracetamol».',
   CAPABILITIES: 'Con las ofertas que publican las farmacias puedo mostrarte: nombre, concentración, presentación, precio referencial, farmacias que lo ofrecen y disponibilidad referencial. «Disponibilidad referencial» significa que la farmacia lo publicó como disponible en su última revisión: confírmalo antes de ir. No muestro el stock de las farmacias ni doy indicaciones médicas.',
-  NEARBY: 'Para ver farmacias cercanas usa «Ver farmacias en el mapa» en Buscar medicamentos. Compartir tu ubicación es opcional y la decides allí; desde este chat no puedo verla.',
+  // F03.1: la búsqueda ya no tiene ese enlace; se indica el camino nuevo y se conserva el atajo a /search/mapa (D-08).
+  NEARBY: 'Para ver farmacias cercanas, en Buscar medicamentos elige dónde buscas y pulsa «Mapa». También puedes usar «Ver farmacias en el mapa». Compartir tu ubicación es opcional y la decides allí; desde este chat no puedo verla.',
   ASK_TERM: '¿De qué medicamento quieres ver los precios? Escribe su nombre, por ejemplo «Paracetamol».',
 } as const;
 

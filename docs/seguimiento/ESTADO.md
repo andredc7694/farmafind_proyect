@@ -188,3 +188,41 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Investigar la corrida del frontend que dio 52 archivos y 250 pruebas.
   - Andre enviará más mejoras: registrarlas como pendientes al llegar.
   - T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · **F07.1 integrada en main:** PR #15, merge commit `264469c`, con CI en verde, MERGEABLE y CLEAN, sin secretos y con la rama conservada. La carpeta principal quedó en `main` actualizado; la DEMO no se reinició porque solo cambiaron documentos.
+- 2026-11-26 · Andre confirma el merge de F07.1. **Nuevo incremento F03.1, «Búsqueda simplificada y mapa interactivo»** (MEJ-007/008), en la rama `feat/f031-busqueda-mapa` (desde `264469c`), con la spec `specs/022-f031-busqueda-mapa/`. Fase *specify*: **pendiente de su aprobación**; no se programa antes.
+- 2026-11-26 · F03.1: **spec aprobada por Andre** con D-01 a D-08 en A.
+  - Condiciones: `farmacia.ubicacion` solo para farmacias verificadas y `null` en el resto; contrato y validador de la caché actualizados; prueba de que las entradas viejas de la caché se descartan.
+  - Siguiente: plan y tasks para su aprobación.
+- 2026-11-26 · F03.1: plan, research, data-model, contrato enmendado (`specs/022/contracts`, 0.2.0; la 004 no se toca), quickstart y tasks (T001–T018) listos. **Pendiente de la aprobación de Andre** antes de programar.
+- 2026-11-26 · F03.1: **plan y tasks aprobados por Andre**. Empieza la implementación (T001 en adelante).
+- 2026-11-26 · F03.1: T001–T011 hechas.
+  - Servidor: `farmacia.ubicacion` y caché.
+  - Pantalla: buscador simplificado, «¿Dónde buscas?», tarjetas, mapa conectado y estilos.
+  - Pruebas: frontend 266/266, búsqueda backend 36, `check` y build correctos.
+  - Siguiente: T012–T016 (base efímera, copia 3001/5174, E2E y regresión).
+- 2026-11-26 · F03.1: T012–T015 hechas.
+  - Pruebas: base de datos 8/8, E2E en la copia 20/20 sin llamadas externas reales y regresión en verde.
+  - El E2E destapó 3 fallos, ya corregidos: texto alternativo de los marcadores, contraste y lista de sugerencias.
+  - La copia 3001/5174 está encendida para T016.
+- 2026-11-26 · F03.1, revisión de Andre en la copia:
+  - Hechos: filtro de lugares al escribir (sin tildes), mapa «Elegir el punto» centrado en Huamanga y casilla alineada. Frontend 271/271, `check` correcto.
+  - **Enmienda E-01 propuesta** (16 distritos de Huamanga verificados con el ubigeo INEI, resto del Perú desactivado por configuración, sin duplicados; «Mi farmacia» no cambia). Pendiente de su aprobación.
+- 2026-11-26 · F03.1: **E-01 aprobada (opción A) e implementada**: 16 distritos de Huamanga por defecto, el resto del Perú desactivado por configuración y sin duplicados. «Mi farmacia» no cambia.
+  - Campo de lugar: lista completa al enfocar, filtro por cualquier parte sin tildes y aviso «No encontramos ese distrito».
+  - Pruebas: frontend 277/277; E2E en la copia 20/20.
+  - Consulta de Andre: el 0 de «paracetamol 500 mg tabletas x 10» se debe a que la búsqueda compara el texto completo con el nombre o el principio activo, y la sugerencia «presentación» de F08.1 propone ese texto largo. No se cambió; queda para decidir.
+- 2026-11-26 · **F03.1 ACEPTADA CON OBSERVACIONES por Andre** (T018), registrada en `acceptance.md` y `approval.md`. Siguiente: PR y merge a `main` con las condiciones de siempre.
+- 2026-11-26 · **Corrección pendiente PRIORITARIA, sin empezar:** la búsqueda debe encontrar resultados cuando el texto junta nombre, concentración y presentación (por ejemplo, «paracetamol 500 mg tabletas x 10»), y ninguna sugerencia del buscador debe llevar a una búsqueda vacía.
+- 2026-11-26 · **Para F09, antes de cualquier despliegue real:**
+  - revisar la configuración `geolocationTest` (también controla si la búsqueda entrega coordenadas);
+  - revisar el alcance de lugares `VITE_SEARCH_PLACES_SCOPE` (por defecto `huamanga`);
+  - revisar el uso de las imágenes de OpenStreetMap: términos, límites y proveedor para producción.
+- 2026-11-26 · **Pendientes, sin empezar:**
+  - Búsqueda con texto completo (prioritaria).
+  - Márgenes de «Revisar solicitudes» y «Mi perfil».
+  - Ayuda de dirección en el registro (después de T063).
+  - Corrida de pruebas por investigar.
+  - T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · F03.1: copia temporal apagada.
+  - Se borraron solo su base `farmafind_f01_test_6b49fe963285` y sus dos roles.
+  - La DEMO, revisada en solo lectura, está idéntica a la foto tomada después de T018 (HUAMANFAR con 518 productos de inventario, 4 usuarios y 2 membresías), y su Redis responde.

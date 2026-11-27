@@ -6,8 +6,22 @@ import type { GeoPublicOffer, GeoPublicPharmacy, GeolocationReadPort } from '../
 
 interface Queryable { query(sql: string, values?: unknown[]): Promise<{ rows: Array<Record<string, unknown>> }>; }
 
+export interface PublicOfferRepositoryOptions {
+  /** F03.1: true solo si la composición activa F07 (su versión de search_public_offers devuelve
+   *  coordenadas únicamente con ubicación verificada). Apagado: ubicacion siempre null. */
+  readonly exposeVerifiedLocation?: boolean;
+}
+
+function verifiedLocation(row: Record<string, unknown>, enabled: boolean) {
+  if (!enabled || row.farmacia_latitud === null || row.farmacia_latitud === undefined ||
+      row.farmacia_longitud === null || row.farmacia_longitud === undefined) return null;
+  const latitud = Number(row.farmacia_latitud), longitud = Number(row.farmacia_longitud);
+  return Number.isFinite(latitud) && Number.isFinite(longitud) && Math.abs(latitud) <= 90 && Math.abs(longitud) <= 180
+    ? { latitud, longitud } : null;
+}
+
 export class PgPublicOfferRepository implements PublicOfferRepository, GeolocationReadPort {
-  constructor(private readonly database: Queryable) {}
+  constructor(private readonly database: Queryable, private readonly options: PublicOfferRepositoryOptions = {}) {}
 
   async search(query: CanonicalPublicQuery, maximum: number): Promise<readonly PublicOffer[]> {
     const result = await this.database.query('SELECT * FROM f03.search_public_offers($1,$2,$3,$4)',
@@ -16,7 +30,8 @@ export class PgPublicOfferRepository implements PublicOfferRepository, Geolocati
       medicamento: { id: String(row.medicamento_id), nombreComercial: String(row.nombre_comercial),
         principioActivo: String(row.principio_activo), concentracion: String(row.concentracion),
         presentacion: String(row.presentacion), clasificacion: String(row.clasificacion) },
-      farmacia: { id: String(row.farmacia_id), nombre: String(row.farmacia_nombre), direccion: String(row.farmacia_direccion) },
+      farmacia: { id: String(row.farmacia_id), nombre: String(row.farmacia_nombre), direccion: String(row.farmacia_direccion),
+        ubicacion: verifiedLocation(row, this.options.exposeVerifiedLocation === true) },
       precioReferencialCentavos: Number(row.precio_centavos), disponibilidadReferencial: 'DISPONIBLE' as const,
       ultimaRevision: new Date(String(row.ultima_revision)).toISOString(),
       distanciaKm: query.latitude === null || row.farmacia_latitud === null || row.farmacia_longitud === null ? null :

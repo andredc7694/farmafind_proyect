@@ -27,6 +27,13 @@ function response(query: CanonicalPublicQuery, candidates: readonly PublicOffer[
 function exactKeys(value: object, allowed: readonly string[]): boolean {
   const keys = Object.keys(value).sort(); return keys.length === allowed.length && keys.every((key,index) => key === [...allowed].sort()[index]);
 }
+/** F03.1: forma nueva obligatoria; una entrada vieja (sin ubicacion) se descarta y se recalcula. */
+function validLocation(value: unknown): boolean {
+  if (value === null) return true;
+  if (typeof value !== 'object' || !exactKeys(value,['latitud','longitud'])) return false;
+  const point = value as { latitud: unknown; longitud: unknown };
+  return typeof point.latitud === 'number' && typeof point.longitud === 'number';
+}
 function validCached(value: unknown): value is PublicSearchResponse {
   if (typeof value !== 'object' || value === null || !exactKeys(value,['consulta','ofertas','paginacion','aviso'])) return false;
   const candidate=value as PublicSearchResponse;
@@ -36,7 +43,8 @@ function validCached(value: unknown): value is PublicSearchResponse {
   return candidate.ofertas.every(offer => typeof offer === 'object' && offer !== null &&
     exactKeys(offer,['medicamento','farmacia','precioReferencialCentavos','disponibilidadReferencial','ultimaRevision','distanciaKm']) &&
     exactKeys(offer.medicamento,['id','nombreComercial','principioActivo','concentracion','presentacion','clasificacion']) &&
-    exactKeys(offer.farmacia,['id','nombre','direccion']) && offer.disponibilidadReferencial === 'DISPONIBLE');
+    exactKeys(offer.farmacia,['id','nombre','direccion','ubicacion']) && validLocation(offer.farmacia.ubicacion) &&
+    offer.disponibilidadReferencial === 'DISPONIBLE');
 }
 
 export class SearchPublicOffers {

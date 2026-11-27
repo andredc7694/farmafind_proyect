@@ -207,7 +207,8 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       redisClient = createClient({ url: config.search.redisUrl, socket: { connectTimeout: config.search.cacheTimeoutMs,
         reconnectStrategy: false } });
       redisClient.on('error', () => undefined);
-      const repository = new PgPublicOfferRepository(tenantPool);
+      // F03.1: coordenadas en la búsqueda solo con F07 activo (geolocationTest).
+      const repository = new PgPublicOfferRepository(tenantPool, { exposeVerifiedLocation: config.geolocationTest === true });
       const cache = new RedisSearchCache(redisClient, config.search.cacheTimeoutMs);
       invalidator = new RedisSearchInvalidator(redisClient);
       const search = new SearchPublicOffers(repository, cache, { ttlSeconds: config.search.cacheTtlSeconds,
