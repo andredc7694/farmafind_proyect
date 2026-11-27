@@ -290,3 +290,13 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Pruebas: backend 666 pasan + 2 fallos de entorno conocidos (F06.1); frontend 295/295; `check` y contratos correctos; PostgreSQL real F07.2 15/15 (incluida la igualdad dueño/revisor y dos envíos simultáneos) y F03.2 35/35; bases efímeras borradas.
   - Copia temporal 3001/5174 encendida con datos ficticios; E2E correcta, axe sin violaciones graves, 0 llamadas externas. Espera revisión de Andre. DEMO sin cambios.
 - 2026-11-27 · **F07.2 ACEPTADA por Andre**, registrada en `acceptance.md` y `approval.md`. Copia temporal apagada y borrada (base y dos usuarios técnicos); DEMO intacta. Siguiente: PR y merge; luego aviso antes de actualizar la DEMO (copia de seguridad y comprobación de STUART-FAR en solo lectura).
+- 2026-11-27 · **F07.2 integrada en main:** PR #18 con merge commit `66c5f96` (CI 4/4 en verde, MERGEABLE, CLEAN, sin secretos, rama conservada, sin force push).
+- 2026-11-27 · Corrección de la línea del 2026-11-26 «Andre probó F03.1 en su DEMO: propuso y aprobó la ubicación de HUAMANFAR»: fue en la copia temporal (5174), no en la DEMO. No hubo pérdida de datos.
+- 2026-11-27 · **DEMO actualizada a F07.2** con la autorización de Andre:
+  - Copia previa `.cache/f025-docker/backups/farmafind_f01_test_d0570879cf41_antes-f072_20261127.dump`: 735 186 bytes y 59 tablas de datos.
+  - Carpeta principal en `main` `66c5f96`, backend compilado; reinicio con `demo-stop.ps1` y `demo-run.ps1`; sin migraciones nuevas. Verificaciones 46/46, 51 y F04 37/37; 3000, 5173 y csrf responden 200.
+  - Solo lectura: datos idénticos a la foto previa (1015 productos de inventario, 6 usuarios, 3 membresías, 1 reserva). Las 3 propuestas conservan sus huellas y siguen las mismas 5 auditorías.
+  - **STUART-FAR, propuesta de 17:33:42:** huella `e0522b3879d8ef84df36dd68274795c3` igual a la de antes (PENDIENTE, versión 1, sin revisor: no se borró ni se modificó). Con el SQL de F07.2: «Pendientes» vacío; filtro «Reemplazadas» la muestra como «Reemplazada» (motivo «Se envió una propuesta más reciente», 17:33:46); el historial del dueño muestra lo mismo.
+  - Siguiente: Andre corrige la ubicación de HUAMANFAR.
+- 2026-11-27 · **Pendientes para una segunda etapa del asistente (pedido de Andre), sin empezar:** consultar «mis reservas» con sesión; asistente para dueños y trabajadores en el panel (poco stock, reservas pendientes); botones «útil / no útil».
+- 2026-11-27 · **F06.2 — Asistente FarmaFind AI mejorado**: rama `feat/f062-asistente-mejorado` desde `main` `66c5f96`; spec en `specs/025-f062-asistente-mejorado/`. Paso Spec Kit: **specify**, espera aprobación. Proveedor sigue en MOCK. Sin cambios en la DEMO.
