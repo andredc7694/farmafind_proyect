@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f072-revision-ubicaciones` (creada desde `main` `3ad229a`)
 **Created**: 2026-11-27
-**Status**: Borrador, **pendiente de aprobación de Andre** (decisiones D-01 a D-06).
+**Status**: **Aprobada por Andre el 2026-11-27** (commit `f602f95`, D-01 a D-06 en A, con condiciones en `approval.md`).
 **Input**: corrección pedida por Andre el 2026-11-27 sobre «Mi farmacia» y «Revisar ubicaciones» (F07.1).
 **Trazabilidad**: F07.1 (spec 021): D-04 A, F071-FR-013 a FR-018; F07 (spec 010); Constitution (US$0, sin servicios nuevos, RLS).
 
