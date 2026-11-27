@@ -52,7 +52,8 @@ describe('F07.1 · «Buscar en el mapa» (FR-013)', () => {
     fireEvent.change(screen.getByLabelText('Dirección pública'), { target: { value: 'Jr. 28 de Julio 145' } });
     expect(suggestionClient.search).not.toHaveBeenCalled(); // sin autocompletado letra por letra
     fireEvent.click(button);
-    await waitFor(() => expect(suggestionClient.search).toHaveBeenCalledWith('alfa', { direccion: 'Jr. 28 de Julio 145', ciudad: 'Ayacucho' }));
+    await waitFor(() => expect(suggestionClient.search).toHaveBeenCalledWith('alfa', { direccion: 'Jr. 28 de Julio 145', ciudad: 'Ayacucho',
+      centro: { latitud: -13.1603, longitud: -74.2253 } }));
     expect(await screen.findByText(/Dirección encontrada/)).toBeTruthy();
     expect(screen.getByTestId('picker').getAttribute('data-point')).toBe('-13.1631,-74.2244');
     expect(picker.focus).toMatchObject({ zoom: 17 });
