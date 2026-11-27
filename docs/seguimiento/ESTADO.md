@@ -160,3 +160,6 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - **Copia temporal apagada.** Se borraron solo su base efímera y sus dos roles.
   - El resto de F07.1 (T012–T019, la autorización de T018, el reinicio final y la comprobación de HUAMANFAR) espera a que Andre termine T057.
   - Sin PR. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · Andre da por conforme el ajuste visual y el cierre de la copia. Confirma que la tercera propuesta aprobada en la copia («esta bien la direccion») la aprobó él durante su revisión.
+- 2026-11-26 · **Corrección pendiente (sin empezar, espera orden de Andre):** revisar el margen de «Revisar solicitudes» (`/admin/farmacias/solicitudes`) y «Mi perfil» (`/mi-perfil`) para que tengan el mismo estilo que «Revisar ubicaciones». Irá en su propia rama cuando se apruebe.
+- 2026-11-26 · Andre todavía no hará T057; antes enviará más correcciones del sistema. Cada corrección se registra como pendiente al llegar y solo se trabaja lo que él ordene. No tocar la DEMO ni sus puertos sin avisar. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
