@@ -117,8 +117,12 @@ a { color: var(--emerald-dark); }
 }
 .point-marker { width: 22px; height: 22px; border-radius: 50%; background: #176b52; border: 3px solid #fff; box-shadow: 0 0 0 2px #176b52; cursor: grab; }
 /* F07.1: historial de «Revisar ubicaciones». */
-.review-filter { display: flex; flex-wrap: wrap; gap: .5rem; }
-.review-filter button[aria-pressed="true"] { font-weight: 700; }
+.location-review { width: min(1180px, calc(100% - 48px)); margin: 2rem auto 3rem; }
+@media (max-width: 700px) { .location-review { width: calc(100% - 32px); margin-top: 1.25rem; } }
+.review-filter { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.review-filter button { min-height: 44px; padding: .5rem .9rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; font: inherit; cursor: pointer; }
+.review-filter button:hover { border-color: var(--emerald-dark); }
+.review-filter button[aria-pressed="true"] { background: var(--mint); color: var(--emerald-dark); border-color: var(--emerald-dark); font-weight: 700; }
 .history-facts { display: grid; grid-template-columns: minmax(6rem, max-content) 1fr; gap: .25rem .8rem; margin: 0; }
 .history-facts dt { font-weight: 600; }
 .history-facts dd { margin: 0; overflow-wrap: anywhere; }
