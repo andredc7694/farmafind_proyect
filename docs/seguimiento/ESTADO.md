@@ -246,3 +246,11 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Observación: la DEMO estaba apagada al revisar (contenedores detenidos hace ~14 h, sin intervención mía). No se encendió.
 - 2026-11-27 · F03.2: **plan y tasks aprobados por Andre** (commit `6d90f9d`). SQL aprobado con correcciones: `concat_ws` en `hay_nombre`/`hay_todo` y mayúsculas con tilde en `translate`; más pruebas (sin presentación o concentración, «ÁCIDO»/«Ácido»/«acido» y palabras cortas). Borrador corregido (`1b2e100`) con nuevos SHA-256 en `approval.md`; espera su visto bueno antes de copiarse a `backend/migrations`.
   - Autoriza encender el contenedor de pruebas (T011) y la DEMO con `demo-run.ps1`, sin aplicar nada de F03.2 en su base.
+- 2026-11-27 · **DEMO reencendida** con la autorización de Andre (estaba apagada; contenedores detenidos sin intervención):
+  - Copia previa `.cache/f025-docker/backups/farmafind_f01_test_d0570879cf41_antes-arranque-f032_20261127.dump`: 621 855 bytes y 59 tablas de datos. Se encendió solo PostgreSQL para la copia y se volvió a dejar como estaba.
+  - Se limpió el registro de procesos viejo con `demo-stop.ps1` (los dos procesos ya no existían; no se detuvo nada ajeno) y se arrancó con `demo-run.ps1`. Sin migraciones nuevas; verificaciones 46/46, 51 y F04 37/37; 3000, 5173 y csrf responden 200.
+  - Revisión en solo lectura: idéntica a la foto posterior a F03.1 (518 productos de inventario, 4 importaciones, 0 reservas, 4 usuarios, 2 membresías). **Nada de F03.2 aplicado en su base.**
+- 2026-11-27 · F03.2, backend (sin SQL copiado todavía):
+  - `domain/search-terms.ts` (limpieza, palabras/tokens, singular, relleno, una letra fuera, falta de nombre); caso de uso con `coincidencia` (EXACTA/APROXIMADA/NINGUNA/FALTA_NOMBRE), solo exactos si existen, caché `v2`; repositorio y sugerencias con la función nueva.
+  - Hallazgos en pruebas: «para» no puede descartarse como relleno si es la única palabra (comienzo de «paracetamol»); la sugerencia armaba «null» si faltaba una parte (corregido). En la base, concentración y presentación son `NOT NULL` (F02 002), así que un producto sin ellas no puede existir; `concat_ws` queda como protección.
+  - Pruebas: `f032-full-text.test.ts` 20/20 (incluye «toda sugerencia lleva a ≥ 1 resultado» en memoria); backend completo 646 pasan, 2 fallos de entorno conocidos de F06.1.
