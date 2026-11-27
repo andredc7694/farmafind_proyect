@@ -305,3 +305,9 @@ a { color: var(--emerald-dark); }
 .results-map .leaflet-popup-content .map-card strong, .results-map .leaflet-popup-content .map-card p { color: var(--ink); }
 .results-map .map-card .button-link, .results-map .map-card .button-link:visited { color: var(--on-accent); background: var(--emerald-dark); }
 .bootstrap .offer-actions button:hover:not(:disabled), .bootstrap .offer-actions button[aria-pressed="true"] { color: var(--emerald-dark); background: var(--mint); border-color: var(--emerald-dark); }
+/* F03.1 (revisión de Andre): casilla del diálogo alineada con su texto y de tamaño normal. */
+.where-dialog .check-field { display: flex; align-items: center; gap: .55rem; font-weight: 500; }
+.where-dialog .check-field input[type="checkbox"] { flex: none; width: 1.15rem; height: 1.15rem; min-height: 0; margin: 0; padding: 0; }
+.where-dialog .suggest-box ul[role='listbox'] { max-height: 14rem; }
+.where-dialog li[role='option'] { padding: .5rem .6rem; border-radius: 6px; cursor: pointer; }
+.where-dialog li[role='option'][aria-selected='true'], .where-dialog li[role='option']:hover { background: var(--mint); color: var(--emerald-dark); }

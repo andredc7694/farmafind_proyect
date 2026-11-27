@@ -39,3 +39,15 @@ export function rememberCity(name, storage = safeStorage()) {
   catch { return false; }
 }
 export function forgetCity(storage = safeStorage()) { try { storage?.removeItem(CITY_KEY); return true; } catch { return false; } }
+
+const fold = value => String(value ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+/**
+ * F03.1: filtra mientras se escribe, sin tildes ni mayúsculas: coincide si el nombre o alguna de sus
+ * palabras empieza por lo escrito («jes» → Jesús Nazareno; «san» → San Juan Bautista, San José de Ticllas…).
+ */
+export function filterPlaces(places, text, limit = 10) {
+  const query = fold(text); if (!query) return [];
+  return places.filter(place => { const name = fold(place.name); return name.startsWith(query) || name.split(' ').some(word => word.startsWith(query)); })
+    .sort((a, b) => Number(fold(b.name).startsWith(query)) - Number(fold(a.name).startsWith(query)) || a.name.localeCompare(b.name, 'es'))
+    .slice(0, limit);
+}

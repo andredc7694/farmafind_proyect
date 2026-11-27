@@ -1,7 +1,10 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { PERU_PLACES } from '../geolocation/peru-cities.js';
 import { PointPicker } from '../geolocation/PointPicker.jsx';
-import { cityLocation, searchLocation } from './search-location.js';
+import { cityLocation, filterPlaces, searchLocation } from './search-location.js';
+
+/** Centro inicial del mapa «Elegir el punto»: Huamanga (Ayacucho), zona de la DEMO. */
+export const SEARCH_MAP_CENTER = { latitude: -13.1603, longitude: -74.2253 };
 
 function devicePosition() {
   return new Promise((resolve, reject) => {
@@ -17,7 +20,7 @@ function devicePosition() {
  * Tres opciones: una lectura del dispositivo, distrito/ciudad de la lista interna (sin servicio externo)
  * o un punto en el mapa (se carga solo al pedirlo). Solo la ciudad puede recordarse, con la casilla.
  */
-export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPosition = devicePosition, loadLeaflet }) {
+export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPosition = devicePosition, loadLeaflet, places = PERU_PLACES }) {
   const ref = useRef(null); const listId = useId();
   const [city, setCity] = useState('');
   const [remember, setRemember] = useState(rememberedCity);
@@ -25,6 +28,10 @@ export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPos
   const [busy, setBusy] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [point, setPoint] = useState(null);
+  const [activeOption, setActiveOption] = useState(-1);
+  const [listOpen, setListOpen] = useState(false);
+  const matches = filterPlaces(places, city);
+  const showList = listOpen && matches.length > 0;
 
   useEffect(() => {
     const dialog = ref.current;
@@ -38,9 +45,16 @@ export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPos
     catch { setMessage('No se pudo usar tu ubicación (permiso denegado o no disponible). Escribe tu distrito o ciudad, o elige en el mapa.'); }
     finally { setBusy(false); }
   }
+  function pick(place) { setCity(place.name); setListOpen(false); setActiveOption(-1); setMessage(''); }
+  function cityKeys(event) { // patrón combobox: ↑ ↓ eligen, Enter confirma la opción activa, Escape cierra solo la lista
+    if (event.key === 'ArrowDown' && matches.length) { event.preventDefault(); setListOpen(true); setActiveOption(current => (current + 1) % matches.length); }
+    else if (event.key === 'ArrowUp' && matches.length) { event.preventDefault(); setListOpen(true); setActiveOption(current => (current <= 0 ? matches.length - 1 : current - 1)); }
+    else if (event.key === 'Enter' && showList && activeOption >= 0) { event.preventDefault(); pick(matches[activeOption]); }
+    else if (event.key === 'Escape' && showList) { event.preventDefault(); event.stopPropagation(); setListOpen(false); setActiveOption(-1); }
+  }
   function useCity(event) {
     event.preventDefault();
-    const location = cityLocation(city);
+    const location = places.some(place => place.name === cityLocation(city)?.label) ? cityLocation(city) : null;
     if (!location) { setMessage('Ese lugar no está en la lista. Elige uno de la lista o márcalo en el mapa.'); return; }
     onChoose(location, { remember });
   }
@@ -54,9 +68,17 @@ export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPos
     <form className="stacked-form where-city" onSubmit={useCity}>
       <div className="form-field">
         <label htmlFor={`${listId}-city`}>Distrito o ciudad</label>
-        <input id={`${listId}-city`} list={`${listId}-places`} value={city} autoComplete="off" maxLength={80}
-          onChange={event => { setCity(event.target.value); setMessage(''); }} placeholder="Ej.: Ayacucho, Miraflores" />
-        <datalist id={`${listId}-places`}>{PERU_PLACES.map(place => <option key={place.name} value={place.name} />)}</datalist>
+        <div className="suggest-box">
+          <input id={`${listId}-city`} role="combobox" aria-autocomplete="list" aria-expanded={showList} aria-controls={`${listId}-places`}
+            aria-activedescendant={showList && activeOption >= 0 ? `${listId}-place-${activeOption}` : undefined}
+            value={city} autoComplete="off" maxLength={80} placeholder="Escribe para filtrar"
+            onChange={event => { setCity(event.target.value); setListOpen(true); setActiveOption(-1); setMessage(''); }}
+            onKeyDown={cityKeys} onBlur={() => setTimeout(() => setListOpen(false), 120)} />
+          <ul id={`${listId}-places`} role="listbox" aria-label="Lugares" hidden={!showList}>{matches.map((place, index) =>
+            <li key={place.name} id={`${listId}-place-${index}`} role="option" aria-selected={index === activeOption}
+              onMouseDown={event => { event.preventDefault(); pick(place); }}>{place.name}</li>)}</ul>
+          <p className="visually-hidden" role="status" aria-live="polite">{city && listOpen ? `${matches.length} lugar(es)` : ''}</p>
+        </div>
       </div>
       <label className="check-field"><input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)} />
         {' '}Recordar la ciudad en este navegador</label>
@@ -65,7 +87,7 @@ export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPos
     {!mapOpen ? <button type="button" className="where-option" onClick={() => setMapOpen(true)}>Elegir en el mapa</button>
       : <div className="where-map">
         <PointPicker value={point} onChange={value => setPoint(value)} {...(loadLeaflet ? { loadLeaflet } : {})}
-          center={{ latitude: -12.0464, longitude: -77.0428 }} compact />
+          center={SEARCH_MAP_CENTER} compact />
         <button type="button" disabled={!point} onClick={() => onChoose(searchLocation('map', point), { remember: false })}>Usar el punto elegido</button>
       </div>}
     {message && <p role="alert">{message}</p>}

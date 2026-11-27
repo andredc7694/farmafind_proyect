@@ -20,3 +20,13 @@
 ## 2026-11-26 · Plan y tasks aprobados
 - Andre: «Apruebo plan y tasks de F03.1 (commit 250ac70). Puedes empezar a programar».
 - Pide explicar cómo decide la API que F07 está activa y dejar anotado el valor necesario para la DEMO. En T016, mostrar en la copia 3001/5174 con credenciales ficticias y el recorrido exacto. No tocar la DEMO, su base ni su Redis.
+
+## 2026-11-26 · Revisión de Andre en la copia (antes de aceptar)
+- Pide:
+  - limitar «¿Dónde buscas?» a los 16 distritos de Huamanga, con el resto del Perú desactivado por configuración y sin duplicados;
+  - filtrar al escribir, sin tildes;
+  - abrir el mapa centrado en Huamanga;
+  - alinear la casilla.
+- Si la lista es compartida con «Mi farmacia», quiere conocer antes el efecto y que no se cambie allí sin su aprobación. Si algo contradice la spec, enmienda antes.
+- Hecho, sin contradecir la spec: filtro al escribir, centro en Huamanga y casilla alineada.
+- **Pendiente de aprobación:** enmienda E-01 (`enmienda-lugares-huamanga.md`), opción A recomendada.

@@ -204,3 +204,6 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Pruebas: base de datos 8/8, E2E en la copia 20/20 sin llamadas externas reales y regresión en verde.
   - El E2E destapó 3 fallos, ya corregidos: texto alternativo de los marcadores, contraste y lista de sugerencias.
   - La copia 3001/5174 está encendida para T016.
+- 2026-11-26 · F03.1, revisión de Andre en la copia:
+  - Hechos: filtro de lugares al escribir (sin tildes), mapa «Elegir el punto» centrado en Huamanga y casilla alineada. Frontend 271/271, `check` correcto.
+  - **Enmienda E-01 propuesta** (16 distritos de Huamanga verificados con el ubigeo INEI, resto del Perú desactivado por configuración, sin duplicados; «Mi farmacia» no cambia). Pendiente de su aprobación.

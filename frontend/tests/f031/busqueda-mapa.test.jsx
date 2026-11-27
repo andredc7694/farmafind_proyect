@@ -186,3 +186,40 @@ describe('F03.1 · sugerencias tardías', () => {
     expect(input.getAttribute('aria-expanded')).toBe('false');
   });
 });
+
+describe('F03.1 · revisión de Andre: filtrar al escribir, centro en Huamanga', () => {
+  const places = [{ name: 'Jesús Nazareno', latitude: -13.154, longitude: -74.213 }, { name: 'San Juan Bautista', latitude: -13.167, longitude: -74.224 },
+    { name: 'San José de Ticllas', latitude: -13.132, longitude: -74.333 }, { name: 'Socos', latitude: -13.215, longitude: -74.289 }];
+  it('filtra sin tildes por inicio de nombre o de palabra', async () => {
+    const { filterPlaces } = await import('../../src/search/search-location.js');
+    expect(filterPlaces(places, 'jes').map(p => p.name)).toEqual(['Jesús Nazareno']);
+    expect(filterPlaces(places, 'JESUS naz').map(p => p.name)).toEqual(['Jesús Nazareno']);
+    expect(filterPlaces(places, 'san').map(p => p.name)).toEqual(['San José de Ticllas', 'San Juan Bautista']);
+    expect(filterPlaces(places, 'ticllas').map(p => p.name)).toEqual(['San José de Ticllas']);
+    expect(filterPlaces(places, '')).toEqual([]);
+  });
+  it('el combobox del diálogo filtra mientras escribes y se maneja con teclado', async () => {
+    const { WhereDialog } = await import('../../src/search/WhereDialog.jsx');
+    render(<WhereDialog places={places} onChoose={vi.fn()} onCancel={vi.fn()} />);
+    const input = screen.getByLabelText('Distrito o ciudad');
+    fireEvent.change(input, { target: { value: 'san' } });
+    expect(screen.getAllByRole('option').map(option => option.textContent)).toEqual(['San José de Ticllas', 'San Juan Bautista']);
+    fireEvent.keyDown(input, { key: 'ArrowDown' }); fireEvent.keyDown(input, { key: 'ArrowDown' }); fireEvent.keyDown(input, { key: 'Enter' });
+    expect(input.value).toBe('San Juan Bautista'); expect(input.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.change(input, { target: { value: 'jes' } });
+    expect(screen.getAllByRole('option').map(option => option.textContent)).toEqual(['Jesús Nazareno']);
+    fireEvent.keyDown(input, { key: 'Escape' }); expect(input.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.getByRole('dialog')).toBeTruthy(); // Escape en la lista no cierra el diálogo
+  });
+  it('el mapa «Elegir el punto» abre centrado en Huamanga', async () => {
+    const { SEARCH_MAP_CENTER } = await import('../../src/search/WhereDialog.jsx');
+    expect(SEARCH_MAP_CENTER.latitude).toBeCloseTo(-13.16, 2); expect(SEARCH_MAP_CENTER.longitude).toBeCloseTo(-74.225, 2);
+    const fake = createFakeLeaflet();
+    const { WhereDialog } = await import('../../src/search/WhereDialog.jsx');
+    render(<WhereDialog places={places} onChoose={vi.fn()} onCancel={vi.fn()} loadLeaflet={fake.load} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Elegir en el mapa' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar el mapa para elegir el punto' }));
+    await waitFor(() => expect(fake.log.setView.length).toBeGreaterThan(0));
+    expect(fake.log.setView[0].center).toEqual([-13.1603, -74.2253]);
+  });
+});
