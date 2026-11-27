@@ -3,6 +3,7 @@ import type { LocationRepository, StoredLocationProposal } from '../application/
 import type { HistoryStatus, LocationHistoryView, PendingLocationView, PlatformLocationRepository,
   PlatformLocationUnitOfWork } from '../application/platform-location-review.js';
 import { PgLocationRepository } from './location-repository.js';
+import { NEWER_PROPOSAL_EXISTS, REPLACED_AT, REPLACED_REASON } from './location-sql.js';
 
 function stored(value:Record<string,unknown>):StoredLocationProposal {
   return {id:String(value.id),pharmacyId:String(value.farmacia_id),proposerId:String(value.propuesta_por),
@@ -31,7 +32,7 @@ export class PgPlatformLocationRepository implements PlatformLocationRepository 
         p.id,p.farmacia_id,f.nombre_publico,p.direccion_publicable,p.ciudad,p.latitud,p.longitud,
         p.precision_m,p.fuente,p.evidencia_referencia,p.version,p.propuesta_at
       FROM f07.ubicacion_propuesta p JOIN f01.farmacia_referencia f ON f.id=p.farmacia_id
-      WHERE p.estado='PENDIENTE' AND f.estado='ACTIVA'
+      WHERE p.estado='PENDIENTE' AND f.estado='ACTIVA' AND NOT ${NEWER_PROPOSAL_EXISTS}
       ORDER BY p.farmacia_id,p.propuesta_at DESC,p.id DESC LIMIT $1`,[limit]);
     return result.rows.map(row=>({propuestaId:String(row.id),farmaciaId:String(row.farmacia_id),
       farmaciaNombre:String(row.nombre_publico),direccionPublicable:String(row.direccion_publicable),
@@ -48,8 +49,9 @@ export class PgPlatformLocationRepository implements PlatformLocationRepository 
   }
 
   async isLatestPending(proposal:StoredLocationProposal):Promise<boolean> {
+    // F07.2: «más reciente» frente a CUALQUIER propuesta más nueva de la farmacia, no solo pendientes.
     const result=await this.client.query(`SELECT NOT EXISTS (SELECT 1 FROM f07.ubicacion_propuesta n
-      WHERE n.farmacia_id=$1 AND n.estado='PENDIENTE' AND n.id<>$2
+      WHERE n.farmacia_id=$1 AND n.id<>$2
         AND (n.propuesta_at,n.id) > (SELECT propuesta_at,id FROM f07.ubicacion_propuesta WHERE id=$2)) AS latest`,
       [proposal.pharmacyId,proposal.id]);
     return result.rows[0]?.latest===true;
@@ -59,22 +61,28 @@ export class PgPlatformLocationRepository implements PlatformLocationRepository 
 
   /** F071-FR-017: RLS (007 y 009) decide las filas; aquí se proyectan solo los campos aprobados. */
   async listHistory(status:HistoryStatus,actorId:string,limit:number,offset:number):Promise<{total:number;rows:LocationHistoryView[]}> {
+    // F07.2: PENDIENTE = pendiente sin propuesta más nueva; REEMPLAZADA = pendiente con una más nueva (regla única).
+    const where=status==='PENDIENTE' ? `p.estado='PENDIENTE' AND NOT ${NEWER_PROPOSAL_EXISTS}`
+      : status==='REEMPLAZADA' ? `p.estado='PENDIENTE' AND ${NEWER_PROPOSAL_EXISTS}` : 'p.estado=$1';
     const total=await this.client.query(`SELECT count(*)::int AS total FROM f07.ubicacion_propuesta p
-      JOIN f01.farmacia_referencia f ON f.id=p.farmacia_id WHERE p.estado=$1`,[status]);
+      JOIN f01.farmacia_referencia f ON f.id=p.farmacia_id WHERE ${where} AND $1::text IS NOT NULL`,[status]);
     const result=await this.client.query(`SELECT p.id,f.nombre_publico,p.direccion_publicable,p.ciudad,p.latitud,p.longitud,
-        p.estado,p.propuesta_at,p.revisada_at,(p.revisada_por IS NOT DISTINCT FROM $2::uuid) AS propia,d.motivo
+        p.estado,p.propuesta_at,p.revisada_at,(p.revisada_por IS NOT DISTINCT FROM $2::uuid) AS propia,d.motivo,
+        (p.estado='PENDIENTE' AND ${NEWER_PROPOSAL_EXISTS}) AS reemplazada,${REPLACED_AT} AS reemplazada_at
       FROM f07.ubicacion_propuesta p JOIN f01.farmacia_referencia f ON f.id=p.farmacia_id
       LEFT JOIN LATERAL (SELECT a.motivo FROM f07.ubicacion_auditoria a WHERE a.propuesta_id=p.id
         AND a.accion IN ('APROBACION','RECHAZO') ORDER BY a.ocurrido_at DESC LIMIT 1) d ON true
-      WHERE p.estado=$1
+      WHERE ${where} AND $1::text IS NOT NULL
       ORDER BY COALESCE(p.revisada_at,p.propuesta_at) DESC,p.id DESC LIMIT $3 OFFSET $4`,[status,actorId,limit,offset]);
     const iso=(value:unknown)=>value===null||value===undefined?null:new Date(String(value)).toISOString();
     return {total:Number(total.rows[0]?.total ?? 0),rows:result.rows.map(row=>({
       propuestaId:String(row.id),farmaciaNombre:String(row.nombre_publico),direccion:String(row.direccion_publicable),
       ciudad:String(row.ciudad),latitud:Number(row.latitud),longitud:Number(row.longitud),
-      decision:row.estado==='PUBLICADA_VERIFICADA'?'APROBADA' as const:row.estado==='RECHAZADA'?'RECHAZADA' as const:'PENDIENTE' as const,
-      motivo:row.motivo===null||row.motivo===undefined?null:String(row.motivo),enviadaAt:iso(row.propuesta_at) as string,
-      decididaAt:iso(row.revisada_at),
+      decision:row.estado==='PUBLICADA_VERIFICADA'?'APROBADA' as const:row.estado==='RECHAZADA'?'RECHAZADA' as const
+        :row.reemplazada===true?'REEMPLAZADA' as const:'PENDIENTE' as const,
+      motivo:row.reemplazada===true?REPLACED_REASON:row.motivo===null||row.motivo===undefined?null:String(row.motivo),
+      enviadaAt:iso(row.propuesta_at) as string,
+      decididaAt:row.reemplazada===true?iso(row.reemplazada_at):iso(row.revisada_at),
       decididoPor:row.estado==='PENDIENTE'?null:row.propia===true?'Tú' as const:'Otro revisor de FarmaFind' as const,
     }))};
   }

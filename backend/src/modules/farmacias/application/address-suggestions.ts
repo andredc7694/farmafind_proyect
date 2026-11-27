@@ -3,8 +3,12 @@ import { LocationValidationError, insidePeru } from '../domain/pharmacy-location
 /** F071-FR-013/014: sugerencia de dirección y ubicación. Nunca publica nada: solo ayuda a llenar el formulario. */
 export interface AddressMatch { readonly latitud:number; readonly longitud:number; readonly etiqueta:string }
 export interface ReverseMatch { readonly calle:string|null; readonly ciudad:string|null }
+/** F07.2 (D-02 A): zona a la que se limita la búsqueda (centro de la ciudad de la lista interna). */
+export interface SearchArea { readonly latitude:number; readonly longitude:number; readonly halfSideDegrees:number }
+/** ±0,27° ≈ 30 km alrededor del centro de la ciudad. */
+export const SEARCH_AREA_HALF_SIDE_DEGREES = 0.27;
 export interface GeocoderPort {
-  search(address:string,city:string):Promise<AddressMatch|null>;
+  search(address:string,city:string,area?:SearchArea|null):Promise<AddressMatch|null>;
   reverse(latitude:number,longitude:number):Promise<ReverseMatch|null>;
 }
 export class AddressSuggestionsDisabledError extends Error {}
@@ -23,12 +27,24 @@ function text(value:unknown,min:number,max:number):string {
   if (normalized.length<min || normalized.length>max) throw new LocationValidationError('Texto fuera de rango');
   return normalized;
 }
-function exact(raw:unknown,keys:readonly string[]):Record<string,unknown> {
+function exact(raw:unknown,keys:readonly string[],optional:readonly string[]=[]):Record<string,unknown> {
   if (typeof raw!=='object' || raw===null || Array.isArray(raw)) throw new LocationValidationError('Objeto requerido');
   const value=raw as Record<string,unknown>;
-  if (Object.keys(value).sort().join(',')!==[...keys].sort().join(',')) throw new LocationValidationError('Campos inválidos');
+  const present=Object.keys(value);
+  if (!keys.every(key=>present.includes(key)) || !present.every(key=>keys.includes(key) || optional.includes(key)))
+    throw new LocationValidationError('Campos inválidos');
   return value;
 }
+function area(raw:unknown):SearchArea|null {
+  if (raw===undefined) return null;
+  const value=exact(raw,['latitud','longitud']);
+  const latitude=value.latitud, longitude=value.longitud;
+  if (typeof latitude!=='number' || typeof longitude!=='number' || !Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+      !insidePeru(latitude,longitude)) throw new LocationValidationError('Centro fuera del Perú');
+  return {latitude:Math.round(latitude*1e4)/1e4,longitude:Math.round(longitude*1e4)/1e4,halfSideDegrees:SEARCH_AREA_HALF_SIDE_DEGREES};
+}
+const insideArea=(zone:SearchArea,latitude:number,longitude:number)=>
+  Math.abs(latitude-zone.latitude)<=zone.halfSideDegrees && Math.abs(longitude-zone.longitude)<=zone.halfSideDegrees;
 
 /**
  * Límite global de 1 consulta/s (reserva de turnos), caché en memoria con caducidad y tamaño máximo,
@@ -45,12 +61,14 @@ export class AddressSuggestions {
   get enabled():boolean { return this.geocoder!==null; }
 
   async search(raw:unknown):Promise<AddressMatch|null> {
-    const input=exact(raw,['direccion','ciudad']);
-    const address=text(input.direccion,3,240), city=text(input.ciudad,2,120);
-    const key=`s:${address.toLocaleLowerCase('es')}|${city.toLocaleLowerCase('es')}`;
+    // F07.2 (D-02 A): `centro` opcional limita la búsqueda a ~30 km de la ciudad; sin él, como en F07.1.
+    const input=exact(raw,['direccion','ciudad'],['centro']);
+    const address=text(input.direccion,3,240), city=text(input.ciudad,2,120), zone=area(input.centro);
+    const key=`s:${address.toLocaleLowerCase('es')}|${city.toLocaleLowerCase('es')}|${zone ? `${zone.latitude},${zone.longitude}` : '-'}`;
     return this.cached(key,async geocoder=>{
-      const match=await geocoder.search(address,city);
-      return match && insidePeru(match.latitud,match.longitud) ? match : null;
+      const match=await geocoder.search(address,city,zone);
+      if (!match || !insidePeru(match.latitud,match.longitud)) return null;
+      return zone && !insideArea(zone,match.latitud,match.longitud) ? null : match; // doble control: nunca fuera de la zona
     });
   }
 

@@ -19,6 +19,10 @@ export interface LocationRepository {
   publicState?(pharmacyId:string):Promise<PublicLocationState|null>;
   publicVersion(pharmacyId:string):Promise<number|null>;
   insert(pharmacyId:string,actorId:string,input:LocationProposalInput,basePublicVersion:number):Promise<StoredLocationProposal>;
+  /** F07.2 (FR-002): procesa de a uno los envíos de una farmacia dentro de la transacción. */
+  lockProposals?(pharmacyId:string):Promise<void>;
+  /** F07.2 (D-05 A): propuesta PENDIENTE idéntica del mismo autor en los últimos 10 s (o null). */
+  findRecentIdentical?(pharmacyId:string,actorId:string,input:LocationProposalInput):Promise<StoredLocationProposal|null>;
   find(pharmacyId:string,proposalId:string):Promise<StoredLocationProposal|null>;
   decide(pharmacyId:string,proposalId:string,actorId:string,status:'PUBLICADA_VERIFICADA'|'RECHAZADA',version:number):Promise<StoredLocationProposal|null>;
   publish(proposal:StoredLocationProposal):Promise<boolean>;

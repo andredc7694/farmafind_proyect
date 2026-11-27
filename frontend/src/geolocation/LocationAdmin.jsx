@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createLocationAdminClient } from './location-admin-client.js';
 import { createAddressSuggestionClient, createLocationStatusClient } from './my-pharmacy-clients.js';
 import { findPeruPlace } from './peru-cities.js';
+import { distanceMessage, distanceWarning, findCityCenter } from './distance-check.js';
 import { PointPicker } from './PointPicker.jsx';
 
 const defaultStatusClient = createLocationStatusClient();
@@ -16,6 +17,10 @@ const actionLabel = { PROPUESTA: 'Propuesta enviada', APROBACION: 'Aprobada', RE
 /** F071-FR-015: la fuente se rellena sola según el origen del punto. */
 export const SOURCE_LABEL = { gps: 'GPS del dispositivo', map: 'Punto marcado en el mapa', keyboard: 'Punto marcado en el mapa',
   search: 'Dirección buscada', typed: 'Coordenadas escritas' };
+
+/** F07.2 (FR-001): «firma» de lo enviado; mientras el formulario no cambie, no se reenvía. */
+const proposalSignature = ({ address, city, point, source, evidence }) => point ? JSON.stringify([address.trim(), city.trim().toLowerCase(),
+  point.latitude.toFixed(6), point.longitude.toFixed(6), source, evidence.trim()]) : '';
 
 /** Presentation visibility follows F01 capabilities; every write is reauthorized by F07/RLS. */
 export function LocationAdmin({ pharmacyId, delegationCodes = [], client = createLocationAdminClient(), statusClient = defaultStatusClient,
@@ -36,6 +41,10 @@ export function LocationAdmin({ pharmacyId, delegationCodes = [], client = creat
   const [searchMessage, setSearchMessage] = useState('');
   const [searching, setSearching] = useState(false);
   const [view, setView] = useState(null);
+  const [evidence, setEvidence] = useState('');
+  const [sentSignature, setSentSignature] = useState('');
+  const [limitNotice, setLimitNotice] = useState('');
+  const sending = useRef(false);
   const reverseTurn = useRef(0);
   const point = latitude !== '' && longitude !== '' && Number.isFinite(Number(latitude)) && Number.isFinite(Number(longitude))
     ? { latitude: Number(latitude), longitude: Number(longitude) } : null;
@@ -46,7 +55,8 @@ export function LocationAdmin({ pharmacyId, delegationCodes = [], client = creat
   }, [pharmacyId, canPropose, statusClient]);
   useEffect(() => {
     setProposalId(''); setStatus(''); setStatusKind('status'); setAddress(''); setCity(''); setLatitude(''); setLongitude('');
-    setOrigin(null); setFocus(null); setApproximate(false); setSearchMessage(''); loadStatus();
+    setOrigin(null); setFocus(null); setApproximate(false); setSearchMessage(''); setEvidence(''); setSentSignature('');
+    setLimitNotice(''); loadStatus();
   }, [pharmacyId, loadStatus]);
   if (!pharmacyId || (!canPropose && !canReview)) return null;
 
@@ -72,9 +82,17 @@ export function LocationAdmin({ pharmacyId, delegationCodes = [], client = creat
   }
   async function searchAddress() { // «Buscar en el mapa» (FR-013): solo al pulsar, nunca letra por letra
     setSearching(true); setSearchMessage('');
+    // F07.2 (D-02 A): con la ciudad en la lista interna, la búsqueda se limita a su zona (~30 km).
+    const center = findCityCenter(city);
+    setLimitNotice(center ? '' : `No pudimos limitar la búsqueda a «${city.trim()}»: no está en nuestra lista de ciudades.`);
     try {
-      const found = await suggestionClient.search(pharmacyId, { direccion: address.trim(), ciudad: city.trim() });
-      if (!found) { setSearchMessage('No encontramos esa dirección. Marca el punto en el mapa.'); return; }
+      const found = await suggestionClient.search(pharmacyId, { direccion: address.trim(), ciudad: city.trim(),
+        ...(center ? { centro: { latitud: center.latitude, longitud: center.longitude } } : {}) });
+      if (!found) {
+        setSearchMessage(center ? `No encontramos esa dirección en ${center.name}. Revisa cómo está escrita o marca el punto tocando el mapa.`
+          : 'No encontramos esa dirección. Revisa cómo está escrita o marca el punto tocando el mapa.');
+        return;
+      }
       setPoint({ latitude: found.latitud, longitude: found.longitud }, 'search'); setApproximate(false);
       setFocus({ latitude: found.latitud, longitude: found.longitud, zoom: 17 });
       setSearchMessage('Dirección encontrada. Revisa el marcador y ajústalo si hace falta.');
@@ -87,13 +105,18 @@ export function LocationAdmin({ pharmacyId, delegationCodes = [], client = creat
     setBusy(true); setStatus('');
     try {
       const result = await action(); setProposalId(result.id); setStatusKind('status');
+      if (result.estado === 'PENDIENTE' && action.signature) setSentSignature(action.signature);
       setStatus(result.estado === 'PENDIENTE'
         ? 'Propuesta enviada. Queda «En revisión» hasta que FarmaFind la verifique; la ubicación publicada no cambia mientras tanto.'
         : `Revisión registrada: ${result.estado}.`);
       loadStatus();
-    } catch (error) { setStatusKind('alert'); setStatus(error.message); } finally { setBusy(false); }
+      return result;
+    } catch (error) { setStatusKind('alert'); setStatus(error.message); return null; } finally { setBusy(false); }
   }
   const source = origin ? SOURCE_LABEL[origin] : null;
+  const signature = proposalSignature({ address, city, point, source, evidence });
+  const alreadySent = sentSignature !== '' && sentSignature === signature;
+  const warning = distanceWarning(city, point);
   const canSearch = address.trim().length >= 3 && city.trim().length >= 2 && !searching;
   return <section aria-labelledby="location-admin-title">
     <h2 id="location-admin-title">Dirección y ubicación en el mapa</h2>
@@ -110,13 +133,15 @@ export function LocationAdmin({ pharmacyId, delegationCodes = [], client = creat
     </div>}
     {status && <p role={statusKind}>{status}</p>}
     {canPropose && <form className="surface-card stacked-form" onSubmit={event => {
-      event.preventDefault(); if (outside || !point || !source) return;
-      const data = new FormData(event.currentTarget);
-      const evidence = String(data.get('evidenciaReferencia') ?? '').trim();
-      void perform(() => client.propose(pharmacyId, {
+      event.preventDefault(); if (outside || !point || !source || alreadySent || sending.current) return;
+      sending.current = true; // F07.2 (FR-001): un segundo clic en el mismo instante no vuelve a enviar
+      const reference = evidence.trim();
+      const action = () => client.propose(pharmacyId, {
         direccionPublicable: address.trim(), ciudad: city.trim(), latitud: point.latitude, longitud: point.longitude, fuente: source,
-        ...(evidence ? { evidenciaReferencia: evidence } : {}),
-      }));
+        ...(reference ? { evidenciaReferencia: reference } : {}),
+      });
+      action.signature = signature;
+      void perform(action).finally(() => { sending.current = false; });
     }}>
       <h3>Proponer dirección y ubicación</h3>
       <p className="field-hint">Escribe la dirección y la ciudad, búscala en el mapa o marca el punto. FarmaFind lo revisará antes de publicarlo.</p>
@@ -134,6 +159,7 @@ export function LocationAdmin({ pharmacyId, delegationCodes = [], client = creat
         </div>
         {approximate && <p className="field-warning" role="status">Ubicación aproximada: completa el número.</p>}
         {searchMessage && <p role="status">{searchMessage}</p>}
+        {limitNotice && <p className="field-hint" role="status">{limitNotice}</p>}
         <p className="field-hint">La búsqueda usa datos de © OpenStreetMap (Nominatim) a través de FarmaFind; solo envía la dirección y la ciudad escritas.</p>
       </div>
       <PointPicker value={point} focus={focus} onChange={(next, from) => void pickOnMap(next, from)} />
@@ -154,12 +180,15 @@ export function LocationAdmin({ pharmacyId, delegationCodes = [], client = creat
       </details>
       <div className="form-field">
         <label htmlFor="loc-evidence">Referencia para encontrar la farmacia (opcional)</label>
-        <input id="loc-evidence" name="evidenciaReferencia" maxLength={240} placeholder="Ej.: frente a la Plaza Mayor" />
+        <input id="loc-evidence" name="evidenciaReferencia" maxLength={240} placeholder="Ej.: frente a la Plaza Mayor"
+          value={evidence} onChange={event => setEvidence(event.target.value)} />
         <p className="field-hint">No escribas datos personales, documentos ni teléfonos.</p>
       </div>
       <label className="check-field"><input name="confirmaDireccion" type="checkbox" required /> Confirmo que la dirección pública y el punto elegido son correctos</label>
       {!point && <p className="field-hint">Falta elegir el punto: búscalo, márcalo en el mapa o usa tu ubicación.</p>}
-      <button type="submit" disabled={busy || outside || !point}>Enviar propuesta</button>
+      {warning && <p className="field-warning distance-warning" role="status">{distanceMessage(warning)}</p>}
+      {alreadySent && <p className="field-hint" role="status">Propuesta enviada; cambia algún dato para enviar otra.</p>}
+      <button type="submit" disabled={busy || outside || !point || alreadySent}>Enviar propuesta</button>
     </form>}
     {canReview && <form className="surface-card stacked-form" onSubmit={event => {
       event.preventDefault(); const data = new FormData(event.currentTarget);

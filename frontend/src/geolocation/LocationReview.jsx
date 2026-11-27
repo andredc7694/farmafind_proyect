@@ -1,8 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPlatformLocationClient } from './my-pharmacy-clients.js';
+import { distanceMessage, distanceWarning } from './distance-check.js';
 
 const defaultClient = createPlatformLocationClient();
-const FILTERS = [['PENDIENTE', 'Pendientes'], ['APROBADA', 'Aprobadas'], ['RECHAZADA', 'Rechazadas']];
+const FILTERS = [['PENDIENTE', 'Pendientes'], ['APROBADA', 'Aprobadas'], ['RECHAZADA', 'Rechazadas'], ['REEMPLAZADA', 'Reemplazadas']];
+const DECISION_LABEL = { APROBADA: 'Aprobada', RECHAZADA: 'Rechazada', REEMPLAZADA: 'Reemplazada', PENDIENTE: 'Pendiente' };
+const EMPTY_LABEL = { APROBADA: 'aprobadas', RECHAZADA: 'rechazadas', REEMPLAZADA: 'reemplazadas' };
+/** F07.2 (FR-008, FR-009): mismo aviso de distancia que ve el dueño; solo alerta, no impide decidir. */
+function DistanceNotice({ city, latitude, longitude }) {
+  const warning = distanceWarning(city, { latitude: Number(latitude), longitude: Number(longitude) });
+  return warning ? <p className="field-warning distance-warning" role="status">{distanceMessage(warning)}</p> : null;
+}
 const when = value => (value ? new Date(value).toLocaleString('es-PE') : '—');
 const coords = (lat, lng) => `${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`;
 
@@ -75,20 +83,22 @@ export function LocationReview({ client = defaultClient }) {
         <p>Coordenadas: {coords(item.latitud, item.longitud)}</p>
         <p>Fuente: {item.fuente}{item.evidenciaReferencia ? ` · Referencia: ${item.evidenciaReferencia}` : ''}</p>
         <p>Enviada el {when(item.propuestaAt)}</p>
+        <DistanceNotice city={item.ciudad} latitude={item.latitud} longitude={item.longitud} />
         <DecisionForm item={item} busy={busy} onDecide={(target, form) => void decide(target, form)} />
       </li>)}</ul>)}
     {state === 'ready' && filter !== 'PENDIENTE' && history && (history.filas.length === 0
-      ? <p>No hay propuestas {filter === 'APROBADA' ? 'aprobadas' : 'rechazadas'}.</p>
+      ? <p>No hay propuestas {EMPTY_LABEL[filter] ?? ''}.</p>
       : <>
         <ul className="offer-grid history-list">{history.filas.map(row => <li key={row.propuestaId} className="surface-card">
           <h2>{row.farmaciaNombre}</h2>
+          <DistanceNotice city={row.ciudad} latitude={row.latitud} longitude={row.longitud} />
           <dl className="history-facts">
             <dt>Dirección</dt><dd>{row.direccion}, {row.ciudad}</dd>
             <dt>Coordenadas</dt><dd>{coords(row.latitud, row.longitud)}</dd>
-            <dt>Decisión</dt><dd>{row.decision === 'APROBADA' ? 'Aprobada' : 'Rechazada'}</dd>
+            <dt>Decisión</dt><dd>{DECISION_LABEL[row.decision] ?? row.decision}</dd>
             <dt>Motivo</dt><dd>{row.motivo ?? '—'}</dd>
             <dt>Enviada</dt><dd>{when(row.enviadaAt)}</dd>
-            <dt>Decidida</dt><dd>{when(row.decididaAt)}</dd>
+            <dt>{row.decision === 'REEMPLAZADA' ? 'Reemplazada' : 'Decidida'}</dt><dd>{when(row.decididaAt)}</dd>
             <dt>Decidió</dt><dd>{row.decididoPor ?? '—'}</dd>
           </dl>
         </li>)}</ul>

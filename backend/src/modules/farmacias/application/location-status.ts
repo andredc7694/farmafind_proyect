@@ -17,6 +17,22 @@ export interface LocationStatusView {
  * la farmacia» o «Revisión de FarmaFind». «Reemplazada» se calcula (D-04 A, sin tocar F07).
  * `history` viene ordenado de la propuesta más reciente a la más antigua.
  */
+
+/**
+ * F07.2 (D-01 A): una propuesta PENDIENTE queda «Reemplazada» si existe otra más nueva de la misma farmacia,
+ * en CUALQUIER estado. Devuelve id → fecha de la propuesta inmediatamente más nueva. Es la misma regla que el
+ * SQL compartido `NEWER_PROPOSAL_EXISTS` del revisor (infrastructure/location-sql.ts).
+ */
+export function replacedProposals(history:readonly LocationHistoryRow[]):Map<string,string> {
+  const replaced=new Map<string,string>();
+  let newer:string|null=null;
+  for (const item of history) {
+    if (item.proposal.status==='PENDIENTE' && newer!==null) replaced.set(item.proposal.id,newer);
+    newer=item.proposedAt;
+  }
+  return replaced;
+}
+
 export function buildLocationStatus(history:readonly LocationHistoryRow[],published:PublicLocationState|null,
   actorId:string):LocationStatusView {
   const who=(id:string)=>id===actorId?'Tú':'Otra persona de la farmacia';
@@ -25,17 +41,17 @@ export function buildLocationStatus(history:readonly LocationHistoryRow[],publis
     : latest?.status==='RECHAZADA' ? 'RECHAZADA'
     : published?.verified || latest?.status==='PUBLICADA_VERIFICADA' ? 'VERIFICADA' : 'SIN_UBICACION';
   const entries:LocationHistoryEntry[]=[];
-  let newerPending=false;
+  const replaced=replacedProposals(history);
   for (const item of history) {
     const {proposal}=item;
-    if (proposal.status==='PENDIENTE' && newerPending)
-      entries.push({fecha:item.proposedAt,accion:'REEMPLAZADA',autor:'FarmaFind',motivo:'Se envió una propuesta más reciente',
+    const replacedAt=replaced.get(proposal.id);
+    if (replacedAt!==undefined)
+      entries.push({fecha:replacedAt,accion:'REEMPLAZADA',autor:'FarmaFind',motivo:'Se envió una propuesta más reciente',
         direccion:proposal.address});
     else if (proposal.status!=='PENDIENTE' && item.reviewedAt)
       entries.push({fecha:item.reviewedAt,accion:proposal.status==='PUBLICADA_VERIFICADA'?'APROBACION':'RECHAZO',
         autor:'Revisión de FarmaFind',motivo:item.reason,direccion:proposal.address});
     entries.push({fecha:item.proposedAt,accion:'PROPUESTA',autor:who(proposal.proposerId),motivo:null,direccion:proposal.address});
-    if (proposal.status==='PENDIENTE') newerPending=true;
   }
   const pending=latest?.status==='PENDIENTE' ? latest : null;
   return {
