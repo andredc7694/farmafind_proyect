@@ -137,7 +137,11 @@ export function PublicSearch({ client = createPublicSearchClient(), loadLeaflet,
           <button type="button" aria-pressed={view === 'mapa'} onClick={() => setView('mapa')}>Mapa</button>
         </div>
       </div>
-      {result.ofertas.length === 0 ? <EmptyState title="Sin ofertas publicadas">No encontramos ofertas publicadas para esta consulta. Prueba con otro nombre o revisa los filtros.</EmptyState> :
+      {result.coincidencia === 'APROXIMADA' && result.ofertas.length > 0 &&
+        <p className="notice match-notice" role="status">No encontramos esa presentación exacta; estas son otras disponibles.</p>}
+      {result.ofertas.length === 0 ? (result.coincidencia === 'FALTA_NOMBRE'
+        ? <EmptyState title="Falta el nombre del medicamento">Escribe también el nombre del medicamento, por ejemplo: paracetamol 500 mg.</EmptyState>
+        : <EmptyState title="Sin ofertas publicadas">No encontramos ofertas publicadas para esta consulta. Prueba con otro nombre o revisa los filtros.</EmptyState>) :
         <div className={`results-layout view-${view}`}>
           <ul className="offer-grid results-list">{result.ofertas.map((offer, index) => <OfferCard key={`${offer.medicamento.id}-${offer.farmacia.id}-${index}`}
             offer={offer} days={hours[offer.farmacia.id]} now={now} comparables={comparableFor(offer, result.ofertas)} gapCents={priceGapCents(offer, result.ofertas)}

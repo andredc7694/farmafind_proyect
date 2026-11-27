@@ -1,6 +1,7 @@
-import type { PublicOfferRepository } from '../application/ports.js';
+import type { MatchedOffer, PublicOfferRepository } from '../application/ports.js';
 import type { PublicOffer, PublicPharmacy } from '../contracts/public-search.js';
 import type { CanonicalPublicQuery } from '../domain/public-query.js';
+import type { SearchTerms } from '../domain/search-terms.js';
 import { distanceKm } from '../domain/public-offer.js';
 import type { GeoPublicOffer, GeoPublicPharmacy, GeolocationReadPort } from '../application/list-nearby-pharmacies.js';
 
@@ -23,10 +24,16 @@ function verifiedLocation(row: Record<string, unknown>, enabled: boolean) {
 export class PgPublicOfferRepository implements PublicOfferRepository, GeolocationReadPort {
   constructor(private readonly database: Queryable, private readonly options: PublicOfferRepositoryOptions = {}) {}
 
-  async search(query: CanonicalPublicQuery, maximum: number): Promise<readonly PublicOffer[]> {
-    const result = await this.database.query('SELECT * FROM f03.search_public_offers($1,$2,$3,$4)',
-      [query.term, query.minimumPrice, query.maximumPrice, maximum]);
-    return result.rows.map(row => ({
+  /** F03.2: f03.search_public_offers_terms (migraciones f03/003 y f07/010). Sin palabras no consulta la base. */
+  async search(terms: SearchTerms, query: CanonicalPublicQuery, maximum: number): Promise<readonly MatchedOffer[]> {
+    if (terms.words.length === 0) return [];
+    const result = await this.database.query('SELECT * FROM f03.search_public_offers_terms($1,$2,$3,$4,$5)',
+      [[...terms.words], [...terms.tokens], query.minimumPrice, query.maximumPrice, maximum]);
+    return result.rows.map(row => ({ offer: this.offer(row, query), matches: Number(row.coincidencias) }));
+  }
+
+  private offer(row: Record<string, unknown>, query: CanonicalPublicQuery): PublicOffer {
+    return {
       medicamento: { id: String(row.medicamento_id), nombreComercial: String(row.nombre_comercial),
         principioActivo: String(row.principio_activo), concentracion: String(row.concentracion),
         presentacion: String(row.presentacion), clasificacion: String(row.clasificacion) },
@@ -36,7 +43,7 @@ export class PgPublicOfferRepository implements PublicOfferRepository, Geolocati
       ultimaRevision: new Date(String(row.ultima_revision)).toISOString(),
       distanciaKm: query.latitude === null || row.farmacia_latitud === null || row.farmacia_longitud === null ? null :
         distanceKm(query.latitude, query.longitude!, Number(row.farmacia_latitud), Number(row.farmacia_longitud)),
-    }));
+    };
   }
 
   async pharmacy(id: string): Promise<PublicPharmacy | null> {

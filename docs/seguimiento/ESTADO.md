@@ -226,3 +226,47 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-26 · F03.1: copia temporal apagada.
   - Se borraron solo su base `farmafind_f01_test_6b49fe963285` y sus dos roles.
   - La DEMO, revisada en solo lectura, está idéntica a la foto tomada después de T018 (HUAMANFAR con 518 productos de inventario, 4 usuarios y 2 membresías), y su Redis responde.
+- 2026-11-26 · **F03.1 integrada en main:** PR #16 con merge commit `288d72a`. Se cumplieron las condiciones: CI en verde, MERGEABLE, CLEAN, sin secretos y la rama conservada.
+- 2026-11-26 · **DEMO actualizada a F03.1** con la autorización de Andre (opción A):
+  - Copia previa `.cache/f025-docker/backups/farmafind_f01_test_d0570879cf41_antes-f031_20261126.dump`: 621 855 bytes y 59 tablas de datos.
+  - La carpeta principal está en `main` `288d72a`. Se reinició con `demo-stop.ps1` y `demo-run.ps1`; no se aplicaron migraciones nuevas.
+  - Verificaciones del arranque: verify-rls 46, application-commands 51 y F04 RLS 37/37.
+  - 3000/health, 5173 y 5173/api/v1/auth/csrf responden 200.
+  - Revisión en solo lectura, idéntica a la foto tomada después de T018: HUAMANFAR activa con 518 productos de inventario, 4 importaciones, 0 reservas, 4 usuarios y 2 membresías. El dueño tiene 13 capacidades, con GEO_LOCATION_PROPOSE. La concesión del revisor está ACTIVA.
+  - La búsqueda devuelve `farmacia.ubicacion` (null mientras HUAMANFAR no esté verificada).
+  - `farmafind_f01_test` no se tocó: su contenedor está apagado y en el clúster F02.5 no existe una base con ese nombre.
+- 2026-11-26 · Con la autorización de Andre se borró la base de pruebas de T012 `farmafind_f01_test_c8f90caa7c42` y su usuario técnico `f07_test_runtime_c8f90caa7c42`. Antes se comprobó que tenía la marca TEST efímera, que no era la DEMO ni `farmafind_f01_test` y que no tenía conexiones abiertas.
+- 2026-11-26 · Andre probó F03.1 en su DEMO: propuso y aprobó la ubicación de HUAMANFAR, que ya aparece en el mapa de la búsqueda. Todo conforme. En espera de su orden; no se empieza nada.
+- 2026-11-27 · **F03.2 — Búsqueda con texto completo** (corrección prioritaria pedida por Andre). Rama `feat/f032-busqueda-texto-completo` creada desde `main` `288d72a`; spec en `specs/023-f032-busqueda-texto-completo/`.
+  - Paso Spec Kit: **specify**. Spec redactada; espera la aprobación de Andre (decisiones D-01 a D-05). No se programa ni se aplica SQL antes.
+  - Sin cambios en la DEMO, su base ni su Redis.
+- 2026-11-27 · F03.2: **spec aprobada por Andre** (commit `e4c6116`, D-01 a D-05 en A). Condiciones en `approval.md` (SQL antes de aplicar; base de medición solo en el servidor de pruebas, sin puertos nuevos ni datos fuera de `.cache`, y borrada al terminar).
+  - Agregado a su pedido F032-FR-013: ayuda «Escribe también el nombre del medicamento…» cuando solo se escribe presentación o concentración. No exige otra enmienda.
+  - Paso Spec Kit: **plan y tasks** redactados con el SQL propuesto en `specs/023-f032-busqueda-texto-completo/sql/`; esperan aprobación. Nada aplicado.
+  - Observación: la DEMO estaba apagada al revisar (contenedores detenidos hace ~14 h, sin intervención mía). No se encendió.
+- 2026-11-27 · F03.2: **plan y tasks aprobados por Andre** (commit `6d90f9d`). SQL aprobado con correcciones: `concat_ws` en `hay_nombre`/`hay_todo` y mayúsculas con tilde en `translate`; más pruebas (sin presentación o concentración, «ÁCIDO»/«Ácido»/«acido» y palabras cortas). Borrador corregido (`1b2e100`) con nuevos SHA-256 en `approval.md`; espera su visto bueno antes de copiarse a `backend/migrations`.
+  - Autoriza encender el contenedor de pruebas (T011) y la DEMO con `demo-run.ps1`, sin aplicar nada de F03.2 en su base.
+- 2026-11-27 · **DEMO reencendida** con la autorización de Andre (estaba apagada; contenedores detenidos sin intervención):
+  - Copia previa `.cache/f025-docker/backups/farmafind_f01_test_d0570879cf41_antes-arranque-f032_20261127.dump`: 621 855 bytes y 59 tablas de datos. Se encendió solo PostgreSQL para la copia y se volvió a dejar como estaba.
+  - Se limpió el registro de procesos viejo con `demo-stop.ps1` (los dos procesos ya no existían; no se detuvo nada ajeno) y se arrancó con `demo-run.ps1`. Sin migraciones nuevas; verificaciones 46/46, 51 y F04 37/37; 3000, 5173 y csrf responden 200.
+  - Revisión en solo lectura: idéntica a la foto posterior a F03.1 (518 productos de inventario, 4 importaciones, 0 reservas, 4 usuarios, 2 membresías). **Nada de F03.2 aplicado en su base.**
+- 2026-11-27 · F03.2, backend (sin SQL copiado todavía):
+  - `domain/search-terms.ts` (limpieza, palabras/tokens, singular, relleno, una letra fuera, falta de nombre); caso de uso con `coincidencia` (EXACTA/APROXIMADA/NINGUNA/FALTA_NOMBRE), solo exactos si existen, caché `v2`; repositorio y sugerencias con la función nueva.
+  - Hallazgos en pruebas: «para» no puede descartarse como relleno si es la única palabra (comienzo de «paracetamol»); la sugerencia armaba «null» si faltaba una parte (corregido). En la base, concentración y presentación son `NOT NULL` (F02 002), así que un producto sin ellas no puede existir; `concat_ws` queda como protección.
+  - Pruebas: `f032-full-text.test.ts` 20/20 (incluye «toda sugerencia lleva a ≥ 1 resultado» en memoria); backend completo 646 pasan, 2 fallos de entorno conocidos de F06.1.
+- 2026-11-27 · F03.2: **visto bueno de Andre al SQL** (hashes `374AEED7…D922` y `C5F0D8F9…873B`, commit `1b2e100`). Copiado sin cambios a `backend/migrations` y registrado en las listas cerradas (`F07_APPROVED` y la nueva `F03_APPROVED`).
+  - Base efímera: **sin errores** al aplicarlo; verificación con PostgreSQL real 35/35; base borrada; DEMO intacta y sin F03.2.
+  - T001–T010 hechas (backend, contrato 0.3.0, pantalla). Pruebas: backend 645 pasan + 2 fallos de entorno conocidos (F06.1); frontend 282/282; `check` correcto.
+  - Siguiente: medición T011 y copia temporal 3001/5174.
+- 2026-11-27 · F03.2, T011 (medición con 518 productos, base restaurada desde la copia de seguridad, **ya borrada**): p95 máximo 27.44 ms (cumple ≤ 100 ms) pero hasta 10.64× la búsqueda actual (no cumple «≤ 2×»). Según D-05 se presenta enmienda a Andre; no se cambia SQL sin su aprobación.
+  - Observación: en los datos reales las presentaciones dicen «caja x N» / «frasco», por eso «… tabletas» y «… capsulas» dan APROXIMADA (con aviso), como pide la spec.
+- 2026-11-27 · F03.2, T013: **copia temporal encendida** (3001/5174, base efímera con datos ficticios, sin Redis compartido ni servicios externos). E2E correcta, axe sin violaciones graves y 0 llamadas externas reales. Espera revisión de Andre.
+- 2026-11-27 · F03.2, velocidad (opción A de Andre): v2 «catálogo primero» en los borradores `sql/` (hashes `FDCBBD7F…E5BB` y `005D52E1…3F6D`). Resultados **idénticos** a la v1 en 120 casos con 518 y 5180 ofertas (0 diferencias de filas y orden). p95 de la v2 ≤ 16 ms con 518 y con 5180 ofertas (la v1 llegaba a 218 ms con 5180). Base de medición borrada. Espera visto bueno; los archivos de `backend/migrations` siguen en v1.
+  - La Constitution permite corregir `f03/003` y `f07/010` porque no están en `main` ni en la DEMO; el cambio de hash queda registrado en `approval.md`.
+  - **Mejora futura (sin empezar):** opción C, guardar el texto limpio en el catálogo, a evaluar junto con la spec 020.
+- 2026-11-27 · F03.2: **v2 aprobada y en `backend/migrations`** (hashes `FDCBBD7F…E5BB` y `005D52E1…3F6D`; la v1 se reemplazó porque nunca llegó a `main` ni a la DEMO). PostgreSQL real 35/35; comparación v1/v2 sin diferencias (120 casos, 518 y 5180 ofertas; peor p95 v2 10.45 / 19.43 ms); regresión: backend 646 pasan + 2 fallos de entorno conocidos, frontend 282/282, `check` correcto. Bases efímeras borradas; DEMO sin cambios.
+- 2026-11-27 · F03.2: copia temporal **recreada con la v2** (base `farmafind_f01_test_1285f97c8984`; la anterior y sus dos usuarios técnicos se borraron). E2E igual que con la v1, axe sin violaciones graves y 0 llamadas externas reales. Lista para la revisión de Andre.
+- 2026-11-27 · **F03.2 ACEPTADA por Andre** (v2 optimizada), registrada en `acceptance.md` y `approval.md`. T001–T015 marcadas con evidencia.
+  - Copia temporal apagada; borradas solo su base y sus dos usuarios técnicos. DEMO revisada en solo lectura: idéntica y sin F03.2.
+  - Siguiente: PR y merge a `main`; luego aviso a Andre antes de reiniciar la DEMO (copia de seguridad, `f03/003` y `f07/010` solo en bases TEST marcadas).
+  - Pendientes sin empezar: márgenes, ayuda de dirección en el registro (después de T063), corrida de pruebas por investigar, opción C (con la spec 020). T057 y T063 sin marcar, F02.5 sin aceptar, spec 020 en opción A.

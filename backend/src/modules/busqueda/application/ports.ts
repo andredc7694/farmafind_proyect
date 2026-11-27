@@ -1,8 +1,12 @@
 import type { PublicOffer, PublicPharmacy } from '../contracts/public-search.js';
 import type { CanonicalPublicQuery } from '../domain/public-query.js';
+import type { SearchTerms } from '../domain/search-terms.js';
+
+/** F03.2: oferta pública + cuántas palabras y tokens de la consulta coinciden (para exacta/aproximada). */
+export interface MatchedOffer { readonly offer: PublicOffer; readonly matches: number; }
 
 export interface PublicOfferRepository {
-  search(query: CanonicalPublicQuery, maximum: number): Promise<readonly PublicOffer[]>;
+  search(terms: SearchTerms, query: CanonicalPublicQuery, maximum: number): Promise<readonly MatchedOffer[]>;
   pharmacy(id: string): Promise<PublicPharmacy | null>;
 }
 

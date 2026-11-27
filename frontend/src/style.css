@@ -315,3 +315,5 @@ a { color: var(--emerald-dark); }
 .where-dialog .suggest-box { position: relative; }
 .where-dialog .place-no-match { position: absolute; z-index: 21; left: 0; right: 0; top: 100%; margin: 2px 0 0; padding: .45rem .6rem; background: var(--surface); color: var(--ink); border: 1px solid var(--control-border); border-bottom: 0; border-radius: 8px 8px 0 0; font-weight: 600; }
 .where-dialog .place-no-match + ul[role='listbox'] { top: calc(100% + 2.3rem); margin-top: 0; border-radius: 0 0 8px 8px; }
+/* F03.2: aviso de coincidencia aproximada (reutiliza .notice). */
+.match-notice { margin: .5rem 0 .75rem; font-weight: 600; }
