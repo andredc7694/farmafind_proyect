@@ -22,3 +22,8 @@
 - Andre: «Apruebo plan y tasks de F07.2 (commit c85dab4). Puedes empezar a programar».
 - Agrega: si «Buscar en el mapa» no encuentra la dirección dentro de la ciudad, el mensaje debe orientar, p. ej. «No encontramos esa dirección en Ayacucho. Revisa cómo está escrita o marca el punto tocando el mapa», con prueba.
 - Cuando la copia esté lista: recorrido exacto y credenciales ficticias. No tocar la DEMO.
+
+## 2026-11-27 · Aceptación
+- Andre: «ACEPTO F07.2 (propuestas duplicadas, «Reemplazada», búsqueda limitada a la ciudad y aviso de distancia). Lo revisé en la copia temporal.»
+- Autoriza: apagar la copia y borrar solo su base y sus usuarios técnicos; PR y merge a `main` con merge commit solo si está MERGEABLE, CLEAN, con CI en verde, sin secretos y con la regresión correcta (sin force push; si algo falla, detenerse).
+- Después del merge: avisar antes de actualizar la DEMO; copia de seguridad previa; al terminar, comprobar en solo lectura que los datos siguen intactos y que la propuesta de STUART-FAR de 17:33:42 salió de «Pendientes» y aparece «Reemplazada», sin borrarse ni modificarse. Luego Andre corrige HUAMANFAR.

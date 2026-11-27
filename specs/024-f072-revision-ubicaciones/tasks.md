@@ -22,6 +22,6 @@ Formato: `T000: descripción (requisitos)`. Una casilla se marca solo con eviden
 ## Fase 4 · Base real, regresión, copia y aceptación
 - [X] T011: `scripts/f07/verify-f072.mjs` con PostgreSQL real en base efímera marcada (borrada al final): caso STUART-FAR, igualdad dueño/revisor, envíos simultáneos, decidir la vieja → 409, RLS sin cambios. (FR-002 a FR-004, FR-011, D-01)
 - [X] T012: Regresión completa (backend, frontend, `check`, contratos, verificadores F07/F07.1 que correspondan) con resultados reales. (SC-001 a SC-004)
-- [ ] T013: Copia temporal 3001/5174 con datos ficticios (doble envío, propuesta colgada, punto lejano); E2E, axe y 0 llamadas externas reales. Andre la revisa. (FR-013)
+- [X] T013: Copia temporal 3001/5174 con datos ficticios (doble envío, propuesta colgada, punto lejano); E2E, axe y 0 llamadas externas reales. Andre la revisa. (FR-013)
 - [X] T014: Revisión de seguridad y converge contra la spec. (FR-010, FR-011)
 - [ ] T015: Aceptación de Andre en `acceptance.md` (**solo Andre decide**). Después: apagar la copia, PR y merge; actualizar la DEMO con aviso y copia de seguridad, y comprobar en solo lectura que la propuesta de STUART-FAR de 17:33:42 salió de «Pendientes» y aparece «Reemplazada», sin borrarse ni modificarse. (FR-012, D-03 A)

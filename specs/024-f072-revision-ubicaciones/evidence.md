@@ -39,3 +39,8 @@
 - Entrada: `centro` cerrado (dos números dentro del Perú), sin campos extra; los textos siguen con sus límites. El aviso de distancia no envía nada: se calcula en la pantalla con la lista interna.
 - Sin servicios, librerías ni costos nuevos. No cambia qué se publica ni quién propone o revisa.
 - Converge: FR-001 a FR-011 y FR-013 cumplidos con las pruebas citadas; FR-012 (STUART-FAR) se comprobará en la DEMO tras la aceptación, en solo lectura.
+
+## T015 · Aceptación · 2026-11-27
+- Andre: **ACEPTO F07.2**, revisada en la copia temporal. Registrada en `acceptance.md`.
+- Copia apagada; se borraron solo su base `farmafind_f01_test_88ad6587efe8` y sus dos usuarios técnicos. La DEMO siguió respondiendo.
+- Foto de la DEMO en solo lectura antes de actualizarla: 3 propuestas y 5 auditorías; la de STUART-FAR de 17:33:42 está PENDIENTE, versión 1, sin revisor, con huella `e0522b38…` (md5 de la fila completa) para compararla después.
