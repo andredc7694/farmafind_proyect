@@ -16,3 +16,7 @@
   - Se actualizan el contrato OpenAPI y el validador de la caché.
   - Hay que probar que las entradas viejas de la caché se descartan sin error.
 - Siguiente: plan y tasks para su aprobación antes de programar. No tocar la DEMO.
+
+## 2026-11-26 · Plan y tasks aprobados
+- Andre: «Apruebo plan y tasks de F03.1 (commit 250ac70). Puedes empezar a programar».
+- Pide explicar cómo decide la API que F07 está activa y dejar anotado el valor necesario para la DEMO. En T016, mostrar en la copia 3001/5174 con credenciales ficticias y el recorrido exacto. No tocar la DEMO, su base ni su Redis.

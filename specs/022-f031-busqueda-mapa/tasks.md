@@ -2,7 +2,7 @@
 
 Una casilla se marca solo si hay evidencia real en `evidence.md`.
 
-**Estado:** pendiente de la aprobación de Andre. No se toca la DEMO (3000/5173), ni su base, ni su Redis.
+**Estado:** aprobado por Andre el 2026-11-26 (commit 250ac70). No se toca la DEMO (3000/5173), ni su base, ni su Redis.
 
 ## Fase 1 · Servidor y contrato (sin puertos)
 - [ ] T001: Repositorio. `farmacia.ubicacion` va con `{latitud, longitud}` solo si las dos coordenadas existen y está activa `exposeVerifiedLocation`; si no, `null`. En la composición, esa opción se enciende solo con `geolocationTest`. Tipo nuevo `PublicOfferPharmacy`. La ficha `/farmacias/{id}` no cambia. Pruebas unitarias. (FR-012, D-01)

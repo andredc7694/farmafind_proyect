@@ -1,7 +1,7 @@
 # Plan: F03.1 — Búsqueda simplificada y mapa interactivo
 
 **Spec**: [spec.md](spec.md), aprobada el 2026-11-26 con D-01 a D-08 en A y las condiciones registradas en [approval.md](approval.md).
-**Estado**: **pendiente de la aprobación de Andre.**
+**Estado**: **aprobado por Andre el 2026-11-26.**
 
 ## Resumen técnico
 Este cambio es casi todo de pantalla. En el servidor solo se toca la API pública de búsqueda: se agrega `farmacia.ubicacion` a cada oferta. **No hay SQL, migraciones, RLS, cambios de TTL ni de claves de caché, ni librerías nuevas.**

@@ -15,9 +15,13 @@ export interface PublicPharmacy {
   readonly direccion: string;
 }
 
+/** F03.1 (spec 022, D-01 A): solo con ubicación verificada y F07 activo; en otro caso null. */
+export interface PublicVerifiedLocation { readonly latitud: number; readonly longitud: number; }
+export interface PublicOfferPharmacy extends PublicPharmacy { readonly ubicacion: PublicVerifiedLocation | null; }
+
 export interface PublicOffer {
   readonly medicamento: PublicMedication;
-  readonly farmacia: PublicPharmacy;
+  readonly farmacia: PublicOfferPharmacy;
   readonly precioReferencialCentavos: number;
   readonly disponibilidadReferencial: 'DISPONIBLE';
   readonly ultimaRevision: string;

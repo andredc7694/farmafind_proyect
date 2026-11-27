@@ -194,3 +194,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Condiciones: `farmacia.ubicacion` solo para farmacias verificadas y `null` en el resto; contrato y validador de la caché actualizados; prueba de que las entradas viejas de la caché se descartan.
   - Siguiente: plan y tasks para su aprobación.
 - 2026-11-26 · F03.1: plan, research, data-model, contrato enmendado (`specs/022/contracts`, 0.2.0; la 004 no se toca), quickstart y tasks (T001–T018) listos. **Pendiente de la aprobación de Andre** antes de programar.
+- 2026-11-26 · F03.1: **plan y tasks aprobados por Andre**. Empieza la implementación (T001 en adelante).
