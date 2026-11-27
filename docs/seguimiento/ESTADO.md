@@ -286,3 +286,6 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-27 · F07.2: **spec aprobada por Andre** (commit `f602f95`, D-01 a D-06 en A). Condiciones: «Reemplazada» igual para dueño y revisor con prueba del caso real; STUART-FAR sin borrar ni modificar, comprobada en solo lectura tras actualizar la DEMO; HUAMANFAR la corrige Andre después.
   - Paso Spec Kit: **plan y tasks** redactados (15 tareas, **sin SQL**); esperan aprobación. DEMO sin cambios.
 - 2026-11-27 · F07.2: **plan y tasks aprobados por Andre** (commit `c85dab4`); agrega el mensaje orientador cuando «Buscar en el mapa» no encuentra la dirección en la ciudad. Paso Spec Kit: **implement**.
+- 2026-11-27 · F07.2 implementada (T001–T012 y T014): regla única de «Reemplazada», envío único (pantalla y servidor), búsqueda limitada con centro y mensaje orientador, aviso de distancia y filtro «Reemplazadas». **Sin SQL.**
+  - Pruebas: backend 666 pasan + 2 fallos de entorno conocidos (F06.1); frontend 295/295; `check` y contratos correctos; PostgreSQL real F07.2 15/15 (incluida la igualdad dueño/revisor y dos envíos simultáneos) y F03.2 35/35; bases efímeras borradas.
+  - Copia temporal 3001/5174 encendida con datos ficticios; E2E correcta, axe sin violaciones graves, 0 llamadas externas. Espera revisión de Andre. DEMO sin cambios.
