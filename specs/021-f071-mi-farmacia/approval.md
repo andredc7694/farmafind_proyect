@@ -47,3 +47,7 @@
 - Andre: «AUTORIZO REINICIO Y T018», con condición previa: copia de seguridad (pg_dump) de la base de la DEMO en `.cache/f025-docker/backups/` (fuera de git); si falla, no reiniciar.
 - Alcance: reinicio con f07/007–009 y f025/017 solo en bases TEST marcadas (nunca `farmafind_f01_test`); comando exacto de T018: `$env:F025_DEMO_SLOT='manual'; node scripts/f07/grant-platform-location-review.mjs --autorizado-por-andre=2026-11-26`.
 - PR solo tras la aceptación de Andre (T019). Corrección de márgenes fuera.
+
+## 2026-11-26 · Aceptación (T019)
+- Andre: **ACEPTO F07.1** (Mi farmacia, revisión de ubicaciones, horario, Mi perfil, ayuda de dirección y mapa, e historial). Lo probó en su DEMO (5173) con HUAMANFAR y el revisor.
+- Autoriza PR y merge a `main` con merge commit, solo si está MERGEABLE, CLEAN, con CI en verde, sin secretos y con la regresión correcta; sin force push.

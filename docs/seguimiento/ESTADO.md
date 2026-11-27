@@ -181,3 +181,10 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - `farmafind_f01_test` no se tocó.
   - La carpeta principal está separada de la rama en `a7c5f01` y sirve la DEMO.
   - **Pendiente:** aceptación de Andre (T019) y, después, el PR.
+- 2026-11-26 · **F07.1 ACEPTADA por Andre** (T019), tras probarla en su DEMO con HUAMANFAR y el revisor. Registrada en `acceptance.md` y en `approval.md`. Siguiente paso: PR y merge a main con las condiciones de siempre.
+- 2026-11-26 · **Pendientes registrados, sin empezar (solo con orden de Andre):**
+  - Márgenes de «Revisar solicitudes» y «Mi perfil».
+  - Ayuda de dirección y mapa en el registro de farmacia, y que «Mi farmacia» traiga llenos el departamento, la provincia, el distrito y la dirección (después de T063).
+  - Investigar la corrida del frontend que dio 52 archivos y 250 pruebas.
+  - Andre enviará más mejoras: registrarlas como pendientes al llegar.
+  - T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
