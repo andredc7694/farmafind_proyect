@@ -25,7 +25,7 @@ const clamp = point => ({ latitude: Math.max(-90, Math.min(90, point.latitude)),
  * sin fijar el punto (por ejemplo, al elegir la ciudad). No guarda nada.
  */
 export function PointPicker({ value = null, onChange, getPosition = devicePosition, loadLeaflet = importLeaflet,
-  center = { latitude: -12.0464, longitude: -77.0428 }, focus = null }) {
+  center = { latitude: -12.0464, longitude: -77.0428 }, focus = null, compact = false }) {
   const container = useRef(null); const mapRef = useRef(null); const markerRef = useRef(null); const leafletRef = useRef(null);
   const onChangeRef = useRef(onChange); onChangeRef.current = onChange;
   const [consent, setConsent] = useState(false);
@@ -89,8 +89,9 @@ export function PointPicker({ value = null, onChange, getPosition = devicePositi
 
   return <fieldset className="point-picker">
     <legend>Elegir el punto</legend>
-    <p>Puedes usar tu ubicación solo una vez, elegir el punto en el mapa o escribir las coordenadas. Ninguna de las tres se guarda como rastro.</p>
-    <button type="button" onClick={() => void useDevice()}>Usar mi ubicación una vez</button>
+    {/* F03.1: en modo compacto (búsqueda) no se repite la ubicación del dispositivo ni se muestran coordenadas. */}
+    {!compact && <p>Puedes usar tu ubicación solo una vez, elegir el punto en el mapa o escribir las coordenadas. Ninguna de las tres se guarda como rastro.</p>}
+    {!compact && <button type="button" onClick={() => void useDevice()}>Usar mi ubicación una vez</button>}
     {!consent
       ? <div className="map-consent"><p>Para mostrar el mapa, tu navegador pedirá imágenes a {F07_MAP_SOURCE.name}, que verá tu dirección IP. Es opcional.</p>
           <button type="button" onClick={() => setConsent(true)}>Mostrar el mapa para elegir el punto</button></div>
@@ -98,10 +99,10 @@ export function PointPicker({ value = null, onChange, getPosition = devicePositi
           <div ref={container} className="pharmacy-map point-picker-map" tabIndex={0} role="application" aria-label="Mapa para elegir el punto. Usa las flechas para mover el punto, haz clic o arrastra el marcador."
             onKeyDown={keyDown} />
           {status === 'loading' && <p role="status">Cargando el mapa…</p>}
-          {status === 'failed' && <p role="alert">El mapa no está disponible; puedes escribir las coordenadas.</p>}
+          {status === 'failed' && <p role="alert">{compact ? 'El mapa no está disponible; escribe tu distrito o ciudad.' : 'El mapa no está disponible; puedes escribir las coordenadas.'}</p>}
           <p className="map-attribution"><a href={F07_MAP_SOURCE.copyright} target="_blank" rel="noopener noreferrer">{F07_MAP_SOURCE.attribution}</a></p>
         </>}
-    {point && <p role="status">Punto elegido: {point.latitude.toFixed(5)}, {point.longitude.toFixed(5)}</p>}
+    {point && <p role="status">{compact ? 'Punto elegido en el mapa.' : `Punto elegido: ${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)}`}</p>}
     {message && <p role="status">{message}</p>}
   </fieldset>;
 }

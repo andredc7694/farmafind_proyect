@@ -61,16 +61,19 @@ describe('F08.1 búsqueda unificada', () => {
   const client = (data, extra = {}) => ({ search: vi.fn().mockResolvedValue(data), suggest: vi.fn().mockResolvedValue([]), ...extra });
   const search = async (text = 'paracetamol') => { fireEvent.change(screen.getByLabelText('Nombre comercial o principio activo'), { target: { value: text } }); fireEvent.click(screen.getByRole('button', { name: 'Buscar' })); };
 
-  it('mantiene los filtros plegables y muestra ofertas comparables con la diferencia de precio y el enlace al mapa', async () => {
+  it('mantiene «Filtros» plegable, muestra ofertas comparables y el interruptor Lista | Mapa (F03.1 reemplaza el enlace)', async () => {
     const api = client(page([offer('m1', 'a', 'Alfa', 1200), offer('m1', 'b', 'Beta', 1000)]));
     render(<PublicSearch client={api} />);
-    expect(document.querySelectorAll('details.search-filter-panel').length).toBe(2);
+    expect(document.querySelectorAll('details.search-filter-panel').length).toBe(1);
     await search();
     expect(await screen.findByText(/S\/ 2\.00 más que el más bajo/)).toBeTruthy();
     expect(screen.getByText(/También en: Beta \(S\/ 10\.00\)/)).toBeTruthy();
     expect(screen.getByText('Es el precio más bajo de esta página.', { exact: false })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Ver farmacias en el mapa' }).getAttribute('href')).toBe('/search/mapa?q=paracetamol');
-    expect(api.search).toHaveBeenCalledWith(expect.objectContaining({ q: 'paracetamol', orden: 'relevancia' }));
+    expect(screen.queryByRole('link', { name: 'Ver farmacias en el mapa' })).toBeNull();
+    const toggle = screen.getByRole('group', { name: 'Vista de resultados' });
+    expect(within(toggle).getByRole('button', { name: 'Lista' }).getAttribute('aria-pressed')).toBe('true');
+    expect(within(toggle).getByRole('button', { name: 'Mapa' }).getAttribute('aria-pressed')).toBe('false');
+    expect(api.search).toHaveBeenCalledWith(expect.objectContaining({ q: 'paracetamol', orden: 'precio_asc' }));
   });
 
   it('el vacío es honesto y no inventa ofertas', async () => {
@@ -82,14 +85,14 @@ describe('F08.1 búsqueda unificada', () => {
     const api = client(page([offer('m1', 'a', 'Alfa', 1200)]));
     render(<PublicSearch client={api} />);
     fireEvent.change(screen.getByLabelText(/Precio mínimo/), { target: { value: '5' } });
-    fireEvent.change(screen.getByLabelText('Orden'), { target: { value: 'precio_asc' } });
+    fireEvent.change(screen.getByLabelText('Otros órdenes'), { target: { value: 'precio_desc' } });
     await search();
     await screen.findByText('Alfa');
-    expect(window.location.search).toBe('?q=paracetamol&min=5&orden=precio_asc');
+    expect(window.location.search).toBe('?q=paracetamol&min=5&orden=precio_desc');
     cleanup();
     render(<PublicSearch client={client(page([]))} />);
     expect(screen.getByLabelText('Nombre comercial o principio activo').value).toBe('paracetamol');
-    expect(screen.getByLabelText(/Precio mínimo/).value).toBe('5'); expect(screen.getByLabelText('Orden').value).toBe('precio_asc');
+    expect(screen.getByLabelText(/Precio mínimo/).value).toBe('5'); expect(screen.getByLabelText('Otros órdenes').value).toBe('precio_desc');
   });
 
   it('recordar filtros exige marcar la casilla y guarda solo precio y orden', async () => {
@@ -99,33 +102,41 @@ describe('F08.1 búsqueda unificada', () => {
     expect(window.localStorage.getItem('ff-filters')).toBeNull();
     fireEvent.click(screen.getByLabelText(/Recordar estos filtros/));
     await search(); await waitFor(() => expect(window.localStorage.getItem('ff-filters')).not.toBeNull());
-    expect(JSON.parse(window.localStorage.getItem('ff-filters'))).toEqual({ minimum: '', maximum: '30', order: 'relevancia' });
+    expect(JSON.parse(window.localStorage.getItem('ff-filters'))).toEqual({ minimum: '', maximum: '30', order: 'precio_asc' });
     fireEvent.click(screen.getByLabelText(/Recordar estos filtros/)); expect(window.localStorage.getItem('ff-filters')).toBeNull();
   });
 
-  it('sin ubicación la lista es completa; la ubicación manual válida habilita «Cercanía» y se puede borrar; una inválida se rechaza', async () => {
+  it('F03.1: sin campos de coordenadas; «Más cercano» sin ubicación abre «¿Dónde buscas?», la ciudad ordena por cercanía y se puede quitar', async () => {
     const api = client(page([offer('m1', 'a', 'Alfa', 1200)]));
     render(<PublicSearch client={api} />);
-    expect(screen.getByRole('option', { name: 'Cercanía' }).disabled).toBe(true);
-    fireEvent.change(screen.getByLabelText('Latitud'), { target: { value: '120' } }); fireEvent.change(screen.getByLabelText('Longitud'), { target: { value: '-77' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Usar esta ubicación' }));
-    expect(screen.getByRole('alert').textContent).toContain('latitud entre -90 y 90');
-    fireEvent.change(screen.getByLabelText('Latitud'), { target: { value: '-12.05' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Usar esta ubicación' }));
-    expect(screen.getByRole('option', { name: 'Cercanía' }).disabled).toBe(false);
-    fireEvent.change(screen.getByLabelText('Orden'), { target: { value: 'cercania' } });
-    await search();
-    await waitFor(() => expect(api.search).toHaveBeenCalledWith(expect.objectContaining({ orden: 'cercania', latitud: -12.05, longitud: -77 })));
-    expect(window.location.search).not.toContain('-12'); expect(window.localStorage.length).toBe(0); // la ubicación nunca se guarda ni va a la URL
-    fireEvent.click(screen.getByRole('button', { name: 'Borrar ubicación' }));
-    expect(screen.getByRole('option', { name: 'Cercanía' }).disabled).toBe(true); expect(screen.getByLabelText('Orden').value).toBe('relevancia');
+    expect(screen.queryByLabelText('Latitud')).toBeNull(); expect(screen.queryByLabelText('Longitud')).toBeNull();
+    expect(screen.getByText(/Sin ubicación/)).toBeTruthy();
+    await search(); await screen.findByText('Alfa');
+    expect(api.search).toHaveBeenLastCalledWith(expect.objectContaining({ orden: 'precio_asc', latitud: undefined }));
+    fireEvent.click(screen.getByRole('button', { name: 'Más cercano' }));
+    const dialog = screen.getByRole('dialog', { name: '¿Dónde buscas?' });
+    fireEvent.change(within(dialog).getByLabelText('Distrito o ciudad'), { target: { value: 'Atlantida' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Usar este lugar' }));
+    expect(within(dialog).getByRole('alert').textContent).toContain('no está en la lista');
+    fireEvent.change(within(dialog).getByLabelText('Distrito o ciudad'), { target: { value: 'ayacucho' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Usar este lugar' }));
+    await waitFor(() => expect(api.search).toHaveBeenLastCalledWith(expect.objectContaining({ orden: 'cercania', latitud: -13.159, longitud: -74.224 })));
+    expect(screen.getByText(/Cerca de:/).textContent).toContain('Ayacucho');
+    expect(screen.getByRole('button', { name: 'Más cercano' }).getAttribute('aria-pressed')).toBe('true');
+    expect(window.location.search).not.toContain('-13'); expect(window.localStorage.length).toBe(0); // sin la casilla, nada se guarda
+    fireEvent.click(screen.getByRole('button', { name: 'Quitar' }));
+    expect(screen.getByText(/Sin ubicación/)).toBeTruthy();
+    await waitFor(() => expect(api.search).toHaveBeenLastCalledWith(expect.objectContaining({ orden: 'precio_asc', latitud: undefined })));
   });
 
   it('si la ubicación del dispositivo se niega, la búsqueda sigue disponible con un mensaje claro', async () => {
-    Object.defineProperty(navigator, 'geolocation', { configurable: true, value: { getCurrentPosition: (_ok, fail) => fail(new Error('denegado')) } });
-    render(<PublicSearch client={client(page([]))} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Usar mi ubicación' }));
-    expect(screen.getByRole('alert').textContent).toContain('puedes buscar sin ella');
+    render(<PublicSearch client={client(page([]))} getPosition={() => Promise.reject(new Error('denegado'))} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Elegir' }));
+    const dialog = screen.getByRole('dialog', { name: '¿Dónde buscas?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Usar mi ubicación' }));
+    expect((await within(dialog).findByRole('alert')).textContent).toContain('permiso denegado');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancelar' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
     expect(screen.getByRole('button', { name: 'Buscar' }).disabled).toBe(false);
   });
 

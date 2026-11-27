@@ -18,3 +18,36 @@
   - `scripts/f025/demo-serve.mjs` ya la pone en `true` siempre que la búsqueda esté configurada, es decir, cuando existe `.cache/f03-docker/redis-password.txt`, como en la DEMO actual.
   - Además, la DEMO ya tiene aplicada la migración `f07/003`, la versión de la función que filtra por verificación.
   - No hace falta ningún valor nuevo.
+
+## T005–T011 · 2026-11-26 (pantalla, sin puertos; Leaflet falso y sin red)
+- **T005** `search-location.js`:
+  - Redondea a 3 decimales.
+  - Etiquetas: «tu ubicación», «el punto elegido» o el nombre de la ciudad.
+  - Solo recuerda `{nombre}` de una ciudad de `PERU_PLACES` (clave `farmafind.search.city`) y tolera un almacenamiento bloqueado.
+- **T006** `today-hours.js`: «Abierto hasta», «Abre a las», «Cerrado ahora», «Cerrado hoy» u «Horario no publicado», en hora de Lima.
+- **T007** `WhereDialog.jsx`: `<dialog>` modal con:
+  - una lectura del dispositivo;
+  - distrito o ciudad de la lista interna, con mensaje si el lugar no existe;
+  - «Elegir en el mapa» con `PointPicker` en modo `compact`, una prop nueva y opcional que no muestra coordenadas ni repite el botón de ubicación. Sin la prop, F07.1 no cambia.
+  - Se cierra con Escape (evento cancel) y con Cancelar, y devuelve el foco al botón que lo abrió.
+- **T008** `PublicSearch.jsx` reescrito:
+  - Buscador grande y la línea «Sin ubicación · Elegir» o «Cerca de: X (aproximado) · Cambiar · Quitar».
+  - «Más barato» y «Más cercano»; este último abre el diálogo si no hay ubicación.
+  - «Filtros» con precio mínimo y máximo, «Otros órdenes» (relevancia, mayor precio y disponibilidad; D-03) y «Recordar filtros».
+  - Orden por defecto: por precio; con ciudad recordada o ubicación elegida, por cercanía (D-02).
+  - Sin campos de latitud ni de longitud.
+- **T009** `OfferCard.jsx`: farmacia, producto, precio, distancia, horario de hoy, dirección, revisión, «Ubicación no verificada», «Reservar», «Ver en el mapa» y «Comparar» discreto (D-04).
+- **T010** `ResultsMap.jsx` e interruptor Lista | Mapa (D-07 y D-08):
+  - Leaflet se carga solo al elegir «Mapa».
+  - Marcador propio en CSS (cruz verde con el precio), con `aria-label`, `title`, `keyboard: true` y `role=button`.
+  - La tarjeta emergente se construye con nodos de texto; se probó con un nombre hostil que contenía `<img onerror>`.
+  - Lista y mapa están conectados en los dos sentidos.
+  - Hay un círculo del visitante, pero el encuadre usa solo las farmacias.
+  - Se quitó el enlace «Ver farmacias en el mapa» de la búsqueda; `/search/mapa` sigue disponible.
+  - El texto del asistente para «farmacias cercanas» indica el camino nuevo y conserva el atajo.
+- **T011** Estilos claro y oscuro con los tokens existentes: foco visible, 44 px y diseño de una sola vista a ≤ 700 px.
+  - Se adaptaron 8 pruebas existentes al cambio aprobado: «Comparar», «Otros órdenes», un solo panel «Filtros», el interruptor en lugar del enlace, el orden por defecto `precio_asc` y el diálogo en lugar de las coordenadas.
+- **Pruebas:**
+  - Frontend: **266/266** (55 archivos), con 10 nuevas en `frontend/tests/f031`.
+  - Asistente: 146 correctas; siguen los dos fallos de entorno de F06.1, sin relación con este cambio.
+  - `check` correcto (324 archivos) y build correcto.

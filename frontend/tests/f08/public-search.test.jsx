@@ -31,8 +31,8 @@ describe('búsqueda F08', () => {
     render(<PublicSearch client={{ search }} />);
     fireEvent.change(screen.getByLabelText('Nombre comercial o principio activo'), { target: { value: 'producto' } });
     fireEvent.click(screen.getByRole('button', { name: 'Buscar', exact: true }));
-    await waitFor(() => expect(screen.getAllByLabelText('Comparar esta oferta')).toHaveLength(4));
-    const choices = screen.getAllByLabelText('Comparar esta oferta');
+    await waitFor(() => expect(screen.getAllByLabelText('Comparar')).toHaveLength(4));
+    const choices = screen.getAllByLabelText('Comparar');
     fireEvent.click(choices[0]); fireEvent.click(choices[1]); fireEvent.click(choices[2]);
     expect(choices[3].disabled).toBe(true);
     expect(screen.getByRole('region', { name: 'Comparación de ofertas' })).toBeTruthy();

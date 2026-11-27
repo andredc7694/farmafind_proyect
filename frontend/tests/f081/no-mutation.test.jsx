@@ -33,7 +33,7 @@ describe('F08.1 las sugerencias solo proponen', () => {
     fireEvent.click(screen.getAllByRole('option').find(option => option.textContent.includes('paracetamol 500 mg')));
     expect(calls.filter(call => !call.url.includes('/sugerencias'))).toEqual([]); // elegir una sugerencia no busca ni escribe
     fireEvent.click(screen.getByLabelText(/Recordar estos filtros/));
-    fireEvent.change(screen.getByLabelText('Orden'), { target: { value: 'precio_asc' } });
+    fireEvent.change(screen.getByLabelText('Otros órdenes'), { target: { value: 'precio_desc' } });
     expect(calls.filter(call => call.method !== 'GET')).toEqual([]);
     expect(calls.some(call => writes.test(call.url))).toBe(false);
   });
