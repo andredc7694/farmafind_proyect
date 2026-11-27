@@ -147,3 +147,11 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-26 · **Pedido de Andre:** historial de decisiones en «Revisar ubicaciones» (filtro y paginación) y formulario de decisión ordenado. Requiere las políticas nuevas `f07/009` (borrador fuera de migraciones, hash `21B8A3F6…45BF`) y la enmienda F071-FR-017/018 con D-06: **propuesta presentada, pendiente de aprobación**. Sin código del historial todavía.
 - 2026-11-26 · Mejora pendiente ampliada (después de T063, sin empezar): además de la ayuda de dirección y mapa en el registro, que «Mi farmacia» traiga llenos el departamento, la provincia, el distrito y la dirección del registro y centre el mapa en ese distrito.
 - 2026-11-26 · Pendiente de investigar (no bloquea): una corrida del frontend reportó 52 archivos y 250 pruebas, sin fallos, en lugar de 53/253; al repetirla dio 53/253.
+- 2026-11-26 · F07.1: **enmienda del historial aprobada por Andre** (FR-017/018, D-06 A, SQL `f07/009`). T026–T027 hechas: 009 copiada sin cambios y registrada con su hash. En implementación (T028–T031).
+- 2026-11-26 · F07.1: **historial de «Revisar ubicaciones» (enmienda D-06 A y SQL 009 aprobados)** T026–T031 hechas.
+  - Pruebas: backend geolocalización 59 en verde y 15 omitidas; frontend 256/256; `check` correcto.
+  - Matriz H1 a H8: 18/18 en la base efímera de la copia, con transacción revertida.
+  - Se ve en la copia (5174) con datos ficticios.
+  - Docker Desktop se había detenido. Con permiso de Andre se encendieron solo los contenedores f025-postgres y f03-search-redis, sin reiniciar la DEMO.
+  - Sin PR.
+  - Pendientes: T012–T019 tras T057; apagar la copia cuando Andre lo diga; corrida del frontend por investigar. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.

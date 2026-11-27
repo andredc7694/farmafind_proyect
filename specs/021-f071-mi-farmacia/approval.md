@@ -39,3 +39,6 @@
 
 ## 2026-11-26 · T024 conforme
 - Andre: «doy conforme la mejora del formulario de dirección y ubicación». Pide además el historial en «Revisar ubicaciones» (propuesta de enmienda en `enmienda-historial-propuesta.md`, pendiente de su aprobación).
+
+## 2026-11-26 · Enmienda del historial aprobada
+- **Andre: «si»** a la enmienda F071-FR-017/018, D-06 A («Tú» / «Otro revisor de FarmaFind», sin correos) y el SQL `f07/009` (hash `21B8A3F6…45BF`). Debe probarse con datos simulados y mostrarse en la copia temporal, sin tocar la DEMO.

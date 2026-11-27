@@ -1,6 +1,6 @@
 # Propuesta de enmienda F07.1 · Historial en «Revisar ubicaciones» (PENDIENTE de aprobación de Andre)
 
-**Estado:** propuesta. No se ha cambiado `spec.md`, no se ha escrito código del historial y el SQL está **fuera** de `backend/migrations` (no se aplica solo).
+**Estado (2026-11-26):** **aprobada por Andre («si»), con D-06 en A.** Incorporada a `spec.md` (FR-017, FR-018) y a `tasks.md` (T026–T031); SQL 009 copiado sin cambios a `backend/migrations/f07/`.
 
 ## Por qué hace falta
 Las políticas aprobadas de la 007 solo muestran al revisor de plataforma las propuestas **pendientes** y las que **él mismo** decidió. Un historial con las decisiones de cualquier revisor necesita dos políticas nuevas de solo lectura (borrador `sql-review/009_platform_location_history.sql`, hash `21B8A3F6445C9DDA1DDD756663D5AE27631E11827DF859749A849297555845BF`).

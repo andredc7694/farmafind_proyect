@@ -144,3 +144,10 @@ Como cualquier usuario con sesión quiero llegar a «Mi perfil» desde un acceso
   - **Datos que salen hacia OpenStreetMap:** solo la dirección y la ciudad escritas (búsqueda) o el punto del mapa (búsqueda inversa), enviados desde nuestro servidor. Nunca datos de usuarios, sesiones, inventario ni identificadores. Las direcciones y puntos consultados **no se guardan en registros** (solo cuentas agregadas).
   - **Límites:** como máximo 1 consulta por segundo en todo el servidor, caché en memoria (24 h, máximo 500 entradas), tiempo máximo de 4 s, un resultado, User-Agent genérico «FarmaFind-DEMO/0.1 (proyecto local de pruebas)» sin correo ni repositorio, y atribución visible «© OpenStreetMap».
   - Las pruebas automáticas **simulan** el servicio; las consultas reales se limitan a la revisión manual de Andre.
+
+## Enmienda 2026-11-26 · Historial en «Revisar ubicaciones» (aprobada por Andre, D-06 A)
+- **F071-FR-017 · Historial de decisiones:** «Revisar ubicaciones» muestra, además de las pendientes, las propuestas decididas, con el filtro «Pendientes / Aprobadas / Rechazadas».
+  - **Cada fila:** farmacia, dirección y ciudad, coordenadas, decisión, motivo, fecha de envío, fecha de decisión y quién decidió («Tú» u «Otro revisor de FarmaFind», sin correos; D-06 A).
+  - **Orden y paginación:** de la más reciente a la más antigua, 20 por página.
+  - **Privacidad:** solo datos de ubicación y decisión; el revisor no ve farmacias de las que es miembro. Requiere la migración aditiva `f07/009` (dos políticas de solo lectura; hash `21B8A3F6…45BF`).
+- **F071-FR-018 · Formulario de decisión ordenado:** etiquetas encima de cada campo y espaciado correcto.

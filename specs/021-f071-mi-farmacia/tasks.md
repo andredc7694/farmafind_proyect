@@ -41,3 +41,11 @@ T001–T002 → T003 → T013, T014 (y el código de T004 y T007 se ajusta al SQ
 - [X] T023 Formulario: «Buscar en el mapa», marcador arrastrable con búsqueda inversa y aviso, fuente automática, evidencia opcional con advertencia, «Opciones avanzadas», etiquetas encima y espacio para la burbuja. Pruebas con servicio simulado (FR-013 a FR-015).
 - [X] T024 Copia temporal (3001 y 5174) con el interruptor encendido y revisión manual de Andre con pocas consultas reales. No se toca la DEMO ni su Redis.
 - [X] T025 Registro de la decisión (servicio nuevo, gratuito, límites, datos que salen y revisión en F09), evidencia y ESTADO.
+
+## Enmienda 2026-11-26 · Historial de ubicaciones (FR-017, FR-018)
+- [X] T026 Aprobación de Andre de la enmienda, D-06 A y el SQL 009 (`21B8A3F6445C9DDA1DDD756663D5AE27631E11827DF859749A849297555845BF`).
+- [X] T027 Copiar la 009 sin cambios a `backend/migrations/f07/` y añadirla a la lista cerrada con su hash.
+- [X] T028 Servidor: `GET /api/v1/platform/location-proposals/historial` (filtro, 20 por página, solo los campos aprobados). Pruebas unitarias y HTTP.
+- [X] T029 Pantalla: filtro, historial paginado y formulario de decisión ordenado. Pruebas.
+- [X] T030 [PUERTO] Matriz H1 a H8 en una base efímera (la de la copia temporal, nunca la DEMO).
+- [X] T031 Resultado en la copia temporal (3001 y 5174), sin tocar la DEMO, su base ni su Redis.

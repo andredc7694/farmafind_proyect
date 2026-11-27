@@ -37,3 +37,23 @@
 
 ## T024 · 2026-11-26
 - **Andre revisó la copia temporal y da conforme** la mejora del formulario de dirección y ubicación (búsqueda, completar al marcar, respaldo de ciudades y formulario ordenado). La copia sigue encendida a pedido suyo.
+
+## T026–T031 · 2026-11-26 (historial de «Revisar ubicaciones», enmienda D-06 A)
+- T026–T027: enmienda y SQL `f07/009` aprobados por Andre; la 009 se copió sin cambios a `backend/migrations/f07/` y entró en la lista cerrada con su hash `21B8A3F6…845BF`. No se editaron la 007 ni la 008.
+- T028 servidor: `GET /api/v1/platform/location-proposals/historial?estado=PENDIENTE|APROBADA|RECHAZADA&pagina=N` (20 por página, de la más reciente a la más antigua). Solo devuelve farmacia, dirección, ciudad, coordenadas, decisión, motivo, fechas y «Tú» u «Otro revisor de FarmaFind». No devuelve identificadores de usuario.
+- T029 pantalla: filtro Pendientes, Aprobadas y Rechazadas; historial paginado; formulario de decisión con cada campo bajo su propia etiqueta.
+- Pruebas: backend geolocalización 59 en verde y 15 omitidas por necesitar PostgreSQL. Frontend 256/256, con 54 archivos. `check` correcto con 315 archivos.
+- Incidencia: Docker Desktop se detuvo y dejó sin PostgreSQL ni Redis a la DEMO y a la copia. Con permiso de Andre (opción A) se encendieron solo `farmafind-f025-postgres` y `farmafind-f03-search-redis`. No se reiniciaron los procesos de la DEMO.
+- T030: la matriz H1 a H8 se ejecutó en la base efímera de la copia (`farmafind_f01_test_0627f4917a55`, nunca la DEMO) y dio **18/18 OK**. Todo se hizo en una transacción que se revirtió al final. La 009 ya estaba aplicada desde el intento anterior, y se confirmó que sus dos políticas existen.
+  - H1: el revisor ve las decisiones y los motivos de otro revisor.
+  - H2: un revisor que es miembro de una farmacia no la ve.
+  - H3: sin concesión o siendo dueño, no ve nada.
+  - H4: no lee inventario, movimientos, reservas, perfil, documentos, membresías ajenas ni delegaciones.
+  - H5: solo devuelve los campos aprobados y ningún identificador.
+  - H6: orden y paginación sin repeticiones.
+  - H7: con la concesión revocada ya no ve nada.
+  - H8: no se puede decidir una propuesta antigua.
+- T031: solo se reinició la API de la copia (3001) con el código nuevo. Se crearon por la API datos ficticios: una propuesta rechazada, una aprobada y una pendiente.
+  - En Chrome a 1280 y a 390 px se ven los tres filtros, las tarjetas con los campos aprobados y la paginación, sin desplazamiento lateral.
+  - La primera captura de «Rechazadas» en PC mostró «Cargando…» porque el guion no esperó a que terminara la carga; a 390 px sí se ve la tarjeta.
+  - La DEMO (3000 y 5173) respondió 200 y no se tocó.

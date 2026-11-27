@@ -40,6 +40,11 @@ export function createPlatformLocationsRouter(identity:LiveSession,review:Platfo
     try {response.status(200).json(await review.list(secret));}
     catch(error){failure(error,response);}
   });
+  router.get('/platform/location-proposals/historial',async(request,response)=>{
+    const secret=await session(request,response); if(!secret)return;
+    try {response.status(200).json(await review.history(secret,request.query.estado,request.query.pagina));}
+    catch(error){failure(error,response);}
+  });
   router.post('/platform/location-proposals/:propuestaId/decision',security.requireCsrf,async(request,response)=>{
     const secret=await session(request,response); if(!secret)return;
     const proposalId=String(request.params.propuestaId);

@@ -33,6 +33,7 @@ export function createLocationStatusClient(fetchImpl = fetch) {
 export function createPlatformLocationClient(fetchImpl = fetch) {
   return {
     list: () => read(fetchImpl, '/api/v1/platform/location-proposals'),
+    history: (estado, pagina) => read(fetchImpl, `/api/v1/platform/location-proposals/historial?estado=${enc(estado)}&pagina=${enc(pagina)}`),
     canReview: async () => {
       const response = await fetchImpl('/api/v1/platform/location-proposals', { credentials: 'same-origin', cache: 'no-store' });
       return response.ok;

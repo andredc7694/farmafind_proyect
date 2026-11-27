@@ -16,6 +16,7 @@ const F07_APPROVED: ReadonlyArray<readonly [string, string | null]> = [
   ['004_public_proximity.sql', null], ['005_review_publication.sql', null], ['006_review_audit.sql', null],
   ['007_platform_location_review.sql', '6D7E0C118858D9160EEB3479241B00A0674DCE86CD227FB314F55967063BB0F9'],
   ['008_opening_hours.sql', '0A6EB089740950D3AD1B31FB9FAC8E3FAB4CF58D76AB6CC1EC0C3D2FC26D2EBF'],
+  ['009_platform_location_history.sql', '21B8A3F6445C9DDA1DDD756663D5AE27631E11827DF859749A849297555845BF'],
 ];
 
 /** Apply only F03 migrations to an isolated F01/F02-shaped local TEST database. */

@@ -116,6 +116,13 @@ a { color: var(--emerald-dark); }
   body:has(.stacked-form) .chat-toggle { padding: .7rem; }
 }
 .point-marker { width: 22px; height: 22px; border-radius: 50%; background: #176b52; border: 3px solid #fff; box-shadow: 0 0 0 2px #176b52; cursor: grab; }
+/* F07.1: historial de «Revisar ubicaciones». */
+.review-filter { display: flex; flex-wrap: wrap; gap: .5rem; }
+.review-filter button[aria-pressed="true"] { font-weight: 700; }
+.history-facts { display: grid; grid-template-columns: minmax(6rem, max-content) 1fr; gap: .25rem .8rem; margin: 0; }
+.history-facts dt { font-weight: 600; }
+.history-facts dd { margin: 0; overflow-wrap: anywhere; }
+.decision-form { margin-top: .8rem; }
 .public-hours summary { cursor: pointer; }
 .public-hours ul { margin: .35rem 0 0; padding-left: 1.1rem; }
 .opening-day { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; }

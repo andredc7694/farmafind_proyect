@@ -1,4 +1,4 @@
-import { LocationConflictError, LocationForbiddenError, LocationNotVisibleError,
+import { LocationConflictError, LocationForbiddenError, LocationNotVisibleError, LocationValidationError,
   parsePlatformLocationDecision } from '../domain/pharmacy-location.js';
 import type { LocationRepository, StoredLocationProposal } from './location-ports.js';
 import type { SearchInvalidator } from '../../busqueda/contracts/search-invalidator.js';
@@ -19,7 +19,20 @@ export interface PlatformLocationRepository {
   isLatestPending(proposal:StoredLocationProposal):Promise<boolean>;
   /** Repositorio F07 acotado a la farmacia de la propuesta (decidir, publicar, auditar). */
   forPharmacy(pharmacyId:string):LocationRepository;
+  /** F071-FR-017: historial (RLS 007 + 009); sin identificadores de usuario. */
+  listHistory?(status:HistoryStatus,actorId:string,limit:number,offset:number):Promise<{total:number;rows:LocationHistoryView[]}>;
 }
+
+export type HistoryStatus='PENDIENTE'|'PUBLICADA_VERIFICADA'|'RECHAZADA';
+/** Fila del historial: solo datos de ubicación y decisión (FR-017). */
+export interface LocationHistoryView {
+  readonly propuestaId:string; readonly farmaciaNombre:string; readonly direccion:string; readonly ciudad:string;
+  readonly latitud:number; readonly longitud:number; readonly decision:'PENDIENTE'|'APROBADA'|'RECHAZADA';
+  readonly motivo:string|null; readonly enviadaAt:string; readonly decididaAt:string|null;
+  readonly decididoPor:'Tú'|'Otro revisor de FarmaFind'|null;
+}
+export const HISTORY_PAGE_SIZE=20;
+const historyFilter:Record<string,HistoryStatus>={PENDIENTE:'PENDIENTE',APROBADA:'PUBLICADA_VERIFICADA',RECHAZADA:'RECHAZADA'};
 export interface PlatformLocationUnitOfWork {
   run<T>(secret:string,work:(repository:PlatformLocationRepository,actorId:string)=>Promise<T>):Promise<T>;
 }
@@ -32,6 +45,18 @@ export class PlatformLocationReview {
     return this.transactions.run(secret,async repository=>{
       if (!(await repository.isReviewer())) throw new LocationForbiddenError('Sin concesión de revisión');
       return repository.listLatestPending(100);
+    });
+  }
+
+  /** F071-FR-017: historial con filtro y paginación (20 por página, de la más reciente a la más antigua). */
+  async history(secret:string,rawStatus:unknown,rawPage:unknown) {
+    const status=historyFilter[String(rawStatus ?? 'PENDIENTE')];
+    const page=rawPage===undefined ? 1 : Number(rawPage);
+    if (!status || !Number.isSafeInteger(page) || page<1 || page>1000) throw new LocationValidationError('Filtro inválido');
+    return this.transactions.run(secret,async(repository,actorId)=>{
+      if (!(await repository.isReviewer()) || !repository.listHistory) throw new LocationForbiddenError('Sin concesión de revisión');
+      const result=await repository.listHistory(status,actorId,HISTORY_PAGE_SIZE,(page-1)*HISTORY_PAGE_SIZE);
+      return {pagina:page,porPagina:HISTORY_PAGE_SIZE,total:result.total,filas:result.rows};
     });
   }
 

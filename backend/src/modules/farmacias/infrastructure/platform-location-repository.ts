@@ -1,6 +1,6 @@
 import type { SqlClient, VerifiedTenantTransactions } from '../../usuarios/contracts/tenant.js';
 import type { LocationRepository, StoredLocationProposal } from '../application/location-ports.js';
-import type { PendingLocationView, PlatformLocationRepository,
+import type { HistoryStatus, LocationHistoryView, PendingLocationView, PlatformLocationRepository,
   PlatformLocationUnitOfWork } from '../application/platform-location-review.js';
 import { PgLocationRepository } from './location-repository.js';
 
@@ -56,6 +56,28 @@ export class PgPlatformLocationRepository implements PlatformLocationRepository 
   }
 
   forPharmacy(pharmacyId:string):LocationRepository { return new PgLocationRepository(this.client,pharmacyId); }
+
+  /** F071-FR-017: RLS (007 y 009) decide las filas; aquí se proyectan solo los campos aprobados. */
+  async listHistory(status:HistoryStatus,actorId:string,limit:number,offset:number):Promise<{total:number;rows:LocationHistoryView[]}> {
+    const total=await this.client.query(`SELECT count(*)::int AS total FROM f07.ubicacion_propuesta p
+      JOIN f01.farmacia_referencia f ON f.id=p.farmacia_id WHERE p.estado=$1`,[status]);
+    const result=await this.client.query(`SELECT p.id,f.nombre_publico,p.direccion_publicable,p.ciudad,p.latitud,p.longitud,
+        p.estado,p.propuesta_at,p.revisada_at,(p.revisada_por IS NOT DISTINCT FROM $2::uuid) AS propia,d.motivo
+      FROM f07.ubicacion_propuesta p JOIN f01.farmacia_referencia f ON f.id=p.farmacia_id
+      LEFT JOIN LATERAL (SELECT a.motivo FROM f07.ubicacion_auditoria a WHERE a.propuesta_id=p.id
+        AND a.accion IN ('APROBACION','RECHAZO') ORDER BY a.ocurrido_at DESC LIMIT 1) d ON true
+      WHERE p.estado=$1
+      ORDER BY COALESCE(p.revisada_at,p.propuesta_at) DESC,p.id DESC LIMIT $3 OFFSET $4`,[status,actorId,limit,offset]);
+    const iso=(value:unknown)=>value===null||value===undefined?null:new Date(String(value)).toISOString();
+    return {total:Number(total.rows[0]?.total ?? 0),rows:result.rows.map(row=>({
+      propuestaId:String(row.id),farmaciaNombre:String(row.nombre_publico),direccion:String(row.direccion_publicable),
+      ciudad:String(row.ciudad),latitud:Number(row.latitud),longitud:Number(row.longitud),
+      decision:row.estado==='PUBLICADA_VERIFICADA'?'APROBADA' as const:row.estado==='RECHAZADA'?'RECHAZADA' as const:'PENDIENTE' as const,
+      motivo:row.motivo===null||row.motivo===undefined?null:String(row.motivo),enviadaAt:iso(row.propuesta_at) as string,
+      decididaAt:iso(row.revisada_at),
+      decididoPor:row.estado==='PENDIENTE'?null:row.propia===true?'Tú' as const:'Otro revisor de FarmaFind' as const,
+    }))};
+  }
 }
 
 export class PgPlatformLocationUnitOfWork implements PlatformLocationUnitOfWork {
