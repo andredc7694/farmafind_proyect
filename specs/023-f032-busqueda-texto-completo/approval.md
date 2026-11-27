@@ -5,7 +5,7 @@
 - Rama propia desde `main` `288d72a`, con SDD. Pasar a `ESTADO.md` las notas de `.cache/estado-pendiente.md` (hecho en esta rama).
 - Reglas: revisar specs F03 y F03.1, Constitution y ADR antes de programar. Si cambia SQL, índices, contrato o caché: enmienda, plan y SQL para aprobar; no aplicar nada antes. No cambiar qué se publica. US$0, sin servicios ni librerías nuevas sin consultar. Medir con los 518 productos de HUAMANFAR. Mostrar en la copia 3001/5174 con datos ficticios. No tocar la DEMO, su base ni su Redis.
 
-## Pendiente
+## Pendiente (resuelto el 2026-11-27)
 - Aprobación de `spec.md` y de las decisiones D-01 a D-05.
 
 ## 2026-11-27 · Spec aprobada
