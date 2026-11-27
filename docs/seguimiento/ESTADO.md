@@ -163,3 +163,13 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-26 · Andre da por conforme el ajuste visual y el cierre de la copia. Confirma que la tercera propuesta aprobada en la copia («esta bien la direccion») la aprobó él durante su revisión.
 - 2026-11-26 · **Corrección pendiente (sin empezar, espera orden de Andre):** revisar el margen de «Revisar solicitudes» (`/admin/farmacias/solicitudes`) y «Mi perfil» (`/mi-perfil`) para que tengan el mismo estilo que «Revisar ubicaciones». Irá en su propia rama cuando se apruebe.
 - 2026-11-26 · Andre todavía no hará T057; antes enviará más correcciones del sistema. Cada corrección se registra como pendiente al llegar y solo se trabaja lo que él ordene. No tocar la DEMO ni sus puertos sin avisar. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · **Cambio de plan de Andre:** pospone T057 y autoriza usar su DEMO para terminar F07.1. Antes de apagarla o reiniciarla hay que avisarle, y T018 solo se ejecuta con su autorización después de que vea el comando.
+  - T012–T017 hechas en bases efímeras del clúster F02.5, ya borradas:
+    - 017: 51/51.
+    - Matriz RLS: 46/46.
+    - E2E: 11/11, sin servicios externos.
+    - Regresión del CI en verde; F07 con base de datos: 23 correctas; suites aplicables de F02.5 correctas.
+    - Revisión de seguridad de las migraciones correcta.
+  - Foto «antes» de la DEMO, en solo lectura: HUAMANFAR con 518 de inventario, 4 importaciones, 0 reservas, 4 usuarios y 2 membresías; el dueño tiene 12 capacidades, sin GEO_LOCATION_PROPOSE.
+  - **Pendiente:** autorización de Andre para el reinicio y para T018; después, la aceptación (T019) y el PR.
+  - La corrección de márgenes sigue pendiente y fuera de este PR. T057 y T063 sin marcar, F02.5 sin aceptar, spec 020 en opción A.

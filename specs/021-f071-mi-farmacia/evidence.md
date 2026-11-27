@@ -69,3 +69,60 @@
 - Copia apagada: se detuvieron solo los procesos de 3001 y 5174.
 - Se borraron solo la base `farmafind_f01_test_0627f4917a55` (antes se comprobó su marca TEST y que no tuviera conexiones) y los roles `ff_f071c_auth_0627f4917a55` y `ff_f071c_runtime_0627f4917a55`. Comprobación posterior: no queda ni la base ni ningún rol; la base de la DEMO sigue ahí.
 - La DEMO (3000 y 5173) responde 200 y no se tocó.
+
+## T012–T017 · 2026-11-26 (base de datos y navegador; Andre autorizó usar la DEMO para terminar F07.1)
+Todo se ejecutó en bases TEST efímeras y marcadas del clúster `farmafind-f025-test` (puerto 55431), creadas en el worktree: la técnica F02.5 `farmafind_f01_test_135376fcba40` y el fixture F07 `farmafind_f01_test_e949f5a632d4`. Nunca se usó `farmafind_f01_test`, la base de la DEMO ni el Redis de la DEMO. Al terminar se borraron las dos bases y sus roles de conexión (`ff_f025_auth/runtime_135376fcba40` y `f07_test_runtime_e949f5a632d4`).
+
+- **T012 (`f025/017`):** se amplió `scripts/f025/verify-application-commands.mjs`. Resultado: **51/51**, con la transacción revertida.
+  - El dueño recibe 13 capacidades, entre ellas `GEO_LOCATION_PROPOSE`.
+  - El trabajador y el administrador global no reciben ninguna capacidad de ubicación. Nadie recibe `GEO_LOCATION_REVIEW`.
+  - El alta directa se rechaza (42501), tanto por el ejecutor de activación como por `f01_runtime`.
+  - La reparación devuelve el permiso borrado, atribuido al revisor original y con una sola auditoría. Si se repite, no duplica nada y respeta la revocación.
+- **T013 y T014 (matriz RLS):** nuevo `scripts/f07/verify-f071-matrix.mjs`. Resultado: **46/46** (casos 1–20 y 22 del README de `sql-review`), con una sola conexión para todos los actores y la transacción revertida.
+  - El revisor no lee inventario, movimientos, importaciones, reservas, personal, invitaciones, credenciales temporales, contacto, documentos ni el horario privado.
+  - Solo decide la última propuesta pendiente. Con una versión obsoleta no publica.
+  - No puede aprobar lo propio ni revisar una farmacia de la que es miembro.
+  - Sin concesión, o como dueño, trabajador o cliente, no ve nada. Con la sesión cerrada o la concesión revocada, se le deniega todo.
+  - El rechazo no cambia lo publicado. La restricción de límites del Perú funciona.
+  - El horario solo lo escribe el dueño y los tramos inválidos se rechazan. El horario público no muestra farmacias inactivas ni acepta más de 50 identificadores.
+  - El revisor ve exactamente las columnas aprobadas.
+  - La matriz H del historial (T030) dio 18/18.
+- **T015 (E2E en Chrome):** copia temporal en los puertos 3001/5174 con su propia base efímera (`farmafind_f01_test_a1698726515b`, ya borrada junto con sus dos roles). Resultado: **11/11**, sin ninguna petición a servidores externos.
+  - El dueño propone, el administrador aprueba y el dueño ve «Verificada».
+  - La búsqueda pública por cercanía muestra la nueva dirección con distancia y «Hoy:».
+  - El horario se guarda.
+  - Un rechazo no cambia lo publicado y aparece en el historial.
+  - «Mi perfil» se abre desde «Mi cuenta». El dueño no ve «Revisar ubicaciones».
+  - No hay desplazamiento lateral a 390 px.
+- **T016 (regresión):**
+  - Contratos OpenAPI correctos (general, f011, f041 y f081).
+  - `check` correcto con 315 archivos. Build correcto.
+  - Suites del CI con dobles, todas correctas:
+
+    | Módulo | Unitarias | API |
+    |---|---|---|
+    | f01 | 114 | 128 |
+    | f02 | 15 | — |
+    | f03 | 33 | — |
+    | f04 | 48 | 25 |
+    | f05 | 8 | 5 |
+    | f06 | 24 | 5 |
+    | f061 | 108 | 15 |
+    | f07 | 19 (+1 omitida) | — |
+
+  - Frontend: 256/256.
+  - Backend completo: 620 correctas y 237 omitidas.
+  - F07 con PostgreSQL (rls, public-api, public-projection y location-api): **23 correctas**.
+  - F02.5 en la base técnica, todas correctas: verify-rls, private-profile (12/12), inactive-reservation, check-f04-rls, activation-concurrency (14) y application-notifications (7/7).
+- **No ejecutado, o fallido por causas del entorno (sin relación con F07.1):**
+  - La migración F07 «fila F03 heredada» necesita la base persistente del clúster F01, que no existe en este clúster. Falla cerrada, como corresponde.
+  - Dos pruebas de integración de F06.1 exigen una URL de base madre propia, que no está configurada.
+  - `verify-sql-matrix`, `verify-pool-isolation` e `import-rollback` dependen del recorrido de navegador de F02.5 (las cinco farmacias).
+  - `verify-redis-activation` no se ejecutó porque usa el Redis de la DEMO.
+  - El CI de GitHub ejecuta la RLS de F01, F02 y F03 en su propio PostgreSQL efímero.
+- **T017 (seguridad de las migraciones):**
+  - 007, 008, 009 y 017 son aditivas: no hay DROP ni ALTER de políticas, funciones o restricciones existentes, ni políticas restrictivas, ni DELETE.
+  - Las funciones SECURITY DEFINER (`location_actor`, `can_platform_location_review` y `public_opening_hours`) tienen `search_path` fijo y `REVOKE ... FROM PUBLIC`. Sus propietarios son roles NOLOGIN y NOBYPASSRLS (`f071_policy` y `f03_projection_owner`).
+  - La 009 solo añade dos políticas SELECT. La 017 tiene una guarda de clúster, base y marca TEST.
+  - Ningún rol de aplicación tiene BYPASSRLS.
+- **Guion de T018** (`scripts/f07/grant-platform-location-review.mjs`): exige `F025_DEMO_SLOT=manual` y `--autorizado-por-andre=AAAA-MM-DD`, y es idempotente. **No se ha ejecutado.**

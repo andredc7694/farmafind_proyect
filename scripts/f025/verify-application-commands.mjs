@@ -176,14 +176,15 @@ try{
   await client.query('SET LOCAL ROLE f01_migrator');
   const delegated=await client.query(`SELECT capacidad FROM f01.delegacion
     WHERE membresia_id=$1 ORDER BY capacidad`,[activated.rows[0].owner_membership_id]);
-  assert.deepEqual(delegated.rows.map(row=>row.capacidad),[
-    'inventory.history','inventory.import.confirm','inventory.import.preview',
+  // F071-FR-007 (f025/017): el dueño también recibe GEO_LOCATION_PROPOSE (13 capacidades).
+  assert.deepEqual(delegated.rows.map(row=>row.capacidad).sort(),[
+    'GEO_LOCATION_PROPOSE','inventory.history','inventory.import.confirm','inventory.import.preview',
     'inventory.read','inventory.write','membership.manage','pharmacy.profile.read','pharmacy.profile.write',
     'reservation.accept','reservation.deliver',
     'reservation.read','reservation.settings']);passed++;
   await client.query('SET LOCAL ROLE f01_runtime');
   await actor(users[0]);
-  assert.equal((await client.query('SELECT capacidad FROM f01.delegacion')).rows.length,12);passed++;
+  assert.equal((await client.query('SELECT capacidad FROM f01.delegacion')).rows.length,13);passed++;
   await client.query("SELECT set_config('app.farmacia_id',$1,true)",
     [activated.rows[0].activated_farmacia_id]);
   assert.equal((await client.query("SELECT f02.can_inventory_action($1,'inventory.import.confirm') AS allowed",
@@ -238,5 +239,47 @@ try{
   await client.query(repair);
   assert.equal(await audits(),2);passed++;
   assert.deepEqual(await manage(),['DUENO/ACTIVA']);passed++;
+  // F071-FR-007 (T012): solo el dueño recibe GEO_LOCATION_PROPOSE; alta directa rechazada;
+  // reparación repetible que respeta revocaciones y atribuye al revisor original.
+  const geo=async()=>(await client.query(`SELECT m.rol,d.estado FROM f01.delegacion d
+    JOIN f01.usuario_farmacia m ON m.id=d.membresia_id WHERE d.capacidad='GEO_LOCATION_PROPOSE'
+    AND d.farmacia_id=$1 ORDER BY 1`,[pharmacy])).rows.map(row=>`${row.rol}/${row.estado}`);
+  assert.deepEqual(await geo(),['DUENO/ACTIVA']);passed++;
+  assert.equal(Number((await client.query(`SELECT count(*) FROM f01.delegacion
+    WHERE capacidad IN ('GEO_LOCATION_PROPOSE','GEO_LOCATION_REVIEW') AND membresia_id=$1`,[worker])).rows[0].count),0);passed++;
+  assert.equal(Number((await client.query(`SELECT count(*) FROM f01.delegacion
+    WHERE capacidad='GEO_LOCATION_REVIEW' AND farmacia_id=$1`,[pharmacy])).rows[0].count),0);passed++;
+  await client.query('SAVEPOINT executor_geo');
+  await client.query('SET LOCAL ROLE f025_activation_executor');
+  await actor(users[2]);
+  await client.query("SELECT set_config('app.f025_application_id',$1,true)",[request]);
+  await assert.rejects(client.query(`INSERT INTO f01.delegacion(membresia_id,farmacia_id,capacidad,estado,
+    granted_by_usuario_id) VALUES($1,$2,'GEO_LOCATION_PROPOSE','ACTIVA',$3)`,[worker,pharmacy,users[2].id]),
+    error=>error.code==='42501');passed++;
+  await client.query('ROLLBACK TO SAVEPOINT executor_geo');
+  await client.query('SAVEPOINT runtime_geo');
+  await client.query('SET LOCAL ROLE f01_runtime');
+  await actor(users[0]);
+  await assert.rejects(client.query(`INSERT INTO f01.delegacion(membresia_id,farmacia_id,capacidad,estado,
+    granted_by_usuario_id) VALUES($1,$2,'GEO_LOCATION_PROPOSE','ACTIVA',$3)`,[worker,pharmacy,users[0].id]),
+    error=>error.code==='42501');passed++;
+  await client.query('ROLLBACK TO SAVEPOINT runtime_geo');
+  await client.query('SET LOCAL ROLE f01_migrator');
+  const repairGeo=readFileSync(path.join(root,'backend/migrations/f025/017_owner_location_test.sql'),'utf8')
+    .replaceAll('\r\n','\n').match(/DO \$repair\$[\s\S]*?END \$repair\$;/)[0];
+  const auditsBefore=await audits();
+  await client.query(`DELETE FROM f01.delegacion WHERE membresia_id=$1 AND capacidad='GEO_LOCATION_PROPOSE'`,[owner]);
+  await client.query(repairGeo);
+  const geoRow=(await client.query(`SELECT estado,granted_by_usuario_id FROM f01.delegacion
+    WHERE membresia_id=$1 AND capacidad='GEO_LOCATION_PROPOSE'`,[owner])).rows;
+  assert.deepEqual(geoRow.map(row=>`${row.estado}/${row.granted_by_usuario_id===users[2].id}`),['ACTIVA/true']);passed++;
+  assert.equal(await audits(),auditsBefore+1);passed++;
+  await client.query(repairGeo);
+  assert.equal(await audits(),auditsBefore+1);passed++;
+  await client.query(`UPDATE f01.delegacion SET estado='REVOCADA',revoked_at=now() WHERE membresia_id=$1
+    AND capacidad='GEO_LOCATION_PROPOSE'`,[owner]);
+  await client.query(repairGeo);
+  assert.deepEqual(await geo(),['DUENO/REVOCADA']);passed++;
+  assert.equal(await audits(),auditsBefore+1);passed++;
   console.log(JSON.stringify({cluster:'farmafind-f025-test',database,passed,rolledBack:true}));
 }finally{await client.query('ROLLBACK');await client.end();}

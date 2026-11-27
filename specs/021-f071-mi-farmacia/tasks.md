@@ -20,14 +20,14 @@
 - [X] T011 Página `/mi-perfil` y enlace «Mi perfil» en «Mi cuenta», sin cambiar las reglas del perfil. Pruebas (FR-009).
 
 ## Fase 4 · Base de datos y navegador [PUERTO]
-- [ ] T012 [PUERTO] Pruebas SQL de `f025/017` en la base TEST técnica: solo el dueño recibe el permiso; trabajador y administrador global no; insert directo rechazado; reparación idempotente que respeta revocaciones y atribuye al revisor (FR-007).
-- [ ] T013 [PUERTO] Matriz RLS de la revisión de plataforma en una base efímera (la de T001), con conexión reutilizada Alfa → Beta (SC-002).
-- [ ] T014 [PUERTO] Matriz RLS del horario y su proyección pública (SC-004).
-- [ ] T015 [PUERTO] E2E: el propietario propone, el administrador aprueba y aparece «Verificada» en el mapa; un rechazo no cambia lo publicado; horario visible; «Mi perfil» desde «Mi cuenta»; escritorio y 390 px (SC-001, SC-003, SC-004).
-- [ ] T016 [PUERTO] Regresión: F07 completo, F02.5, F01.1, F03 y F08; `check`, build y contratos (SC-005).
+- [X] T012 [PUERTO] Pruebas SQL de `f025/017` en la base TEST técnica: solo el dueño recibe el permiso; trabajador y administrador global no; insert directo rechazado; reparación idempotente que respeta revocaciones y atribuye al revisor (FR-007).
+- [X] T013 [PUERTO] Matriz RLS de la revisión de plataforma en una base efímera (la de T001), con conexión reutilizada Alfa → Beta (SC-002).
+- [X] T014 [PUERTO] Matriz RLS del horario y su proyección pública (SC-004).
+- [X] T015 [PUERTO] E2E: el propietario propone, el administrador aprueba y aparece «Verificada» en el mapa; un rechazo no cambia lo publicado; horario visible; «Mi perfil» desde «Mi cuenta»; escritorio y 390 px (SC-001, SC-003, SC-004).
+- [X] T016 [PUERTO] Regresión: F07 completo, F02.5, F01.1, F03 y F08; `check`, build y contratos (SC-005).
 
 ## Fase 5 · Cierre
-- [ ] T017 Revisión de seguridad de las migraciones; `evidence.md`, `convergence.md`, `traceability.md` y `ESTADO.md`.
+- [X] T017 Revisión de seguridad de las migraciones; `evidence.md`, `convergence.md`, `traceability.md` y `ESTADO.md`.
 - [ ] T018 **[PUERTA]** Aplicación a la DEMO en un único reinicio con todo el SQL aprobado (`f025/017`, `f07/007`, `f07/008`). Incluye conceder la revisión de ubicaciones al revisor TEST de la DEMO (alta de datos, con autorización expresa de Andre). Reporte de HUAMANFAR antes y después, con inventario, importaciones y reservas intactos.
 - [ ] T019 **[PUERTA]** `acceptance.md`: aceptación humana de Andre (nunca autoaprobar). Con su ACEPTO: PR y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
 
