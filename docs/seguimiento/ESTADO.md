@@ -207,3 +207,7 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-26 · F03.1, revisión de Andre en la copia:
   - Hechos: filtro de lugares al escribir (sin tildes), mapa «Elegir el punto» centrado en Huamanga y casilla alineada. Frontend 271/271, `check` correcto.
   - **Enmienda E-01 propuesta** (16 distritos de Huamanga verificados con el ubigeo INEI, resto del Perú desactivado por configuración, sin duplicados; «Mi farmacia» no cambia). Pendiente de su aprobación.
+- 2026-11-26 · F03.1: **E-01 aprobada (opción A) e implementada**: 16 distritos de Huamanga por defecto, el resto del Perú desactivado por configuración y sin duplicados. «Mi farmacia» no cambia.
+  - Campo de lugar: lista completa al enfocar, filtro por cualquier parte sin tildes y aviso «No encontramos ese distrito».
+  - Pruebas: frontend 277/277; E2E en la copia 20/20.
+  - Consulta de Andre: el 0 de «paracetamol 500 mg tabletas x 10» se debe a que la búsqueda compara el texto completo con el nombre o el principio activo, y la sugerencia «presentación» de F08.1 propone ese texto largo. No se cambió; queda para decidir.

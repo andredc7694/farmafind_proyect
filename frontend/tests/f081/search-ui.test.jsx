@@ -117,10 +117,10 @@ describe('F08.1 búsqueda unificada', () => {
     const dialog = screen.getByRole('dialog', { name: '¿Dónde buscas?' });
     fireEvent.change(within(dialog).getByLabelText('Distrito o ciudad'), { target: { value: 'Atlantida' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Usar este lugar' }));
-    expect(within(dialog).getByRole('alert').textContent).toContain('no está en la lista');
+    expect(within(dialog).getByRole('alert').textContent).toContain('No encontramos ese distrito');
     fireEvent.change(within(dialog).getByLabelText('Distrito o ciudad'), { target: { value: 'ayacucho' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Usar este lugar' }));
-    await waitFor(() => expect(api.search).toHaveBeenLastCalledWith(expect.objectContaining({ orden: 'cercania', latitud: -13.159, longitud: -74.224 })));
+    await waitFor(() => expect(api.search).toHaveBeenLastCalledWith(expect.objectContaining({ orden: 'cercania', latitud: -13.16, longitud: -74.225 })));
     expect(screen.getByText(/Cerca de:/).textContent).toContain('Ayacucho');
     expect(screen.getByRole('button', { name: 'Más cercano' }).getAttribute('aria-pressed')).toBe('true');
     expect(window.location.search).not.toContain('-13'); expect(window.localStorage.length).toBe(0); // sin la casilla, nada se guarda

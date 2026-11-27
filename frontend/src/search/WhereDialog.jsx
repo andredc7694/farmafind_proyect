@@ -1,7 +1,7 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { PERU_PLACES } from '../geolocation/peru-cities.js';
 import { PointPicker } from '../geolocation/PointPicker.jsx';
 import { cityLocation, filterPlaces, searchLocation } from './search-location.js';
+import { ACTIVE_SEARCH_PLACES } from './search-places.js';
 
 /** Centro inicial del mapa «Elegir el punto»: Huamanga (Ayacucho), zona de la DEMO. */
 export const SEARCH_MAP_CENTER = { latitude: -13.1603, longitude: -74.2253 };
@@ -17,10 +17,11 @@ function devicePosition() {
 
 /**
  * F03.1 (FR-002, FR-003, FR-010): «¿Dónde buscas?». Diálogo modal nativo (foco atrapado, Escape cierra).
- * Tres opciones: una lectura del dispositivo, distrito/ciudad de la lista interna (sin servicio externo)
+ * Tres opciones: una lectura del dispositivo, distrito de la lista propia de la búsqueda (E-01: por defecto
+ * los 16 distritos de Huamanga; sin servicio externo)
  * o un punto en el mapa (se carga solo al pedirlo). Solo la ciudad puede recordarse, con la casilla.
  */
-export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPosition = devicePosition, loadLeaflet, places = PERU_PLACES }) {
+export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPosition = devicePosition, loadLeaflet, places = ACTIVE_SEARCH_PLACES }) {
   const ref = useRef(null); const listId = useId();
   const [city, setCity] = useState('');
   const [remember, setRemember] = useState(rememberedCity);
@@ -30,7 +31,10 @@ export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPos
   const [point, setPoint] = useState(null);
   const [activeOption, setActiveOption] = useState(-1);
   const [listOpen, setListOpen] = useState(false);
-  const matches = filterPlaces(places, city);
+  // E-01: con el campo vacío se ve la lista completa como guía; sin coincidencias, aviso y lista completa otra vez.
+  const filtered = filterPlaces(places, city);
+  const noMatch = city.trim() !== '' && filtered.length === 0;
+  const matches = noMatch ? [...places] : filtered;
   const showList = listOpen && matches.length > 0;
 
   useEffect(() => {
@@ -55,7 +59,7 @@ export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPos
   function useCity(event) {
     event.preventDefault();
     const location = places.some(place => place.name === cityLocation(city)?.label) ? cityLocation(city) : null;
-    if (!location) { setMessage('Ese lugar no está en la lista. Elige uno de la lista o márcalo en el mapa.'); return; }
+    if (!location) { setMessage('No encontramos ese distrito. Elige uno de la lista o márcalo en el mapa.'); setListOpen(true); return; }
     onChoose(location, { remember });
   }
 
@@ -68,16 +72,19 @@ export function WhereDialog({ onChoose, onCancel, rememberedCity = false, getPos
     <form className="stacked-form where-city" onSubmit={useCity}>
       <div className="form-field">
         <label htmlFor={`${listId}-city`}>Distrito o ciudad</label>
+        <p className="field-hint" id={`${listId}-hint`}>Toca el campo para ver la lista o escribe para filtrarla.</p>
         <div className="suggest-box">
           <input id={`${listId}-city`} role="combobox" aria-autocomplete="list" aria-expanded={showList} aria-controls={`${listId}-places`}
             aria-activedescendant={showList && activeOption >= 0 ? `${listId}-place-${activeOption}` : undefined}
-            value={city} autoComplete="off" maxLength={80} placeholder="Escribe para filtrar"
+            aria-describedby={`${listId}-hint`} value={city} autoComplete="off" maxLength={80} placeholder="Ej.: Carmen Alto"
+            onFocus={() => setListOpen(true)} onClick={() => setListOpen(true)}
             onChange={event => { setCity(event.target.value); setListOpen(true); setActiveOption(-1); setMessage(''); }}
             onKeyDown={cityKeys} onBlur={() => setTimeout(() => setListOpen(false), 120)} />
+          {showList && noMatch && <p className="place-no-match" role="status">No encontramos ese distrito</p>}
           <ul id={`${listId}-places`} role="listbox" aria-label="Lugares" hidden={!showList}>{matches.map((place, index) =>
             <li key={place.name} id={`${listId}-place-${index}`} role="option" aria-selected={index === activeOption}
               onMouseDown={event => { event.preventDefault(); pick(place); }}>{place.name}</li>)}</ul>
-          <p className="visually-hidden" role="status" aria-live="polite">{city && listOpen ? `${matches.length} lugar(es)` : ''}</p>
+          <p className="visually-hidden" role="status" aria-live="polite">{city && listOpen && !noMatch ? `${matches.length} lugar(es)` : ''}</p>
         </div>
       </div>
       <label className="check-field"><input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)} />

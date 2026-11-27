@@ -60,7 +60,13 @@ Cada resultado muestra la farmacia, el producto, el precio, la distancia (si hay
 - **F031-FR-002**: La ubicación ocupa una línea pequeña: «Sin ubicación · Elegir» o «Cerca de: {lugar} (aproximado) · Cambiar».
   - La ventanita «¿Dónde buscas?» es un diálogo accesible con tres opciones:
     - «Usar mi ubicación»: una sola lectura, con permiso del navegador.
-    - Distrito o ciudad de la lista interna de F07.1: sin servicio externo y usando su centro aproximado.
+    - Distrito o ciudad de la **lista interna propia de la búsqueda** (enmienda **E-01**, aprobada por Andre el 2026-11-26, opción A):
+      - Por defecto, los 16 distritos de Huamanga (ubigeo INEI 050101–050116).
+      - El resto del Perú está desactivado por configuración (`VITE_SEARCH_PLACES_SCOPE=peru`).
+      - Sin duplicados y sin servicio externo; cada lugar usa su centro aproximado.
+      - Al enfocar el campo se ve la lista completa. Al escribir se filtra por cualquier parte del nombre, sin tildes.
+      - Sin coincidencias aparece «No encontramos ese distrito».
+      - «Mi farmacia» (F07.1) no cambia.
     - «Elegir en el mapa»: PointPicker, con el aviso de privacidad.
   - Ningún campo de latitud ni de longitud queda visible.
 - **F031-FR-003**: Una casilla opcional, «Recordar la ciudad en este navegador», guarda solo la ciudad de la lista en `localStorage`, con el mismo patrón que los filtros. La ubicación del dispositivo y el punto del mapa no se guardan nunca (D-05). Sin la casilla no se guarda nada.

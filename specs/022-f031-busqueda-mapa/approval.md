@@ -30,3 +30,12 @@
 - Si la lista es compartida con «Mi farmacia», quiere conocer antes el efecto y que no se cambie allí sin su aprobación. Si algo contradice la spec, enmienda antes.
 - Hecho, sin contradecir la spec: filtro al escribir, centro en Huamanga y casilla alineada.
 - **Pendiente de aprobación:** enmienda E-01 (`enmienda-lugares-huamanga.md`), opción A recomendada.
+
+## 2026-11-26 · Enmienda E-01 aprobada
+- Andre: «Apruebo E-01 opción A: la búsqueda tiene su propia lista, con los 16 distritos de Huamanga por defecto, y «Mi farmacia» no cambia».
+- Agregados pedidos:
+  - Al tocar o enfocar el campo se ve la lista completa de los 16 distritos.
+  - El filtro busca en cualquier parte del nombre, sin tildes ni mayúsculas; primero los que empiezan con lo escrito y luego los que lo contienen.
+  - Sin coincidencias aparece «No encontramos ese distrito» y la lista completa vuelve a estar disponible.
+  - Prueba automática de que, con el alcance Huamanga, no aparece ningún lugar de Lima ni de otra ciudad.
+- Consulta aparte (solo informar): «paracetamol 500 mg tabletas x 10» da 0 resultados.

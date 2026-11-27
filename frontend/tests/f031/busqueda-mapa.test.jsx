@@ -30,13 +30,16 @@ describe('F03.1 · ubicación de búsqueda (T005)', () => {
     expect(roundPoint({ latitude: -13.158812, longitude: -74.223949 })).toEqual({ latitude: -13.159, longitude: -74.224 });
     expect(searchLocation('gps', { latitude: 1.23456, longitude: 2 }).label).toBe('tu ubicación');
     expect(searchLocation('map', { latitude: 1, longitude: 2 }).label).toBe('el punto elegido');
-    expect(cityLocation('AYACUCHO')).toMatchObject({ source: 'city', label: 'Ayacucho', latitude: -13.159, longitude: -74.224 });
+    expect(cityLocation('AYACUCHO')).toMatchObject({ source: 'city', label: 'Ayacucho', latitude: -13.16, longitude: -74.225 });
     expect(cityLocation('Atlántida')).toBeNull();
   });
-  it('solo recuerda el NOMBRE de una ciudad de la lista; tolera almacenamiento bloqueado', () => {
-    expect(rememberCity('miraflores')).toBe(true);
-    expect(JSON.parse(window.localStorage.getItem('farmafind.search.city'))).toEqual({ nombre: 'Miraflores' });
-    expect(readRememberedCity()).toMatchObject({ label: 'Miraflores', source: 'city' });
+  it('solo recuerda el NOMBRE de un distrito de la lista activa; tolera almacenamiento bloqueado', () => {
+    expect(rememberCity('carmen alto')).toBe(true);
+    expect(JSON.parse(window.localStorage.getItem('farmafind.search.city'))).toEqual({ nombre: 'Carmen Alto' });
+    expect(readRememberedCity()).toMatchObject({ label: 'Carmen Alto', source: 'city' });
+    expect(rememberCity('Miraflores')).toBe(false); // fuera del alcance Huamanga (E-01)
+    window.localStorage.setItem('farmafind.search.city', JSON.stringify({ nombre: 'Miraflores' }));
+    expect(readRememberedCity()).toBeNull(); // una ciudad recordada fuera del alcance se ignora
     expect(rememberCity('Lugar inventado')).toBe(false);
     window.localStorage.setItem('farmafind.search.city', JSON.stringify({ nombre: 'Lugar inventado', latitud: 1 }));
     expect(readRememberedCity()).toBeNull();
@@ -144,11 +147,11 @@ describe('F03.1 · página completa (T007, T008, T010)', () => {
     fireEvent.change(within(dialog).getByLabelText('Distrito o ciudad'), { target: { value: 'Huamanga' } });
     fireEvent.click(within(dialog).getByLabelText('Recordar la ciudad en este navegador'));
     fireEvent.click(within(dialog).getByRole('button', { name: 'Usar este lugar' }));
-    await waitFor(() => expect(window.localStorage.getItem('farmafind.search.city')).toBe(JSON.stringify({ nombre: 'Huamanga' })));
+    await waitFor(() => expect(window.localStorage.getItem('farmafind.search.city')).toBe(JSON.stringify({ nombre: 'Ayacucho' }))); // «Huamanga» es sinónimo
     expect(Object.keys(window.localStorage)).toEqual(['farmafind.search.city']);
     cleanup(); // otro día: la ciudad recordada aparece y el orden por defecto es «Más cercano» (D-02)
     render(<PublicSearch client={client(page([]))} />);
-    expect(screen.getByText(/Cerca de:/).textContent).toContain('Huamanga');
+    expect(screen.getByText(/Cerca de:/).textContent).toContain('Ayacucho');
     expect(screen.getByRole('button', { name: 'Más cercano' }).getAttribute('aria-pressed')).toBe('true');
   });
   it('el diálogo se cierra con Escape (evento cancel) y Cancelar, sin cambiar nada', async () => {
@@ -196,7 +199,7 @@ describe('F03.1 · revisión de Andre: filtrar al escribir, centro en Huamanga',
     expect(filterPlaces(places, 'JESUS naz').map(p => p.name)).toEqual(['Jesús Nazareno']);
     expect(filterPlaces(places, 'san').map(p => p.name)).toEqual(['San José de Ticllas', 'San Juan Bautista']);
     expect(filterPlaces(places, 'ticllas').map(p => p.name)).toEqual(['San José de Ticllas']);
-    expect(filterPlaces(places, '')).toEqual([]);
+    expect(filterPlaces(places, '')).toHaveLength(4); // vacío → lista completa como guía
   });
   it('el combobox del diálogo filtra mientras escribes y se maneja con teclado', async () => {
     const { WhereDialog } = await import('../../src/search/WhereDialog.jsx');

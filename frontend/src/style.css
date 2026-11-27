@@ -311,3 +311,7 @@ a { color: var(--emerald-dark); }
 .where-dialog .suggest-box ul[role='listbox'] { max-height: 14rem; }
 .where-dialog li[role='option'] { padding: .5rem .6rem; border-radius: 6px; cursor: pointer; }
 .where-dialog li[role='option'][aria-selected='true'], .where-dialog li[role='option']:hover { background: var(--mint); color: var(--emerald-dark); }
+/* F03.1 E-01: aviso sin coincidencias sobre la lista de distritos. */
+.where-dialog .suggest-box { position: relative; }
+.where-dialog .place-no-match { position: absolute; z-index: 21; left: 0; right: 0; top: 100%; margin: 2px 0 0; padding: .45rem .6rem; background: var(--surface); color: var(--ink); border: 1px solid var(--control-border); border-bottom: 0; border-radius: 8px 8px 0 0; font-weight: 600; }
+.where-dialog .place-no-match + ul[role='listbox'] { top: calc(100% + 2.3rem); margin-top: 0; border-radius: 0 0 8px 8px; }

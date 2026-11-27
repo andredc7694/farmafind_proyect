@@ -94,3 +94,37 @@
   - Frontend: **268/268**.
   - F07 con PostgreSQL: 23 correctas. Sigue fallando, por entorno, la prueba de migración que necesita el clúster F01.
   - `check` correcto (325 archivos) y build correcto.
+
+## Revisión de Andre y enmienda E-01 · 2026-11-26
+- **Antes de E-01** (sin contradecir la spec):
+  - El filtro de lugares funciona al escribir y sin tildes.
+  - El mapa «Elegir el punto» abre centrado en Huamanga (`SEARCH_MAP_CENTER` -13.1603, -74.2253).
+  - La casilla «Recordar la ciudad» se alineó: antes medía 306×44 px y ahora 18×18 px.
+- **E-01 aprobada (opción A).** Nuevo `frontend/src/search/search-places.js`:
+  - Por defecto, 16 distritos con ubigeo INEI 050101–050116 y la capital de cada uno. La verificación y las fuentes están en `enmienda-lugares-huamanga.md`.
+  - Configuración `VITE_SEARCH_PLACES_SCOPE`: `huamanga` por defecto o ante un valor desconocido; `peru` suma la lista F07.1 sin duplicados.
+  - Sinónimos: «huamanga» lleva a Ayacucho y «cuzco» a Cusco.
+  - Una ciudad recordada fuera del alcance se ignora.
+  - `peru-cities.js` y «Mi farmacia» no cambian (prueba incluida).
+- **Campo «Distrito o ciudad»:**
+  - Al enfocar o tocar, muestra los 16.
+  - Filtra por cualquier parte, sin tildes ni mayúsculas: primero los que empiezan así, luego los que tienen una palabra que empieza así y después los que lo contienen.
+  - Sin coincidencias, muestra «No encontramos ese distrito» y vuelve a mostrar la lista completa.
+  - Teclado: ↑, ↓ y Enter; Escape cierra solo la lista.
+- **Pruebas:**
+  - Frontend **277/277**: 6 nuevas en `lugares-huamanga.test.jsx`, entre ellas «con el alcance Huamanga no aparece ningún lugar de Lima ni de otra ciudad», que recorre los más de 40 lugares de fuera.
+  - `check` correcto (327 archivos).
+  - En Chrome sobre la copia: al enfocar se ven 16 opciones y ninguna de Lima o de otra ciudad.
+    - «jes» → Jesús Nazareno.
+    - «san» → San José de Ticllas, San Juan Bautista y Santiago de Pischa.
+    - «juan» → San Juan Bautista.
+    - «caceres» → Andrés Avelino Cáceres Dorregaray.
+    - «nazareno» → Jesús Nazareno.
+    - «xyz» → aviso y lista completa.
+  - E2E completo: 20/20, axe sin violaciones graves, sin llamadas externas reales.
+- **Consulta de Andre** («paracetamol 500 mg tabletas x 10» da 0 resultados), solo informativa:
+  - La búsqueda F03 busca el texto completo dentro del **nombre** o del **principio activo**: `position(término in nombre)` en `f03.search_public_offers`.
+  - Los datos ficticios son correctos: nombre «paracetamol», concentración «500 mg» y presentación «tabletas x 10».
+  - El texto largo une nombre, concentración y presentación, y no aparece completo en ninguno de los dos campos; por eso da 0 resultados.
+  - Ese texto lo propone la sugerencia de tipo «presentación» de F08.1 (`suggest-public.ts`), así que la sugerencia lleva a una búsqueda vacía.
+  - Es un comportamiento anterior a F03.1 y no se cambió.
