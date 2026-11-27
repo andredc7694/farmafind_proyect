@@ -196,6 +196,7 @@ try {
       for (const item of (await suggest.execute(typed)).suggestions) seen.add(item.text);
     const empty = [];
     for (const text of seen) { const r = await search(text); if (r.paginacion.total === 0 || r.coincidencia !== 'EXACTA') empty.push([text, r.coincidencia]); }
+    console.log(JSON.stringify({ sugerencias: [...seen] }));
     ok(`T008 · las ${seen.size} sugerencias de la base real llevan a ≥ 1 resultado exacto`, seen.size >= 10 && empty.length === 0, empty);
   });
   console.log(JSON.stringify({ database, passed, results }, null, 1));

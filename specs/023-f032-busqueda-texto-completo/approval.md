@@ -33,3 +33,12 @@
 - Andre: «Doy visto bueno a los dos SQL de F03.2 con estos hashes: f03_003_search_terms.sql 374AEED785DA2AFB2C73A82406857D2C5F3B28B6E730C13F782707B6058BD922 y f07_010_search_terms_location.sql C5F0D8F990767E2DC37DCB3C0A02665B946533DF449DAB48E572882256BB873B (commit 1b2e100)».
 - Instrucciones: copiarlos sin cambios a `backend/migrations` y registrarlos en las listas cerradas de hashes; probarlos primero en una base efímera y, si hay error, detenerse y mostrar la corrección con hash nuevo sin editar los aprobados; seguir con T002, T003, la medición T011 (base temporal restaurada desde la copia y borrada al terminar) y la copia 3001/5174 para su revisión.
 - **Nada se aplica en la base de la DEMO hasta su aceptación.** El reinicio será al final, con copia de seguridad antes y aviso previo.
+
+## 2026-11-27 · Velocidad: opción A (SQL optimizado)
+- Andre: «Opción A: muéstrame el SQL optimizado con su hash». Prefiere corregir los mismos `f03/003` y `f07/010` (aún no están en `main` ni en la DEMO) si la Constitution lo permite, registrando el cambio de hash y el motivo; pide demostrar resultados idénticos (mismas filas y mismo orden) sobre la base restaurada, incluidas las 15 sugerencias, «ÁCIDO», «paracetamol 500 mg tabletas x 10» y palabras cortas, repetir la medición con unas 5000 ofertas sintéticas y anotar la opción C como mejora futura junto con la spec 020.
+- Respuesta: la Constitution lo permite (ver `evidence.md`). **Cambio de hash propuesto** (motivo: rendimiento; mismos resultados):
+  - `f03_003_search_terms.sql`: `374AEED785DA2AFB2C73A82406857D2C5F3B28B6E730C13F782707B6058BD922` → `FDCBBD7F0A7381D7C9A8700406C3A0D4C4CF84384E85B50C10AC4736E003E5BB`
+  - `f07_010_search_terms_location.sql`: `C5F0D8F990767E2DC37DCB3C0A02665B946533DF449DAB48E572882256BB873B` → `005D52E14820CEA02DC431AE9B8CFD1240B5BB8305D753B39A43CF5F5E1A3F6D`
+
+## Pendiente
+- Visto bueno de Andre a la v2 (hashes de arriba) para reemplazar los archivos de `backend/migrations` y las listas cerradas, repetir la verificación 35/35 y recrear la copia temporal con la v2.
