@@ -226,3 +226,17 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-26 · F03.1: copia temporal apagada.
   - Se borraron solo su base `farmafind_f01_test_6b49fe963285` y sus dos roles.
   - La DEMO, revisada en solo lectura, está idéntica a la foto tomada después de T018 (HUAMANFAR con 518 productos de inventario, 4 usuarios y 2 membresías), y su Redis responde.
+- 2026-11-26 · **F03.1 integrada en main:** PR #16 con merge commit `288d72a`. Se cumplieron las condiciones: CI en verde, MERGEABLE, CLEAN, sin secretos y la rama conservada.
+- 2026-11-26 · **DEMO actualizada a F03.1** con la autorización de Andre (opción A):
+  - Copia previa `.cache/f025-docker/backups/farmafind_f01_test_d0570879cf41_antes-f031_20261126.dump`: 621 855 bytes y 59 tablas de datos.
+  - La carpeta principal está en `main` `288d72a`. Se reinició con `demo-stop.ps1` y `demo-run.ps1`; no se aplicaron migraciones nuevas.
+  - Verificaciones del arranque: verify-rls 46, application-commands 51 y F04 RLS 37/37.
+  - 3000/health, 5173 y 5173/api/v1/auth/csrf responden 200.
+  - Revisión en solo lectura, idéntica a la foto tomada después de T018: HUAMANFAR activa con 518 productos de inventario, 4 importaciones, 0 reservas, 4 usuarios y 2 membresías. El dueño tiene 13 capacidades, con GEO_LOCATION_PROPOSE. La concesión del revisor está ACTIVA.
+  - La búsqueda devuelve `farmacia.ubicacion` (null mientras HUAMANFAR no esté verificada).
+  - `farmafind_f01_test` no se tocó: su contenedor está apagado y en el clúster F02.5 no existe una base con ese nombre.
+- 2026-11-26 · Con la autorización de Andre se borró la base de pruebas de T012 `farmafind_f01_test_c8f90caa7c42` y su usuario técnico `f07_test_runtime_c8f90caa7c42`. Antes se comprobó que tenía la marca TEST efímera, que no era la DEMO ni `farmafind_f01_test` y que no tenía conexiones abiertas.
+- 2026-11-26 · Andre probó F03.1 en su DEMO: propuso y aprobó la ubicación de HUAMANFAR, que ya aparece en el mapa de la búsqueda. Todo conforme. En espera de su orden; no se empieza nada.
+- 2026-11-27 · **F03.2 — Búsqueda con texto completo** (corrección prioritaria pedida por Andre). Rama `feat/f032-busqueda-texto-completo` creada desde `main` `288d72a`; spec en `specs/023-f032-busqueda-texto-completo/`.
+  - Paso Spec Kit: **specify**. Spec redactada; espera la aprobación de Andre (decisiones D-01 a D-05). No se programa ni se aplica SQL antes.
+  - Sin cambios en la DEMO, su base ni su Redis.
