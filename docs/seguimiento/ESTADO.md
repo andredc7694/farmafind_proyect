@@ -258,3 +258,6 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Base efímera: **sin errores** al aplicarlo; verificación con PostgreSQL real 35/35; base borrada; DEMO intacta y sin F03.2.
   - T001–T010 hechas (backend, contrato 0.3.0, pantalla). Pruebas: backend 645 pasan + 2 fallos de entorno conocidos (F06.1); frontend 282/282; `check` correcto.
   - Siguiente: medición T011 y copia temporal 3001/5174.
+- 2026-11-27 · F03.2, T011 (medición con 518 productos, base restaurada desde la copia de seguridad, **ya borrada**): p95 máximo 27.44 ms (cumple ≤ 100 ms) pero hasta 10.64× la búsqueda actual (no cumple «≤ 2×»). Según D-05 se presenta enmienda a Andre; no se cambia SQL sin su aprobación.
+  - Observación: en los datos reales las presentaciones dicen «caja x N» / «frasco», por eso «… tabletas» y «… capsulas» dan APROXIMADA (con aviso), como pide la spec.
+- 2026-11-27 · F03.2, T013: **copia temporal encendida** (3001/5174, base efímera con datos ficticios, sin Redis compartido ni servicios externos). E2E correcta, axe sin violaciones graves y 0 llamadas externas reales. Espera revisión de Andre.
