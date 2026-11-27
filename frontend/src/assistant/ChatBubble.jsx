@@ -122,7 +122,8 @@ export function ChatBubble({ client = defaultClient, path = typeof window === 'u
       </form>
       <p className="chat-note">No da diagnósticos, tratamientos ni dosis: consulta al químico farmacéutico. Precios y disponibilidad referenciales.</p>
     </section>}
-    {!open && <button ref={buttonRef} type="button" className="chat-toggle" aria-expanded="false" aria-controls={panelId} onClick={() => setOpen(true)}>
-      <Icon path={chatIcon} /> Preguntar a FarmaFind AI{answers.length > 0 ? ` (${answers.length})` : ''}</button>}
+    {!open && <button ref={buttonRef} type="button" className="chat-toggle" aria-expanded="false" aria-controls={panelId} onClick={() => setOpen(true)}
+      aria-label={`Preguntar a FarmaFind AI${answers.length > 0 ? ` (${answers.length})` : ''}`}>
+      <Icon path={chatIcon} /> <span className="chat-toggle-label">Preguntar a FarmaFind AI{answers.length > 0 ? ` (${answers.length})` : ''}</span></button>}
   </div>;
 }

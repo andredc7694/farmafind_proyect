@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createSessionClient } from '../identity/session-client.js';
 import { createPharmacyApplicationClient } from '../pharmacies/application-client.js';
+import { createPlatformLocationClient } from '../geolocation/my-pharmacy-clients.js';
 import { createProfileClient } from '../identity/profile-client.js';
 import { navigationFor, accountLinksFor } from './navigation.js';
 import { AccountMenu } from './AccountMenu.jsx';
@@ -9,11 +10,13 @@ import { ChatBubble } from '../assistant/ChatBubble.jsx';
 const client = createSessionClient();
 const applications = createPharmacyApplicationClient();
 const profile = createProfileClient();
+const platformLocations = createPlatformLocationClient();
 
 export function AppShell({ children, path = window.location.pathname }) {
   const [session, setSession] = useState(null);
   const [memberships, setMemberships] = useState([]);
   const [canReviewApplications, setCanReviewApplications] = useState(false);
+  const [canReviewLocations, setCanReviewLocations] = useState(false);
   const [ownApplications, setOwnApplications] = useState([]);
   // The public home still renders when the API is unavailable. A live session
   // enables the reviewer link without storing identity or grants in the browser.
@@ -27,22 +30,24 @@ export function AppShell({ children, path = window.location.pathname }) {
         const value = await client.session();
         if (!active) return;
         setSession(value);
-        if (!value) { setMemberships([]); setCanReviewApplications(false); setOwnApplications([]); return; }
-        const [own, review, requests] = await Promise.allSettled([
+        if (!value) { setMemberships([]); setCanReviewApplications(false); setCanReviewLocations(false); setOwnApplications([]); return; }
+        const [own, review, requests, locations] = await Promise.allSettled([
           client.memberships(), applications.canReview(), Promise.resolve().then(() => applications.own()),
+          platformLocations.canReview(),
         ]);
         if (!active) return;
         setMemberships(own.status === 'fulfilled' ? own.value : []);
         setCanReviewApplications(review.status === 'fulfilled');
+        setCanReviewLocations(locations.status === 'fulfilled' && locations.value === true);
         setOwnApplications(requests.status === 'fulfilled' && Array.isArray(requests.value) ? requests.value : []);
-      } catch { if (active) { setSession(null); setMemberships([]); setCanReviewApplications(false); setOwnApplications([]); } }
+      } catch { if (active) { setSession(null); setMemberships([]); setCanReviewApplications(false); setCanReviewLocations(false); setOwnApplications([]); } }
     }
     void refresh();
     window.addEventListener('farmafind:session-changed', refresh);
     return () => { active = false; window.removeEventListener('farmafind:session-changed', refresh); };
   }, [sessionAware]);
 
-  const actor = { session, memberships, canReview: canReviewApplications, applications: ownApplications };
+  const actor = { session, memberships, canReview: canReviewApplications, canReviewLocations, applications: ownApplications };
   const links = navigationFor(actor);
   async function logout() { await client.logout(); window.location.assign('/'); }
 

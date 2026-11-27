@@ -4,7 +4,7 @@ import { createReservationsClient } from '../reservations/reservations-client.js
 import { PharmacyReservations } from '../reservations/PharmacyReservations.jsx';
 import { InventoryView } from '../inventory/InventoryView.jsx';
 import { StaffAdmin } from '../identity/StaffAdmin.jsx';
-import { LocationAdmin } from '../geolocation/LocationAdmin.jsx';
+import { MyPharmacy } from './MyPharmacy.jsx';
 import { PharmacySummary } from './PharmacySummary.jsx';
 import { panelSections } from '../app/navigation.js';
 
@@ -107,7 +107,7 @@ export function PharmacyPanel({ sessionClient: injectedSession, reservationsClie
       <button type="button" aria-current={item.id === activeSection ? 'true' : undefined} onClick={() => setSectionId(item.id)}>{item.label}</button></li>)}</ul></nav>
     <div key={`${pharmacyId}:${activeSection}`}>
       {activeSection === 'resumen' && <PharmacySummary pharmacyId={pharmacyId} capabilities={codes} />}
-      {activeSection === 'farmacia' && <LocationAdmin pharmacyId={pharmacyId} delegationCodes={codes} />}
+      {activeSection === 'farmacia' && <MyPharmacy pharmacyId={pharmacyId} codes={codes} />}
       {activeSection === 'inventario' && <InventoryView pharmacyId={pharmacyId} section="inventario" capabilities={codes.filter(code => !importCapabilities.includes(code))} />}
       {activeSection === 'importar' && <InventoryView pharmacyId={pharmacyId} section="importar" capabilities={codes.filter(code => code === 'inventory.read' || importCapabilities.includes(code))} />}
       {activeSection === 'reservas' && <PharmacyReservations client={reservationsClient} pharmacyId={pharmacyId} capabilities={codes} showSettings={false} showTabs={false} />}

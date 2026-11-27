@@ -4,6 +4,7 @@ import { EmptyState } from '../design/Primitives.jsx';
 import { SuggestBox } from './SuggestBox.jsx';
 import { PointPicker } from '../geolocation/PointPicker.jsx';
 import { comparableFor, priceGapCents } from './comparable.js';
+import { PublicOpeningHours, usePublicOpeningHours } from '../geolocation/OpeningHours.jsx';
 import { forgetFilters, parseFilters, readRememberedFilters, rememberFilters, serializeFilters } from './filters-state.js';
 
 const money = cents => `S/ ${(cents / 100).toFixed(2)}`;
@@ -24,6 +25,7 @@ export function PublicSearch({ client = createPublicSearchClient() }) {
   const [order, setOrder] = useState(start.order);
   const [remember, setRemember] = useState(start.remembered);
   const [result, setResult] = useState(null);
+  const hours = usePublicOpeningHours(result?.ofertas?.map(offer => offer.farmacia.id) ?? []);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [location, setLocation] = useState(null);
@@ -108,6 +110,7 @@ export function PublicSearch({ client = createPublicSearchClient() }) {
           <label className="compare-select"><input type="checkbox" checked={selectedOffers.includes(index)} disabled={!selectedOffers.includes(index) && selectedOffers.length >= 3} onChange={() => setSelectedOffers(current => current.includes(index) ? current.filter(value => value !== index) : [...current, index])} /> Comparar esta oferta</label>
           <h2>{offer.medicamento.nombreComercial}</h2><p>{offer.medicamento.principioActivo} · {offer.medicamento.concentracion}</p>
           <p>{offer.medicamento.presentacion}</p><h3>{offer.farmacia.nombre}</h3><p>{offer.farmacia.direccion}</p>
+          <PublicOpeningHours days={hours[offer.farmacia.id]} />
           <strong>{money(offer.precioReferencialCentavos)}</strong>
           {others.length > 0 && <p className="comparables">{gap === 0 ? 'Es el precio más bajo de esta página. ' : `${money(gap)} más que el más bajo de esta página. `}
             También en: {others.map(other => `${other.pharmacy} (${money(other.priceCents)})`).join(', ')}.</p>}

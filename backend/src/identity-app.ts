@@ -76,6 +76,16 @@ import { createGeolocationRouter } from './modules/busqueda/presentation/geoloca
 import { PgLocationUnitOfWork } from './modules/farmacias/infrastructure/location-unit-of-work.js';
 import { ManagePharmacyLocation } from './modules/farmacias/application/manage-pharmacy-location.js';
 import { createLocationRouter } from './modules/farmacias/presentation/location-router.js';
+import { PlatformLocationReview } from './modules/farmacias/application/platform-location-review.js';
+import { PgPlatformLocationUnitOfWork } from './modules/farmacias/infrastructure/platform-location-repository.js';
+import { createPlatformLocationsRouter } from './modules/farmacias/presentation/platform-locations-router.js';
+import { ManageOpeningHours, ReadPublicOpeningHours } from './modules/farmacias/application/manage-opening-hours.js';
+import { PgOpeningHoursUnitOfWork, PgPublicOpeningHours } from './modules/farmacias/infrastructure/opening-hours-repository.js';
+import { RedisOpeningHoursCache } from './modules/busqueda/infrastructure/redis-opening-hours-cache.js';
+import { createOpeningHoursRouter } from './modules/farmacias/presentation/opening-hours-router.js';
+import { AddressSuggestions } from './modules/farmacias/application/address-suggestions.js';
+import { NominatimGeocoder } from './modules/farmacias/infrastructure/nominatim-geocoder.js';
+import { createAddressSuggestionsRouter } from './modules/farmacias/presentation/address-suggestions-router.js';
 import { PgPharmacyUnitOfWork } from './modules/farmacias/infrastructure/pharmacy-unit-of-work.js';
 import { ManageApplications } from './modules/farmacias/application/manage-applications.js';
 import { createPharmacyApplicationRouter } from './modules/farmacias/presentation/application-router.js';
@@ -102,6 +112,8 @@ export interface LocalIdentityRuntimeConfig {
   reservations?: ReservationRuntimeConfig;
   /** F07 is limited to isolated local TEST databases until persistent migration is authorized. */
   geolocationTest?: true;
+  /** F071-FR-016: sugerencia de dirección del formulario F07.1. Apagada salvo que la composición TEST/DEMO la pida. */
+  addressSuggestions?: 'nominatim';
   /** F02.5 routes are never mounted on persistent or production databases. */
   pharmaciesTest?: true;
 }
@@ -217,8 +229,18 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
         new InMemoryReviewedSourceCatalog([]), new F03ConversationPublicTools(publicGateway), new InMemoryConversationStore())));
     }
     if (config.geolocationTest) {
-      app.use('/api/v1', createLocationRouter(identity,
-        new ManagePharmacyLocation(new PgLocationUnitOfWork(tenantTransactions), invalidator), http));
+      const locationManagement = new ManagePharmacyLocation(new PgLocationUnitOfWork(tenantTransactions), invalidator);
+      // F071-FR-013/016: la sugerencia se monta antes que el router F07 (que analiza JSON en todas sus rutas).
+      app.use('/api/v1', createAddressSuggestionsRouter(identity, locationManagement,
+        new AddressSuggestions(config.addressSuggestions === 'nominatim' ? new NominatimGeocoder() : null), http));
+      app.use('/api/v1', createLocationRouter(identity, locationManagement, http));
+      // F07.1: revisión de plataforma (solo datos públicos) y horario de atención.
+      app.use('/api/v1', createPlatformLocationsRouter(identity,
+        new PlatformLocationReview(new PgPlatformLocationUnitOfWork(tenantTransactions), invalidator), http));
+      const hoursCache = redisClient ? new RedisOpeningHoursCache(redisClient) : undefined;
+      app.use('/api/v1', createOpeningHoursRouter(identity,
+        new ManageOpeningHours(new PgOpeningHoursUnitOfWork(tenantTransactions), hoursCache),
+        new ReadPublicOpeningHours(new PgPublicOpeningHours(tenantPool), hoursCache), http));
     }
     app.use('/api/v1', createInventoryRouter(new ManualInventory(inventoryTransactions, invalidator), http));
     const previewImport = new PreviewImport(inventoryTransactions);

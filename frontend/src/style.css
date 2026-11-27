@@ -99,6 +99,38 @@ a { color: var(--emerald-dark); }
 .pharmacy-choices li { margin: 0 !important; }
 .search-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: .8rem; }
 .notice, .status-notice { padding: .85rem 1rem; background: var(--tint); border-left: 4px solid var(--emerald); border-radius: 7px; line-height: 1.5; }
+/* F07.1: formulario con etiquetas encima y espacio para la burbuja del asistente. */
+.stacked-form { display: grid; gap: .9rem; }
+.stacked-form .form-field { display: grid; gap: .3rem; }
+.stacked-form .form-field > label { font-weight: 600; }
+.stacked-form .form-field input { width: 100%; max-width: 36rem; box-sizing: border-box; }
+.stacked-form .input-with-action { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.stacked-form .input-with-action input { flex: 1 1 16rem; }
+.stacked-form .check-field { display: flex; gap: .5rem; align-items: flex-start; }
+.stacked-form .advanced-options { border: 1px dashed var(--line, #c9d6d1); border-radius: 7px; padding: .5rem .8rem; }
+.stacked-form .advanced-options summary { cursor: pointer; font-weight: 600; }
+.stacked-form button[type="submit"] { justify-self: start; }
+.my-pharmacy { padding-bottom: 7rem; } /* la burbuja flotante no tapa «Enviar propuesta» */
+@media (max-width: 640px) { /* F07.1: con un formulario en pantalla, la burbuja queda solo como icono */
+  body:has(.stacked-form) .chat-toggle-label { display: none; }
+  body:has(.stacked-form) .chat-toggle { padding: .7rem; }
+}
+.point-marker { width: 22px; height: 22px; border-radius: 50%; background: #176b52; border: 3px solid #fff; box-shadow: 0 0 0 2px #176b52; cursor: grab; }
+/* F07.1: historial de «Revisar ubicaciones». */
+.location-review { width: min(1180px, calc(100% - 48px)); margin: 2rem auto 3rem; }
+@media (max-width: 700px) { .location-review { width: calc(100% - 32px); margin-top: 1.25rem; } }
+.review-filter { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.review-filter button { min-height: 44px; padding: .5rem .9rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; font: inherit; cursor: pointer; }
+.review-filter button:hover { border-color: var(--emerald-dark); }
+.review-filter button[aria-pressed="true"] { background: var(--mint); color: var(--emerald-dark); border-color: var(--emerald-dark); font-weight: 700; }
+.history-facts { display: grid; grid-template-columns: minmax(6rem, max-content) 1fr; gap: .25rem .8rem; margin: 0; }
+.history-facts dt { font-weight: 600; }
+.history-facts dd { margin: 0; overflow-wrap: anywhere; }
+.decision-form { margin-top: .8rem; }
+.public-hours summary { cursor: pointer; }
+.public-hours ul { margin: .35rem 0 0; padding-left: 1.1rem; }
+.opening-day { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; }
+.location-history { padding-left: 1.2rem; line-height: 1.5; }
 .field-warning { margin: .35rem 0 .75rem; padding: .55rem .8rem; border-left: 4px solid currentColor; border-radius: 6px; background: var(--tint); line-height: 1.45; }
 [role="alert"] { color: var(--danger); }
 .offer-grid { list-style: none; padding: 0 !important; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; }

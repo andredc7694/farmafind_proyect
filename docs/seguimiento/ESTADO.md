@@ -130,3 +130,61 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
 - 2026-11-26 · Mejora de «Personal» aprobada por Andre (usuario para entrar visible y aviso de nombre parecido a usuario) en `feat/f011-personal-usuario-visible`; solo frontend. Pendiente de su revisión en la DEMO.
 - 2026-11-26 · Forma de trabajo reiterada por Andre: cada corrección se registra como pendiente con fecha y no se empieza sin su orden; cada cambio aprobado va en su rama, con PR y fusión solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
 - 2026-11-26 · **Mejora «usuario visible» de Personal ACEPTADA por Andre**; autorizada su integración a `main`. F02.5 sigue SIN ACEPTAR (T057 y T063 sin marcar); spec 020 en opción A.
+- 2026-11-26 · **Pedido de Andre:** incremento nuevo «Mi farmacia: datos, ubicación y horario» (F07.1, parte de MEJ-006 y RF21; MEJ-006 no completa). Incluye pestaña «Mi farmacia», revisión de ubicaciones y direcciones por el administrador de plataforma, `GEO_LOCATION_PROPOSE` para propietarios nuevos y reparados (SQL a revisar antes), horario P2 y acceso visible a «Mi perfil».
+- 2026-11-26 · F07.1 en `feat/f071-mi-farmacia`, `specs/021-f071-mi-farmacia/spec.md` (*specify*). **Pendiente de aprobación de Andre** y de las decisiones D-01 a D-05. No se toca la DEMO ni lo aprobado de F07. F02.5 sigue SIN ACEPTAR (T057 y T063 sin marcar); spec 020 en opción A.
+- 2026-11-26 · F07.1: **spec aprobada por Andre** («apruebo»). D-01 a D-05 y T057 con la opción A recomendada, pendientes de confirmar. Plan, research, data-model, contrato y quickstart listos; borrador SQL `f025/017` (permiso GEO_LOCATION_PROPOSE, hash `CC87C988…1B9A`) sin registrar ni ejecutar. **Pendiente: aprobación del plan y del SQL.** Los SQL de F07 (`f07/007`, `f07/008`) se escribirán tras esa aprobación porque F07 aplica su carpeta sola.
+- 2026-11-26 · F07.1: **plan y SQL `f025/017` aprobados por Andre**; D-01 a D-05 y T057 confirmadas en A. Hash de la 017 registrado en `migrate-f025.ts` (ninguna migración ni hash aprobado editado). `tasks.md` generado: **pendiente de su aprobación**. El SQL de `f07/007` y `f07/008` se mostrará completo antes de escribirlo en migraciones.
+- 2026-11-26 · T057 (opción A): Andre hace ahora el recorrido de cinco farmacias **sin el mapa**; registrada la omisión conocida «ubicación en mapa pendiente de F07.1». Mientras tanto: no apagar, reiniciar ni modificar su DEMO ni usar sus puertos. Spec 020 usará `f025/018`.
+- 2026-11-26 · F07.1: **tasks aprobadas** por Andre. T001–T002 hechas: SQL `f07/007` y `f07/008` en `specs/021-f071-mi-farmacia/sql-review/` con matriz de pruebas, **sin ejecutar, pendiente de su revisión (T003)**. Aviso: dos políticas nuevas de solo lectura en tablas F01 para el rol interno `f071_policy`; ninguna política de F07 ni restricción de F025 tocada.
+- 2026-11-26 · F07.1: **SQL `f07/007` y `f07/008` aprobados por Andre**; T003 hecha. Se ejecutan solo en bases TEST efímeras y marcadas, nunca en `farmafind_f01_test`. Lista cerrada de migraciones F07 con hashes para 007 y 008. El administrador de la DEMO tiene `ADMINISTRADOR_PLATAFORMA`. Siguiente: servidor y pantalla sin puertos (T004–T011). T018 (concesión en la DEMO) pendiente de autorización expresa.
+- 2026-11-26 · F07.1: T004–T011 hechas sin usar los puertos de la DEMO. Servidor: revisión de plataforma, estado e historial, límites del Perú y horario. Pantalla: «Mi farmacia», «Revisar ubicaciones», horario público y `/mi-perfil`. Pruebas: backend geolocalización 45, frontend 246/246, `check` y build correctos. Corregido un `check` fallido que se había anotado como correcto (regla de Redis y contratos). **Pendiente: T012–T016 con base de datos y navegador, después de T057**; T018 (concesión en la DEMO) espera autorización expresa.
+- 2026-11-26 · F07.1: **copia temporal de revisión visual** autorizada por Andre en http://localhost:5174 (API 127.0.0.1:3001), rama feat/f071-mi-farmacia, con una base TEST efímera nueva (farmafind_f01_test_0627f4917a55) en el servidor 55431 y datos ficticios (dueño, farmacia aprobada y administrador con revisión de ubicaciones). Sin Redis compartido (la copia apunta a un Redis inexistente), sin tocar la DEMO (3000/5173), su base ni farmafind_f01_test. Configuración temporal solo en .cache (fuera de git). No demuestra nada de HUAMANFAR. Al terminar Andre: apagar la copia y borrar solo su base efímera y sus dos roles de conexión.
+- 2026-11-26 · **Pedido de Andre (pendiente, sin empezar):** mejora del formulario «Proponer dirección y ubicación» de F07.1: «Buscar en el mapa» con Nominatim (OSM) a través del servidor, búsqueda inversa al mover el marcador, respaldo con lista interna de ciudades del Perú, fuente automática, evidencia opcional, coordenadas en «avanzado», orden visual, interruptor para apagar el servicio y pruebas simuladas. **Detenido:** el plan aprobado de F07 y la spec aprobada de F07.1 excluyen expresamente la geocodificación externa; la Constitution no lo prohíbe. Requiere enmienda aprobada por Andre antes de programar. No exige cambiar los SQL 007 ni 008.
+- 2026-11-26 · F07.1: **enmienda «sugerencia de dirección y ubicación» aprobada por Andre (A)**: F071-FR-013 a FR-016 y T020 a T025 registrados; decisión R-06 (Nominatim gratuito, solo este formulario, interruptor apagado por defecto fuera de TEST/DEMO, revisión en F09). En implementación.
+- 2026-11-26 · F07.1 enmienda: T020–T023 y T025 hechas (sugerencia de dirección con Nominatim solo en el formulario, límite 1/s, caché, interruptor; respaldo de ciudades; formulario ordenado; burbuja como icono en pantallas estrechas). Pruebas simuladas: backend 55, frontend 253, `check` y build correctos. En la copia temporal para la revisión de Andre (T024). DEMO y su Redis intactos.
+- 2026-11-26 · **Mejora pendiente (para después de T063; no se toca F02.5 mientras está en aceptación):** «Usar la misma ayuda de dirección y mapa en el formulario de registro de farmacia». Hoy «Registrar mi farmacia» pide la dirección solo como texto (dirección, departamento, provincia y distrito), sin punto en el mapa. Sin empezar hasta orden de Andre.
+- 2026-11-26 · F07.1: **T024 conforme por Andre** (formulario de dirección y ubicación revisado en la copia temporal).
+- 2026-11-26 · **Pedido de Andre:** historial de decisiones en «Revisar ubicaciones» (filtro y paginación) y formulario de decisión ordenado. Requiere las políticas nuevas `f07/009` (borrador fuera de migraciones, hash `21B8A3F6…45BF`) y la enmienda F071-FR-017/018 con D-06: **propuesta presentada, pendiente de aprobación**. Sin código del historial todavía.
+- 2026-11-26 · Mejora pendiente ampliada (después de T063, sin empezar): además de la ayuda de dirección y mapa en el registro, que «Mi farmacia» traiga llenos el departamento, la provincia, el distrito y la dirección del registro y centre el mapa en ese distrito.
+- 2026-11-26 · Pendiente de investigar (no bloquea): una corrida del frontend reportó 52 archivos y 250 pruebas, sin fallos, en lugar de 53/253; al repetirla dio 53/253.
+- 2026-11-26 · F07.1: **enmienda del historial aprobada por Andre** (FR-017/018, D-06 A, SQL `f07/009`). T026–T027 hechas: 009 copiada sin cambios y registrada con su hash. En implementación (T028–T031).
+- 2026-11-26 · F07.1: **historial de «Revisar ubicaciones» (enmienda D-06 A y SQL 009 aprobados)** T026–T031 hechas.
+  - Pruebas: backend geolocalización 59 en verde y 15 omitidas; frontend 256/256; `check` correcto.
+  - Matriz H1 a H8: 18/18 en la base efímera de la copia, con transacción revertida.
+  - Se ve en la copia (5174) con datos ficticios.
+  - Docker Desktop se había detenido. Con permiso de Andre se encendieron solo los contenedores f025-postgres y f03-search-redis, sin reiniciar la DEMO.
+  - Sin PR.
+  - Pendientes: T012–T019 tras T057; apagar la copia cuando Andre lo diga; corrida del frontend por investigar. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · F07.1: Andre dio por bueno el historial. Se ajustó el estilo de «Revisar ubicaciones» (margen y botones del filtro), comprobado en la copia.
+  - DEMO revisada en solo lectura: los datos están intactos. HUAMANFAR tiene 518 productos de inventario y la búsqueda pública funciona.
+  - **Copia temporal apagada.** Se borraron solo su base efímera y sus dos roles.
+  - El resto de F07.1 (T012–T019, la autorización de T018, el reinicio final y la comprobación de HUAMANFAR) espera a que Andre termine T057.
+  - Sin PR. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · Andre da por conforme el ajuste visual y el cierre de la copia. Confirma que la tercera propuesta aprobada en la copia («esta bien la direccion») la aprobó él durante su revisión.
+- 2026-11-26 · **Corrección pendiente (sin empezar, espera orden de Andre):** revisar el margen de «Revisar solicitudes» (`/admin/farmacias/solicitudes`) y «Mi perfil» (`/mi-perfil`) para que tengan el mismo estilo que «Revisar ubicaciones». Irá en su propia rama cuando se apruebe.
+- 2026-11-26 · Andre todavía no hará T057; antes enviará más correcciones del sistema. Cada corrección se registra como pendiente al llegar y solo se trabaja lo que él ordene. No tocar la DEMO ni sus puertos sin avisar. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · **Cambio de plan de Andre:** pospone T057 y autoriza usar su DEMO para terminar F07.1. Antes de apagarla o reiniciarla hay que avisarle, y T018 solo se ejecuta con su autorización después de que vea el comando.
+  - T012–T017 hechas en bases efímeras del clúster F02.5, ya borradas:
+    - 017: 51/51.
+    - Matriz RLS: 46/46.
+    - E2E: 11/11, sin servicios externos.
+    - Regresión del CI en verde; F07 con base de datos: 23 correctas; suites aplicables de F02.5 correctas.
+    - Revisión de seguridad de las migraciones correcta.
+  - Foto «antes» de la DEMO, en solo lectura: HUAMANFAR con 518 de inventario, 4 importaciones, 0 reservas, 4 usuarios y 2 membresías; el dueño tiene 12 capacidades, sin GEO_LOCATION_PROPOSE.
+  - **Pendiente:** autorización de Andre para el reinicio y para T018; después, la aceptación (T019) y el PR.
+  - La corrección de márgenes sigue pendiente y fuera de este PR. T057 y T063 sin marcar, F02.5 sin aceptar, spec 020 en opción A.
+- 2026-11-26 · F07.1 **T018 hecha** con la autorización de Andre:
+  - Copia de seguridad previa: `.cache/f025-docker/backups/…antes-f071_20261126.dump`, de 594 522 bytes.
+  - Reinicio con f07/007–009 y f025/017 solo en las bases TEST marcadas.
+  - Concesión de revisión ACTIVA para el revisor de la DEMO.
+  - HUAMANFAR intacto: 518 de inventario, 4 usuarios y 2 membresías. Su dueño tiene ahora GEO_LOCATION_PROPOSE.
+  - `farmafind_f01_test` no se tocó.
+  - La carpeta principal está separada de la rama en `a7c5f01` y sirve la DEMO.
+  - **Pendiente:** aceptación de Andre (T019) y, después, el PR.
+- 2026-11-26 · **F07.1 ACEPTADA por Andre** (T019), tras probarla en su DEMO con HUAMANFAR y el revisor. Registrada en `acceptance.md` y en `approval.md`. Siguiente paso: PR y merge a main con las condiciones de siempre.
+- 2026-11-26 · **Pendientes registrados, sin empezar (solo con orden de Andre):**
+  - Márgenes de «Revisar solicitudes» y «Mi perfil».
+  - Ayuda de dirección y mapa en el registro de farmacia, y que «Mi farmacia» traiga llenos el departamento, la provincia, el distrito y la dirección (después de T063).
+  - Investigar la corrida del frontend que dio 52 archivos y 250 pruebas.
+  - Andre enviará más mejoras: registrarlas como pendientes al llegar.
+  - T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.

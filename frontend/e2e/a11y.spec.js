@@ -65,7 +65,7 @@ for (const mode of ['CLARO', 'OSCURO']) {
     const second = await newPage(browser); await login(second.page, owner); await setTheme(second.page, mode);
     await open(second.page, '/farmacias/panel'); await setTheme(second.page, mode);
     expect.soft((await scan(second.page, 'panel de farmacia', mode)).map(v => v.id), `panel (${mode})`).toEqual([]);
-    for (const label of ['Inventario', 'Reservas', 'Historial', 'Personal', 'Configuración', 'Farmacia y ubicación']) {
+    for (const label of ['Inventario', 'Reservas', 'Historial', 'Personal', 'Configuración', 'Mi farmacia']) {
       const tab = second.page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button', { name: label });
       if (await tab.count()) { await tab.click(); await second.page.waitForTimeout(400); expect.soft((await scan(second.page, `panel · ${label}`, mode)).map(v => v.id), `${label} (${mode})`).toEqual([]); }
     }

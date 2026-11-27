@@ -23,6 +23,7 @@ const reviewed = new Map<string,string>([
   ['014_private_profile_test.sql','9A0F2801DDC4CBD1BB73C94DED841152E59B9B3B5FFC1EA38AAE36F9A3996FC7'],
   ['015_application_notifications_test.sql','BF5C3300B818223DD99BFDC728CBAE0B360339BC9CB38C568661DF7FD275F857'],
   ['016_owner_staff_manage_test.sql','2667F61535861CB30852A3ACE1A867015A7AE68245EF254F9AFEBADCC7DF27AE'],
+  ['017_owner_location_test.sql','CC87C9880E82DAC6796F11A0755FA8E880ED45CB68EECF35A93C6FCE7F131B9A'],
 ]);
 
 /** F02.5 schema is deliberately unavailable to the persistent F01 database. */
