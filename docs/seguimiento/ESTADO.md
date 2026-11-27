@@ -188,3 +188,5 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Investigar la corrida del frontend que dio 52 archivos y 250 pruebas.
   - Andre enviará más mejoras: registrarlas como pendientes al llegar.
   - T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · **F07.1 integrada en main:** PR #15, merge commit `264469c`, con CI en verde, MERGEABLE y CLEAN, sin secretos y con la rama conservada. La carpeta principal quedó en `main` actualizado; la DEMO no se reinició porque solo cambiaron documentos.
+- 2026-11-26 · Andre confirma el merge de F07.1. **Nuevo incremento F03.1, «Búsqueda simplificada y mapa interactivo»** (MEJ-007/008), en la rama `feat/f031-busqueda-mapa` (desde `264469c`), con la spec `specs/022-f031-busqueda-mapa/`. Fase *specify*: **pendiente de su aprobación**; no se programa antes.
