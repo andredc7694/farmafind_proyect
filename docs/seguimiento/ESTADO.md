@@ -211,3 +211,18 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Campo de lugar: lista completa al enfocar, filtro por cualquier parte sin tildes y aviso «No encontramos ese distrito».
   - Pruebas: frontend 277/277; E2E en la copia 20/20.
   - Consulta de Andre: el 0 de «paracetamol 500 mg tabletas x 10» se debe a que la búsqueda compara el texto completo con el nombre o el principio activo, y la sugerencia «presentación» de F08.1 propone ese texto largo. No se cambió; queda para decidir.
+- 2026-11-26 · **F03.1 ACEPTADA CON OBSERVACIONES por Andre** (T018), registrada en `acceptance.md` y `approval.md`. Siguiente: PR y merge a `main` con las condiciones de siempre.
+- 2026-11-26 · **Corrección pendiente PRIORITARIA, sin empezar:** la búsqueda debe encontrar resultados cuando el texto junta nombre, concentración y presentación (por ejemplo, «paracetamol 500 mg tabletas x 10»), y ninguna sugerencia del buscador debe llevar a una búsqueda vacía.
+- 2026-11-26 · **Para F09, antes de cualquier despliegue real:**
+  - revisar la configuración `geolocationTest` (también controla si la búsqueda entrega coordenadas);
+  - revisar el alcance de lugares `VITE_SEARCH_PLACES_SCOPE` (por defecto `huamanga`);
+  - revisar el uso de las imágenes de OpenStreetMap: términos, límites y proveedor para producción.
+- 2026-11-26 · **Pendientes, sin empezar:**
+  - Búsqueda con texto completo (prioritaria).
+  - Márgenes de «Revisar solicitudes» y «Mi perfil».
+  - Ayuda de dirección en el registro (después de T063).
+  - Corrida de pruebas por investigar.
+  - T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · F03.1: copia temporal apagada.
+  - Se borraron solo su base `farmafind_f01_test_6b49fe963285` y sus dos roles.
+  - La DEMO, revisada en solo lectura, está idéntica a la foto tomada después de T018 (HUAMANFAR con 518 productos de inventario, 4 usuarios y 2 membresías), y su Redis responde.

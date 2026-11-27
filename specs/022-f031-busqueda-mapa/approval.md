@@ -39,3 +39,12 @@
   - Sin coincidencias aparece «No encontramos ese distrito» y la lista completa vuelve a estar disponible.
   - Prueba automática de que, con el alcance Huamanga, no aparece ningún lugar de Lima ni de otra ciudad.
 - Consulta aparte (solo informar): «paracetamol 500 mg tabletas x 10» da 0 resultados.
+
+## 2026-11-26 · Aceptación (T018)
+- Andre: **ACEPTO CON OBSERVACIONES F03.1** (búsqueda simplificada, mapa interactivo y E-01 opción A). Lo revisó en la copia temporal.
+- Observación: corrección pendiente **prioritaria** y sin empezar, la búsqueda con texto completo (nombre + concentración + presentación), para que ninguna sugerencia lleve a una búsqueda vacía.
+- Autoriza:
+  - apagar la copia y borrar solo su base efímera y sus dos usuarios técnicos;
+  - abrir el PR y hacer el merge a `main` con merge commit (MERGEABLE, CLEAN, CI en verde, sin secretos, regresión correcta y sin force push).
+- Después: dejar la carpeta principal en `main` actualizado. Si la DEMO necesita reiniciarse, avisar antes y hacer copia de seguridad.
+- Para F09: revisar `geolocationTest`, `VITE_SEARCH_PLACES_SCOPE` y las imágenes de OpenStreetMap antes de cualquier despliegue real.

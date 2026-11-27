@@ -128,3 +128,12 @@
   - El texto largo une nombre, concentración y presentación, y no aparece completo en ninguno de los dos campos; por eso da 0 resultados.
   - Ese texto lo propone la sugerencia de tipo «presentación» de F08.1 (`suggest-public.ts`), así que la sugerencia lleva a una búsqueda vacía.
   - Es un comportamiento anterior a F03.1 y no se cambió.
+
+## T016–T018 · 2026-11-26
+- **T016:** Andre revisó la copia temporal (3001/5174) con datos ficticios.
+- **T017 (revisión de seguridad):**
+  - Los nombres y direcciones de farmacia nunca se insertan como HTML: el icono del mapa solo lleva el precio formateado y la tarjeta se arma con nodos de texto. Hay una prueba con un nombre hostil.
+  - No se publican datos nuevos: `ubicacion` solo trae coordenadas verificadas que F07 ya publica, y con F07 activo.
+  - La ubicación del visitante no se guarda: se redondea a unos 100 m, no encuadra el mapa y solo se recuerda el nombre del distrito, con la casilla.
+  - Sin librerías ni servicios nuevos. Las pruebas no hacen llamadas externas.
+- **T018:** aceptación con observaciones en `acceptance.md`.
