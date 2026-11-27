@@ -155,3 +155,8 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Docker Desktop se había detenido. Con permiso de Andre se encendieron solo los contenedores f025-postgres y f03-search-redis, sin reiniciar la DEMO.
   - Sin PR.
   - Pendientes: T012–T019 tras T057; apagar la copia cuando Andre lo diga; corrida del frontend por investigar. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
+- 2026-11-26 · F07.1: Andre dio por bueno el historial. Se ajustó el estilo de «Revisar ubicaciones» (margen y botones del filtro), comprobado en la copia.
+  - DEMO revisada en solo lectura: los datos están intactos. HUAMANFAR tiene 518 productos de inventario y la búsqueda pública funciona.
+  - **Copia temporal apagada.** Se borraron solo su base efímera y sus dos roles.
+  - El resto de F07.1 (T012–T019, la autorización de T018, el reinicio final y la comprobación de HUAMANFAR) espera a que Andre termine T057.
+  - Sin PR. T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.

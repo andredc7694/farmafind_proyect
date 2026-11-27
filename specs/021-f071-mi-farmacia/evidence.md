@@ -57,3 +57,15 @@
   - En Chrome a 1280 y a 390 px se ven los tres filtros, las tarjetas con los campos aprobados y la paginación, sin desplazamiento lateral.
   - La primera captura de «Rechazadas» en PC mostró «Cargando…» porque el guion no esperó a que terminara la carga; a 390 px sí se ve la tarjeta.
   - La DEMO (3000 y 5173) respondió 200 y no se tocó.
+
+## Ajuste visual y cierre de la copia · 2026-11-26
+- Andre revisó el historial en la copia y lo dio por bueno. Pidió dos ajustes visuales: margen en «Revisar ubicaciones» y botones del filtro con el estilo de FarmaFind (borde, 44 px de alto y fondo menta en el activo). El cambio solo afecta a esa página. Se comprobó en Chrome a 1280 y a 390 px, sin desplazamiento lateral. Frontend 256/256, `check` correcto y build correcto.
+- Revisión de la DEMO **en solo lectura** (transacción READ ONLY revertida, sin escrituras), en la base `farmafind_f01_test_d0570879cf41`:
+  - HUAMANFAR publicada.
+  - 518 productos de inventario, 518 movimientos y 518 medicamentos.
+  - 4 usuarios y 2 membresías.
+  - La búsqueda pública devuelve ofertas de HUAMANFAR; por ejemplo, «para» encuentra paracetamol.
+  - Redis responde a PING. Está vacío porque es solo caché y se vuelve a llenar sola.
+- Copia apagada: se detuvieron solo los procesos de 3001 y 5174.
+- Se borraron solo la base `farmafind_f01_test_0627f4917a55` (antes se comprobó su marca TEST y que no tuviera conexiones) y los roles `ff_f071c_auth_0627f4917a55` y `ff_f071c_runtime_0627f4917a55`. Comprobación posterior: no queda ni la base ni ningún rol; la base de la DEMO sigue ahí.
+- La DEMO (3000 y 5173) responde 200 y no se tocó.
