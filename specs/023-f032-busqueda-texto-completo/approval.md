@@ -16,5 +16,17 @@
   - Agregar a la spec: si se busca solo una presentación o concentración sin nombre («tabletas», «500 mg»), mostrar la ayuda «Escribe también el nombre del medicamento, por ejemplo: paracetamol 500 mg». Hecho como **F032-FR-013**; no exige enmendar otra spec (es un estado vacío explícito, compatible con F03-FR-002, y viaja en el campo `coincidencia` ya aprobado en D-03).
 - Siguiente: plan, tasks y SQL para su aprobación antes de aplicar nada.
 
+
+## 2026-11-27 · Plan y tasks aprobados; SQL aprobado con correcciones
+- Andre: «Apruebo el plan y las tareas de F03.2 (commit 6d90f9d)». El SQL, con dos correcciones en el borrador antes de aplicarlo:
+  1. `hay_nombre` y `hay_todo` con `concat_ws(' ', …)` en lugar de `||`, para que una concentración o presentación en NULL no anule el texto. Con prueba de un producto sin presentación y otro sin concentración.
+  2. En `normalize_search_text`, también las mayúsculas con tilde en el `translate` (o demostrar que `lower()` las convierte). Prueba de «ÁCIDO», «Ácido» y «acido» en la base real.
+  - Prueba adicional: palabras de una sola letra o muy cortas no devuelven todo el catálogo.
+- Hecho en el borrador (commit `1b2e100`); además, la función ignora palabras de menos de 2 letras. Nuevos SHA-256 (texto con LF):
+  - `sql/f03_003_search_terms.sql`: `374AEED785DA2AFB2C73A82406857D2C5F3B28B6E730C13F782707B6058BD922`
+  - `sql/f07_010_search_terms_location.sql`: `C5F0D8F990767E2DC37DCB3C0A02665B946533DF449DAB48E572882256BB873B`
+- Autoriza encender el contenedor del servidor de pruebas para T011, y encender la DEMO con `demo-run.ps1` sin borrar datos, verificando en solo lectura que siguen intactos. **Nada de F03.2 se aplica en la base de la DEMO.**
+- Siguiente: mostrarle el SQL corregido y su hash **antes** de copiarlo a `backend/migrations`.
+
 ## Pendiente
-- Aprobación de `plan.md`, `tasks.md` y del SQL de `sql/`.
+- Visto bueno de Andre al SQL corregido (hashes de arriba) para copiarlo a `backend/migrations` (T001).

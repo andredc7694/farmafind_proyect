@@ -244,3 +244,5 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Agregado a su pedido F032-FR-013: ayuda «Escribe también el nombre del medicamento…» cuando solo se escribe presentación o concentración. No exige otra enmienda.
   - Paso Spec Kit: **plan y tasks** redactados con el SQL propuesto en `specs/023-f032-busqueda-texto-completo/sql/`; esperan aprobación. Nada aplicado.
   - Observación: la DEMO estaba apagada al revisar (contenedores detenidos hace ~14 h, sin intervención mía). No se encendió.
+- 2026-11-27 · F03.2: **plan y tasks aprobados por Andre** (commit `6d90f9d`). SQL aprobado con correcciones: `concat_ws` en `hay_nombre`/`hay_todo` y mayúsculas con tilde en `translate`; más pruebas (sin presentación o concentración, «ÁCIDO»/«Ácido»/«acido» y palabras cortas). Borrador corregido (`1b2e100`) con nuevos SHA-256 en `approval.md`; espera su visto bueno antes de copiarse a `backend/migrations`.
+  - Autoriza encender el contenedor de pruebas (T011) y la DEMO con `demo-run.ps1`, sin aplicar nada de F03.2 en su base.

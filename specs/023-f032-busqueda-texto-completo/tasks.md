@@ -1,12 +1,12 @@
 # Tasks: F03.2 — Búsqueda con texto completo
 
-**Estado**: **pendiente de aprobación de Andre** (junto con `plan.md` y el SQL de `sql/`). Ninguna tarea empieza antes.
+**Estado**: **aprobadas por Andre el 2026-11-27** (commit `6d90f9d`). El SQL, aprobado con correcciones, se copia a `backend/migrations` solo después de que Andre vea el SQL corregido y su hash.
 Formato: `T000: descripción (requisitos)`. Una casilla se marca solo con evidencia real en `evidence.md`.
 
 ## Fase 1 · Base de datos (solo tras aprobar el SQL)
 - [ ] T001: Copiar **literalmente** `sql/f03_003_search_terms.sql` a `backend/migrations/f03/003_search_terms.sql` y `sql/f07_010_search_terms_location.sql` a `backend/migrations/f07/010_search_terms_location.sql`; registrar ambos SHA-256 (propuesta = copia) y agregar el de 010 a `F07_APPROVED`. Si al aplicarlo en la base efímera hay un error, detenerse y presentar la corrección. (D-01, FR-008)
 - [ ] T002: Prueba de base en una base TEST efímera marcada (clúster 55431): la función nueva respeta la publicación (farmacia inactiva, sin stock, medicamento inactivo, sin principio activo → fuera), coordenadas solo verificadas y NULL sin F07; `f01_runtime` solo puede ejecutarla; `f03.search_public_offers` no cambia. (FR-008)
-- [ ] T003: Prueba de base de comparación: tildes en datos («acido» → «ácido»), «500mg» = «500 mg», «500» no encuentra «1500 mg», «x10» = «x 10», orden por coincidencias antes del límite. (FR-001 a FR-004)
+- [ ] T003: Prueba de base de comparación: tildes en datos («acido» → «ácido»), «500mg» = «500 mg», «500» no encuentra «1500 mg», «x10» = «x 10», orden por coincidencias antes del límite. Agregadas por Andre: un producto **sin presentación** y otro **sin concentración** conservan sus puntos (`concat_ws`); «ÁCIDO», «Ácido» y «acido» dan lo mismo en la base real; palabras de una letra o muy cortas no devuelven todo el catálogo (la función las ignora y el backend no las envía). (FR-001 a FR-004)
 
 ## Fase 2 · Backend
 - [ ] T004: `domain/search-terms.ts`: limpieza, palabras/tokens, relleno, singular, unidades, `nameless`, límites 8/8/40. Pruebas unitarias, incluida la **paridad TS/SQL** sobre una lista fija (contra la base efímera). (FR-001 a FR-003, FR-013)

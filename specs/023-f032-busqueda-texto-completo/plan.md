@@ -1,7 +1,7 @@
 # Implementation Plan: F03.2 — Búsqueda con texto completo
 
 **Branch**: `feat/f032-busqueda-texto-completo` | **Spec**: `spec.md` (aprobada 2026-11-27, D-01 a D-05 en A + FR-013)
-**Status**: **pendiente de aprobación de Andre** (plan, tasks y SQL). No se aplica nada antes.
+**Status**: **Aprobado por Andre el 2026-11-27** (commit `6d90f9d`). SQL aprobado con dos correcciones (`concat_ws` y mayúsculas con tilde) y una prueba más (palabras cortas); ver `approval.md`.
 
 ## Resumen
 La pantalla y la API siguen igual por fuera. Cambia cómo se compara el texto:
@@ -39,6 +39,7 @@ La pantalla y la API siguen igual por fuera. Cambia cómo se compara el texto:
   - Unidades (token entero): mg, g, mcg, ug, ml, l, ui, kg, %.
   - Singular: «-es» → quita «es» (≥ 5 letras), «-s» → quita «s» (≥ 4 letras). Siempre queda un prefijo, así que solo amplía.
   - `nameless` = no hay palabras, o todas son de presentación (tableta, capsula, comprimido, jarabe, suspension, solucion, gota, ampolla, inyectable, crema, gel, unguento, pomada, ovulo, supositorio, sobre, polvo, frasco, spray, inhalador, parche, blister, caja, unidad, recubierto, efervescente).
+  - Las palabras de una sola letra que no son unidad se descartan (la función SQL también ignora las de menos de 2).
   - Máximo 8 palabras y 8 tokens (el resto se ignora); cada uno ≤ 40 caracteres.
 - `ports.ts`: método nuevo `searchTerms(terms, minimumPrice, maximumPrice, limit)` → ofertas con `coincidencias`. `search()` antiguo se conserva para `/geo`.
 - `public-offer-repository.ts`: llama a la función nueva; misma regla `exposeVerifiedLocation`.
