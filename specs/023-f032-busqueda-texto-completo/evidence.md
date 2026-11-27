@@ -98,3 +98,10 @@
 
 ### Mejora futura (opción C), anotada a pedido de Andre
 - Guardar el texto ya limpio en el catálogo (`f02.medicamento`, columna calculada) para quitar también el costo fijo. Cambia la tabla de F02, así que se evaluará **junto con la spec 020** (identidad de producto y catálogo, en opción A). Sin empezar.
+
+## v2 en backend/migrations · 2026-11-27
+- Visto bueno de Andre a los hashes v2 (commit `d588b8f`). **La v1 se reemplazó porque nunca llegó a `main` ni a la DEMO**: solo se aplicó en bases efímeras ya borradas y en la copia temporal de revisión, que se recrea con la v2.
+- `backend/migrations/f03/003_search_terms.sql` = `FDCBBD7F0A7381D7C9A8700406C3A0D4C4CF84384E85B50C10AC4736E003E5BB` y `backend/migrations/f07/010_search_terms_location.sql` = `005D52E14820CEA02DC431AE9B8CFD1240B5BB8305D753B39A43CF5F5E1A3F6D`, iguales a los borradores aprobados. Listas cerradas `F03_APPROVED` y `F07_APPROVED` y `f071-migrations.test.ts` actualizadas. La v1 queda en el historial de git (`b59e32d`).
+- **PostgreSQL real** (`verify-f032-search.mjs`, migraciones del repo): **35/35**; base efímera borrada; la DEMO no se tocó.
+- **Comparación v1/v2** con la v2 aplicada por las migraciones y la v1 recuperada de git (solo en la base efímera restaurada desde la copia de seguridad, borrada al final): 120 casos, **0 diferencias** con 518 ofertas (2062 filas) y con 5180 (21458 filas). Peor p95 de la v2: 10.45 ms con 518 y 19.43 ms con 5180; «paracetamol» con 5180: v2 13.9 ms, actual 31.09 ms y v1 102.17 ms.
+- **Regresión:** backend 646 pasan (2 fallos de entorno conocidos de F06.1, que necesitan su base madre); frontend 282/282; `check` correcto (329 archivos); contratos OpenAPI con 41 operaciones con ruta.

@@ -18,8 +18,8 @@ describe('F07.1 · migraciones aprobadas (sin base de datos)', () => {
     expect(sha('007_platform_location_review.sql')).toBe('6D7E0C118858D9160EEB3479241B00A0674DCE86CD227FB314F55967063BB0F9');
     expect(sha('008_opening_hours.sql')).toBe('0A6EB089740950D3AD1B31FB9FAC8E3FAB4CF58D76AB6CC1EC0C3D2FC26D2EBF');
     expect(sha('009_platform_location_history.sql')).toBe('21B8A3F6445C9DDA1DDD756663D5AE27631E11827DF859749A849297555845BF');
-    // F03.2: aprobada por Andre el 2026-11-27 (commit 1b2e100).
-    expect(sha('010_search_terms_location.sql')).toBe('C5F0D8F990767E2DC37DCB3C0A02665B946533DF449DAB48E572882256BB873B');
+    // F03.2 v2: aprobada por Andre el 2026-11-27 (commit d588b8f); reemplaza la v1, que nunca llegó a main ni a la DEMO.
+    expect(sha('010_search_terms_location.sql')).toBe('005D52E14820CEA02DC431AE9B8CFD1240B5BB8305D753B39A43CF5F5E1A3F6D');
   });
 
   it('son aditivas: no borran ni alteran políticas, no usan BYPASSRLS ni el esquema f025', () => {

@@ -9,11 +9,11 @@ interface MigrationClient {
 const directory = fileURLToPath(new URL('../../../../migrations/f03/', import.meta.url));
 const f07Directory = fileURLToPath(new URL('../../../../migrations/f07/', import.meta.url));
 
-/** Lista cerrada de migraciones F03. 001–002 (F03) sin hash histórico; 003 (F03.2) aprobada por Andre el
- *  2026-11-27 con su SHA-256 sobre el texto normalizado a LF. */
+/** Lista cerrada de migraciones F03. 001–002 (F03) sin hash histórico; 003 (F03.2, v2) aprobada por Andre el
+ *  2026-11-27 con su SHA-256 sobre el texto normalizado a LF (v1 reemplazada: nunca llegó a main ni a la DEMO). */
 const F03_APPROVED: ReadonlyArray<readonly [string, string | null]> = [
   ['001_public_search.sql', null], ['002_public_projection.sql', null],
-  ['003_search_terms.sql', '374AEED785DA2AFB2C73A82406857D2C5F3B28B6E730C13F782707B6058BD922'],
+  ['003_search_terms.sql', 'FDCBBD7F0A7381D7C9A8700406C3A0D4C4CF84384E85B50C10AC4736E003E5BB'],
 ];
 
 /** Lista cerrada de migraciones F07 aprobadas. 001–006 (F07) sin hash histórico; 007–008 (F07.1)
@@ -24,7 +24,7 @@ const F07_APPROVED: ReadonlyArray<readonly [string, string | null]> = [
   ['007_platform_location_review.sql', '6D7E0C118858D9160EEB3479241B00A0674DCE86CD227FB314F55967063BB0F9'],
   ['008_opening_hours.sql', '0A6EB089740950D3AD1B31FB9FAC8E3FAB4CF58D76AB6CC1EC0C3D2FC26D2EBF'],
   ['009_platform_location_history.sql', '21B8A3F6445C9DDA1DDD756663D5AE27631E11827DF859749A849297555845BF'],
-  ['010_search_terms_location.sql', 'C5F0D8F990767E2DC37DCB3C0A02665B946533DF449DAB48E572882256BB873B'],
+  ['010_search_terms_location.sql', '005D52E14820CEA02DC431AE9B8CFD1240B5BB8305D753B39A43CF5F5E1A3F6D'],
 ];
 
 /** Apply only F03 migrations to an isolated F01/F02-shaped local TEST database. */

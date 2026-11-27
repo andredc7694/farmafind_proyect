@@ -40,5 +40,8 @@
   - `f03_003_search_terms.sql`: `374AEED785DA2AFB2C73A82406857D2C5F3B28B6E730C13F782707B6058BD922` → `FDCBBD7F0A7381D7C9A8700406C3A0D4C4CF84384E85B50C10AC4736E003E5BB`
   - `f07_010_search_terms_location.sql`: `C5F0D8F990767E2DC37DCB3C0A02665B946533DF449DAB48E572882256BB873B` → `005D52E14820CEA02DC431AE9B8CFD1240B5BB8305D753B39A43CF5F5E1A3F6D`
 
-## Pendiente
-- Visto bueno de Andre a la v2 (hashes de arriba) para reemplazar los archivos de `backend/migrations` y las listas cerradas, repetir la verificación 35/35 y recrear la copia temporal con la v2.
+
+## 2026-11-27 · Visto bueno a la v2
+- Andre: «Doy visto bueno a los hashes v2 de F03.2: f03_003_search_terms.sql FDCBBD7F0A7381D7C9A8700406C3A0D4C4CF84384E85B50C10AC4736E003E5BB y f07_010_search_terms_location.sql 005D52E14820CEA02DC431AE9B8CFD1240B5BB8305D753B39A43CF5F5E1A3F6D (commit d588b8f)».
+- Se reemplazaron los archivos de `backend/migrations` y las listas cerradas. **La v1 se reemplazó porque nunca llegó a `main` ni a la DEMO.**
+- Instrucciones: repetir en base efímera las pruebas de PostgreSQL real, la comparación v1/v2 y la regresión completa (si algo falla, detenerse); actualizar la copia temporal a la v2 y avisar. Nada en la base de la DEMO hasta su aceptación; el reinicio será al final, con copia de seguridad y aviso previo.
