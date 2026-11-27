@@ -190,3 +190,7 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - T057 y T063 sin marcar, F02.5 sin aceptar y spec 020 en opción A.
 - 2026-11-26 · **F07.1 integrada en main:** PR #15, merge commit `264469c`, con CI en verde, MERGEABLE y CLEAN, sin secretos y con la rama conservada. La carpeta principal quedó en `main` actualizado; la DEMO no se reinició porque solo cambiaron documentos.
 - 2026-11-26 · Andre confirma el merge de F07.1. **Nuevo incremento F03.1, «Búsqueda simplificada y mapa interactivo»** (MEJ-007/008), en la rama `feat/f031-busqueda-mapa` (desde `264469c`), con la spec `specs/022-f031-busqueda-mapa/`. Fase *specify*: **pendiente de su aprobación**; no se programa antes.
+- 2026-11-26 · F03.1: **spec aprobada por Andre** con D-01 a D-08 en A.
+  - Condiciones: `farmacia.ubicacion` solo para farmacias verificadas y `null` en el resto; contrato y validador de la caché actualizados; prueba de que las entradas viejas de la caché se descartan.
+  - Siguiente: plan y tasks para su aprobación.
+- 2026-11-26 · F03.1: plan, research, data-model, contrato enmendado (`specs/022/contracts`, 0.2.0; la 004 no se toca), quickstart y tasks (T001–T018) listos. **Pendiente de la aprobación de Andre** antes de programar.

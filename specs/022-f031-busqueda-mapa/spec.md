@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f031-busqueda-mapa` (creada desde `main` `264469c`)
 **Created**: 2026-11-26
-**Status**: Draft. **Pendiente de la aprobación de Andre**; no se programa antes.
+**Status**: **Aprobada por Andre el 2026-11-26** (D-01 a D-08 en A, con condiciones en `approval.md`).
 **Input**: pedido de Andre del 2026-11-26: simplificar «Buscar medicamentos» y agregar un mapa interactivo de farmacias.
 **Trazabilidad**:
 - Maestro v3.2: **MEJ-007** (buscar medicamento + precio + cercanía integrados; F03) y **MEJ-008** (buscador grande, filtros colapsables, lista/mapa y tarjetas con CTA; F08/F03). Ambas corresponden a HU16 y RF29.
