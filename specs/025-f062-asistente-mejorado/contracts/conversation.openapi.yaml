@@ -1,0 +1,175 @@
+openapi: 3.1.0
+info:
+  title: FarmaFind F06.2 Conversation API
+  version: 2.0.0
+  description: >-
+    Enmienda versionada (F061-FR-020) del contrato F06.1 0.1.0 (specs/009, que no se edita). Plan aprobado por
+    Andre el 2026-11-27. El servidor no guarda conversaciones (D-01 A): la página reenvía un contexto
+    ESTRUCTURADO y limitado (nunca texto libre, máx. 1 KB) que el servidor valida, descarta si no lo reconoce y no
+    escribe en registros. Proveedor MOCK; solo datos públicos (F03/F03.2, F07, F07.1). Sin cookie ni sesión.
+paths:
+  /api/v1/asistente/conversaciones:
+    post:
+      summary: Consulta conversacional informativa pública
+      description: >-
+        Orden fijo: urgencia (sola, con números oficiales) → rechazo clínico → intención → medicamento en ofertas
+        públicas → aclaración → tarjetas. Nunca reserva ni escribe (el enlace «Reservar» lleva a la pantalla existente).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConversationRequest' }
+      responses:
+        '200':
+          description: Respuesta con tarjetas, aclaración, sugerencia, ayuda, abstención, rechazo clínico o urgencia
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConversationResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /api/v1/asistente/conversaciones/descartar:
+    post:
+      summary: Compatibilidad F06.1 (no hay nada que borrar en el servidor)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '204': { description: Sin efecto; el servidor no guarda conversaciones }
+        '429': { $ref: '#/components/responses/RateLimited' }
+components:
+  schemas:
+    ConversationRequest:
+      type: object
+      additionalProperties: false
+      required: [consulta]
+      properties:
+        consulta: { type: string, minLength: 1, maxLength: 500 }
+        contexto: { $ref: '#/components/schemas/ConversationContext' }
+    ConversationContext:
+      type: object
+      description: >-
+        Máx. 1024 bytes en JSON (si lo supera se descarta entero). Claves o valores no reconocidos se descartan en
+        silencio; la consulta sigue. Nunca se registra.
+      properties:
+        intencion: { type: string, enum: [PRECIO, CERCANIA, HORARIO, ALTERNATIVA] }
+        medicamento: { type: string, pattern: '^[\p{L}\p{N}][\p{L}\p{N} ]{1,59}$' }
+        concentracion: { type: string, maxLength: 20, pattern: '^\d{1,5}(?:\.\d{1,3})? (?:mg|g|mcg|ug|ml|ui|%)$' }
+        forma: { type: string, enum: [tableta, capsula, jarabe, suspension, solucion, gotas, crema, gel, unguento, inyectable, supositorio, ovulo, sobre, parche, spray, inhalador] }
+        distrito: { type: string, description: Uno de los 16 distritos de Huamanga de «¿Dónde buscas?» }
+        punto:
+          type: object
+          additionalProperties: false
+          required: [latitud, longitud]
+          properties:
+            latitud: { type: number, minimum: -18.4, maximum: -0.03, description: Redondeada a 3 decimales }
+            longitud: { type: number, minimum: -81.4, maximum: -68.6, description: Redondeada a 3 decimales }
+    ConversationResponse:
+      type: object
+      additionalProperties: false
+      required: [version, estado, respuesta, aviso, fuentes, correlationId, proveedor, contexto]
+      properties:
+        version: { const: '2.0' }
+        estado: { type: string, enum: [INFORMATIVA, BUSQUEDA_PUBLICA, ACLARACION, AYUDA, ABSTENCION, CLINICA_RECHAZADA, URGENCIA] }
+        respuesta: { type: string }
+        aviso: { type: string }
+        fuentes:
+          type: array
+          maxItems: 20
+          items: { $ref: '#/components/schemas/Citation' }
+        correlationId: { type: string, format: uuid }
+        proveedor: { const: mock }
+        contexto: { $ref: '#/components/schemas/ConversationContext' }
+        tarjetas:
+          type: array
+          maxItems: 3
+          items: { $ref: '#/components/schemas/Card' }
+        opciones:
+          type: array
+          maxItems: 6
+          items: { $ref: '#/components/schemas/Choice' }
+        sugerencia: { $ref: '#/components/schemas/Choice' }
+        verTodas:
+          type: object
+          additionalProperties: false
+          required: [texto, url]
+          properties:
+            texto: { type: string }
+            url: { type: string, pattern: '^/search' }
+        emergencia: { $ref: '#/components/schemas/Emergency' }
+      description: Con `emergencia` nunca hay `tarjetas`, `opciones` ni `sugerencia` (D-08).
+    Citation:
+      type: object
+      required: [tipo, titulo, referencia, revisadoEl]
+      properties:
+        tipo: { type: string, enum: [FICHA, OFERTA_PUBLICA, FARMACIA_PUBLICA] }
+        titulo: { type: string }
+        referencia: { type: string }
+        revisadoEl: { type: string }
+        vigenteHasta: { type: string }
+    Card:
+      type: object
+      additionalProperties: false
+      required: [farmacia, producto, precioCentavos, distanciaKm, horarioHoy, reservarUrl]
+      properties:
+        etiqueta: { type: string, enum: ['Mismo principio activo y concentración'] }
+        farmacia:
+          type: object
+          required: [id, nombre, direccion]
+          properties: { id: { type: string }, nombre: { type: string }, direccion: { type: string } }
+        producto:
+          type: [object, 'null']
+          required: [id, nombre, concentracion, presentacion]
+          properties: { id: { type: string }, nombre: { type: string }, concentracion: { type: string }, presentacion: { type: string } }
+        precioCentavos: { type: [integer, 'null'] }
+        distanciaKm: { type: [number, 'null'], description: Línea recta, referencial }
+        horarioHoy: { type: [string, 'null'], description: Horario público F07.1 de hoy, hora de Lima }
+        reservarUrl: { type: [string, 'null'], pattern: '^/reservations\?pharmacyId=' }
+    Choice:
+      type: object
+      additionalProperties: false
+      required: [texto, consulta]
+      properties:
+        texto: { type: string }
+        consulta: { type: string, maxLength: 500 }
+    Emergency:
+      type: object
+      required: [mensaje, numeros, fuentes, verificadoEl]
+      properties:
+        mensaje: { type: string }
+        numeros:
+          type: array
+          items:
+            type: object
+            required: [servicio, numero]
+            properties: { servicio: { type: string }, numero: { type: string, enum: ['106', '116', '105'] } }
+        fuentes:
+          type: array
+          items:
+            type: object
+            required: [titulo, url]
+            properties: { titulo: { type: string }, url: { type: string, pattern: '^https://www\.gob\.pe/' } }
+        verificadoEl: { type: string, format: date }
+    Error:
+      type: object
+      required: [code, message, correlationId]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        correlationId: { type: string, format: uuid }
+  responses:
+    BadRequest:
+      description: Cuerpo, JSON o campos no válidos (incluye el antiguo conversacionId)
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    PayloadTooLarge:
+      description: Cuerpo mayor que 4 KB
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    RateLimited:
+      description: Cuota por origen técnico excedida; incluye Retry-After
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unavailable:
+      description: Falla interna minimizada, sin detalles
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }

@@ -4,7 +4,6 @@ import { SearchPublicOffers } from '../../src/modules/busqueda/application/searc
 import { F03PublicAssistantGateway } from '../../src/modules/busqueda/infrastructure/public-assistant-gateway.js';
 import { ConverseAssistant } from '../../src/modules/asistente-ia/application/converse-assistant.js';
 import { F03ConversationPublicTools } from '../../src/modules/asistente-ia/infrastructure/conversation-public-tools.js';
-import { InMemoryConversationStore } from '../../src/modules/asistente-ia/infrastructure/in-memory-conversation-store.js';
 import { InMemoryReviewedSourceCatalog } from '../../src/modules/asistente-ia/infrastructure/reviewed-source-catalog.js';
 import { MockConversationProvider } from '../../src/modules/asistente-ia/infrastructure/mock-conversation-provider.js';
 import { createConversationRealFixture } from './fixtures/conversation-real-fixture.js';
@@ -43,12 +42,12 @@ describe('F06.1 PostgreSQL RLS real en base efímera', () => {
     const search = new SearchPublicOffers(repository, null, { ttlSeconds: 30, candidateLimit: 200 });
     const tools = new F03ConversationPublicTools(new F03PublicAssistantGateway(search, repository));
     const assistant = new ConverseAssistant(new MockConversationProvider(), new InMemoryReviewedSourceCatalog([]),
-      tools, new InMemoryConversationStore());
-    const result = await assistant.execute({ consulta: `busca ${fixture.product}` }, 'origen-TEST', 'corr-TEST');
+      tools);
+    const result = await assistant.execute({ consulta: `busca ${fixture.product}` }, 'corr-TEST');
     expect(result.estado).toBe('BUSQUEDA_PUBLICA');
     expect(result.fuentes).toHaveLength(2);
-    expect(result.respuesta).toContain('Farmacia Alfa');
-    expect(result.respuesta).toContain('Farmacia Beta');
+    expect(JSON.stringify(result.tarjetas)).toContain('Farmacia Alfa');
+    expect(JSON.stringify(result.tarjetas)).toContain('Farmacia Beta');
     expect(JSON.stringify(result)).not.toMatch(/cantidad_fisica|cantidad_comprometida|password_hash|token_fingerprint/u);
     expect(result.fuentes.every(source => source.tipo === 'OFERTA_PUBLICA')).toBe(true);
   });

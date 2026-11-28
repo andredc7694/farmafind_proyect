@@ -68,7 +68,6 @@ import { F03PublicAssistantGateway } from './modules/busqueda/infrastructure/pub
 import { ConverseAssistant } from './modules/asistente-ia/application/converse-assistant.js';
 import { selectDemoConversationProvider } from './modules/asistente-ia/infrastructure/demo-conversation-provider.js';
 import { InMemoryReviewedSourceCatalog } from './modules/asistente-ia/infrastructure/reviewed-source-catalog.js';
-import { InMemoryConversationStore } from './modules/asistente-ia/infrastructure/in-memory-conversation-store.js';
 import { createConversationRouter } from './modules/asistente-ia/presentation/conversation-router.js';
 import { F03ConversationPublicTools } from './modules/asistente-ia/infrastructure/conversation-public-tools.js';
 import { ListNearbyPharmacies } from './modules/busqueda/application/list-nearby-pharmacies.js';
@@ -227,7 +226,10 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
         console.warn('F06.1: proveedor externo deshabilitado; modo DEMO determinista activo');
       }
       app.use('/api/v1', createConversationRouter(new ConverseAssistant(selectedConversation.provider,
-        new InMemoryReviewedSourceCatalog([]), new F03ConversationPublicTools(publicGateway), new InMemoryConversationStore())));
+        new InMemoryReviewedSourceCatalog([]), new F03ConversationPublicTools(publicGateway,
+          // F06.2: lugar (F07) y horario público (F07.1) solo con F07 activo; siempre lectura pública.
+          geoRepository ? new ListNearbyPharmacies(geoRepository) : undefined,
+          config.geolocationTest ? new ReadPublicOpeningHours(new PgPublicOpeningHours(tenantPool), new RedisOpeningHoursCache(redisClient)) : undefined))));
     }
     if (config.geolocationTest) {
       const locationManagement = new ManagePharmacyLocation(new PgLocationUnitOfWork(tenantTransactions), invalidator);

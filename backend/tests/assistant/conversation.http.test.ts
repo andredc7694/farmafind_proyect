@@ -2,7 +2,6 @@ import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 import { ConverseAssistant } from '../../src/modules/asistente-ia/application/converse-assistant.js';
-import { InMemoryConversationStore } from '../../src/modules/asistente-ia/infrastructure/in-memory-conversation-store.js';
 import { InMemoryReviewedSourceCatalog } from '../../src/modules/asistente-ia/infrastructure/reviewed-source-catalog.js';
 import { MockConversationProvider } from '../../src/modules/asistente-ia/infrastructure/mock-conversation-provider.js';
 import { createConversationRouter } from '../../src/modules/asistente-ia/presentation/conversation-router.js';
@@ -13,8 +12,7 @@ import { createLocalIdentityApp } from '../../src/identity-app.js';
 function app(withSource = true, limit = new InMemoryAssistantRateLimit()) {
   const tools = { search: vi.fn(), compare: vi.fn(), pharmacy: vi.fn() };
   const service = new ConverseAssistant(new MockConversationProvider(),
-    new InMemoryReviewedSourceCatalog(withSource ? [SYNTHETIC_SOURCE] : []), tools,
-    new InMemoryConversationStore(), () => new Date('2026-11-17T12:00:00.000Z'));
+    new InMemoryReviewedSourceCatalog(withSource ? [SYNTHETIC_SOURCE] : []), tools, () => new Date('2026-11-17T12:00:00.000Z'));
   const server = express();
   server.use('/api/v1', createConversationRouter(service, limit));
   return { server, tools };
@@ -45,7 +43,7 @@ describe('HTTP F06.1', () => {
         .send({ consulta: 'Ayuda' }).expect(200);
       expect(help.body.estado).toBe('AYUDA');
       const absent = await request(composed.app).post('/api/v1/asistente/conversaciones')
-        .send({ consulta: 'Ficha de Producto Ficticio Alfa', conversacionId: help.body.conversacionId }).expect(200);
+        .send({ consulta: 'Ficha de Producto Ficticio Alfa', contexto: help.body.contexto }).expect(200);
       expect(absent.body).toMatchObject({ estado: 'ABSTENCION', fuentes: [] });
       const clinical = await request(composed.app).post('/api/v1/asistente/conversaciones')
         .send({ consulta: '¿Qué dosis debo tomar?' }).expect(200);
@@ -55,20 +53,23 @@ describe('HTTP F06.1', () => {
       expect(legacy.body.proveedor).toBe('mock');
     } finally { await composed.close(); }
   });
-  it('devuelve ficha TEST citada, seguimiento y descarte', async () => {
+  it('devuelve ficha TEST citada, seguimiento con contexto de la página y descarte sin estado', async () => {
     const { server } = app();
     const first = await request(server).post('/api/v1/asistente/conversaciones')
       .send({ consulta: 'Ficha de Producto Ficticio Alfa' }).expect(200);
     expect(first.headers['cache-control']).toBe('no-store');
     expect(first.body).toMatchObject({ estado: 'INFORMATIVA', proveedor: 'mock', correlationId: expect.any(String) });
     expect(first.body.fuentes).toHaveLength(1);
-    const id = first.body.conversacionId;
-    await request(server).post('/api/v1/asistente/conversaciones')
-      .send({ consulta: '¿y sus advertencias?', conversacionId: id }).expect(200);
-    await request(server).post('/api/v1/asistente/conversaciones/descartar').send({ conversacionId: id }).expect(204);
-    const expired = await request(server).post('/api/v1/asistente/conversaciones')
-      .send({ consulta: '¿y sus advertencias?', conversacionId: id }).expect(422);
-    expect(expired.body.code).toBe('INVALID_CONTEXT');
+    expect(first.body).toMatchObject({ version: '2.0', contexto: { medicamento: 'Producto Ficticio Alfa' } });
+    expect(first.body).not.toHaveProperty('conversacionId');
+    const followup = await request(server).post('/api/v1/asistente/conversaciones')
+      .send({ consulta: '¿y sus advertencias?', contexto: first.body.contexto }).expect(200);
+    expect(followup.body.respuesta).toBe(SYNTHETIC_SOURCE.educationalWarning);
+    await request(server).post('/api/v1/asistente/conversaciones/descartar').send({ conversacionId: 'cualquiera' }).expect(204);
+    await request(server).post('/api/v1/asistente/conversaciones/descartar').send({}).expect(204);
+    const reloaded = await request(server).post('/api/v1/asistente/conversaciones')
+      .send({ consulta: '¿y sus advertencias?' }).expect(200);
+    expect(reloaded.body.estado).toBe('ABSTENCION');
   });
   it('se abstiene sin contenido autorizado', async () => {
     const result = await request(app(false).server).post('/api/v1/asistente/conversaciones')
