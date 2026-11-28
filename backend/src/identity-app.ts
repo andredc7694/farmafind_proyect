@@ -45,6 +45,8 @@ import { SearchPublicOffers } from './modules/busqueda/application/search-public
 import { SuggestPublicOffers } from './modules/busqueda/application/suggest-public.js';
 import { createPublicSuggestRouter } from './modules/busqueda/presentation/public-suggest-router.js';
 import { createPublicSearchRouter } from './modules/busqueda/presentation/public-search-router.js';
+import { InMemoryPublicRateLimit } from './modules/busqueda/presentation/public-rate-limit.js';
+import { resolvePublicRateLimit } from './config/load-test-limit.js';
 import { createPublicPharmacyRouter } from './modules/busqueda/presentation/public-pharmacy-router.js';
 import { InMemorySearchMetrics } from './modules/busqueda/infrastructure/in-memory-search-metrics.js';
 import { PgReservationUnitOfWork } from './modules/reservas/infrastructure/reservation-unit-of-work.js';
@@ -115,6 +117,9 @@ export interface LocalIdentityRuntimeConfig {
   addressSuggestions?: 'nominatim';
   /** F02.5 routes are never mounted on persistent or production databases. */
   pharmaciesTest?: true;
+  /** Sprint 2 (k6): límite público por IP y minuto SOLO para una copia temporal de carga en base TEST aislada.
+   *  La DEMO y cualquier otro arranque no lo definen: siguen con 60/min (búsqueda y cercanas) y 120/min (sugerencias). */
+  loadTestRateLimitPerMinute?: number;
 }
 
 interface SqlClient {
@@ -161,8 +166,12 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
         new URL(config.authDatabaseUrl).pathname !== new URL(config.tenantDatabaseUrl).pathname)) {
       throw new Error('F07: solo base TEST aislada con búsqueda pública F03');
     }
+    const isolatedTest = config.geolocationTest === true;
+    resolvePublicRateLimit(60, config.loadTestRateLimitPerMinute, isolatedTest); // falla al arrancar si el valor no es válido
+    const publicLimit = (standard: number) =>
+      new InMemoryPublicRateLimit(resolvePublicRateLimit(standard, config.loadTestRateLimitPerMinute, isolatedTest));
     const geoRepository=config.geolocationTest ? new PgPublicOfferRepository(tenantPool) : null;
-    const geoRouter=geoRepository ? createGeolocationRouter(new ListNearbyPharmacies(geoRepository)) : undefined;
+    const geoRouter=geoRepository ? createGeolocationRouter(new ListNearbyPharmacies(geoRepository), publicLimit(60)) : undefined;
     // F01.1: la guardia de sesión restringida se monta antes que cualquier ruta de negocio.
     const restrictedGuard = createRestrictedSessionGuard({ ...http, prefix: '/api/v1', restrictionOf: secret => identity.restrictionOf(secret) });
     const app = createApp(createIdentityRouter(identity, http, new AccountRecovery(new PgAuthUnitOfWork(authPool, config.abuseKey), hasher,
@@ -212,8 +221,8 @@ export async function createLocalIdentityApp(config: LocalIdentityRuntimeConfig,
       invalidator = new RedisSearchInvalidator(redisClient);
       const search = new SearchPublicOffers(repository, cache, { ttlSeconds: config.search.cacheTtlSeconds,
         candidateLimit: config.search.candidateLimit }, new InMemorySearchMetrics());
-      app.use('/api/v1', createPublicSearchRouter(search));
-      app.use('/api/v1', createPublicSuggestRouter(new SuggestPublicOffers(repository)));
+      app.use('/api/v1', createPublicSearchRouter(search, publicLimit(60)));
+      app.use('/api/v1', createPublicSuggestRouter(new SuggestPublicOffers(repository), publicLimit(120)));
       app.use('/api/v1', createPublicPharmacyRouter(repository));
       const publicGateway = new F03PublicAssistantGateway(search, repository);
       const publicTools = new F03PublicKnowledgeTools(publicGateway);
