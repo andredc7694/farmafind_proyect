@@ -97,7 +97,7 @@
 - [X] T054 [US6] Ejecutar recorrido Playwright de cinco solicitudes, aprobaciones, paneles, importaciones y comparaciones mediante `scripts/f025/browser-five.mjs` en Linux oficialmente compatible y con montajes limitados (FR-020/021/027; AC09/12).
 - [X] T055 [US6] Ejecutar 20 casos negativos de tenant desde HTTP y rol runtime y documentar matriz Alfa/Beta en `specs/012-f025-incorporacion-farmacias/acceptance.md` (FR-020; SC-002).
 - [X] T056 [US6] Preparar guía con URL/comandos reales, acceso seguro a credenciales ficticias, arranque/parada sin borrar volúmenes en `docs/demo-manual-f025.md` (FR-021).
-- [ ] T057 [US6] Realizar demostración humana de cinco farmacias sin scripts de alta individual y registrar resultados/omisiones en `specs/012-f025-incorporacion-farmacias/evidence.md` (FR-021; SC-001/005).
+- [X] T057 [US6] Realizar demostración humana de cinco farmacias sin scripts de alta individual y registrar resultados/omisiones en `specs/012-f025-incorporacion-farmacias/evidence.md` (FR-021; SC-001/005). _Hecha por Andre el 2026-11-27._
 
 ## Phase 9: Cierre, regresión y límites
 
@@ -106,7 +106,7 @@
 - [X] T060 Registrar la suspensión/desactivación F025-RF23 como **bloqueada** sin crear endpoint ni migración operativa, y verificar que no se habilitó en `specs/012-f025-incorporacion-farmacias/acceptance.md` (FR-026).
 - [X] T061 Construir matriz FR/SC/AC→prueba/evidencia y 16 criterios sin puntajes inventados en `specs/012-f025-incorporacion-farmacias/acceptance.md` y `traceability.md` (FR-020/028).
 - [X] T062 Ejecutar `git diff --check`, revisar archivos privados, datos TEST y secretos, y registrar estado de `farmafind_f01_test` solo mediante lectura en `specs/012-f025-incorporacion-farmacias/evidence.md` (FR-021).
-- [ ] T063 Solicitar aceptación humana final de F02.5 con límites TEST y registrar decisión, sin autoaprobar, en `specs/012-f025-incorporacion-farmacias/acceptance.md` (SC-001–008).
+- [X] T063 Solicitar aceptación humana final de F02.5 con límites TEST y registrar decisión, sin autoaprobar, en `specs/012-f025-incorporacion-farmacias/acceptance.md` (SC-001–008). _Decisión de Andre el 2026-11-27: ACEPTO CON OBSERVACIONES (alcance TEST/DEMO)._
 
 ## Adenda SDD aprobada 2026-11-21 — preparación de suites F06.1
 
