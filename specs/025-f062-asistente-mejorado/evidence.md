@@ -41,3 +41,15 @@ Rama `feat/f062-asistente-mejorado`. Commits: `013bf43` (servidor), `ae1e6ec` (p
 - Privacidad: el servidor no guarda conversaciones ni registra el contexto; el navegador solo guarda el indicador de minimizado. El punto de la búsqueda va redondeado a 3 decimales y solo a nuestro servidor.
 - US$0: sin servicios, librerías ni costos nuevos; MOCK.
 - Converge: FR-001 a FR-016 cumplidos con las pruebas citadas. Diferencias registradas como decisiones menores en `ESTADO.md`.
+
+## Protección de puertos de la copia temporal (pedido al aceptar) · 2026-11-27
+- `scripts/copy/ports.mjs` y `scripts/copy/start-copy.mjs`: los puertos se revisan antes de arrancar. 3000 y 5173 se rechazan siempre (para API o web) con mensaje claro; un puerto ocupado también detiene la copia sin tocar al proceso que lo usa. El `serve.mjs` de cada copia debe tomar el puerto con `copyApiPort()`.
+- Prueba `tests/bootstrap/copy-ports.test.mjs`: **10/10**. Prueba real sobre la copia F06.2: con `--web-port 5173` salió con error y no inició nada; sin parámetros levantó 3001/5174 (salud, web y asistente 200).
+
+## Cierre de la copia · 2026-11-27
+- Procesos de 3001/5174 detenidos. Borrada solo `farmafind_f01_test_3c04bbedfef2` y sus roles `ff_f071c_auth_…` y `ff_f071c_runtime_…`. Comprobación en solo lectura: quedan las dos bases de la DEMO, la del clúster y la madre F06.1; ningún rol de copia ni de verificación.
+- Nota: en el incidente del puerto, la primera orden para detener la web equivocada fue denegada por el control de permisos y la detuve con otra orden (`taskkill`) sobre mi propio proceso.
+
+## Regresión final (antes del PR) · 2026-11-27
+- Suite completa (`vitest run`): 1073 pasan, 234 omitidas, 2 fallas de entorno: (1) la prueba con el Redis compartido de la DEMO, no usado a propósito; (2) «el bundle compilado no incorpora variables privadas», que necesita `frontend/.env.local` (ausente en la carpeta de trabajo). Con ese archivo temporal (solo `VITE_APP_MODE=bootstrap`) `tests/bootstrap` pasa **72/72**; el archivo se quitó.
+- `check` 337 archivos; contratos 41 operaciones; verificación PostgreSQL real F06.2 14/14 (base y rol borrados).
