@@ -13,7 +13,8 @@ const contracts=[
   ['specs/005-f04-reservas/contracts/reservations.openapi.yaml',''],
   ['specs/006-f05-notificaciones/contracts/notifications.openapi.yaml',''],
   ['specs/007-f06-asistente-ia/contracts/assistant.openapi.yaml',''],
-  ['specs/009-f061-asistente-conversacional/contracts/conversation.openapi.yaml',''],
+  // F06.2 (spec 025): contrato de conversación 2.0.0 (la carpeta 009 aprobada no se edita).
+  ['specs/025-f062-asistente-mejorado/contracts/conversation.openapi.yaml',''],
 ];
 const routeFiles=[
   ['backend/src/bootstrap/health.ts',''],

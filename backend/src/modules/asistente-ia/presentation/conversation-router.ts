@@ -1,18 +1,21 @@
 import { createHmac, randomBytes, randomUUID } from 'node:crypto';
 import { json, Router, type NextFunction, type Request, type Response } from 'express';
-import { ConversationRequestError, parseConversationRequest, parseDiscardRequest,
+import { ConversationRequestError, parseConversationRequest,
   type ConversationRequest, type ConversationResponse } from '../domain/conversation-contract.js';
 import { InMemoryAssistantRateLimit, type AssistantRateLimit } from './rate-limit.js';
 
 export interface ConversationService {
-  execute(request: ConversationRequest, origin: string, correlationId: string): Promise<ConversationResponse>;
-  discard(origin: string, id: string): void;
+  execute(request: ConversationRequest, correlationId: string): Promise<ConversationResponse>;
 }
 
 function fail(response: Response, status: number, code: string, message: string, correlationId: string) {
   return response.status(status).json({ code, message, correlationId });
 }
 
+/**
+ * F06.2: la conversación no se guarda en el servidor (D-01 A). El contexto que trae la petición se valida y se usa
+ * solo para responder; nunca se escribe en registros (condición de Andre, 2026-11-27).
+ */
 export function createConversationRouter(service: ConversationService,
   limit: AssistantRateLimit = new InMemoryAssistantRateLimit()): Router {
   const router = Router();
@@ -29,24 +32,14 @@ export function createConversationRouter(service: ConversationService,
   router.post('/asistente/conversaciones', async (request, response) => {
     const correlationId = randomUUID();
     try {
-      return response.status(200).json(await service.execute(parseConversationRequest(request.body), originKey(request), correlationId));
-    } catch (error) {
-      if (error instanceof ConversationRequestError) {
-        return fail(response, error.code === 'INVALID_REQUEST' ? 400 : 422, error.code, error.message, correlationId);
-      }
-      return fail(response, 503, 'CONVERSATION_UNAVAILABLE', 'El asistente no está disponible temporalmente.', correlationId);
-    }
-  });
-  router.post('/asistente/conversaciones/descartar', (request, response) => {
-    const correlationId = randomUUID();
-    try {
-      service.discard(originKey(request), parseDiscardRequest(request.body));
-      return response.status(204).end();
+      return response.status(200).json(await service.execute(parseConversationRequest(request.body), correlationId));
     } catch (error) {
       if (error instanceof ConversationRequestError) return fail(response, 400, error.code, error.message, correlationId);
       return fail(response, 503, 'CONVERSATION_UNAVAILABLE', 'El asistente no está disponible temporalmente.', correlationId);
     }
   });
+  // Compatibilidad con F06.1: no hay nada que borrar en el servidor.
+  router.post('/asistente/conversaciones/descartar', (_request, response) => response.status(204).end());
   router.use((error: unknown, _request: Request, response: Response, next: NextFunction) => {
     const candidate = error as { type?: string };
     if (candidate?.type === 'entity.too.large') return fail(response, 413, 'PAYLOAD_TOO_LARGE', 'El cuerpo supera el límite permitido.', randomUUID());

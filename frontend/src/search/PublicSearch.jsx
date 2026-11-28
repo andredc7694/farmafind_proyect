@@ -9,6 +9,7 @@ import { forgetCity, readRememberedCity, rememberCity } from './search-location.
 import { OfferCard, money } from './OfferCard.jsx';
 import { ResultsMap } from './ResultsMap.jsx';
 import { WhereDialog } from './WhereDialog.jsx';
+import { publishSearchContext } from './search-context.js';
 
 const ORDER_LABELS = { precio_asc: 'Más barato', cercania: 'Más cercano', relevancia: 'Relevancia', precio_desc: 'Mayor precio', disponibilidad: 'Disponibilidad' };
 
@@ -56,6 +57,7 @@ export function PublicSearch({ client = createPublicSearchClient(), loadLeaflet,
         precioMaxCentavos: current.maximum === '' ? '' : Math.round(Number(current.maximum) * 100), orden: current.order,
         latitud: current.location?.latitude, longitud: current.location?.longitude, pagina: page });
       setResult(data); setSelectedOffers([]); setSelectedId(null); setStatus('ready');
+      publishSearchContext({ term: current.query, place: current.location }); // F06.2: contexto de pantalla, solo en memoria
       const filters = { query: current.query, minimum: current.minimum, maximum: current.maximum, order: current.order };
       if (typeof window !== 'undefined' && window.history?.replaceState) {
         const text = serializeFilters(filters); window.history.replaceState(null, '', text ? `${window.location.pathname}?${text}` : window.location.pathname);
