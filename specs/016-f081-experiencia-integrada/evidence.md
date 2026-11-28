@@ -20,3 +20,10 @@ No reejecutado: `f05:rls` (la base marcada no admite la reejecución; mismo caso
 
 ## Pendiente humano
 T022 / aceptación de Andre. No se marca por mí.
+
+## Falso positivo de la matriz de rutas en CI (2026-11-28)
+- Qué pasó: en el PR #22 (solo documentación), corrida `46132081446`, intento 1, falló «trabajador de Alfa sin permisos». La respuesta era `NOT_VISIBLE` / «Recurso no visible», con `correlationId` `1000d71e-ed99-489e-8690-5f328f91d73b`.
+- Causa: la prueba buscaba el texto «1000» (el precio sembrado) en toda la respuesta y el UUID al azar lo contenía. **No hubo fuga de datos.** La otra corrida del mismo commit pasó, y el intento 2 también (repetido con permiso de Andre; PR #22 fusionado en `0f6e252`).
+- Arreglo (`backend/tests/identity/f081-direct-routes.rls.test.ts`): se omite solo el campo `correlationId`, y solo si tiene forma de UUID. El resto de la respuesta se revisa igual.
+- De paso se corrigió un hueco: el patrón `ficticio` no detectaba «Farmacia ficticia Alfa»; ahora es `fictici[oa]`.
+- Autochequeo en el mismo archivo (sin base de datos): 6/6; el identificador del fallo se ignora y las fugas en otros campos, anidadas o metidas en `correlationId` se siguen detectando. La matriz con PostgreSQL se verifica en el trabajo RLS del CI.

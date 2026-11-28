@@ -15,6 +15,30 @@ const origin = 'http://127.0.0.1:5173';
 const password = 'clave-ficticia-segura-123';
 type Agent = ReturnType<typeof request.agent>;
 
+/** Datos de Alfa que nunca deben salir en una respuesta denegada: el medicamento «ficticio», la farmacia «ficticia», el precio 1000 y el alias de la prueba. */
+const LEAK = /fictici[oa]|1000|ruta\.directa/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** correlationId es un UUID al azar y puede contener «1000» sin fuga. Se omite solo ese campo, y solo si es un UUID. */
+function inspectable(body: unknown): string {
+  return JSON.stringify(body, (key, value: unknown) => key === 'correlationId' && typeof value === 'string' && UUID.test(value) ? undefined : value);
+}
+
+describe('F08.1 detector de fugas de la matriz (sin base de datos)', () => {
+  const randomId = '1000d71e-ed99-489e-8690-5f328f91d73b'; // el que provocó el falso positivo en CI
+  it('ignora el identificador aleatorio de error', () => {
+    expect(inspectable({ code: 'NOT_VISIBLE', message: 'Recurso no visible', correlationId: randomId })).not.toMatch(LEAK);
+  });
+  it.each([
+    ['precio en otro campo', { code: 'NOT_VISIBLE', precio_centavos: '1000', correlationId: randomId }],
+    ['nombre en el mensaje', { message: 'Farmacia ficticia Alfa', correlationId: randomId }],
+    ['alias anidado', { items: [{ alias: 'ruta.directa' }] }],
+    ['dato metido en correlationId que no es un UUID', { correlationId: 'precio=1000' }],
+    ['UUID con 1000 en otro campo', { medicationId: randomId }],
+  ])('sigue detectando una fuga: %s', (_label, body) => {
+    expect(inspectable(body)).toMatch(LEAK);
+  });
+});
+
 /**
  * F08.1: el menú es solo presentación. Cada ruta privada de la farmacia se prueba DIRECTO contra el servidor con actores
  * sin permiso, de otra farmacia, clientes y anónimos, y se contrasta con un control positivo del propietario.
@@ -115,7 +139,7 @@ group('F08.1 matriz de rutas directas (HTTP + PostgreSQL + RLS)', () => {
     for (const [method, path, body] of routes) {
       const response = await call(agent, method as 'get', fill(path, pharmacyA), body);
       expect(isDenied(response.status), `${method} ${path} → ${response.status}`).toBe(true);
-      expect(JSON.stringify(response.body)).not.toMatch(/ficticio|1000|ruta\.directa/);
+      expect(inspectable(response.body), `${method} ${path}`).not.toMatch(LEAK);
     }
     expect(JSON.stringify([(await database.query('SELECT id,estado FROM f04.reserva ORDER BY id')).rows, (await database.query('SELECT medicamento_id,precio_centavos,cantidad_fisica,version FROM f02.inventario ORDER BY farmacia_id')).rows,
       (await database.query('SELECT count(*)::int n FROM f01.usuario')).rows, (await database.query('SELECT count(*)::int n FROM f01.usuario_farmacia')).rows])).toBe(before);
