@@ -33,7 +33,7 @@ Responder siempre en español. Fuente de verdad: `.specify/memory/constitution.m
 - Nunca tocar la base persistente `farmafind_f01_test`. Usar bases TEST efímeras.
 
 ## Estado y orden de trabajo
-- F02.5 sigue **sin aceptar** (pendientes T046, T057, T063).
+- F02.5 **aceptada con observaciones** por Andre el 2026-11-27 (alcance TEST/DEMO; T046, T057 y T063 marcadas). Observación (a): filas excluidas en las importaciones → spec 020, prioritaria.
 - Orden: F02.1 (falta aceptación T038) → F01.1 → F04.1 → F08.1 → pruebas integrales.
 - Al terminar cada bloque, actualizar `docs/seguimiento/ESTADO.md`: fecha, rama, commit, qué se hizo, pruebas ejecutadas con resultado real y pendientes.
 
@@ -59,7 +59,7 @@ Trabajar de forma continua y autónoma, deteniéndose **solo** en las puertas de
 5. Cualquier costo nuevo, servicio de pago, AWS, borrado de datos o cambio fuera del alcance autorizado.
 6. Modificación arquitectónica o de seguridad de mayor alcance que el autorizado: presentar impacto y detenerse.
 
-**No hacer:** declarar aceptadas F02.1, F02.5 (T046, T057, T063), F08 ni F06.1 (dejarlas pendientes en ESTADO.md). No abrir F01.1 ni otro incremento hasta cerrar F02.1.
+**No hacer:** declarar aceptado ningún incremento sin la decisión expresa de Andre (F02.5 ya la tiene: aceptada con observaciones, 2026-11-27). No abrir F01.1 ni otro incremento hasta cerrar F02.1.
 
 **Formato de cada parada (máx. 15 líneas):** qué hice · pruebas ejecutadas y resultado real · qué debo aprobar/decidir (con recomendación) · qué haré después.
 

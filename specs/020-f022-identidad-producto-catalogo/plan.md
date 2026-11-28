@@ -1,5 +1,7 @@
 # Plan: F02.2 — Identidad del producto y propuestas de catálogo
 
+> **DESACTUALIZADO (2026-11-27):** escrito antes de F03.1, F03.2, F06.2, F07.1 y F07.2. Usa nombres de migración ya ocupados (`f025/016`, `f03/003`). Se rehace, con el SQL y sus hashes, después de que Andre apruebe la spec actualizada. No se implementa nada de este documento.
+
 **Spec**: [spec.md](spec.md) (aprobada 2026-11-25, D-01..D-05 = A). **Estado**: aprobado por Andre el 2026-11-25.
 **Condición de inicio**: la corrección de importación (enmienda F02.1) integrada en `main`. US$0, sin IA ni servicios externos.
 

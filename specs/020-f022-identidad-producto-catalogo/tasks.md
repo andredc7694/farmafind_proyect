@@ -1,5 +1,7 @@
 # Tasks: F02.2 (casilla solo con evidencia real en evidence.md)
 
+> **DESACTUALIZADO (2026-11-27):** escrito antes de F03.1, F03.2, F06.2, F07.1 y F07.2. Usa nombres de migración ya ocupados (`f025/016`, `f03/003`). Se rehace, con el SQL y sus hashes, después de que Andre apruebe la spec actualizada. No se implementa nada de este documento.
+
 **Puerta previa**: la enmienda F02.1 integrada en `main` (T001).
 
 ## Preparación

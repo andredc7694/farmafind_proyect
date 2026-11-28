@@ -328,3 +328,7 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - **Mejora pendiente, sin empezar:** en «Aprobadas», marcar cuál es la ubicación publicada actualmente de cada farmacia, para no confundirla con propuestas posteriores rechazadas.
   - Pendiente opcional: horarios de RHFARMA y FARMAPOINT.
   - Se destraban (sin empezar, esperan orden): spec 020 y la ayuda de dirección y mapa en el registro. La rama `feat/f022-identidad-producto-catalogo` (spec 020) está atrasada respecto a `main` y sus nombres de SQL `f025/016` y `f03/003` ya están ocupados: hay que actualizar plan y tasks antes de programar.
+- 2026-11-27 · **Spec 020 (F02.2) prioritaria.** Rama `feat/f022-identidad-producto-catalogo` actualizada con `main` `b0557d5` por merge (sin force push). `CLAUDE.md` corregido: F02.5 aceptada con observaciones.
+  - Paso Spec Kit: **specify (actualización)**: spec actualizada al estado real (forma farmacéutica en la identidad; reimportación sin duplicar; propuestas repetidas vinculadas solas; opción C de F03.2 evaluada). **Espera aprobación de Andre** (D-06 a D-12). Plan, tareas y SQL después. Nada programado ni aplicado. DEMO sin tocar.
+  - Filas excluidas en las cinco importaciones de la DEMO: **2806** (2780 duplicadas + 26 no conciliadas).
+  - Pendientes sin empezar: ayuda de dirección y mapa en el registro (con la marca de ubicación publicada en «Aprobadas»), detalles de mejora de Andre y márgenes, corrida de pruebas por investigar, segunda etapa del asistente, horarios opcionales de RHFARMA y FARMAPOINT.
