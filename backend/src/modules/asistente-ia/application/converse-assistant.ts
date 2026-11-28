@@ -18,6 +18,7 @@ const ABSTAIN = 'No dispongo de una fuente revisada y vigente para responder con
 export const ALTERNATIVE_LABEL = 'Mismo principio activo y concentración';
 export const ALTERNATIVE_NOTICE = 'Consulta al químico farmacéutico antes de cambiar de producto.';
 const NEAR_RADIUS_KM = 3;
+const CHEAPEST_RADIUS_KM = 5;
 const INTENTS = ['SOURCE', 'SYMPTOM', 'PUBLIC_SEARCH', 'PUBLIC_COMPARE', 'HELP', 'GREETING', 'CAPABILITIES', 'NEARBY', 'ASK_TERM'];
 
 function bounded<T>(operation: Promise<T>, milliseconds = 1_500): Promise<T> {
@@ -107,28 +108,34 @@ export class ConverseAssistant {
     const term = found.term;
     const named2: ConversationContext = { ...base, medicamento: term };
     const matches = filterVariant(found.offers, ask.strength, ask.form);
+    // «el más barato cerca»: el botón de aclaración conserva el pedido completo.
+    const cheapest = intent === 'CERCANIA' && reading.cheapest;
+    const suffix = cheapest ? 'mas barato cerca' : '';
     const label = [capital(term), ask.strength, ask.form ? DOSAGE_FORM_LABEL[ask.form] : null].filter(Boolean).join(' ');
     const seeAll = { texto: 'Ver todas en Buscar medicamentos', url: `/search?q=${encodeURIComponent([term, ask.strength].filter(Boolean).join(' '))}` };
     if (matches.length === 0) {
       return reply('ACLARACION', `No encontré «${label}» publicado. Estas son las opciones publicadas de «${capital(term)}»:`, named2,
-        { opciones: variantChoices(term, groupOffers(found.offers)), verTodas: seeAll });
+        { opciones: variantChoices(term, groupOffers(found.offers), suffix), verTodas: seeAll });
     }
     const reference = intent === 'ALTERNATIVA' ? this.brandOffers(matches, term) : matches;
     const groups = groupOffers(reference);
     if (groups.length > 1) {
       return reply('ACLARACION', `Hay varias presentaciones de «${capital(term)}». ¿Cuál buscas?`, named2,
-        { opciones: variantChoices(term, groups), verTodas: seeAll });
+        { opciones: variantChoices(term, groups, suffix), verTodas: seeAll });
     }
     const group = groups[0];
     const chosen: ConversationContext = { ...named2, ...(group.strength ? { concentracion: group.strength } : {}), ...(group.form ? { forma: group.form } : {}) };
 
     if (intent === 'ALTERNATIVA') return this.alternatives(group, chosen, seeAll, reply);
-    const ordered = [...group.offers].sort(intent === 'CERCANIA' ? byDistance : byPrice);
+    const nearby = cheapest ? group.offers.filter(offer => offer.distanciaKm !== null && offer.distanciaKm <= CHEAPEST_RADIUS_KM) : [];
+    const ordered = nearby.length > 0 ? [...nearby].sort(byPrice) : [...group.offers].sort(intent === 'CERCANIA' ? byDistance : byPrice);
     const top = ordered.slice(0, 3);
     const hours = await this.hoursFor(top.map(offer => offer.farmacia.id));
     const groupLabel = `${capital(term)} ${group.concentracion}${group.form ? ` (${DOSAGE_FORM_LABEL[group.form]})` : ''}`;
     const count = `${ordered.length} ${ordered.length === 1 ? 'oferta publicada' : 'ofertas publicadas'}`;
-    const respuesta = intent === 'CERCANIA'
+    const respuesta = nearby.length > 0
+      ? `«${groupLabel}» más barato a menos de ${CHEAPEST_RADIUS_KM} km de ${place!.label}, de menor a mayor precio (${count}; distancia en línea recta, referencial).`
+      : intent === 'CERCANIA'
       ? `«${groupLabel}» más cerca de ${place!.label} (${count}; distancia en línea recta, referencial).`
         + (top.every(offer => offer.distanciaKm === null) ? ' Estas farmacias aún no tienen ubicación verificada; las muestro por precio.' : '')
       : `Precios referenciales de «${groupLabel}», de menor a mayor (${count}). Confirma precio y existencias con la farmacia.`;

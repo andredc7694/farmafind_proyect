@@ -173,7 +173,7 @@ describe('F06.2 asistente en panel (antes burbuja F08.1)', () => {
     expect(toggle().textContent).toContain('¿Quieres ver el más barato cerca de ti?');
     fireEvent.click(toggle());
     fireEvent.click(screen.getByRole('button', { name: '¿Quieres ver el más barato cerca de ti?' }));
-    await waitFor(() => expect(client.query).toHaveBeenCalledWith('ibuprofeno cerca', { distrito: 'Carmen Alto' }));
+    await waitFor(() => expect(client.query).toHaveBeenCalledWith('ibuprofeno más barato cerca', { distrito: 'Carmen Alto' }));
     cleanup();
     window.sessionStorage.setItem(MINIMIZED_KEY, '1');
     render(<ChatBubble client={makeClient()} path="/search" />);

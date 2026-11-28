@@ -21,6 +21,8 @@ export interface PhraseReading {
   readonly form: DosageForm | null;
   /** Palabras que pueden ser el nombre del medicamento (normalizadas, en orden). */
   readonly medicineWords: readonly string[];
+  /** «el más barato cerca»: cercanía + precio (las cercanas, de menor a mayor precio). */
+  readonly cheapest: boolean;
 }
 
 const ALTERNATIVE = /\b(?:mas (?:barat[oa]s?|economic[oa]s?) que|parecid[oa]s? (?:a|al)|similar(?:es)? (?:a|al)|generic[oa]s?|alternativas?|otras? marcas?)\b/;
@@ -50,7 +52,8 @@ export function readPhrase(query: string): PhraseReading {
   const medicineWords = rest.split(' ').filter(word => word.length >= 3 && !STOP.has(word) && !FORM_WORD.test(word)
     && !/^\d/.test(word) && !/^(?:mg|g|mcg|ug|ml|ui|l|kg|x)$/.test(word));
   const followUp = /^y\b/.test(normalized) || (intent === null && medicineWords.length === 0 && (place !== null || strength !== null || forms.length > 0));
-  return { normalized, intent, followUp, place, strength, form: forms.length === 1 ? forms[0] : null, medicineWords };
+  return { normalized, intent, followUp, place, strength, form: forms.length === 1 ? forms[0] : null, medicineWords,
+    cheapest: intent === 'CERCANIA' && PRICE.test(normalized) };
 }
 
 /** ¿La concentración publicada coincide con la pedida («600 mg»)? Comparación por palabras enteras. */

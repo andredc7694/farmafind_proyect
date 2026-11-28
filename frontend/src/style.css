@@ -205,7 +205,7 @@ a { color: var(--emerald-dark); }
 /* F06.2 · D-06: hoja inferior en celular; panel lateral de 420 px desde 1024 px (desde 1280 px el contenido se corre). */
 .chat-panel { position: fixed; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; height: min(80vh, 640px); height: min(80dvh, 640px); overflow: hidden; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 16px 16px 0 0; box-shadow: var(--shadow); z-index: 60; }
 @media (min-width: 1024px) { .chat-panel { top: 0; left: auto; width: 420px; height: 100vh; height: 100dvh; border-width: 0 0 0 1px; border-radius: 0; } }
-.chat-minimize { display: inline-flex; gap: .3rem; align-items: center; padding: 0 .5rem; font-weight: 600; }
+.chat-icon.chat-minimize { display: inline-flex; gap: .3rem; align-items: center; padding: 0 .5rem; font-weight: 600; }
 .chat-minimize-label { font-size: .9rem; }
 .chat-cards { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .5rem; }
 .chat-card { padding: .55rem .65rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }

@@ -120,7 +120,7 @@ export function ChatBubble({ client = defaultClient, path = typeof window === 'u
     if (field) { field.focus(); setTimeout(() => field.setSelectionRange(text.length, text.length), 0); }
   }
   const quick = item => (item.send ? send(item.send) : fill(item.fill));
-  const proposal = onSearch ? { texto: '¿Quieres ver el más barato cerca de ti?', consulta: `${screen.term} cerca` } : null;
+  const proposal = onSearch ? { texto: '¿Quieres ver el más barato cerca de ti?', consulta: `${screen.term} más barato cerca` } : null;
   const toggleLabel = `Preguntar a FarmaFind AI${answers.length > 0 ? ` (${answers.length})` : ''}`;
 
   return <div className="chat-bubble">

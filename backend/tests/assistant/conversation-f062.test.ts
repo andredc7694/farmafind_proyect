@@ -160,6 +160,18 @@ describe('F06.2 frases del pedido (MOCK, herramientas falsas)', () => {
       expect(tools.search).not.toHaveBeenCalled();
     });
 
+  it('«el más barato cerca»: solo farmacias a ≤ 5 km, de menor a mayor precio; el botón de aclaración conserva el pedido', async () => {
+    const offers = [offer({ id: 'a', name: 'Ibuprofeno', strength: '400 mg', pharmacy: 'Cerca', price: 300, distance: 0.2 }),
+      offer({ id: 'b', name: 'Ibuprofeno', strength: '400 mg', pharmacy: 'Media', price: 200, distance: 2 }),
+      offer({ id: 'c', name: 'Ibuprofeno', strength: '400 mg', pharmacy: 'Lejos', price: 50, distance: 8 })];
+    const { ask } = assistant(catalogTools(offers));
+    const answer = await ask('ibuprofeno más barato cerca', { distrito: 'Carmen Alto' });
+    expect(answer.tarjetas!.map(card => card.producto!.id)).toEqual(['b', 'a']);
+    expect(answer.respuesta).toContain('a menos de 5 km de Carmen Alto');
+    const choices = await assistant(catalogTools(CATALOG)).ask('ibuprofeno más barato cerca', { distrito: 'Carmen Alto' });
+    expect(choices.opciones![0].consulta).toBe('ibuprofeno 400 mg tableta mas barato cerca');
+  });
+
   it('sin resultados lo dice nombrando el medicamento y sin inventar', async () => {
     const answer = await assistant(catalogTools(CATALOG)).ask('¿Dónde está más barato el zzzzmedicina?');
     expect(answer.respuesta).toContain('«zzzzmedicina»');

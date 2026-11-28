@@ -40,10 +40,10 @@ export function groupOffers(offers: readonly PublicOffer[]): OfferGroup[] {
 }
 
 /** Botones de «¿Cuál buscas?»: hasta 5, sin repetir la misma consulta. */
-export function variantChoices(term: string, groups: readonly OfferGroup[]): AssistantChoice[] {
+export function variantChoices(term: string, groups: readonly OfferGroup[], suffix = ''): AssistantChoice[] {
   const seen = new Set<string>(); const choices: AssistantChoice[] = [];
   for (const group of groups) {
-    const consulta = [term, group.strength ?? '', group.form ?? ''].filter(Boolean).join(' ');
+    const consulta = [term, group.strength ?? '', group.form ?? '', suffix].filter(Boolean).join(' ');
     if (seen.has(consulta)) continue;
     seen.add(consulta);
     choices.push({ texto: `${capital(group.principio)} ${group.concentracion}${group.form ? ` · ${DOSAGE_FORM_LABEL[group.form]}` : ''}`, consulta });
