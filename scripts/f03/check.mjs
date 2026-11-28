@@ -14,6 +14,7 @@ const files = mode === 'unit' ? [
   'backend/tests/search/invalidation.integration.test.ts','backend/tests/search/migrations.rls.test.ts',
   'backend/tests/search/public-contract.test.ts','backend/tests/search/public-offer.test.ts',
   'backend/tests/search/distance.test.ts','backend/tests/search/public-security.http.test.ts','backend/tests/search/f081-suggest.http.test.ts',
+  'backend/tests/search/load-test-limit.test.ts',
   'frontend/tests/search/public-search.test.jsx','frontend/tests/search/comparison.test.jsx',
 ] : mode === 'integration' ? ['backend/tests/search/redis.integration.test.ts']
   : ['backend/tests/search/public-projection.rls.test.ts','backend/tests/search/f081-suggest.rls.test.ts'];

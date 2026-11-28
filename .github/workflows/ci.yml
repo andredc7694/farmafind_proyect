@@ -44,17 +44,17 @@ jobs:
           npm run verify:contracts:f011
           npm run verify:contracts:f041
           npm run verify:contracts:f081
-      - name: Pruebas unitarias y de API con dobles (F01–F07)
-        run: |
-          for suite in "f01 unit" "f02 unit" "f03 unit" "f04 unit" "f05 unit" "f06 unit" "f061 unit" "f07 unit" \
-                       "f01 api" "f04 api" "f05 api" "f06 api" "f061 api"; do
-            set -- $suite
-            echo "::group::$1 $2"
-            node "scripts/$1/check.mjs" "$2"
-            echo "::endgroup::"
-          done
-      - name: Frontend (Vitest)
-        run: node node_modules/vitest/vitest.mjs run frontend/tests/ --exclude "**/*.spec.js"
+      # Mismas suites de siempre (unitarias y API con dobles F01–F07, más frontend Vitest), ahora con cobertura.
+      - name: Pruebas unitarias, de API con dobles y frontend, con cobertura
+        run: npm run test:coverage
+      - name: Reporte de cobertura (artefacto)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cobertura
+          path: coverage/
+          if-no-files-found: error
+          retention-days: 14
 
   postgres-rls:
     name: PostgreSQL efímero y RLS (F01, F02, F03)

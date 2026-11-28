@@ -1,0 +1,234 @@
+{
+ "options": {
+  "summaryTrendStats": [
+   "avg",
+   "med",
+   "p(95)",
+   "p(99)",
+   "max"
+  ],
+  "summaryTimeUnit": "",
+  "noColor": false
+ },
+ "state": {
+  "isStdOutTTY": false,
+  "isStdErrTTY": false,
+  "testRunDurationMs": 20036.402543
+ },
+ "metrics": {
+  "http_req_waiting": {
+   "contains": "time",
+   "values": {
+    "avg": 35.88413008143572,
+    "med": 33.3042485,
+    "p(95)": 53.85574799999994,
+    "p(99)": 73.78248000000006,
+    "max": 588.375578
+   },
+   "type": "trend"
+  },
+  "http_reqs": {
+   "type": "counter",
+   "contains": "default",
+   "values": {
+    "count": 10892,
+    "rate": 543.6105596613337
+   }
+  },
+  "iteration_duration": {
+   "type": "trend",
+   "contains": "time",
+   "values": {
+    "avg": 36.72139805086303,
+    "med": 33.960799,
+    "p(95)": 54.72017299999998,
+    "p(99)": 76.66100509,
+    "max": 591.788278
+   }
+  },
+  "http_req_failed": {
+   "type": "rate",
+   "contains": "default",
+   "values": {
+    "rate": 0,
+    "passes": 0,
+    "fails": 10892
+   }
+  },
+  "http_req_blocked": {
+   "type": "trend",
+   "contains": "time",
+   "values": {
+    "avg": 0.04797529260007288,
+    "med": 0.0086,
+    "p(95)": 0.0301,
+    "p(99)": 0.06992700000000004,
+    "max": 27.246699
+   }
+  },
+  "data_sent": {
+   "values": {
+    "count": 1220479,
+    "rate": 60913.080448485576
+   },
+   "type": "counter",
+   "contains": "data"
+  },
+  "http_req_tls_handshaking": {
+   "type": "trend",
+   "contains": "time",
+   "values": {
+    "med": 0,
+    "p(95)": 0,
+    "p(99)": 0,
+    "max": 0,
+    "avg": 0
+   }
+  },
+  "http_req_connecting": {
+   "contains": "time",
+   "values": {
+    "p(99)": 0,
+    "max": 26.735099,
+    "avg": 0.03217194215938303,
+    "med": 0,
+    "p(95)": 0
+   },
+   "type": "trend"
+  },
+  "respuestas_429": {
+   "type": "counter",
+   "contains": "default",
+   "values": {
+    "count": 10832,
+    "rate": 540.6160101222517
+   }
+  },
+  "iterations": {
+   "values": {
+    "count": 10892,
+    "rate": 543.6105596613337
+   },
+   "type": "counter",
+   "contains": "default"
+  },
+  "http_req_receiving": {
+   "type": "trend",
+   "contains": "time",
+   "values": {
+    "avg": 0.2027603602644145,
+    "med": 0.1477,
+    "p(95)": 0.40688999999999975,
+    "p(99)": 1.0288300000000026,
+    "max": 15.591799
+   }
+  },
+  "checks{tipo:limite}": {
+   "values": {
+    "rate": 1,
+    "passes": 10892,
+    "fails": 0
+   },
+   "thresholds": {
+    "rate>0": {
+     "ok": true
+    }
+   },
+   "type": "rate",
+   "contains": "default"
+  },
+  "http_req_duration": {
+   "type": "trend",
+   "contains": "time",
+   "values": {
+    "avg": 36.15369287247516,
+    "med": 33.522498999999996,
+    "p(95)": 54.117138,
+    "p(99)": 74.40695491000004,
+    "max": 591.320678
+   }
+  },
+  "vus": {
+   "type": "gauge",
+   "contains": "default",
+   "values": {
+    "value": 20,
+    "min": 20,
+    "max": 20
+   }
+  },
+  "http_req_sending": {
+   "type": "trend",
+   "contains": "time",
+   "values": {
+    "p(95)": 0.14364499999999988,
+    "p(99)": 0.2498620900000001,
+    "max": 7.391,
+    "avg": 0.06680243077488097,
+    "med": 0.0567
+   }
+  },
+  "http_req_duration{expected_response:true}": {
+   "type": "trend",
+   "contains": "time",
+   "values": {
+    "avg": 36.15369287247516,
+    "med": 33.522498999999996,
+    "p(95)": 54.117138,
+    "p(99)": 74.40695491000004,
+    "max": 591.320678
+   }
+  },
+  "vus_max": {
+   "values": {
+    "value": 20,
+    "min": 20,
+    "max": 20
+   },
+   "type": "gauge",
+   "contains": "default"
+  },
+  "checks": {
+   "contains": "default",
+   "values": {
+    "rate": 1,
+    "passes": 21784,
+    "fails": 0
+   },
+   "type": "rate"
+  },
+  "data_received": {
+   "values": {
+    "count": 4960223,
+    "rate": 247560.55830655707
+   },
+   "type": "counter",
+   "contains": "data"
+  }
+ },
+ "setup_data": {
+  "start": 1795858005595
+ },
+ "root_group": {
+  "name": "",
+  "path": "",
+  "id": "d41d8cd98f00b204e9800998ecf8427e",
+  "groups": [],
+  "checks": [
+    {
+     "path": "::límite real devuelve 429 con Retry-After",
+     "id": "ceb019688dd1dba872e6952c1895ab5f",
+     "passes": 10892,
+     "fails": 0,
+     "name": "límite real devuelve 429 con Retry-After"
+    },
+    {
+     "fails": 0,
+     "name": "solo 200 o 429",
+     "path": "::solo 200 o 429",
+     "id": "daeab88f26fa44c94488cfbe2371d2f8",
+     "passes": 10892
+    }
+   ]
+ }
+}

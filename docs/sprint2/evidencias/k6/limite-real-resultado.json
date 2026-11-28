@@ -1,0 +1,35 @@
+{
+  "etiqueta": "limite-real",
+  "modo": "limit",
+  "fecha": "2026-11-28T09:26:42.732Z",
+  "duracionSegundos": 24,
+  "codigoSalidaK6": 0,
+  "saludAntes": 200,
+  "saludDespues": 200,
+  "redis": {
+    "aciertos": 54,
+    "fallos": 66
+  },
+  "total": {
+    "peticiones": 10892,
+    "porSegundo": 543.61,
+    "medianaMs": 33.52,
+    "p95Ms": 54.12,
+    "p99Ms": 74.41,
+    "maxMs": 591.32,
+    "errorPct": 0
+  },
+  "respuestas429": 10832,
+  "comprobaciones": [
+    {
+      "nombre": "límite real devuelve 429 con Retry-After",
+      "bien": 10892,
+      "mal": 0
+    },
+    {
+      "nombre": "solo 200 o 429",
+      "bien": 10892,
+      "mal": 0
+    }
+  ]
+}

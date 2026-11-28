@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="FarmaFind Sprint 2 — API REST (copia TEST)" tests="85" time="1.530">
+  <testsuite name="1. Públicos / Salud del servicio" id="d0baca1d-7eb9-41a8-ae3a-155f88467f1e" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.038">
+    <testcase name="responde 200" time="0.038" classname="1PublicosSaludDelServicio"/>
+    <testcase name="tiempo &lt; 500 ms" time="0.038" classname="1PublicosSaludDelServicio"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Búsqueda de medicamento" id="3450c6a7-5e5b-4916-b1da-eab11df5d340" timestamp="2026-11-28T04:19:31.521Z" tests="4" failures="0" errors="0" time="0.040">
+    <testcase name="responde 200" time="0.040" classname="1PublicosBusquedaDeMedicamento"/>
+    <testcase name="tiempo &lt; 2000 ms" time="0.040" classname="1PublicosBusquedaDeMedicamento"/>
+    <testcase name="no expone datos privados (stock exacto, costo, reservas)" time="0.040" classname="1PublicosBusquedaDeMedicamento"/>
+    <testcase name="devuelve ofertas con farmacia y precio" time="0.040" classname="1PublicosBusquedaDeMedicamento"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Búsqueda inválida (1 letra)" id="c99fd2a2-c302-4064-bca4-1a7273860c15" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="responde 400" time="0.003" classname="1PublicosBusquedaInvalida1Letra"/>
+    <testcase name="error sin SQL ni secretos" time="0.003" classname="1PublicosBusquedaInvalida1Letra"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Parámetro desconocido se ignora sin exponer stock" id="61b55fc9-c8a8-405a-9acb-fae177b6aee9" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="responde 200" time="0.007" classname="1PublicosParametroDesconocidoSeIgnoraSinExponerStock"/>
+    <testcase name="no expone datos privados (stock exacto, costo, reservas)" time="0.007" classname="1PublicosParametroDesconocidoSeIgnoraSinExponerStock"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Sugerencias" id="53eab0fb-eaad-49ec-aead-518ec4f8e8b7" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.017">
+    <testcase name="responde 200" time="0.017" classname="1PublicosSugerencias"/>
+    <testcase name="tiempo &lt; 2000 ms" time="0.017" classname="1PublicosSugerencias"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Farmacias por ciudad" id="4deeb793-cce2-4996-942b-8d55eeb7d6af" timestamp="2026-11-28T04:19:31.521Z" tests="3" failures="0" errors="0" time="0.028">
+    <testcase name="responde 200" time="0.028" classname="1PublicosFarmaciasPorCiudad"/>
+    <testcase name="tiempo &lt; 2000 ms" time="0.028" classname="1PublicosFarmaciasPorCiudad"/>
+    <testcase name="no expone datos privados (stock exacto, costo, reservas)" time="0.028" classname="1PublicosFarmaciasPorCiudad"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Farmacias cercanas (ubicación en el cuerpo)" id="5699b69e-eef8-445a-9cbd-58b489f83d0b" timestamp="2026-11-28T04:19:31.521Z" tests="3" failures="0" errors="0" time="0.022">
+    <testcase name="responde 200" time="0.022" classname="1PublicosFarmaciasCercanasUbicacionEnElCuerpo"/>
+    <testcase name="tiempo &lt; 2000 ms" time="0.022" classname="1PublicosFarmaciasCercanasUbicacionEnElCuerpo"/>
+    <testcase name="no expone datos privados (stock exacto, costo, reservas)" time="0.022" classname="1PublicosFarmaciasCercanasUbicacionEnElCuerpo"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Ubicación en la URL se rechaza" id="378c5ee4-4553-43e5-ad69-65d8e7831d4b" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="responde 400" time="0.003" classname="1PublicosUbicacionEnLaUrlSeRechaza"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Asistente: pregunta por un medicamento" id="1f0bb725-974c-46a2-9546-a2122a5e76e6" timestamp="2026-11-28T04:19:31.521Z" tests="3" failures="0" errors="0" time="0.032">
+    <testcase name="responde 200" time="0.032" classname="1PublicosAsistentePreguntaPorUnMedicamento"/>
+    <testcase name="tiempo &lt; 3000 ms" time="0.032" classname="1PublicosAsistentePreguntaPorUnMedicamento"/>
+    <testcase name="no expone datos privados (stock exacto, costo, reservas)" time="0.032" classname="1PublicosAsistentePreguntaPorUnMedicamento"/>
+  </testsuite>
+  <testsuite name="1. Públicos / Asistente: campos no permitidos se rechazan" id="3fdfacc2-e66a-458f-983a-77b4210acb75" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="responde 400" time="0.004" classname="1PublicosAsistenteCamposNoPermitidosSeRechazan"/>
+    <testcase name="error sin SQL ni secretos" time="0.004" classname="1PublicosAsistenteCamposNoPermitidosSeRechazan"/>
+  </testsuite>
+  <testsuite name="2. Seguridad sin sesión / Mis reservas sin sesión" id="0dd7f532-c42a-4555-8315-5e44442577de" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="responde 401" time="0.004" classname="2SeguridadSinSesionMisReservasSinSesion"/>
+    <testcase name="error sin SQL ni secretos" time="0.004" classname="2SeguridadSinSesionMisReservasSinSesion"/>
+  </testsuite>
+  <testsuite name="2. Seguridad sin sesión / Mis membresías sin sesión" id="e5ee7161-0fcc-430e-a056-6d0b4257439b" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.002">
+    <testcase name="responde 401" time="0.002" classname="2SeguridadSinSesionMisMembresiasSinSesion"/>
+  </testsuite>
+  <testsuite name="2. Seguridad sin sesión / Inventario de una farmacia sin sesión" id="af5c25af-a353-492f-aa94-86459a67a381" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="responde 401" time="0.003" classname="2SeguridadSinSesionInventarioDeUnaFarmaciaSinSesion"/>
+  </testsuite>
+  <testsuite name="2. Seguridad sin sesión / Crear reserva sin sesión ni CSRF" id="0f5d3467-afd3-4874-b337-070e978f38b9" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="rechazada (401 o 403)" time="0.003" classname="2SeguridadSinSesionCrearReservaSinSesionNiCsrf"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Token CSRF" id="00dec2ed-c57d-44d4-aa85-a3079fd0ef1d" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="responde 200" time="0.006" classname="3SesionDeFarmaciaYAislamientoTokenCsrf"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Login con contraseña incorrecta" id="cee20b65-7499-41c1-9094-e57af256adde" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.421">
+    <testcase name="responde 401" time="0.421" classname="3SesionDeFarmaciaYAislamientoLoginConContrasenaIncorrecta"/>
+    <testcase name="mensaje genérico que no repite el correo" time="0.421" classname="3SesionDeFarmaciaYAislamientoLoginConContrasenaIncorrecta"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Token CSRF (de nuevo)" id="569ffca4-79ea-4bfe-9bde-65276e95fc1b" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="responde 200" time="0.003" classname="3SesionDeFarmaciaYAislamientoTokenCsrfDeNuevo"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Login del dueño (copia)" id="4df74eb4-b6c4-4c11-8432-49772df9e7f1" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.203">
+    <testcase name="responde 200" time="0.203" classname="3SesionDeFarmaciaYAislamientoLoginDelDuenoCopia"/>
+    <testcase name="tiempo &lt; 3000 ms" time="0.203" classname="3SesionDeFarmaciaYAislamientoLoginDelDuenoCopia"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Mis membresías" id="042b7f1b-d459-49fe-8f67-9baaac7df3e4" timestamp="2026-11-28T04:19:31.521Z" tests="3" failures="0" errors="0" time="0.038">
+    <testcase name="responde 200" time="0.038" classname="3SesionDeFarmaciaYAislamientoMisMembresias"/>
+    <testcase name="una sola farmacia propia" time="0.038" classname="3SesionDeFarmaciaYAislamientoMisMembresias"/>
+    <testcase name="hay otra farmacia para probar aislamiento" time="0.038" classname="3SesionDeFarmaciaYAislamientoMisMembresias"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Token CSRF de la sesión" id="6fd003df-6683-4f87-bc2f-76237f606e0f" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.014">
+    <testcase name="responde 200" time="0.014" classname="3SesionDeFarmaciaYAislamientoTokenCsrfDeLaSesion"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Elegir farmacia activa" id="8618321e-1de2-45f2-a7e3-4c376cea13d3" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.042">
+    <testcase name="responde 200" time="0.042" classname="3SesionDeFarmaciaYAislamientoElegirFarmaciaActiva"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Resumen de inventario propio" id="e1797a33-7ce3-497d-9b17-4eb8938b353f" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.025">
+    <testcase name="responde 200" time="0.025" classname="3SesionDeFarmaciaYAislamientoResumenDeInventarioPropio"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Inventario de OTRA farmacia (aislamiento RLS)" id="ac51669a-09b5-413b-9cac-57efa364eb3b" timestamp="2026-11-28T04:19:31.521Z" tests="2" failures="0" errors="0" time="0.023">
+    <testcase name="responde 404" time="0.023" classname="3SesionDeFarmaciaYAislamientoInventarioDeOtraFarmaciaAislamientoRls"/>
+    <testcase name="no revela datos de la otra farmacia" time="0.023" classname="3SesionDeFarmaciaYAislamientoInventarioDeOtraFarmaciaAislamientoRls"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Reservas de OTRA farmacia" id="d607fd4b-dfaf-448b-aaee-5bd5f56ebd88" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.019">
+    <testcase name="rechazada (403 o 404)" time="0.019" classname="3SesionDeFarmaciaYAislamientoReservasDeOtraFarmacia"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Cambio sin token CSRF" id="301490ca-4169-43d8-8e1b-f34e0e4ecbd4" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.025">
+    <testcase name="responde 403" time="0.025" classname="3SesionDeFarmaciaYAislamientoCambioSinTokenCsrf"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Cerrar sesión" id="3d67f36d-2ac8-4718-bd52-c6327fbdbbce" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.020">
+    <testcase name="sesión cerrada (200 o 204)" time="0.020" classname="3SesionDeFarmaciaYAislamientoCerrarSesion"/>
+  </testsuite>
+  <testsuite name="3. Sesión de farmacia y aislamiento / Membresías tras cerrar sesión" id="4d373773-789a-4e76-a050-ff8a6e256202" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.004">
+    <testcase name="responde 401" time="0.004" classname="3SesionDeFarmaciaYAislamientoMembresiasTrasCerrarSesion"/>
+  </testsuite>
+  <testsuite name="4. Protección contra abuso (límite real 60/min por IP) / Búsqueda repetida hasta el 429" id="849c26be-34f5-4adb-aea7-f9ac5ba87bb1" timestamp="2026-11-28T04:19:31.521Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="llega al límite: 429 con Retry-After (intento 58)" time="0.003" classname="4ProteccionContraAbusoLimiteReal60MinPorIpBusquedaRepetidaHastaEl429"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,753 @@
+{
+  "info": {
+    "name": "FarmaFind Sprint 2 — API REST (copia TEST)",
+    "description": "Pruebas funcionales y de seguridad de la API pública y de farmacia. Ejecutar solo contra la copia temporal (3001), nunca contra la DEMO.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Públicos",
+      "item": [
+        {
+          "name": "Salud del servicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tiempo < 500 ms\", () => pm.expect(pm.response.responseTime).to.be.below(500));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          }
+        },
+        {
+          "name": "Búsqueda de medicamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tiempo < 2000 ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"no expone datos privados (stock exacto, costo, reservas)\", () => { const t = pm.response.text(); [\"cantidadFisica\",\"cantidad_fisica\",\"cantidadComprometida\",\"precioCompra\",\"reservas\"].forEach(k => pm.expect(t).to.not.include(k)); });",
+                  "pm.test(\"devuelve ofertas con farmacia y precio\", () => { const b = pm.response.json(); pm.expect(b.ofertas).to.be.an(\"array\").that.is.not.empty; pm.expect(b.ofertas[0].farmacia.id).to.be.a(\"string\"); });",
+                  "pm.collectionVariables.set(\"publicPharmacyIds\", JSON.stringify([...new Set(pm.response.json().ofertas.map(o => o.farmacia.id))]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/busquedas?q=paracetamol"
+          }
+        },
+        {
+          "name": "Búsqueda inválida (1 letra)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"error sin SQL ni secretos\", () => pm.expect(pm.response.text()).to.not.match(/select |password_hash|stack/i));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/busquedas?q=a"
+          }
+        },
+        {
+          "name": "Parámetro desconocido se ignora sin exponer stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"no expone datos privados (stock exacto, costo, reservas)\", () => { const t = pm.response.text(); [\"cantidadFisica\",\"cantidad_fisica\",\"cantidadComprometida\",\"precioCompra\",\"reservas\"].forEach(k => pm.expect(t).to.not.include(k)); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/busquedas?q=paracetamol&stock=1"
+          }
+        },
+        {
+          "name": "Sugerencias",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tiempo < 2000 ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/busquedas/sugerencias?q=ibupro"
+          }
+        },
+        {
+          "name": "Farmacias por ciudad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tiempo < 2000 ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"no expone datos privados (stock exacto, costo, reservas)\", () => { const t = pm.response.text(); [\"cantidadFisica\",\"cantidad_fisica\",\"cantidadComprometida\",\"precioCompra\",\"reservas\"].forEach(k => pm.expect(t).to.not.include(k)); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/geolocalizacion/farmacias?ciudad=ayacucho"
+          }
+        },
+        {
+          "name": "Farmacias cercanas (ubicación en el cuerpo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tiempo < 2000 ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"no expone datos privados (stock exacto, costo, reservas)\", () => { const t = pm.response.text(); [\"cantidadFisica\",\"cantidad_fisica\",\"cantidadComprometida\",\"precioCompra\",\"reservas\"].forEach(k => pm.expect(t).to.not.include(k)); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/geolocalizacion/consultas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"latitud\":-13.16,\"longitud\":-74.22,\"radioKm\":5,\"q\":\"ibuprofeno\"}"
+            }
+          }
+        },
+        {
+          "name": "Ubicación en la URL se rechaza",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/geolocalizacion/consultas?latitud=-13.16",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"latitud\":-13.16,\"longitud\":-74.22,\"radioKm\":5}"
+            }
+          }
+        },
+        {
+          "name": "Asistente: pregunta por un medicamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tiempo < 3000 ms\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "pm.test(\"no expone datos privados (stock exacto, costo, reservas)\", () => { const t = pm.response.text(); [\"cantidadFisica\",\"cantidad_fisica\",\"cantidadComprometida\",\"precioCompra\",\"reservas\"].forEach(k => pm.expect(t).to.not.include(k)); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/asistente/conversaciones",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"consulta\":\"¿Dónde hay ibuprofeno 400 mg?\"}"
+            }
+          }
+        },
+        {
+          "name": "Asistente: campos no permitidos se rechazan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"error sin SQL ni secretos\", () => pm.expect(pm.response.text()).to.not.match(/select |password_hash|stack/i));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/asistente/conversaciones",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"consulta\":\"hola\",\"usuarioId\":\"x\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Seguridad sin sesión",
+      "item": [
+        {
+          "name": "Mis reservas sin sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"error sin SQL ni secretos\", () => pm.expect(pm.response.text()).to.not.match(/select |password_hash|stack/i));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reservas"
+          }
+        },
+        {
+          "name": "Mis membresías sin sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/me/memberships"
+          }
+        },
+        {
+          "name": "Inventario de una farmacia sin sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"otherPharmacyId\", JSON.parse(pm.collectionVariables.get(\"publicPharmacyIds\"))[0]);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/farmacias/{{otherPharmacyId}}/inventario"
+          }
+        },
+        {
+          "name": "Crear reserva sin sesión ni CSRF",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"rechazada (401 o 403)\", () => pm.expect([401,403]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reservas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pharmacyId\":\"00000000-0000-4000-8000-000000000000\",\"medicationId\":\"00000000-0000-4000-8000-000000000000\",\"quantity\":1}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Sesión de farmacia y aislamiento",
+      "item": [
+        {
+          "name": "Token CSRF",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"csrfToken\", pm.response.json().csrfToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auth/csrf"
+          }
+        },
+        {
+          "name": "Login con contraseña incorrecta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"mensaje genérico que no repite el correo\", () => pm.expect(pm.response.text()).to.not.include(pm.environment.get(\"ownerEmail\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{ownerEmail}}\",\"password\":\"incorrecta-123456\"}"
+            }
+          }
+        },
+        {
+          "name": "Token CSRF (de nuevo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"csrfToken\", pm.response.json().csrfToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auth/csrf"
+          }
+        },
+        {
+          "name": "Login del dueño (copia)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tiempo < 3000 ms\", () => pm.expect(pm.response.responseTime).to.be.below(3000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{ownerEmail}}\",\"password\":\"{{ownerPassword}}\"}"
+            }
+          }
+        },
+        {
+          "name": "Mis membresías",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"una sola farmacia propia\", () => pm.expect(pm.response.json()).to.have.lengthOf(1));",
+                  "const own = pm.response.json()[0].pharmacyId; pm.collectionVariables.set(\"pharmacyId\", own);",
+                  "const others = JSON.parse(pm.collectionVariables.get(\"publicPharmacyIds\")).filter(id => id !== own); pm.test(\"hay otra farmacia para probar aislamiento\", () => pm.expect(others).to.not.be.empty); pm.collectionVariables.set(\"otherPharmacyId\", others[0]);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/me/memberships"
+          }
+        },
+        {
+          "name": "Token CSRF de la sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"csrfToken\", pm.response.json().csrfToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auth/csrf"
+          }
+        },
+        {
+          "name": "Elegir farmacia activa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/me/active-pharmacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pharmacyId\":\"{{pharmacyId}}\"}"
+            }
+          }
+        },
+        {
+          "name": "Resumen de inventario propio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/farmacias/{{pharmacyId}}/inventario/resumen"
+          }
+        },
+        {
+          "name": "Inventario de OTRA farmacia (aislamiento RLS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"no revela datos de la otra farmacia\", () => pm.expect(pm.response.text()).to.not.include(\"Botica\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/farmacias/{{otherPharmacyId}}/inventario"
+          }
+        },
+        {
+          "name": "Reservas de OTRA farmacia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"rechazada (403 o 404)\", () => pm.expect([403,404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/farmacias/{{otherPharmacyId}}/reservas"
+          }
+        },
+        {
+          "name": "Cambio sin token CSRF",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/farmacias/{{pharmacyId}}/reservas/configuracion",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pickupWindowHours\":4}"
+            }
+          }
+        },
+        {
+          "name": "Cerrar sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"sesión cerrada (200 o 204)\", () => pm.expect([200,204]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          }
+        },
+        {
+          "name": "Membresías tras cerrar sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/me/memberships"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Protección contra abuso (límite real 60/min por IP)",
+      "item": [
+        {
+          "name": "Búsqueda repetida hasta el 429",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const n = Number(pm.collectionVariables.get(\"burst\") || 0) + 1; pm.collectionVariables.set(\"burst\", n);",
+                  "if (pm.response.code === 200 && n < 80) { pm.execution.setNextRequest(\"Búsqueda repetida hasta el 429\"); }",
+                  "else { pm.test(\"llega al límite: 429 con Retry-After (intento \" + n + \")\", () => { pm.response.to.have.status(429); pm.expect(pm.response.headers.get(\"Retry-After\")).to.be.ok; }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/busquedas?q=ibuprofeno"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "csrfToken",
+      "value": ""
+    },
+    {
+      "key": "pharmacyId",
+      "value": ""
+    },
+    {
+      "key": "otherPharmacyId",
+      "value": ""
+    },
+    {
+      "key": "publicPharmacyIds",
+      "value": "[]"
+    },
+    {
+      "key": "burst",
+      "value": ""
+    }
+  ]
+}
