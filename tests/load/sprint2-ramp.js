@@ -34,10 +34,11 @@ const TERMS = ['paracetamol', 'ibuprofeno', 'amoxicilina', 'naproxeno', 'diclofe
 
 const status429 = new Counter('respuestas_429');
 
-// Etapa según el tiempo transcurrido: subida + meseta de cada nivel.
+// Cada etapa se mide solo en su meseta (todos los VU activos); subida y bajada quedan como «subida».
 function stageOf(elapsedS) {
   const block = RAMP_S + HOLD_S;
-  const index = Math.min(LEVELS.length - 1, Math.floor(elapsedS / block));
+  const index = Math.floor(elapsedS / block);
+  if (index >= LEVELS.length || elapsedS - index * block < RAMP_S) return 'subida';
   return String(LEVELS[index]);
 }
 
@@ -50,6 +51,7 @@ export default function (data) {
     const response = http.get(url, { tags: { tipo: 'limite' }, responseCallback: http.expectedStatuses(200, 429) });
     if (response.status === 429) status429.add(1);
     check(response, { 'límite real devuelve 429 con Retry-After': r => r.status !== 429 || Boolean(r.headers['Retry-After']) }, { tipo: 'limite' });
+    if (response.status !== 200 && response.status !== 429) console.log(`otro estado=${response.status} error=${response.error_code} t=${Math.round((Date.now() - data.start) / 1000)}s`);
     check(response, { 'solo 200 o 429': r => r.status === 200 || r.status === 429 });
     return;
   }

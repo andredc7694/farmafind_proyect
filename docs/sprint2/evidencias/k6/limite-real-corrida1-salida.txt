@@ -1,0 +1,7 @@
+time="2026-11-28T09:26:23Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:3001/api/v1/busquedas?q=diclofenaco\": dial: i/o timeout"
+time="2026-11-28T09:26:23Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:3001/api/v1/busquedas?q=prednisona\": dial: i/o timeout"
+time="2026-11-28T09:26:23Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:3001/api/v1/busquedas?q=diclofenaco%20gel\": dial: i/o timeout"
+time="2026-11-28T09:26:23Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:3001/api/v1/busquedas?q=naproxeno\": dial: i/o timeout"
+time="2026-11-28T09:26:23Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:3001/api/v1/busquedas?q=loratadina\": dial: i/o timeout"
+
+(resumen JSON guardado)

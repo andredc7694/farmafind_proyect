@@ -1,0 +1,82 @@
+{
+  "etiqueta": "rampa-sin-redis",
+  "modo": "ramp",
+  "fecha": "2026-11-28T09:18:44.497Z",
+  "duracionSegundos": 413,
+  "codigoSalidaK6": 99,
+  "saludAntes": 200,
+  "saludDespues": 200,
+  "redis": {
+    "aciertos": 0,
+    "fallos": 0
+  },
+  "total": {
+    "peticiones": 32072,
+    "porSegundo": 78.95,
+    "medianaMs": 4771.86,
+    "p95Ms": 21685.91,
+    "p99Ms": 22090.95,
+    "maxMs": 22417.48,
+    "errorPct": 0
+  },
+  "etapas": {
+    "50": {
+      "peticiones": 2143,
+      "porSegundo": 47.62,
+      "medianaMs": 42.81,
+      "p95Ms": 92.6,
+      "p99Ms": 142.14,
+      "maxMs": 233.97,
+      "errorPct": 0
+    },
+    "250": {
+      "peticiones": 3902,
+      "porSegundo": 86.71,
+      "medianaMs": 1859.01,
+      "p95Ms": 2398.83,
+      "p99Ms": 2466.79,
+      "maxMs": 2564.88,
+      "errorPct": 0
+    },
+    "500": {
+      "peticiones": 4107,
+      "porSegundo": 91.27,
+      "medianaMs": 4528.62,
+      "p95Ms": 4878.21,
+      "p99Ms": 4955.68,
+      "maxMs": 5095.27,
+      "errorPct": 0
+    },
+    "1000": {
+      "peticiones": 4045,
+      "porSegundo": 89.89,
+      "medianaMs": 10081.24,
+      "p95Ms": 10626.46,
+      "p99Ms": 10978.44,
+      "maxMs": 11047.77,
+      "errorPct": 0
+    },
+    "2000": {
+      "peticiones": 3962,
+      "porSegundo": 88.04,
+      "medianaMs": 21533.56,
+      "p95Ms": 21943.67,
+      "p99Ms": 22056.86,
+      "maxMs": 22187.63,
+      "errorPct": 0
+    }
+  },
+  "respuestas429": 0,
+  "comprobaciones": [
+    {
+      "nombre": "status 200",
+      "bien": 32072,
+      "mal": 0
+    },
+    {
+      "nombre": "sin campos privados",
+      "bien": 32072,
+      "mal": 0
+    }
+  ]
+}
