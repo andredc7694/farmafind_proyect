@@ -1,0 +1,448 @@
+Ejecutado 2026-11-28T04:19:40.175Z contra http://127.0.0.1:3001 (copia TEST)
+
+newman
+
+FarmaFind Sprint 2 — API REST (copia TEST)
+
+Folder 1. Públicos
+Sub-folder Salud del servicio
+  GET http://127.0.0.1:3001/health [200 OK, 297B, 38ms]
+  Pass  responde 200
+  Pass  tiempo < 500 ms
+
+Sub-folder Búsqueda de medicamento
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=paracetamol [200 OK, 11.16kB, 40ms]
+  Pass  responde 200
+  Pass  tiempo < 2000 ms
+  Pass  no expone datos privados (stock exacto, costo, reservas)
+  Pass  devuelve ofertas con farmacia y precio
+
+Sub-folder Búsqueda inválida (1 letra)
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=a [400 Bad Request, 386B, 3ms]
+  Pass  responde 400
+  Pass  error sin SQL ni secretos
+
+Sub-folder Parámetro desconocido se ignora sin exponer stock
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=paracetamol&stock=1 [200 OK, 11.16kB, 7ms]
+  Pass  responde 200
+  Pass  no expone datos privados (stock exacto, costo, reservas)
+
+Sub-folder Sugerencias
+  GET http://127.0.0.1:3001/api/v1/busquedas/sugerencias?q=ibupro [200 OK, 671B, 17ms]
+  Pass  responde 200
+  Pass  tiempo < 2000 ms
+
+Sub-folder Farmacias por ciudad
+  GET http://127.0.0.1:3001/api/v1/geolocalizacion/farmacias?ciudad=ayacucho [200 OK, 19.96kB, 28ms]
+  Pass  responde 200
+  Pass  tiempo < 2000 ms
+  Pass  no expone datos privados (stock exacto, costo, reservas)
+
+Sub-folder Farmacias cercanas (ubicación en el cuerpo)
+  POST http://127.0.0.1:3001/api/v1/geolocalizacion/consultas [200 OK, 16.18kB, 22ms]
+  Pass  responde 200
+  Pass  tiempo < 2000 ms
+  Pass  no expone datos privados (stock exacto, costo, reservas)
+
+Sub-folder Ubicación en la URL se rechaza
+  POST http://127.0.0.1:3001/api/v1/geolocalizacion/consultas?latitud=-13.16 [400 Bad Request, 386B, 3ms]
+  Pass  responde 400
+
+Sub-folder Asistente: pregunta por un medicamento
+  POST http://127.0.0.1:3001/api/v1/asistente/conversaciones [200 OK, 3.46kB, 32ms]
+  Pass  responde 200
+  Pass  tiempo < 3000 ms
+  Pass  no expone datos privados (stock exacto, costo, reservas)
+
+Sub-folder Asistente: campos no permitidos se rechazan
+  POST http://127.0.0.1:3001/api/v1/asistente/conversaciones [400 Bad Request, 377B, 4ms]
+  Pass  responde 400
+  Pass  error sin SQL ni secretos
+
+Folder 2. Seguridad sin sesión
+Sub-folder Mis reservas sin sesión
+  GET http://127.0.0.1:3001/api/v1/reservas [401 Unauthorized, 358B, 4ms]
+  Pass  responde 401
+  Pass  error sin SQL ni secretos
+
+Sub-folder Mis membresías sin sesión
+  GET http://127.0.0.1:3001/api/v1/me/memberships [401 Unauthorized, 358B, 2ms]
+  Pass  responde 401
+
+Sub-folder Inventario de una farmacia sin sesión
+  GET http://127.0.0.1:3001/api/v1/farmacias/4dc6c552-22fd-4846-bd49-b23e574ac54f/inventario [401 Unauthorized, 360B, 3ms]
+  Pass  responde 401
+
+Sub-folder Crear reserva sin sesión ni CSRF
+  POST http://127.0.0.1:3001/api/v1/reservas [403 Forbidden, 356B, 3ms]
+  Pass  rechazada (401 o 403)
+
+Folder 3. Sesión de farmacia y aislamiento
+Sub-folder Token CSRF
+  GET http://127.0.0.1:3001/api/v1/auth/csrf [200 OK, 496B, 6ms]
+  Pass  responde 200
+
+Sub-folder Login con contraseña incorrecta
+  POST http://127.0.0.1:3001/api/v1/auth/login [401 Unauthorized, 365B, 421ms]
+  Pass  responde 401
+  Pass  mensaje genérico que no repite el correo
+
+Sub-folder Token CSRF (de nuevo)
+  GET http://127.0.0.1:3001/api/v1/auth/csrf [200 OK, 496B, 3ms]
+  Pass  responde 200
+
+Sub-folder Login del dueño (copia)
+  POST http://127.0.0.1:3001/api/v1/auth/login [200 OK, 543B, 203ms]
+  Pass  responde 200
+  Pass  tiempo < 3000 ms
+
+Sub-folder Mis membresías
+  GET http://127.0.0.1:3001/api/v1/me/memberships [200 OK, 658B, 38ms]
+  Pass  responde 200
+  Pass  una sola farmacia propia
+  Pass  hay otra farmacia para probar aislamiento
+
+Sub-folder Token CSRF de la sesión
+  GET http://127.0.0.1:3001/api/v1/auth/csrf [200 OK, 496B, 14ms]
+  Pass  responde 200
+
+Sub-folder Elegir farmacia activa
+  PUT http://127.0.0.1:3001/api/v1/me/active-pharmacy [200 OK, 617B, 42ms]
+  Pass  responde 200
+
+Sub-folder Resumen de inventario propio
+  GET http://127.0.0.1:3001/api/v1/farmacias/fd4b820e-fc06-44fb-ac09-dab6363c682d/inventario/resumen [200 OK, 309B, 25ms]
+  Pass  responde 200
+
+Sub-folder Inventario de OTRA farmacia (aislamiento RLS)
+  GET http://127.0.0.1:3001/api/v1/farmacias/4dc6c552-22fd-4846-bd49-b23e574ac54f/inventario [404 Not Found, 353B, 23ms]
+  Pass  responde 404
+  Pass  no revela datos de la otra farmacia
+
+Sub-folder Reservas de OTRA farmacia
+  GET http://127.0.0.1:3001/api/v1/farmacias/4dc6c552-22fd-4846-bd49-b23e574ac54f/reservas [403 Forbidden, 348B, 19ms]
+  Pass  rechazada (403 o 404)
+
+Sub-folder Cambio sin token CSRF
+  PUT http://127.0.0.1:3001/api/v1/farmacias/fd4b820e-fc06-44fb-ac09-dab6363c682d/reservas/configuracion [403 Forbidden, 356B, 25ms]
+  Pass  responde 403
+
+Sub-folder Cerrar sesión
+  POST http://127.0.0.1:3001/api/v1/auth/logout [204 No Content, 241B, 20ms]
+  Pass  sesión cerrada (200 o 204)
+
+Sub-folder Membresías tras cerrar sesión
+  GET http://127.0.0.1:3001/api/v1/me/memberships [401 Unauthorized, 358B, 4ms]
+  Pass  responde 401
+
+Folder 4. Protección contra abuso (límite real 60/min por IP)
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 19ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 9ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 8ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 9ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 42ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 41ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 9ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 11ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 8ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 10ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 21ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 7ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 12ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 13ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 5ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 8ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [200 OK, 11.08kB, 6ms]
+
+Attempting to set next request to Búsqueda repetida hasta el 429
+
+Sub-folder Búsqueda repetida hasta el 429
+  GET http://127.0.0.1:3001/api/v1/busquedas?q=ibuprofeno [429 Too Many Requests, 402B, 3ms]
+  Pass  llega al límite: 429 con Retry-After (intento 58)
+
+------------------------------------------------------------------
+|                         |          executed |           failed |
+--------------------------+-------------------+-------------------
+|              iterations |                 1 |                0 |
+--------------------------+-------------------+-------------------
+|                requests |                85 |                0 |
+--------------------------+-------------------+-------------------
+|            test-scripts |                85 |                0 |
+--------------------------+-------------------+-------------------
+|      prerequest-scripts |                 1 |                0 |
+--------------------------+-------------------+-------------------
+|              assertions |                48 |                0 |
+------------------------------------------------------------------
+| total run duration: 8.5s                                       |
+------------------------------------------------------------------
+| total data received: 681.85kB (approx)                         |
+------------------------------------------------------------------
+| average response time: 17ms [min: 2ms, max: 421ms, s.d.: 49ms] |
+------------------------------------------------------------------
+(node:23176) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)

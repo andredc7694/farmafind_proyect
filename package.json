@@ -28,6 +28,7 @@
     "check:config": "node scripts/f00/check-config.mjs",
     "test:base": "node scripts/integration/test-base.mjs",
     "test:coverage": "node scripts/test-coverage/run.mjs",
+    "test:postman": "node scripts/postman/run.mjs",
     "test:f01:unit": "node scripts/f01/check.mjs unit",
     "test:f01:api": "node scripts/f01/check.mjs api",
     "test:f01:rls": "node scripts/f01/check.mjs rls",
