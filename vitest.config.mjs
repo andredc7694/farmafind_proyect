@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 
-// Cobertura (Sprint 2): solo se activa cuando scripts/coverage/run.mjs define FARMAFIND_COVERAGE_BLOB.
+// Cobertura (Sprint 2): solo se activa cuando scripts/test-coverage/run.mjs define FARMAFIND_COVERAGE_BLOB.
 // Cada suite deja su informe parcial (blob) y al final se fusionan en coverage/.
 const blob = process.env.FARMAFIND_COVERAGE_BLOB;
 
