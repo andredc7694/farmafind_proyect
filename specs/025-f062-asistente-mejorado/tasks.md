@@ -26,4 +26,4 @@ Formato: `T000: descripción (requisitos)`. Una casilla se marca solo con eviden
 - [x] T014: Regresión completa (backend, frontend, `check`, contratos, verificaciones F03.2 y F07.2) con resultados reales.
 - [x] T015: Copia temporal 3001/5174 con datos ficticios; E2E con Chrome, axe y 0 llamadas externas; Andre la revisa. (FR-016, SC-005)
 - [x] T016: Revisión de seguridad (clínica, inyección, privacidad, sin escrituras) y converge contra la spec. (FR-012 a FR-014)
-- [ ] T017: Aceptación de Andre en `acceptance.md` (**solo Andre decide**). Después: apagar la copia, PR y merge; actualizar la DEMO con aviso y copia de seguridad (sin migraciones).
+- [x] T017: Aceptación de Andre en `acceptance.md` (**solo Andre decide**). Después: apagar la copia, PR y merge; actualizar la DEMO con aviso y copia de seguridad (sin migraciones).

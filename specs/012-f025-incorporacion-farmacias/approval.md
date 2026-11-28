@@ -61,3 +61,8 @@ Andre cargó `farma.xlsx` (hojas «Precios», «Farmacia», «Léeme»; encabeza
 - **Andre: «Apruebo el bloque ampliado»** de `016_owner_staff_manage_test.sql` (hash `2667F61535861CB30852A3ACE1A867015A7AE68245EF254F9AFEBADCC7DF27AE`), tal como está en `fix/f025-propietario-gestiona-personal` (commit `9d978c2`).
 - Autoriza: reiniciar su DEMO, aplicar la migración y verificar en el navegador «Personal» y el perfil de HUAMANFAR; después, PR y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
 - **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre). Spec 020 en opción A.
+
+## 2026-11-27 · T057 y aceptación F02.5 (T063)
+- Andre hizo T057 a mano en su DEMO: cinco farmacias, importación, ubicación aprobada, búsqueda en lista y mapa, reserva, sexta solicitud rechazada y prueba de seguridad entre farmacias; sin errores.
+- Decisión: **ACEPTO CON OBSERVACIONES F02.5 (alcance TEST/DEMO)**. Observaciones en `acceptance.md`.
+- La búsqueda y la prueba entre farmacias quedan registradas como declaradas por Andre. Horarios de RHFARMA y FARMAPOINT: no guardados; pendiente opcional.
