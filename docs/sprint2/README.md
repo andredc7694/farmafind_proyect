@@ -1,6 +1,20 @@
 # FarmaFind — Entrega Sprint 2 (IS-488 Arquitectura de Software)
 
-Fecha: 2026-11-27 · Rama `feat/sprint2-validacion` · Base: `main` `b0557d5`.
+Fecha: 2026-11-28 · Rama `feat/sprint2-validacion` · Base: `main` `b0557d5`.
+
+## Resumen de resultados
+
+| Evidencia | Resultado real |
+|---|---|
+| Pruebas sin base de datos (CI) | 149 archivos, 867 aprobadas y 1 omitida |
+| Cobertura de líneas | 57,73 % |
+| Swagger UI | Con Docker Desktop encendido: `npm run docs:swagger`, abrir `http://127.0.0.1:8088/`; al terminar, `npm run docs:swagger:stop` |
+| Postman / newman | 85 peticiones, 48 de 48 aserciones |
+| k6 con Redis | Meta (p95 ≤ 2 s) cumplida hasta **250** usuarios virtuales; no desde 500 |
+| k6 sin Redis | Meta cumplida solo con **50** usuarios virtuales |
+| k6 hasta 2000 usuarios | Se llegó a 2000 sin errores HTTP, pero con latencias de 22–25 s en p95 |
+| Límite de abuso | 429 con `Retry-After` a partir de la petición 61 del minuto |
+| Pendiente | AC03 y la parte de dos instancias de AC02 |
 Todo lo que aparece aquí se ejecutó de verdad. Lo que falta se dice claramente en la sección 9.
 
 ## Índice
@@ -144,13 +158,25 @@ Cada módulo tiene las mismas capas. Las dependencias siempre apuntan hacia aden
   1. El frontend ya usa **Vite**, y Vitest comparte su configuración y su transformador.
   2. Ejecuta **TypeScript y ESM** sin configurar Babel ni ts-jest.
   3. Una sola herramienta sirve para backend, frontend (con jsdom y Testing Library) y Notificaciones.
-  4. Es más rápido.
+
+**Compatibilidad con Jest, sin exagerar:**
+
+| Tema | Jest | Vitest (este proyecto) |
+|---|---|---|
+| `describe`, `it`, `expect`, `beforeEach`, matchers | Igual | Igual |
+| Dobles | `jest.fn()`, `jest.mock()` | `vi.fn()`, `vi.mock()` |
+| `describe`/`expect` disponibles sin importar | Sí, por defecto | No: aquí se importan de `vitest` |
+| Configuración | `jest.config` | `vitest.config.mjs` |
+| Cobertura | `--coverage` | `--coverage` con `@vitest/coverage-v8` |
+
+La compatibilidad es de estilo y de la mayor parte de la API, **no del 100 %**: pasar estas pruebas a Jest exigiría cambiar los `import`, los `vi.` y la configuración. Si la rúbrica exige Jest de forma literal, es un punto a confirmar con el docente.
 
 ### Números reales
-- 225 archivos de prueba en el repositorio.
+- 226 archivos `*.test.*` en el repositorio.
 - Suites sin base de datos (las del CI): **149 archivos, 867 pruebas aprobadas** y 1 omitida.
-- Suites con PostgreSQL (RLS e integración): se corren aparte, y en el CI con una base efímera.
-- Última regresión completa local: 1073 pruebas aprobadas.
+- Suites con PostgreSQL (RLS e integración): se corren aparte. En el CI solo corren las RLS de F01, F02 y F03, con una base efímera.
+- Última regresión completa local (F06.2, `specs/025-f062-asistente-mejorado/evidence.md`): 1073 aprobadas, 234 omitidas y 2 fallas de entorno (Redis de la DEMO no usado a propósito y un `frontend/.env.local` ausente).
+- Esa regresión es anterior a este Sprint 2 y no se repitió completa.
 
 ### CI con GitHub Actions (`.github/workflows/ci.yml`)
 - Corre en cada push y en cada PR a `main`, con permisos de solo lectura.
@@ -188,7 +214,60 @@ Cada módulo tiene las mismas capas. Las dependencias siempre apuntan hacia aden
 - Detalle en `docs/sprint2/evidencias/postman/LEEME.md`.
 
 ### 8.2 k6 — carga progresiva hasta 2000 usuarios virtuales
-*(Pendiente en este borrador: se completará con los resultados reales de la corrida.)*
+
+#### Condiciones
+- Script `tests/load/sprint2-ramp.js`, lanzado con `node scripts/load/sprint2.mjs` (imagen `grafana/k6:1.8.2`).
+- Petición medida: `GET /api/v1/busquedas?q=…`, con 34 términos al azar. Cada usuario virtual busca, espera la respuesta y descansa 1 s.
+- Rampa 50 → 250 → 500 → 1000 → 2000: 30 s de subida y 45 s de meseta por nivel. **Cada fila mide solo la meseta.**
+- Datos ficticios: 527 productos, 47 farmacias y 5313 ofertas, en una base TEST efímera.
+- Equipo: un portátil Intel Core i5-10210U (8 hilos), 16 GB, Windows 10 y Docker Desktop. La API, PostgreSQL, Redis y k6 compartían ese equipo. La DEMO estaba apagada.
+- API: un solo proceso con 6 conexiones a PostgreSQL, igual que la DEMO.
+- El límite por IP se subió **solo en esta copia** (`backend/src/config/load-test-limit.ts`), porque k6 sale de una sola IP. El valor normal sigue en 60 por minuto y tiene su prueba.
+- Meta (AC01): p95 ≤ 2 s y errores < 1 %.
+
+#### Resultados
+
+| Usuarios | **Con Redis**: pet./s | p95 | p99 | Errores | ¿Cumple? | **Sin Redis**: pet./s | p95 | p99 | Errores | ¿Cumple? |
+|---:|---:|---:|---:|---:|:---:|---:|---:|---:|---:|:---:|
+| 50 | 49,4 | 15 ms | 30 ms | 0 % | Sí | 47,6 | 93 ms | 142 ms | 0 % | Sí |
+| 250 | 245,0 | 68 ms | 138 ms | 0 % | Sí | 86,7 | 2,40 s | 2,47 s | 0 % | No |
+| 500 | 336,1 | 3,65 s | 6,54 s | 0 % | No | 91,3 | 4,88 s | 4,96 s | 0 % | No |
+| 1000 | 287,8 | 13,09 s | 15,19 s | 0 % | No | 89,9 | 10,63 s | 10,98 s | 0 % | No |
+| 2000 | 172,7 | 25,08 s | 25,54 s | 0 % | No | 88,0 | 21,94 s | 22,06 s | 0 % | No |
+
+| Medida (K6-02), corrida completa | Con Redis | Sin Redis |
+|---|---:|---:|
+| Peticiones respondidas (todas 200) | 81 293 | 32 072 |
+| Peticiones por segundo (promedio) | 202,9 | 79,0 |
+| Mediana | 182 ms | 4,77 s |
+| p95 / p99 | 21,0 s / 24,7 s | 21,7 s / 22,1 s |
+| Aciertos de caché | 71 218 (87,6 % de las peticiones) | — |
+| CPU de PostgreSQL, media / máxima | 164 % / 474 % | 413 % / 518 % |
+| CPU de la API, media / máxima | 54 % / 83 % | 58 % / 74 % |
+
+- CPU: 100 % equivale a un hilo de los 8.
+- El contador de fallos de Redis marcó 86 807, pero incluye una lectura por petición de la clave de generación, que no existe en una copia sin cambios de inventario. Por eso se informa el porcentaje de aciertos.
+- En ninguna respuesta aparecieron campos privados de stock, y la API siguió respondiendo `/health` al terminar.
+
+#### Hasta dónde llegó y por qué
+- **El equipo sostuvo los 2000 usuarios virtuales sin errores HTTP, pero no cumplió la meta de tiempo.** El límite que cumple es 250 con Redis y 50 sin Redis. Entre esos niveles y el siguiente no se midió nada, así que no se afirma dónde está el punto exacto.
+- **Sin Redis** las peticiones por segundo se estancan cerca de 90 desde 250 usuarios, y la espera crece al sumar usuarios: las peticiones hacen cola. PostgreSQL fue lo que más CPU usó. La causa más probable es el costo de la consulta de búsqueda con 6 conexiones.
+- **Con Redis** el máximo medido fue de 336 pet./s (con 500 usuarios) y después bajó. La mediana siguió baja mientras el p95 subió mucho, lo que coincide con respuestas rápidas desde la caché y otras esperando a PostgreSQL.
+  - Hipótesis, **no comprobada**: al vencer el TTL de 60 s muchas peticiones consultan a la vez lo mismo (no se agrupan), y con carga alta Redis puede superar los 150 ms y caer a PostgreSQL. Para confirmarlo hay que exponer las métricas de fallback.
+- No hubo señales de que faltara memoria (siempre quedaron al menos 2,4 GB libres) ni de que k6 fuera el freno (menos de un hilo).
+- Mejoras posibles, sin aplicar ni medir: agrupar consultas iguales simultáneas, revisar el tamaño del pool, y probar con más de una instancia de la API en otro equipo.
+
+#### Límite real: ráfaga que devuelve 429
+20 usuarios sin pausa durante 20 s, con el límite normal de 60 por minuto:
+
+| Corrida | Peticiones | 200 | 429 | Otras | 429 con `Retry-After` |
+|---|---:|---:|---:|---:|:---:|
+| Repetición (la válida) | 10 892 | 60 | 10 832 | 0 | Todos |
+| Primera | 9 798 | 60 | 9 733 | 5 | Todos |
+
+Las 5 «otras» de la primera corrida no llegaron a la API: fueron tiempos de espera al abrir la conexión entre el contenedor de k6 y el equipo (`dial: i/o timeout`). El p95 de la repetición fue 54 ms.
+
+Evidencia completa: `docs/sprint2/evidencias/k6/` (ver su `LEEME.md`).
 
 ## 9. Matriz de escenarios de calidad del Sprint 1 (AC01–AC09)
 
@@ -196,20 +275,22 @@ Definidos en el Documento Maestro v3.0 (`docs/referencias/FarmaFind_Documento_Ma
 
 | ID | Atributo y escenario | Prueba y evidencia | Estado |
 |---|---|---|---|
-| AC01 | Rendimiento: búsqueda p95 ≤ 2 s y errores < 1 % | k6 con 3 usuarios virtuales: p95 68 ms y 0 % de fallos (`docs/evidencias/integration/review-2026-11/load.txt`); rampa hasta 2000 en la sección 8.2 | Ver 8.2 |
-| AC02 | Disponibilidad: 2 instancias de la API, una cae y el servicio sigue en ≤ 30 s; Redis caído → PostgreSQL | Probada solo la parte de Redis: la búsqueda sigue sin Redis (pruebas de integración F03 con y sin Redis, y k6 sin Redis en 8.2) | **Parcial: falta la prueba con 2 instancias** |
-| AC03 | Escalabilidad: comparar 1 y 2 instancias | — | **Sin prueba** |
-| AC04 | Seguridad: 100 % de intentos no autorizados rechazados | Suites RLS F01–F03 en el CI; 20 casos negativos entre farmacias (F02.5 T055); Postman (401, 403, 404 y 429) | Cumplido |
-| AC05 | Consistencia: 10 unidades y 100 solicitudes simultáneas → exactamente 10 | `load.txt`: 10 de 100, p95 1021 ms, sin sobreventa | Cumplido |
-| AC06 | Mantenibilidad: cambiar Redis y Notificaciones por simulaciones | Pruebas con dobles de `SearchCache`, del proveedor del asistente y de Notificaciones (suites unitarias y de API) | Cumplido (sin documento propio) |
-| AC07 | Interoperabilidad: contratos, eventos duplicados y mapeo de Excel | `verify:contracts` en el CI; deduplicación de eventos en F05; importación con mapeo de columnas | Cumplido |
-| AC08 | Resiliencia: Notificaciones caído 5 min; el Outbox se recupera | `npm run test:f05:recovery` | Cumplido |
-| AC09 | Observabilidad: correlación, registros y métricas | `correlationId` en errores, métricas de caché y del asistente | Parcial (sin panel) |
+| AC01 | Rendimiento: búsqueda p95 ≤ 2 s y errores < 1 % bajo carga controlada | k6, sección 8.2 y `evidencias/k6/` (K6-02: con y sin caché) | **Cumplido hasta 250 usuarios con Redis**; no cumple desde 500 |
+| AC02 | Disponibilidad: 2 instancias de la API, una cae y el servicio sigue en ≤ 30 s; Redis caído → PostgreSQL | Solo la parte de Redis: `backend/tests/search/cache-aside.test.ts` y rampa k6 sin Redis (32 072 respuestas 200) | **Parcial: falta la prueba con 2 instancias** |
+| AC03 | Escalabilidad: comparar 1 y 2 instancias | — | **Pendiente, sin prueba** |
+| AC04 | Seguridad: 100 % de intentos no autorizados rechazados | Suites `test:f01:rls`, `test:f02:rls`, `test:f03:rls` en el CI; `specs/012-f025-incorporacion-farmacias/evidence.md` (T055); Postman (401, 403, 404 y 429) | Cumplido para los casos definidos |
+| AC05 | Consistencia: 10 unidades y 100 solicitudes simultáneas → exactamente 10 | `docs/evidencias/integration/review-2026-11/load.txt`: 10 de 100, p95 1021 ms, sin sobreventa | Cumplido |
+| AC06 | Mantenibilidad: cambiar Redis y Notificaciones por simulaciones | `backend/tests/search/cache-aside.test.ts`, `notifications/tests/events.http.test.ts` (repositorio en memoria), `backend/tests/notifications/notifications.integration.test.ts` | Cumplido (sin documento propio) |
+| AC07 | Interoperabilidad: contratos, eventos duplicados y mapeo de Excel | `verify:contracts` en el CI; `notifications/tests/events.http.test.ts` (deduplica); `backend/tests/inventory/f021-detector.test.ts` (columnas) | Cumplido |
+| AC08 | Resiliencia: Notificaciones caído 5 min; el Outbox se recupera | `npm run test:f05:recovery`; `specs/006-f05-notificaciones/implementation-evidence.md` | **Cumplido en simulación** (reloj controlado y dobles, no una caída real de 5 min) |
+| AC09 | Observabilidad: correlación, registros y métricas | `correlationId` en respuestas de error y eventos; métricas de caché y del asistente | Parcial (sin panel ni métricas consultables desde fuera) |
 
 **Pendientes, dichos con honestidad:**
 - AC02, la parte de dos instancias de la API.
 - AC03, la comparación entre una y dos instancias.
+- AC01 por encima de 250 usuarios virtuales en este equipo.
 - Un panel de observabilidad para AC09.
+- AC08 con una caída real de Notificaciones.
 
 Todas las pruebas de carga se corrieron en un solo portátil. No son una medida de producción.
 
@@ -222,4 +303,4 @@ Todas las pruebas de carga se corrieron en un solo portátil. No son una medida 
 | Swagger UI | `npm run docs:swagger` y abrir `http://127.0.0.1:8088/` |
 | Cobertura | `npm run test:coverage` y abrir `coverage/index.html` |
 | Postman | `npm run test:postman -- .cache/<copia>/state.local.json` (copia temporal encendida) |
-| k6 | Ver la sección 8.2 |
+| k6 | Con la copia temporal encendida: `node scripts/load/sprint2.mjs .cache/<copia> <etiqueta> ramp` (o `limit`) |
