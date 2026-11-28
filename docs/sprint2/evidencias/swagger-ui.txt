@@ -1,0 +1,25 @@
+Swagger UI — comprobación real 2026-11-27 23:10 (Edge sin interfaz, Playwright)
+Comando: npm run docs:swagger  →  http://127.0.0.1:8088/  (imagen oficial swaggerapi/swagger-ui:v5.34.1)
+Contratos cargados: 19 (todos los specs/*/contracts/*.yaml de main). Errores de lectura: 0 en los 19.
+Operaciones mostradas: 111 en total.
+ops  errores  contrato
+  1  0  f00 bootstrap
+ 13  0  f01 identity
+ 11  0  f02 inventory
+  2  0  f03 public-search 0.1.0
+ 10  0  f04 reservations
+  1  0  f05 notifications
+  1  0  f06 assistant
+  2  0  f061 conversation
+  4  0  f07 geolocation
+  1  0  f025 application-events
+ 13  0  f025 solicitudes
+ 26  0  f011 identity-staff
+  3  0  f041 reservations-ops
+  3  0  f081 experience
+  6  0  f071 mi-farmacia
+  2  0  f031 public-search 0.2.0
+  2  0  f032 public-search 0.3.0
+  8  0  f072 mi-farmacia
+  2  0  f062 conversation 2.0.0
+Capturas: swagger-ui-reservas.png, swagger-ui-busqueda.png

@@ -71,6 +71,8 @@
     "verify:contracts:f081": "node scripts/integration/check-openapi-routes.mjs --f081-routes",
     "verify:contracts:f041": "node scripts/integration/check-openapi-routes.mjs --f041-routes",
     "verify:contracts:f011": "node scripts/integration/check-openapi-routes.mjs --f011-routes",
+    "docs:swagger": "node scripts/swagger/start.mjs",
+    "docs:swagger:stop": "node scripts/swagger/start.mjs stop",
     "migrate:f01:test": "node scripts/f01/migrate.mjs",
     "bootstrap:f01:test": "node scripts/f01/bootstrap.mjs",
     "verify:local": "node scripts/f00/verify-local.mjs",
