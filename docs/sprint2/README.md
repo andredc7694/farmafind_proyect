@@ -1,13 +1,13 @@
 # FarmaFind — Entrega Sprint 2 (IS-488 Arquitectura de Software)
 
-Fecha: 2026-11-28 · Rama `feat/sprint2-validacion` · Base: `main` `b0557d5`.
+Fecha: 2026-11-28 · Integrado en `main` (PR #21, `229d2c3`).
 
 ## Resumen de resultados
 
 | Evidencia | Resultado real |
 |---|---|
-| Pruebas sin base de datos (CI) | 149 archivos, 867 aprobadas y 1 omitida |
-| Cobertura de líneas | 57,73 % |
+| Pruebas sin base de datos (CI) | 150 archivos, 870 aprobadas y 1 omitida |
+| Cobertura de líneas | 57,78 % |
 | Swagger UI | Con Docker Desktop encendido: `npm run docs:swagger`, abrir `http://127.0.0.1:8088/`; al terminar, `npm run docs:swagger:stop` |
 | Postman / newman | 85 peticiones, 48 de 48 aserciones |
 | k6 con Redis | Meta (p95 ≤ 2 s) cumplida hasta **250** usuarios virtuales; no desde 500 |
@@ -173,7 +173,7 @@ La compatibilidad es de estilo y de la mayor parte de la API, **no del 100 %**: 
 
 ### Números reales
 - 226 archivos `*.test.*` en el repositorio.
-- Suites sin base de datos (las del CI): **149 archivos, 867 pruebas aprobadas** y 1 omitida.
+- Suites sin base de datos (las del CI): **150 archivos, 870 pruebas aprobadas** y 1 omitida.
 - Suites con PostgreSQL (RLS e integración): se corren aparte. En el CI solo corren las RLS de F01, F02 y F03, con una base efímera.
 - Última regresión completa local (F06.2, `specs/025-f062-asistente-mejorado/evidence.md`): 1073 aprobadas, 234 omitidas y 2 fallas de entorno (Redis de la DEMO no usado a propósito y un `frontend/.env.local` ausente).
 - Esa regresión es anterior a este Sprint 2 y no se repitió completa.
@@ -186,14 +186,14 @@ La compatibilidad es de estilo y de la mayor parte de la API, **no del 100 %**: 
 ### Cobertura (`@vitest/coverage-v8`)
 - Comando: `npm run test:coverage` (`scripts/test-coverage/run.mjs`). Corre cada suite, guarda un informe parcial y los fusiona.
 - Informe: `coverage/index.html` (HTML), `coverage/lcov.info` y `coverage/coverage-summary.json`. En GitHub se descarga desde la corrida del CI, en el artefacto «cobertura».
-- **Resultado real**, igual en local y en el CI (corrida `46106323980`):
+- **Resultado real**, igual en local y en el CI (corrida `46131172246` sobre `main`):
 
 | Métrica | % | Cubiertas / total |
 |---|---|---|
-| Líneas | **57,73 %** | 3945 / 6833 |
-| Sentencias | 56,24 % | 5526 / 9825 |
-| Funciones | 57,16 % | 1393 / 2437 |
-| Ramas | 55,15 % | 4089 / 7413 |
+| Líneas | **57,78 %** | 3953 / 6841 |
+| Sentencias | 56,28 % | 5535 / 9834 |
+| Funciones | 57,19 % | 1395 / 2439 |
+| Ramas | 55,20 % | 4097 / 7421 |
 
 - **Lectura honesta:** el porcentaje mide solo las suites sin base de datos. El código SQL y los repositorios se prueban con las suites RLS e integración contra PostgreSQL real, que no entran en este número. Por eso la cobertura real del comportamiento es mayor que la que muestra el informe.
 

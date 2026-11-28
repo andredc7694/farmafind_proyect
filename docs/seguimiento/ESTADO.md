@@ -333,3 +333,4 @@ Desde Git Bash, vitest falla («reading 'config'») por la letra de unidad `c:` 
   - Paso 6 · Documento `docs/sprint2/README.md` completado.
   - Pendiente: AC03 y la parte de dos instancias de AC02 (paso opcional no hecho); investigar la caída de rendimiento con Redis desde 500 usuarios (hipótesis sin comprobar: consultas iguales simultáneas al vencer el TTL y tiempo límite de 150 ms).
 - 2026-11-28 · Sprint 2, cierre: copia (3001/5174), Redis de la copia y Swagger apagados; borrada solo la base efímera de la copia y sus 2 roles. La DEMO no se tocó (apagada desde el reinicio del equipo).
+- 2026-11-28 · Sprint 2 integrado en `main` (PR #21, merge `229d2c3`, CI en verde). Cobertura medida sobre el código final: líneas 57,78 % (3953/6841), 150 archivos, 870 pruebas aprobadas y 1 omitida; documento corregido (las cifras de 57,73 % eran de antes de agregar el límite de carga).
