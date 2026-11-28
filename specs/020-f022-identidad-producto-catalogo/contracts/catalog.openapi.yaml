@@ -1,15 +1,36 @@
 openapi: 3.1.0
-info: { title: F02.2 propuestas de catálogo (borrador), version: 0.1.0 }
+info:
+  title: F02.2 propuestas y revisión de catálogo (borrador para aprobar con el plan)
+  version: 0.2.0
+  description: >-
+    Sustituye el borrador 0.1.0 (2026-11-25). Propuestas por farmacia (quien confirma importaciones), revisión por
+    lotes con filtros, conteos y muestra obligatoria, y decisiones atómicas. Ninguna respuesta incluye precio, stock,
+    reservas ni archivos. Búsqueda pública 0.4.0 y conversación 2.1.0 se documentan en sus propios contratos.
 paths:
   /farmacias/{farmaciaId}/catalogo/propuestas:
-    get: { summary: Estado de las propuestas propias (paginado y filtrable), responses: { '200': { description: OK }, '404': { description: No visible } } }
-    post: { summary: Proponer los pendientes de una vista previa vigente, responses: { '201': { description: Lote creado }, '404': { description: No visible }, '409': { description: Vista previa vencida } } }
-  /plataforma/catalogo/lotes:
-    get: { summary: Lotes pendientes con conteos (CATALOG_REVIEW + segundo factor), responses: { '200': { description: OK }, '403': { description: Sin permiso } } }
-  /plataforma/catalogo/lotes/{loteId}/propuestas:
-    get: { summary: Propuestas del lote (paginado y filtrable), responses: { '200': { description: OK }, '403': { description: Sin permiso } } }
-  /plataforma/catalogo/lotes/{loteId}/muestra:
-    post: { summary: Obtener la muestra aleatoria obligatoria, responses: { '200': { description: Muestra }, '403': { description: Sin permiso } } }
-    put: { summary: Marcar la muestra como correcta o incorrecta, responses: { '204': { description: Registrada }, '403': { description: Sin permiso } } }
+    get:
+      summary: Mis propuestas (paginado; filtros estado, lote, texto; conteos por estado)
+      responses: { '200': { description: OK }, '404': { description: No visible } }
+    post:
+      summary: Proponer los pendientes de una vista previa vigente (lotes de hasta 1000)
+      responses:
+        '201': { description: 'Lote creado: propuestas, vinculadas solas (ya existen) y omitidas' }
+        '400': { description: Falta principio activo o forma inválida }
+        '404': { description: No visible }
+        '409': { description: Vista previa vencida }
+  /plataforma/catalogo/propuestas:
+    get:
+      summary: Propuestas abiertas con filtros (farmacia, laboratorio, forma, aviso, texto), paginadas; conteos y «quedan N»
+      responses: { '200': { description: OK }, '403': { description: Sin permiso o sin segundo factor } }
+  /plataforma/catalogo/revisiones:
+    post:
+      summary: Abrir revisión de una selección (hasta 1000, sin avisos); devuelve la muestra al azar
+      responses: { '201': { description: Revisión y muestra }, '403': { description: Sin permiso }, '409': { description: Selección con propuestas decididas o con aviso } }
+  /plataforma/catalogo/revisiones/{revisionId}/muestra/{propuestaId}:
+    put:
+      summary: Marcar una ficha de la muestra como correcta o incorrecta
+      responses: { '204': { description: Registrada }, '403': { description: Sin permiso }, '409': { description: Revisión vencida o usada } }
   /plataforma/catalogo/decisiones:
-    post: { summary: Aprobar, rechazar o vincular (una o en lote), responses: { '200': { description: Resumen agrupado }, '403': { description: Sin permiso }, '409': { description: Muestra incompleta o con errores, o estado cambiado } } }
+    post:
+      summary: Aprobar, rechazar (motivo) o vincular; una o en lote (lote con revisión y muestra correcta)
+      responses: { '200': { description: 'Resumen: aprobadas, rechazadas, vinculadas y vinculadas solas en otras farmacias' }, '403': { description: Sin permiso }, '409': { description: Muestra incompleta o con errores, o estado cambiado } }

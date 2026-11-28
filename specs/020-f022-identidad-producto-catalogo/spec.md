@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/f022-identidad-producto-catalogo` (actualizada con `main` `b0557d5` el 2026-11-27, por merge, sin force push)
 **Created**: 2026-11-25 · **Actualizada**: 2026-11-27
-**Status**: Spec aprobada el 2026-11-25 (D-01..D-05 = A). **Actualización 2026-11-27 pendiente de aprobación de Andre** (decisiones nuevas D-06 a D-12). El plan y las tareas del 2026-11-25 quedan **desactualizados**: se rehacen, con el SQL y sus hashes, después de aprobar esta spec. Nada se programa ni se aplica antes.
+**Status**: **Aprobada por Andre el 2026-11-27** (commit `5d6d579`; D-01..D-12 = A) con condiciones sobre D-08, la prueba de la restricción, la revisión por lotes y D-09 (ver `approval.md`). Plan, tareas y SQL rehechos: pendientes de aprobación. Nada se programa ni se aplica antes.
 **Prioridad**: prioritaria desde la aceptación de F02.5 (2026-11-27, observación a).
 
 ## Origen
