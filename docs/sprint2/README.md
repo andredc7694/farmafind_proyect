@@ -69,7 +69,7 @@ Cada módulo tiene las mismas capas. Las dependencias siempre apuntan hacia aden
 
 - La composición (quién usa qué adaptador) se hace en un solo lugar: `backend/src/identity-app.ts`.
 - **Se comprueba automáticamente en cada push:**
-  - `npm run check` (`scripts/f03/check-project.mjs`): TypeScript estricto y límites entre módulos. Resultado real: «339 archivos JS, TypeScript estricto y límites modulares correctos».
+  - `npm run check` (`scripts/f03/check-project.mjs`): TypeScript estricto y límites entre módulos. Resultado real: «343 archivos JS, TypeScript estricto y límites modulares correctos».
   - `tests/bootstrap/architecture.test.mjs` con `scripts/f00/check-architecture.mjs`.
 
 ## 3. Especificaciones SDD (Spec Kit)
