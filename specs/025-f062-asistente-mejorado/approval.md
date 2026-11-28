@@ -23,3 +23,7 @@
   - El resumen de conversación que envía el navegador **no es texto libre**: solo datos estructurados y limitados (último medicamento, concentración, forma y distrito), con tamaño máximo. El servidor los valida, descarta lo que no reconoce y **no los guarda en registros**. Pruebas de un resumen manipulado y de uno demasiado largo. Incorporado en `plan.md`, `data-model.md` y T005.
   - Pendiente para evaluar con la spec 020: campo explícito de forma farmacéutica en el catálogo (tableta, cápsula, jarabe…) para que las alternativas funcionen con datos reales como «caja x 30». Registrado en `ESTADO.md`.
   - Al tener lista la copia temporal: recorrido exacto y credenciales ficticias. No tocar la DEMO.
+
+## 2026-11-27 · Aceptación de F06.2
+- Andre: «ACEPTO F06.2 (asistente mejorado). Lo revisé en la copia temporal. Acepto también tus tres decisiones menores.» Detalle en `acceptance.md`.
+- Pedido adicional: protección de puertos 3000/5173 en el arranque de la copia temporal, con prueba, en esta rama.
