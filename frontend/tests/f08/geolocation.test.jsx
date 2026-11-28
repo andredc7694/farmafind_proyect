@@ -41,8 +41,8 @@ describe('geolocalización TEST en F08', () => {
     render(<LocationAdmin pharmacyId="alfa" delegationCodes={['GEO_LOCATION_PROPOSE']} client={client} />);
     expect(screen.getByText(/únicamente en el entorno TEST\/DEMO/)).toBeTruthy();
     for (const [name, value] of Object.entries({
-      'Dirección pública': 'Calle ficticia', Ciudad: 'Lima', Latitud: '-12', Longitud: '-77',
-      Fuente: 'Fixture TEST', 'Referencia de evidencia no sensible': 'REF-TEST',
+      'Dirección pública': 'Calle ficticia', 'Ciudad o distrito': 'Lima', Latitud: '-12', Longitud: '-77',
+      'Referencia para encontrar la farmacia (opcional)': 'REF-TEST', // F07.1: la fuente se rellena sola
     })) fireEvent.change(screen.getByLabelText(name), { target: { value } });
     fireEvent.click(screen.getByLabelText(/Confirmo que la dirección pública y el punto/)); // F08.1: confirmación explícita de la dirección
     fireEvent.click(screen.getByRole('button', { name: 'Enviar propuesta' }));

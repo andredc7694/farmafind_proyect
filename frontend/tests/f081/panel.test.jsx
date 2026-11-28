@@ -36,7 +36,7 @@ describe('F08.1 panel de farmacia', () => {
     summary.reservations.mockResolvedValue({ pending: 3, confirmed: 2, expiringSoon: 1 }); summary.inventory.mockResolvedValue({ products: 9, withoutStock: 4 });
     render(<PharmacyPanel {...clients([alfa])} />);
     await screen.findByText('Resumen de la farmacia');
-    expect(navLabels()).toEqual(['Resumen', 'Farmacia y ubicación', 'Inventario', 'Importar', 'Reservas', 'Historial', 'Personal', 'Configuración']);
+    expect(navLabels()).toEqual(['Resumen', 'Mi farmacia', 'Inventario', 'Importar', 'Reservas', 'Historial', 'Personal', 'Configuración']);
     expect(await screen.findByText('Pendientes de responder')).toBeTruthy();
     expect(screen.getByText('3')).toBeTruthy(); expect(screen.getByText('4')).toBeTruthy();
   });
@@ -71,7 +71,7 @@ describe('F08.1 panel de farmacia', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Historial' }));
     expect(screen.getByTestId('reservations').getAttribute('data-tab')).toBe('history');
     fireEvent.click(screen.getByRole('button', { name: 'Personal' })); expect(screen.getByTestId('staff').getAttribute('data-pharmacy')).toBe('alfa');
-    fireEvent.click(screen.getByRole('button', { name: 'Farmacia y ubicación' })); expect(screen.getByTestId('location').getAttribute('data-pharmacy')).toBe('alfa');
+    fireEvent.click(screen.getByRole('button', { name: 'Mi farmacia' })); expect(screen.getByTestId('location').getAttribute('data-pharmacy')).toBe('alfa');
     fireEvent.click(screen.getByRole('button', { name: 'Configuración' })); expect(await screen.findByLabelText(/Plazo de recogida/)).toBeTruthy();
   });
 

@@ -150,6 +150,7 @@ Como responsable quiero solicitar, aprobar y operar cinco farmacias ficticias de
 - **F025-FR-026**: La desactivación/suspensión futura DEBE requerir procedimiento y permisos específicos que definan sus efectos en ofertas, sesiones, reservas y auditoría; **no se implementa en el alcance TEST inicialmente aprobado**. La propuesta F025-RF23 de v3.1 queda pendiente de decisión separada.
 - **F025-FR-027**: Las vistas nuevas DEBEN mantener accesibilidad, adaptación móvil y español de F08, con estados de error, carga y recuperación verificables.
 - **F025-FR-028**: Los campos de identificación comercial y documentos obligatorios futuros DEBEN contrastarse con fuentes peruanas vigentes y revisión humana antes de presentarse como habilitación legal real.
+- **F025-FR-029** *(enmienda 2026-11-26, ver [enmienda-personal.md](enmienda-personal.md))*: Todo propietario creado por la activación de una solicitud aprobada DEBE recibir `membership.manage` de forma automática y atómica con su membresía. Solo el propietario (nunca trabajadores ni el administrador global), sin autoescalada. Las farmacias ya activadas se reparan una vez, con auditoría.
 
 ### Key Entities
 

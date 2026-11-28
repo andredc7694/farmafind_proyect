@@ -38,6 +38,13 @@ export function createLocationRouter(identity:LiveSession, management:ManagePhar
     try { const view=await identity.session(secret); if(!uuid.test(view.userId)) throw new Error(); return secret; }
     catch {sendIdentityError(response,401,'UNAUTHENTICATED','Sesión no válida');return null;}
   }
+  router.get('/farmacias/:farmaciaId/ubicacion',async(request,response)=>{
+    const secret=await session(request,response); if(!secret)return;
+    const pharmacyId=String(request.params.farmaciaId);
+    if(!uuid.test(pharmacyId)){sendIdentityError(response,400,'BAD_REQUEST','Entrada no válida');return;}
+    try {response.status(200).json(await management.status(secret,pharmacyId));}
+    catch(error){failure(error,response);}
+  });
   router.post('/farmacias/:farmaciaId/ubicacion/propuestas',security.requireCsrf,async(request,response)=>{
     const secret=await session(request,response); if(!secret)return;
     const pharmacyId=String(request.params.farmaciaId);

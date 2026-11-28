@@ -52,9 +52,10 @@ describe('F08.1 ruta pública de sugerencias', () => {
   });
 
   it('el caso de uso consulta solo la proyección pública con una consulta canónica y sin ubicación', async () => {
-    const search = vi.fn().mockResolvedValue([offer('Paracetamol', 'Activo', '500 mg', 'tabletas')]);
+    const search = vi.fn().mockResolvedValue([{ offer: offer('Paracetamol', 'Activo', '500 mg', 'tabletas'), matches: 2 }]);
     const result = await new SuggestPublicOffers({ search, pharmacy: vi.fn() } as never).execute('  PARA   cet  ');
-    expect(search.mock.calls[0][0]).toMatchObject({ term: 'para cet', latitude: null, longitude: null, minimumPrice: null, page: 1 });
+    expect(search.mock.calls[0][0]).toEqual({ words: ['cet'], tokens: [], nameless: false });
+    expect(search.mock.calls[0][1]).toMatchObject({ term: 'para cet', latitude: null, longitude: null, minimumPrice: null, page: 1 });
     expect(result.suggestions.map(item => item.text)).toContain('Paracetamol 500 mg tabletas');
   });
 });

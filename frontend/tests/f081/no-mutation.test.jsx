@@ -33,19 +33,22 @@ describe('F08.1 las sugerencias solo proponen', () => {
     fireEvent.click(screen.getAllByRole('option').find(option => option.textContent.includes('paracetamol 500 mg')));
     expect(calls.filter(call => !call.url.includes('/sugerencias'))).toEqual([]); // elegir una sugerencia no busca ni escribe
     fireEvent.click(screen.getByLabelText(/Recordar estos filtros/));
-    fireEvent.change(screen.getByLabelText('Orden'), { target: { value: 'precio_asc' } });
+    fireEvent.change(screen.getByLabelText('Otros órdenes'), { target: { value: 'precio_desc' } });
     expect(calls.filter(call => call.method !== 'GET')).toEqual([]);
     expect(calls.some(call => writes.test(call.url))).toBe(false);
   });
 
-  it('las preguntas sugeridas del chat no envían nada hasta que la persona pulsa Enviar, y aun así solo consultan el asistente', async () => {
+  it('las preguntas rápidas que necesitan nombre solo rellenan; las completas envían (D-10) y aun así solo consultan el asistente', async () => {
     render(<ChatBubble client={createConversationClient(globalThis.fetch)} path="/search" />);
     fireEvent.click(screen.getByRole('button', { name: /Preguntar a FarmaFind AI/ }));
-    for (const button of screen.getAllByRole('button').filter(item => item.closest('.chat-suggestions'))) fireEvent.click(button);
+    fireEvent.click(screen.getByRole('button', { name: '¿Dónde está más barato…?' }));
     expect(calls).toEqual([]);
-    fireEvent.submit(screen.getByRole('button', { name: 'Enviar' }).closest('form'));
+    fireEvent.click(screen.getByRole('button', { name: '¿Qué farmacia está abierta ahora?' }));
     await waitFor(() => expect(calls).toHaveLength(1));
-    expect(calls[0]).toEqual({ url: '/api/v1/asistente/conversaciones', method: 'POST' });
+    fireEvent.change(screen.getByLabelText('Tu consulta'), { target: { value: 'paracetamol' } });
+    fireEvent.submit(screen.getByRole('button', { name: 'Enviar' }).closest('form'));
+    await waitFor(() => expect(calls).toHaveLength(2));
+    expect(calls.every(call => call.url === '/api/v1/asistente/conversaciones' && call.method === 'POST')).toBe(true);
     expect(calls.some(call => writes.test(call.url))).toBe(false);
   });
 

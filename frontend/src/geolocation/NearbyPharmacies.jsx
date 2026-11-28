@@ -4,6 +4,7 @@ import { PharmacyMap } from './PharmacyMap.jsx';
 import { PharmacyDirections } from './PharmacyDirections.jsx';
 import { F07_MAP_SOURCE } from './map-source.js';
 import { EmptyState } from '../design/Primitives.jsx';
+import { PublicOpeningHours, usePublicOpeningHours } from './OpeningHours.jsx';
 
 function devicePosition() {
   return new Promise((resolve,reject)=>{
@@ -23,6 +24,7 @@ export function NearbyPharmacies({client=createGeolocationClient(),getPosition=d
   const [radius,setRadius]=useState('10');
   const [device,setDevice]=useState(null);
   const [result,setResult]=useState(null);
+  const hours=usePublicOpeningHours(result?.farmacias?.map(pharmacy=>pharmacy.farmaciaId)??[]);
   const [status,setStatus]=useState('idle');
   const [message,setMessage]=useState('');
   const [showMap,setShowMap]=useState(false);
@@ -88,6 +90,7 @@ export function NearbyPharmacies({client=createGeolocationClient(),getPosition=d
       {result.farmacias.length===0 ? <EmptyState title="Sin farmacias públicas"><span>No hay farmacias públicas para esta consulta.</span> Prueba con otra ciudad o un radio distinto.</EmptyState>
         : <ul className="offer-grid">{result.farmacias.map(pharmacy=><li className="offer" key={pharmacy.farmaciaId}>
           <h2>{pharmacy.nombre}</h2><p>{pharmacy.direccion}</p>
+          <PublicOpeningHours days={hours[pharmacy.farmaciaId]} />
           {pharmacy.distanciaLinealKm!==undefined && <p>Distancia lineal estimada: {pharmacy.distanciaLinealKm.toFixed(2)} km</p>}
           {!pharmacy.ubicacionVerificada && <p>Ubicación en revisión; sin distancia ni marcador.</p>}
           {pharmacy.ofertas?.map(offer=><p key={offer.productoId}>Oferta pública referencial: S/ {(offer.precioCentavos/100).toFixed(2)}

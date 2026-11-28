@@ -12,7 +12,6 @@ import { createSessionClient } from './session-client.js';
 import { InventoryView } from '../inventory/InventoryView.jsx';
 import { ReservationsView } from '../reservations/ReservationsView.jsx';
 import { LocationAdmin } from '../geolocation/LocationAdmin.jsx';
-import { PrivatePharmacyProfile } from '../pharmacies/PrivatePharmacyProfile.jsx';
 
 const identity = createSessionClient();
 
@@ -208,9 +207,7 @@ export function IdentityApp({ inventoryMode = false, reservationsMode = false, l
         .some(code => code === 'GEO_LOCATION_PROPOSE' || code === 'GEO_LOCATION_REVIEW') &&
       <p role="status">No tienes permiso para administrar la ubicación de esta farmacia.</p>}
     {status === 'authenticated' && !restricted && activePharmacyId && !reservationsMode && !locationMode && (inventoryMode
-      ? <><PrivatePharmacyProfile pharmacyId={activePharmacyId}
-          capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} />
-        <InventoryView pharmacyId={activePharmacyId}
+      ? <><InventoryView pharmacyId={activePharmacyId}
           capabilities={pharmacies.find(item => item.pharmacyId === activePharmacyId)?.delegationCodes ?? []} /></>
       : <><MembershipAdmin pharmacyId={activePharmacyId} /><StaffAdmin pharmacyId={activePharmacyId} /></>)}
   </main>;

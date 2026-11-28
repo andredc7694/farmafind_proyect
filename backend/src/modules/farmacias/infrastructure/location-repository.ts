@@ -1,6 +1,11 @@
 import type { SqlClient } from '../../usuarios/contracts/tenant.js';
 import type { LocationProposalInput } from '../domain/pharmacy-location.js';
-import type { LocationRepository, StoredLocationProposal } from '../application/location-ports.js';
+import type { LocationHistoryRow, LocationRepository, PublicLocationState,
+  StoredLocationProposal } from '../application/location-ports.js';
+import { NEWER_PROPOSAL_EXISTS } from './location-sql.js';
+
+/** F07.2 (D-05 A): ventana en la que un envío idéntico se considera el mismo. */
+export const IDENTICAL_WINDOW_SECONDS = 10;
 
 function row(value:Record<string,unknown>):StoredLocationProposal {
   return {id:String(value.id),pharmacyId:String(value.farmacia_id),proposerId:String(value.propuesta_por),
@@ -30,6 +35,26 @@ export class PgLocationRepository implements LocationRepository {
         input.source,input.evidenceReference,actorId,basePublicVersion]);
     return row(result.rows[0]);
   }
+  async lockProposals(pharmacyId:string):Promise<void> {
+    this.scope(pharmacyId);
+    // Bloqueo de transacción estándar de PostgreSQL (sin permisos nuevos); se libera al terminar la transacción.
+    await this.client.query("SELECT pg_advisory_xact_lock(hashtextextended('f072:propuesta:'||$1::text,0))",[pharmacyId]);
+  }
+  async findRecentIdentical(pharmacyId:string,actorId:string,input:LocationProposalInput):Promise<StoredLocationProposal|null> {
+    this.scope(pharmacyId);
+    const result=await this.client.query(`SELECT p.* FROM f07.ubicacion_propuesta p
+      WHERE p.farmacia_id=$1 AND p.propuesta_por=$2 AND p.estado='PENDIENTE'
+        AND p.direccion_publicable=$3 AND p.ciudad=$4
+        AND p.latitud=round($5::numeric,6) AND p.longitud=round($6::numeric,6)
+        AND p.precision_m IS NOT DISTINCT FROM round($7::numeric,2) AND p.fuente=$8
+        AND p.evidencia_referencia IS NOT DISTINCT FROM $9::text
+        AND p.propuesta_at > clock_timestamp() - make_interval(secs => $10)
+        AND NOT ${NEWER_PROPOSAL_EXISTS}
+      ORDER BY p.propuesta_at DESC,p.id DESC LIMIT 1`,
+      [pharmacyId,actorId,input.address,input.city,input.latitude,input.longitude,input.precisionMeters,
+        input.source,input.evidenceReference,IDENTICAL_WINDOW_SECONDS]);
+    return result.rows.length===1 ? row(result.rows[0]) : null;
+  }
   async find(pharmacyId:string,proposalId:string):Promise<StoredLocationProposal|null> {
     this.scope(pharmacyId);
     const result=await this.client.query(`SELECT * FROM f07.ubicacion_propuesta
@@ -55,6 +80,28 @@ export class PgLocationRepository implements LocationRepository {
       [proposal.pharmacyId,proposal.address,proposal.city,proposal.latitude,proposal.longitude,
         proposal.precisionMeters,proposal.source,proposal.proposerId,proposal.reviewerId,proposal.basePublicVersion]);
     return result.rows.length===1;
+  }
+  async history(pharmacyId:string,limit:number):Promise<LocationHistoryRow[]> {
+    this.scope(pharmacyId);
+    const result=await this.client.query(`SELECT p.*,
+        (SELECT a.motivo FROM f07.ubicacion_auditoria a WHERE a.propuesta_id=p.id
+          AND a.accion IN ('APROBACION','RECHAZO') ORDER BY a.ocurrido_at DESC LIMIT 1) AS motivo_decision
+      FROM f07.ubicacion_propuesta p WHERE p.farmacia_id=$1
+      ORDER BY p.propuesta_at DESC,p.id DESC LIMIT $2`,[pharmacyId,limit]);
+    return result.rows.map(value=>({proposal:row(value),proposedAt:new Date(String(value.propuesta_at)).toISOString(),
+      reviewedAt:value.revisada_at===null?null:new Date(String(value.revisada_at)).toISOString(),
+      reason:value.motivo_decision===null||value.motivo_decision===undefined?null:String(value.motivo_decision)}));
+  }
+  async publicState(pharmacyId:string):Promise<PublicLocationState|null> {
+    this.scope(pharmacyId);
+    const result=await this.client.query(`SELECT direccion_texto,ciudad,latitud,longitud,estado_ubicacion,
+      fecha_verificacion FROM f03.farmacia_publica WHERE farmacia_id=$1`,[pharmacyId]);
+    if (result.rows.length!==1) return null;
+    const value=result.rows[0]; const verified=value.estado_ubicacion==='PUBLICADA_VERIFICADA';
+    return {verified,address:String(value.direccion_texto),city:value.ciudad===null?null:String(value.ciudad),
+      latitude:verified&&value.latitud!==null?Number(value.latitud):null,
+      longitude:verified&&value.longitud!==null?Number(value.longitud):null,
+      verifiedAt:value.fecha_verificacion===null?null:new Date(String(value.fecha_verificacion)).toISOString()};
   }
   async audit(pharmacyId:string,proposalId:string,actorId:string,
     action:'PROPUESTA'|'APROBACION'|'RECHAZO',evidenceConfirmed?:boolean,reason?:string|null):Promise<void> {

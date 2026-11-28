@@ -9,11 +9,15 @@ export function distanceKm(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 export function orderOffers(offers: readonly PublicOffer[], query: CanonicalPublicQuery): readonly PublicOffer[] {
-  return [...offers].sort((a, b) => {
+  return [...offers].sort(compareOffers(query));
+}
+
+export function compareOffers(query: CanonicalPublicQuery): (a: PublicOffer, b: PublicOffer) => number {
+  return (a, b) => {
     if (query.order === 'precio_asc') return a.precioReferencialCentavos - b.precioReferencialCentavos || a.farmacia.id.localeCompare(b.farmacia.id);
     if (query.order === 'precio_desc') return b.precioReferencialCentavos - a.precioReferencialCentavos || a.farmacia.id.localeCompare(b.farmacia.id);
     if (query.order === 'cercania') return (a.distanciaKm ?? Infinity) - (b.distanciaKm ?? Infinity) || a.farmacia.id.localeCompare(b.farmacia.id);
     return a.medicamento.nombreComercial.localeCompare(b.medicamento.nombreComercial, 'es') ||
       a.medicamento.presentacion.localeCompare(b.medicamento.presentacion, 'es') || a.farmacia.id.localeCompare(b.farmacia.id);
-  });
+  };
 }

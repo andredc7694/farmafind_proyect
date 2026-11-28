@@ -8,7 +8,6 @@ import { InMemorySearchMetrics } from '../../src/modules/busqueda/infrastructure
 import { F03PublicAssistantGateway } from '../../src/modules/busqueda/infrastructure/public-assistant-gateway.js';
 import { ConverseAssistant } from '../../src/modules/asistente-ia/application/converse-assistant.js';
 import { F03ConversationPublicTools } from '../../src/modules/asistente-ia/infrastructure/conversation-public-tools.js';
-import { InMemoryConversationStore } from '../../src/modules/asistente-ia/infrastructure/in-memory-conversation-store.js';
 import { InMemoryReviewedSourceCatalog } from '../../src/modules/asistente-ia/infrastructure/reviewed-source-catalog.js';
 import { MockConversationProvider } from '../../src/modules/asistente-ia/infrastructure/mock-conversation-provider.js';
 import { createConversationRealFixture } from './fixtures/conversation-real-fixture.js';
@@ -35,22 +34,21 @@ describe('F06.1 con Redis y fallback PostgreSQL reales', () => {
     const repository = new PgPublicOfferRepository(fixture.runtime);
     const search = new SearchPublicOffers(repository, cache, { ttlSeconds: 30, candidateLimit: 200 }, metrics);
     return new ConverseAssistant(new MockConversationProvider(), new InMemoryReviewedSourceCatalog([]),
-      new F03ConversationPublicTools(new F03PublicAssistantGateway(search, repository)),
-      new InMemoryConversationStore());
+      new F03ConversationPublicTools(new F03PublicAssistantGateway(search, repository)));
   }
 
   it('con Redis activo observa miss y hit de la misma respuesta pública', async () => {
     const metrics = new InMemorySearchMetrics();
     const service = assistant(new RedisSearchCache(redis, 500), metrics);
     const request = { consulta: `busca ${fixture.product}` };
-    const first = await service.execute(request, 'origen-TEST', 'corr-1');
-    const second = await service.execute(request, 'origen-TEST', 'corr-2');
+    const first = await service.execute(request, 'corr-1');
+    const second = await service.execute(request, 'corr-2');
     expect(first.fuentes).toHaveLength(2);
     expect(second.fuentes).toEqual(first.fuentes);
     expect(metrics.snapshot().miss).toBe(1);
     expect(metrics.snapshot().hit).toBe(1);
     await new RedisSearchInvalidator(redis).invalidate();
-    const afterInvalidation = await service.execute(request, 'origen-TEST', 'corr-4');
+    const afterInvalidation = await service.execute(request, 'corr-4');
     expect(afterInvalidation.fuentes).toEqual(first.fuentes);
     expect(metrics.snapshot().miss).toBe(2);
   });
@@ -62,7 +60,7 @@ describe('F06.1 con Redis y fallback PostgreSQL reales', () => {
     const metrics = new InMemorySearchMetrics();
     try {
       const service = assistant(new RedisSearchCache(unavailable, 100), metrics);
-      const result = await service.execute({ consulta: `compara ${fixture.product}` }, 'origen-TEST', 'corr-3');
+      const result = await service.execute({ consulta: `compara ${fixture.product}` }, 'corr-3');
       expect(result.estado).toBe('BUSQUEDA_PUBLICA');
       expect(result.fuentes).toHaveLength(2);
       expect(metrics.snapshot().fallback).toBeGreaterThan(0);

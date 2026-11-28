@@ -21,7 +21,7 @@ describe('F08.1 modelo de navegación por actor', () => {
   const account = actor => accountLinksFor(actor).map(link => link.label);
 
   it('visitante: menú público sin «Farmacias cercanas» y acceso dentro de Mi cuenta', () => {
-    expect(hrefs()).toEqual(['/', '/search', '/farmacias/solicitar', '/assistant/conversation']);
+    expect(hrefs()).toEqual(['/', '/search', '/farmacias/solicitar']);
     expect(navigationFor().map(link => link.label)).not.toContain('Farmacias cercanas');
     expect(account()).toEqual(['Entrar o crear cuenta']);
   });
@@ -51,7 +51,7 @@ describe('F08.1 modelo de navegación por actor', () => {
     expect(hrefs({ session: u, canReview: true })).toEqual([...publicNavigation.map(link => link.href), '/admin/farmacias/solicitudes']);
     expect(account({ session: u, canReview: true })).toEqual(['Mi perfil']);
     const geo = { session: u, memberships: [{ roleCode: 'TRABAJADOR', delegationCodes: ['GEO_LOCATION_REVIEW'] }] };
-    expect(hrefs(geo)).toEqual([...publicNavigation.map(link => link.href), '/ubicacion']);
+    expect(hrefs(geo)).toEqual([...publicNavigation.map(link => link.href), '/farmacias/panel']); // F07.1: la ubicación vive en «Mi farmacia»
   });
 
   it('el propietario recibe las secciones en el orden de la spec', () => {

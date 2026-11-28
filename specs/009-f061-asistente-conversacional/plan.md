@@ -110,3 +110,6 @@ La separación dentro de `asistente-ia` reutiliza el módulo aprobado F06. La ru
 ## Complexity Tracking
 
 No se solicita excepción a la Constitution ni una nueva dependencia de ejecución. La conversación efímera añade una responsabilidad limitada dentro del módulo existente, sin base nueva.
+
+## Enmienda 2026-11-25
+Clasificación determinista en `mock-conversation-provider.ts`, textos en `domain/friendly-replies.ts`, burbuja en `ChatBubble.jsx`. Sin cambios de contrato ni de datos.

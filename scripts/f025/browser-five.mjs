@@ -25,6 +25,7 @@ const compareJourney=process.env.F025_BROWSER_COMPARE==='1';
 const queueJourney=process.env.F025_BROWSER_QUEUE==='1';
 const importVariants=process.env.F025_BROWSER_IMPORT_VARIANTS==='1';
 const returnJourney=process.env.F025_BROWSER_RETURN==='1';
+const staffJourney=process.env.F025_BROWSER_STAFF==='1'; // F025-FR-029
 const browser=await chromium.launch({headless:true});
 const owners=[];
 let checks=0;
@@ -105,6 +106,39 @@ try{
     for(const capability of ['reservation.read','reservation.accept','reservation.deliver','reservation.settings'])
       assert(membership.delegationCodes.includes(capability));
     owners.push({context:ownerContext,id:membership.pharmacyId,name});checks++;
+    if(staffJourney){
+      // F025-FR-029: el propietario recién activado abre «Personal» y crea un trabajador con clave temporal.
+      assert(membership.delegationCodes.includes('membership.manage'));
+      await owner.getByRole('navigation',{name:'Secciones de la farmacia'}).getByRole('button',{name:'Personal'}).click();
+      await expect(owner.getByRole('heading',{name:'Personal de la farmacia'})).toBeVisible();checks++;
+      const alias=`caja.${marker}`;
+      await owner.getByLabel('Usuario (alias) del trabajador').fill(alias);
+      await owner.getByLabel('Nombre para mostrar').fill('Caja ficticia TEST');
+      await owner.getByLabel('Ver inventario').first().check();
+      await owner.getByRole('button',{name:'Crear cuenta de trabajador'}).click();
+      const temporary=(await owner.getByLabel('Clave temporal').textContent()).trim();
+      assert(temporary.length>=12);checks++;
+      const workerContext=await browser.newContext();
+      const worker=await workerContext.newPage();
+      await worker.goto(`${root}/identity`);
+      const form=worker.locator('form').filter({has:worker.getByRole('button',{name:'Iniciar sesión'})});
+      await form.getByLabel('Usuario o correo electrónico').fill(alias);
+      await form.getByLabel('Contraseña').fill(temporary);
+      await form.getByRole('button',{name:'Iniciar sesión'}).click();
+      await expect(worker.getByRole('heading',{name:'Define tu clave definitiva'})).toBeVisible();checks++;
+      const definitive=`Aa1!${randomBytes(12).toString('hex')}`;
+      await worker.getByLabel('Clave nueva (mínimo 12 caracteres)').fill(definitive);
+      await worker.getByLabel('Repite la clave nueva').fill(definitive);
+      await worker.getByRole('button',{name:'Guardar clave y continuar'}).click();
+      await expect(worker.getByRole('heading',{name:'Sesión activa'})).toBeVisible();
+      const workerMemberships=await (await workerContext.request.get(`${root}/api/v1/me/memberships`)).json();
+      const workerOwn=workerMemberships.find(item=>item.pharmacyId===membership.pharmacyId);
+      assert(workerOwn&&workerOwn.delegationCodes.includes('inventory.read'));
+      assert(!workerOwn.delegationCodes.includes('membership.manage'));checks++;
+      const workerStaff=await workerContext.request.get(`${root}/api/v1/pharmacies/${membership.pharmacyId}/staff`);
+      assert([403,404].includes(workerStaff.status()));checks++;
+      await workerContext.close();
+    }
   }
   for(const owner of owners){
     for(const other of owners.filter(item=>item!==owner)){

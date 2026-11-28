@@ -1,18 +1,5 @@
-import type { PublicKnowledgeTools } from './ports.js';
-
-export interface ConversationContext {
-  readonly id: string;
-  readonly referent: string | null;
-  readonly turns: number;
-  readonly expiresAt: number;
-}
-
-export interface ConversationStore {
-  create(origin: string, referent: string | null): ConversationContext;
-  get(origin: string, id: string): ConversationContext;
-  advance(origin: string, id: string, referent: string | null): ConversationContext;
-  discard(origin: string, id: string): void;
-}
+import type { PublicSearchResponse } from '../../busqueda/contracts/public-search.js';
+import type { PublicOpeningDay } from '../domain/opening-now.js';
 
 export interface ReviewedSource {
   readonly authority: string;
@@ -35,7 +22,26 @@ export interface ReviewedSourceCatalog {
   lookup(term: string, now: Date): ReviewedSource | null;
 }
 
-export type ConversationIntent = 'SOURCE' | 'PUBLIC_SEARCH' | 'PUBLIC_COMPARE' | 'SYMPTOM' | 'HELP';
+export type ConversationIntent = 'SOURCE' | 'PUBLIC_SEARCH' | 'PUBLIC_COMPARE' | 'SYMPTOM' | 'HELP'
+  | 'GREETING' | 'CAPABILITIES' | 'NEARBY' | 'ASK_TERM';
 export interface ConversationDecision { readonly intent: ConversationIntent; readonly term: string | null; }
 export interface ConversationProvider { classify(query: string): Promise<ConversationDecision>; }
-export type ConversationPublicTools = PublicKnowledgeTools;
+
+export interface GeoPoint { readonly latitude: number; readonly longitude: number }
+export interface AssistantSearchOptions { readonly order: 'relevancia' | 'precio_asc' | 'cercania'; readonly point?: GeoPoint | null }
+/** Farmacia pública activa con ubicación verificada (F07), sin datos privados. */
+export interface NearbyPublicPharmacy {
+  readonly id: string; readonly nombre: string; readonly direccion: string; readonly distanciaKm: number | null;
+}
+
+/**
+ * F06.2 · FR-013: herramientas de SOLO LECTURA sobre datos públicos (ofertas publicadas F03/F03.2, farmacias activas
+ * F07 y horario público F07.1). Las de lugar y horario existen solo cuando F07 está activo.
+ */
+export interface ConversationPublicTools {
+  search(term: string, options: AssistantSearchOptions): Promise<PublicSearchResponse>;
+  /** Nombres públicos que empiezan como el texto dado (para «¿Quisiste decir…?»). */
+  suggestNames(prefix: string): Promise<readonly string[]>;
+  pharmaciesNear?(point: GeoPoint, radiusKm: number): Promise<readonly NearbyPublicPharmacy[]>;
+  openingHours?(pharmacyIds: readonly string[]): Promise<Readonly<Record<string, readonly PublicOpeningDay[]>>>;
+}

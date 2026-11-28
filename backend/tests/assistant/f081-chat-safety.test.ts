@@ -2,7 +2,6 @@ import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 import { ConverseAssistant } from '../../src/modules/asistente-ia/application/converse-assistant.js';
-import { InMemoryConversationStore } from '../../src/modules/asistente-ia/infrastructure/in-memory-conversation-store.js';
 import { InMemoryReviewedSourceCatalog } from '../../src/modules/asistente-ia/infrastructure/reviewed-source-catalog.js';
 import { MockConversationProvider } from '../../src/modules/asistente-ia/infrastructure/mock-conversation-provider.js';
 import { createConversationRouter } from '../../src/modules/asistente-ia/presentation/conversation-router.js';
@@ -11,8 +10,7 @@ import { InMemoryAssistantRateLimit } from '../../src/modules/asistente-ia/prese
 /** F08.1: la burbuja de chat usa F06.1 mock; estas pruebas fijan que solo LEE y que no se deja llevar por instrucciones ajenas. */
 function build() {
   const tools = { search: vi.fn().mockResolvedValue({ ofertas: [] }), compare: vi.fn().mockResolvedValue({ ofertas: [] }), pharmacy: vi.fn().mockResolvedValue(null) };
-  const service = new ConverseAssistant(new MockConversationProvider(), new InMemoryReviewedSourceCatalog([]), tools as never,
-    new InMemoryConversationStore(), () => new Date('2026-11-24T12:00:00.000Z'));
+  const service = new ConverseAssistant(new MockConversationProvider(), new InMemoryReviewedSourceCatalog([]), tools as never, () => new Date('2026-11-24T12:00:00.000Z'));
   const server = express(); server.use('/api/v1', createConversationRouter(service, new InMemoryAssistantRateLimit(200)));
   return { server, tools };
 }

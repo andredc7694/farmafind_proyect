@@ -44,3 +44,25 @@ Andre cargó `farma.xlsx` (hojas «Precios», «Farmacia», «Léeme»; encabeza
 - **Salvedad:** las 583 filas excluidas quedan pendientes hasta implementar la spec 020.
 - Sustituye al «NO APROBADA» anterior del mismo día. **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre); F025-RF23 aplazada.
 - Autoriza: PR de `feat/f025-cierre-verificacion` y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada; después, rama nueva desde `main`: primero el lote del asistente virtual y luego la spec 020, sin alterar los datos ni el esquema de la DEMO de F02.5 mientras hace T057 y T063 (base TEST separada). Al aprobar productos nuevos del catálogo se exige el principio activo.
+
+## 2026-11-26 · Hallazgo y decisión: el propietario activado no gestiona su personal
+- **Hallazgo** (consulta de solo lectura): la activación F02.5 no concede `membership.manage`; el dueño de HUAMANFAR no ve «Personal». La gestión de personal F01.1 existe y está aceptada.
+- **Decisión de Andre:** corregirlo como enmienda de F02.5 (F025-FR-029), en una rama propia desde `main`, con SDD abreviado y parada en la aprobación del plan. Migración nueva y aditiva, sin editar la 009 ni los hashes aprobados. Mostrar el SQL antes de ejecutarlo. Reparar las farmacias ya activadas, con auditoría. Tocar RLS solo si es imprescindible y avisar. Pruebas: recorrido completo, aislamiento Alfa/Beta, ni trabajador ni administrador global obtienen el permiso, y regresión F01.1, F02.5 y spec 017.
+- Migrar la base de su DEMO queda autorizado **solo después** de que Andre apruebe el SQL. Debe quedar lista antes de su verificación T057.
+- T046 aceptada; **T057 y T063 sin marcar; F02.5 sigue SIN ACEPTAR.** Spec 020 en opción A.
+
+## 2026-11-26 · Revisión del SQL 016 por Andre
+- **Aprueba el SQL en lo esencial**, con una ampliación: la reparación concede además `pharmacy.profile.read/write` a los propietarios vigentes que no los tengan (mismas reglas, una auditoría por alta, repetible), más una comparación de solo lectura de HUAMANFAR antes de añadir nada más.
+- Pide ver el **bloque ampliado** antes de aplicarlo. Pide también confirmar el rol de la reparación y su comportamiento frente a RLS, que no se editan hashes aprobados, registrar el hash final en `migrate-f025.ts` y documentar la atribución al revisor original y a la migración.
+- Apagó la DEMO y **autorizó las pruebas de F01.1 y de navegador**. **No aplicar a su DEMO** hasta aprobar el bloque ampliado. Después: reiniciar la DEMO, aplicar, verificar en el navegador «Personal» y el perfil de la farmacia, e informar los permisos antes y después.
+- T057 y T063 sin marcar; F02.5 SIN ACEPTAR; spec 020 en opción A.
+
+## 2026-11-26 · Aprobación del bloque ampliado del SQL 016
+- **Andre: «Apruebo el bloque ampliado»** de `016_owner_staff_manage_test.sql` (hash `2667F61535861CB30852A3ACE1A867015A7AE68245EF254F9AFEBADCC7DF27AE`), tal como está en `fix/f025-propietario-gestiona-personal` (commit `9d978c2`).
+- Autoriza: reiniciar su DEMO, aplicar la migración y verificar en el navegador «Personal» y el perfil de HUAMANFAR; después, PR y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
+- **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre). Spec 020 en opción A.
+
+## 2026-11-27 · T057 y aceptación F02.5 (T063)
+- Andre hizo T057 a mano en su DEMO: cinco farmacias, importación, ubicación aprobada, búsqueda en lista y mapa, reserva, sexta solicitud rechazada y prueba de seguridad entre farmacias; sin errores.
+- Decisión: **ACEPTO CON OBSERVACIONES F02.5 (alcance TEST/DEMO)**. Observaciones en `acceptance.md`.
+- La búsqueda y la prueba entre farmacias quedan registradas como declaradas por Andre. Horarios de RHFARMA y FARMAPOINT: no guardados; pendiente opcional.

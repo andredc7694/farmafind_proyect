@@ -1,0 +1,27 @@
+# Research F03.1
+
+- **R-01 · Coordenadas sin SQL nuevo.**
+  - Hecho comprobado: `f07/003_public_projection.sql` redefine `f03.search_public_offers` para devolver `latitud`/`longitud` solo con `estado_ubicacion='PUBLICADA_VERIFICADA'`.
+  - Decisión: exponer esas columnas en la API y no crear SQL nuevo.
+  - Alternativa descartada: una función SQL nueva. Sería una migración, y la spec la excluye.
+- **R-02 · Guarda contra la función F03 antigua.**
+  - Problema: en una base con F03 pero sin F07 (por ejemplo, el job `postgres-rls` del CI), la función `002` no filtra por verificación.
+  - Decisión: la opción `exposeVerifiedLocation` solo se enciende cuando la composición activa F07.
+  - Alternativa descartada: inferir la verificación desde la API. No es posible, porque la fila no trae el estado.
+- **R-03 · Caché.**
+  - `validCached` usa claves exactas, así que una entrada vieja se rechaza (métrica `invalid`), se consulta la base y se reescribe.
+  - Decisión: no se toca la generación ni el TTL.
+  - Prueba: se siembra una entrada con la forma antigua y se espera la forma nueva, una métrica `invalid` y ningún error.
+- **R-04 · Marcadores sin librería.**
+  - `L.divIcon` con HTML estático: solo el precio formateado, más el aria-label puesto por DOM. Con un máximo de 20 resultados por página no hace falta agruparlos.
+  - Descartadas: `Leaflet.markercluster` (una dependencia nueva que Andre no aprobó) e iconos de imagen de terceros.
+- **R-05 · Accesibilidad del mapa.**
+  - Leaflet 1.9 hace los marcadores enfocables con `keyboard: true` y abre la tarjeta con Enter.
+  - La lista sigue siendo la vía principal y completa.
+  - El diálogo es un `<dialog>` nativo, con foco inicial y devolución del foco al cerrar.
+- **R-06 · Privacidad del encuadre.**
+  - El mapa se ajusta a las farmacias, igual que en F07 («nunca la ubicación personal centra el mapa»).
+  - El círculo del usuario solo se dibuja si cae en la zona visible.
+- **R-07 · Ciudad recordada.**
+  - Clave propia en `localStorage` que guarda solo `{nombre}`. Las coordenadas se recalculan desde `PERU_PLACES` al cargar.
+  - Si el nombre ya no está en la lista, se ignora.

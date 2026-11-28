@@ -62,14 +62,51 @@ test('visitante: menú público mínimo, tema que se recuerda, búsqueda con sug
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await dialog.locator('.chat-suggestions button').first().click();
-  await expect(dialog.getByLabel('Tu consulta')).not.toHaveValue('');
+  const box = dialog.getByLabel('Tu consulta');
+  await expect(box).toHaveValue('Compara el precio de ');
+  await expect(dialog.locator('.chat-answer')).toHaveCount(0);
+  await box.fill('hola'); await box.press('Shift+Enter'); // salto de línea, no envía
+  await expect(box).toHaveValue('hola\n');
+  await expect(dialog.locator('.chat-answer')).toHaveCount(0);
+  await box.press('Enter'); // en computadora, Enter envía
+  await expect(dialog.locator('.chat-answer')).toHaveCount(1, { timeout: 20000 });
+  await expect(dialog.locator('.chat-answer').first()).toContainText('¡Hola!');
+  await expect(box).toHaveValue('');
+  await box.fill('Paracetamol'); await box.press('Enter');
+  await expect(dialog.locator('.chat-answer').nth(1)).toContainText(/Precios referenciales de «paracetamol»[\s\S]*S\/ 9\.90[\s\S]*Farmacia/, { timeout: 20000 }); // la más barata primero
+  await expect(dialog.locator('.chat-answer').nth(1)).not.toContainText(/stock|cantidad/i);
+  await box.fill('¿Qué dosis tomo?'); await box.press('Enter');
+  await expect(dialog.locator('.chat-answer').nth(2)).toContainText('químico farmacéutico', { timeout: 20000 });
+  await expect(dialog.getByText(/No da diagnósticos, tratamientos ni dosis/)).toHaveCount(1);
+  const mine = await dialog.locator('.chat-user').first().boundingBox();
+  const theirs = await dialog.locator('.chat-answer .chat-assistant').first().boundingBox();
+  expect(mine.x).toBeGreaterThan(theirs.x); // usuario a la derecha, asistente a la izquierda
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Preguntar a FarmaFind AI \(3\)/ })).toBeFocused();
+  // El asistente ya no está en el menú ni en el pie; sus rutas antiguas llevan a la búsqueda.
+  await expect(menu(page).getByRole('link', { name: 'FarmaFind AI' })).toHaveCount(0);
+  await expect(page.locator('footer').getByRole('link', { name: 'Asistente' })).toHaveCount(0);
+  for (const old of ['/assistant', '/assistant/conversation']) { await open(page, old); expect(new URL(page.url()).pathname).toBe('/search'); }
+  const remember = await page.getByRole('checkbox', { name: /Recordar estos filtros/ }).boundingBox();
+  expect(remember.width).toBeLessThan(24); expect(remember.height).toBeLessThan(24); // sin el cuadro gris suelto
+  await context.close();
+});
+
+test('pantalla táctil: Enter hace salto de línea y se envía con el botón', async ({ browser }) => {
+  const { page, context } = await newPage(browser, { viewport: { width: 390, height: 800 }, hasTouch: true, isMobile: true });
+  await open(page, '/search');
+  await page.getByRole('button', { name: /Preguntar a FarmaFind AI/ }).click();
+  const dialog = page.getByRole('dialog'); const box = dialog.getByLabel('Tu consulta');
+  await box.fill('hola'); await box.press('Enter');
+  await expect(box).toHaveValue('hola\n');
   await expect(dialog.locator('.chat-answer')).toHaveCount(0);
   await dialog.getByRole('button', { name: 'Enviar' }).click();
   await expect(dialog.locator('.chat-answer')).toHaveCount(1, { timeout: 20000 });
-  await expect(dialog.getByText(/diagnósticos, tratamientos, recetas ni dosis/)).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /Preguntar a FarmaFind AI \(1\)/ })).toBeFocused();
+  const panel = await dialog.boundingBox();
+  expect(panel.x).toBeGreaterThanOrEqual(0); expect(panel.x + panel.width).toBeLessThanOrEqual(391);
+  expect(panel.y).toBeGreaterThanOrEqual(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   await context.close();
 });
 
@@ -145,7 +182,7 @@ test('propietario: ocho secciones en orden, resumen de su farmacia, historial y 
   await openAccount(page); await expect(menu(page).getByRole('link', { name: 'Mis reservas' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible(); await openAccount(page);
   const sections = page.getByRole('navigation', { name: 'Secciones de la farmacia' });
-  await expect(sections.getByRole('button')).toHaveText(['Resumen', 'Farmacia y ubicación', 'Inventario', 'Importar', 'Reservas', 'Historial', 'Personal', 'Configuración']);
+  await expect(sections.getByRole('button')).toHaveText(['Resumen', 'Mi farmacia', 'Inventario', 'Importar', 'Reservas', 'Historial', 'Personal', 'Configuración']);
   await expect(page.getByText('Pendientes de responder')).toBeVisible();
   await expect(page.getByText('Productos en inventario')).toBeVisible();
   await expect(page.locator('.summary-grid').first()).toContainText('0'); // aún sin reservas
@@ -169,10 +206,11 @@ test('propietario: ocho secciones en orden, resumen de su farmacia, historial y 
 test('revisor de ubicaciones: ve solo lo suyo y el servidor deniega personal y reservas', async ({ browser }) => {
   const { page, context } = await newPage(browser);
   await login(page, reviewer);
-  await expect(menu(page).getByRole('link', { name: 'Ubicación de farmacia' })).toBeVisible();
-  await expect(menu(page).getByRole('link', { name: 'Panel de farmacia' })).toHaveCount(0);
+  // F07.1: la ubicación vive en «Mi farmacia» dentro del panel; ya no hay enlace propio.
+  await expect(menu(page).getByRole('link', { name: 'Panel de farmacia' })).toBeVisible();
+  await expect(menu(page).getByRole('link', { name: 'Ubicación de farmacia' })).toHaveCount(0);
   await open(page, '/farmacias/panel');
-  await expect(page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button')).toHaveText(['Farmacia y ubicación']);
+  await expect(page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button')).toHaveText(['Mi farmacia']);
   expect(await status(page, `/api/v1/pharmacies/${alfaId}/staff`)).toBe(403);
   expect(await status(page, `/api/v1/farmacias/${alfaId}/reservas/resumen`)).toBe(403);
   expect(await status(page, `/api/v1/farmacias/${alfaId}/inventario/resumen`)).not.toBe(200);
@@ -183,8 +221,8 @@ test('propietario: elegir el punto con la ubicación del dispositivo (una vez, c
   const { page, context } = await newPage(browser, { permissions: ['geolocation'], geolocation: { latitude: -12.0555, longitude: -77.0444 } });
   await login(page, owner);
   await open(page, '/farmacias/panel');
-  await page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button', { name: 'Farmacia y ubicación' }).click();
-  await expect(page.getByRole('heading', { name: 'Ubicación pública de la farmacia' })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Secciones de la farmacia' }).getByRole('button', { name: 'Mi farmacia' }).click();
+  await expect(page.getByRole('heading', { name: 'Dirección y ubicación en el mapa' })).toBeVisible();
   await expect(page.getByText(/verá tu dirección IP/)).toBeVisible();
   await expect(page.getByRole('application')).toHaveCount(0); // el mapa no se carga hasta consentir
   await page.getByRole('button', { name: 'Usar mi ubicación una vez' }).click();

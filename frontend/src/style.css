@@ -99,6 +99,39 @@ a { color: var(--emerald-dark); }
 .pharmacy-choices li { margin: 0 !important; }
 .search-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: .8rem; }
 .notice, .status-notice { padding: .85rem 1rem; background: var(--tint); border-left: 4px solid var(--emerald); border-radius: 7px; line-height: 1.5; }
+/* F07.1: formulario con etiquetas encima y espacio para la burbuja del asistente. */
+.stacked-form { display: grid; gap: .9rem; }
+.stacked-form .form-field { display: grid; gap: .3rem; }
+.stacked-form .form-field > label { font-weight: 600; }
+.stacked-form .form-field input { width: 100%; max-width: 36rem; box-sizing: border-box; }
+.stacked-form .input-with-action { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.stacked-form .input-with-action input { flex: 1 1 16rem; }
+.stacked-form .check-field { display: flex; gap: .5rem; align-items: flex-start; }
+.stacked-form .advanced-options { border: 1px dashed var(--line, #c9d6d1); border-radius: 7px; padding: .5rem .8rem; }
+.stacked-form .advanced-options summary { cursor: pointer; font-weight: 600; }
+.stacked-form button[type="submit"] { justify-self: start; }
+.my-pharmacy { padding-bottom: 7rem; } /* la burbuja flotante no tapa «Enviar propuesta» */
+@media (max-width: 640px) { /* F07.1: con un formulario en pantalla, la burbuja queda solo como icono */
+  body:has(.stacked-form) .chat-toggle-label { display: none; }
+  body:has(.stacked-form) .chat-toggle { padding: .7rem; }
+}
+.point-marker { width: 22px; height: 22px; border-radius: 50%; background: #176b52; border: 3px solid #fff; box-shadow: 0 0 0 2px #176b52; cursor: grab; }
+/* F07.1: historial de «Revisar ubicaciones». */
+.location-review { width: min(1180px, calc(100% - 48px)); margin: 2rem auto 3rem; }
+@media (max-width: 700px) { .location-review { width: calc(100% - 32px); margin-top: 1.25rem; } }
+.review-filter { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.review-filter button { min-height: 44px; padding: .5rem .9rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; font: inherit; cursor: pointer; }
+.review-filter button:hover { border-color: var(--emerald-dark); }
+.review-filter button[aria-pressed="true"] { background: var(--mint); color: var(--emerald-dark); border-color: var(--emerald-dark); font-weight: 700; }
+.history-facts { display: grid; grid-template-columns: minmax(6rem, max-content) 1fr; gap: .25rem .8rem; margin: 0; }
+.history-facts dt { font-weight: 600; }
+.history-facts dd { margin: 0; overflow-wrap: anywhere; }
+.decision-form { margin-top: .8rem; }
+.public-hours summary { cursor: pointer; }
+.public-hours ul { margin: .35rem 0 0; padding-left: 1.1rem; }
+.opening-day { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; }
+.location-history { padding-left: 1.2rem; line-height: 1.5; }
+.field-warning { margin: .35rem 0 .75rem; padding: .55rem .8rem; border-left: 4px solid currentColor; border-radius: 6px; background: var(--tint); line-height: 1.45; }
 [role="alert"] { color: var(--danger); }
 .offer-grid { list-style: none; padding: 0 !important; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; }
 .offer, .surface-card { min-width: 0; padding: 1.25rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 3px 12px rgba(17,60,57,.04); }
@@ -168,20 +201,60 @@ a { color: var(--emerald-dark); }
 .point-picker legend { font-weight: 700; padding: 0 .4rem; }
 .point-picker-map { min-height: 280px; }
 .chat-bubble { position: fixed; right: 1rem; bottom: 1rem; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; max-width: calc(100vw - 2rem); }
-.chat-toggle { min-height: 48px; padding: .7rem 1.1rem; color: var(--on-accent); background: var(--emerald); border: 0; border-radius: 999px; font-weight: 700; box-shadow: var(--shadow); }
-.chat-panel { width: min(380px, calc(100vw - 2rem)); max-height: min(70vh, 640px); overflow-y: auto; padding: 1rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
-.chat-panel header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
-.chat-panel h2 { margin: 0; font-size: 1.1rem; }
-.chat-panel textarea { width: 100%; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; padding: .5rem; }
-.chat-panel button { min-height: 40px; padding: .4rem .8rem; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; }
-.chat-panel button[type='submit'] { color: var(--on-accent); background: var(--emerald); border-color: var(--emerald); }
-.chat-note, .chat-sources, .chat-answer small { color: var(--ink-muted); font-size: .88rem; }
-.chat-suggestions ul { list-style: none; padding: 0; display: grid; gap: .35rem; }
-.chat-suggestions button { text-align: left; width: 100%; }
-.chat-question { font-weight: 700; }
-.chat-actions { display: flex; gap: .5rem; margin-top: .5rem; flex-wrap: wrap; }
-@media (min-width: 900px) { body[data-chat='open'] .site-content { margin-right: min(410px, 36vw); } }
-@media (max-width: 899px) { body[data-chat='open'] .site-content { padding-bottom: min(70vh, 640px); } .chat-bubble { left: 1rem; align-items: stretch; } .chat-panel { width: 100%; } }
+.chat-toggle { display: inline-flex; align-items: center; gap: .5rem; min-height: 48px; padding: .7rem 1.1rem; color: var(--on-accent); background: var(--emerald); border: 0; border-radius: 999px; font-weight: 700; box-shadow: var(--shadow); }
+/* F06.2 · D-06: hoja inferior en celular; panel lateral de 420 px desde 1024 px (desde 1280 px el contenido se corre). */
+.chat-panel { position: fixed; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; height: min(80vh, 640px); height: min(80dvh, 640px); overflow: hidden; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 16px 16px 0 0; box-shadow: var(--shadow); z-index: 60; }
+@media (min-width: 1024px) { .chat-panel { top: 0; left: auto; width: 420px; height: 100vh; height: 100dvh; border-width: 0 0 0 1px; border-radius: 0; } }
+.chat-icon.chat-minimize { display: inline-flex; gap: .3rem; align-items: center; padding: 0 .5rem; font-weight: 600; }
+.chat-minimize-label { font-size: .9rem; }
+.chat-cards { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.chat-card { padding: .55rem .65rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.chat-card p { margin: 0; }
+.chat-card-label { display: inline-block; margin-bottom: .25rem !important; padding: .1rem .45rem; font-size: .78rem; font-weight: 700; color: var(--emerald-dark); background: var(--mint); border-radius: 999px; }
+.chat-card-address { color: var(--ink-muted); font-size: .85rem; }
+.chat-card-facts { display: flex; flex-wrap: wrap; gap: .25rem .75rem; margin-top: .2rem !important; font-size: .88rem; }
+.chat-card-price { font-weight: 800; }
+.chat-card-action { display: inline-flex; align-items: center; min-height: 40px; margin-top: .35rem; padding: 0 .8rem; color: var(--on-accent) !important; background: var(--emerald); border-radius: 8px; text-decoration: none; }
+.chat-options { list-style: none; margin: .5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .35rem; }
+.chat-options button, .chat-proposal { min-height: 40px; padding: .35rem .75rem; color: var(--ink); background: var(--surface); border: 1px solid var(--emerald); border-radius: 999px; font-weight: 600; text-align: left; }
+.chat-emergency { padding: .6rem .7rem; color: #5c0b0b; background: #fdecec; border: 2px solid #b42318; border-radius: 10px; }
+.chat-emergency p { margin: 0 0 .4rem; }
+.chat-emergency-numbers { list-style: none; margin: 0 0 .4rem; padding: 0; display: grid; gap: .35rem; }
+.chat-emergency-numbers a { display: flex; align-items: center; min-height: 44px; padding: 0 .75rem; color: #fff !important; background: #b42318; border-radius: 8px; font-weight: 800; text-decoration: none; }
+.chat-emergency-source { font-size: .8rem; }
+.chat-emergency-source a { color: #5c0b0b !important; }
+.chat-header { display: flex; align-items: center; gap: .5rem; padding: .6rem .75rem; border-bottom: 1px solid var(--line); }
+.chat-header h2 { flex: 1; margin: 0; font-size: 1.05rem; }
+.chat-avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: var(--on-accent); background: var(--emerald); }
+.chat-icon { display: grid; place-items: center; min-width: 40px; min-height: 40px; color: var(--ink); background: transparent; border: 1px solid transparent; border-radius: 8px; }
+.chat-icon:hover:not(:disabled) { border-color: var(--control-border); }
+.chat-log { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: .6rem; padding: .75rem; }
+.chat-answer { display: flex; flex-direction: column; gap: .6rem; }
+.chat-message { max-width: 88%; padding: .6rem .75rem; border-radius: 14px; overflow-wrap: anywhere; }
+.chat-message p { margin: 0; white-space: pre-line; }
+.chat-assistant { align-self: flex-start; background: var(--mint); color: var(--ink); border-bottom-left-radius: 4px; }
+.chat-assistant a { color: var(--emerald-dark); font-weight: 700; }
+.chat-user { align-self: flex-end; background: var(--emerald); color: var(--on-accent); border-bottom-right-radius: 4px; }
+.chat-suggestions { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .35rem; }
+.chat-suggestions button { width: 100%; min-height: 40px; padding: .4rem .7rem; text-align: left; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 999px; }
+.chat-sources { margin-top: .4rem; font-size: .85rem; }
+.chat-typing { display: inline-flex; gap: .2rem; font-size: 1.3rem; line-height: 1; }
+.chat-typing span[aria-hidden] { animation: chat-dot 1.2s infinite ease-in-out; }
+.chat-typing span[aria-hidden]:nth-of-type(3) { animation-delay: .2s; }
+.chat-typing span[aria-hidden]:nth-of-type(4) { animation-delay: .4s; }
+@keyframes chat-dot { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .chat-typing span[aria-hidden] { animation: none; } }
+.chat-error { margin: 0; }
+.chat-form { display: flex; align-items: flex-end; gap: .5rem; padding: .6rem .75rem 0; border-top: 1px solid var(--line); }
+.chat-form textarea { flex: 1; min-width: 0; resize: none; color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); border-radius: 10px; padding: .5rem; }
+.chat-send { min-height: 44px; padding: .4rem .9rem; color: var(--on-accent); background: var(--emerald); border: 1px solid var(--emerald); border-radius: 10px; font-weight: 700; }
+.chat-note { margin: 0; padding: .4rem .75rem .6rem; color: var(--ink-muted); font-size: .78rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.link-button { padding: 0; background: none; border: 0; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+.bootstrap .remember-filters, .remember-filters { display: flex; align-items: flex-start; gap: .5rem; }
+.bootstrap .remember-filters input, .remember-filters input { width: 1.1rem; height: 1.1rem; min-height: 0; padding: 0; margin: .15rem 0 0; flex: none; }
+@media (min-width: 1280px) { body[data-chat='open'] .site-header, body[data-chat='open'] .site-content, body[data-chat='open'] .site-footer { margin-right: 420px; } }
+@media (max-width: 1023px) { body[data-chat='open'] .site-content { padding-bottom: min(80dvh, 640px); } }
 .table-scroll { max-width: 100%; overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th, .data-table td { padding: .55rem .65rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
@@ -190,3 +263,77 @@ a { color: var(--emerald-dark); }
 .account-menu > summary { padding: .65rem .75rem; border-radius: 8px; color: var(--ink-muted); font-size: .91rem; font-weight: 650; cursor: pointer; }
 .account-menu-panel { position: absolute; right: 0; top: calc(100% + .35rem); z-index: 60; display: grid; gap: .5rem; min-width: 15rem; padding: .75rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
 @media (max-width: 700px) { .account-menu-panel { right: auto; left: 0; } }
+/* F03.1 (spec 022): búsqueda simplificada y mapa interactivo. */
+.search-hero-row { display: flex; gap: .6rem; align-items: flex-end; flex-wrap: wrap; }
+.search-hero-row > :first-child { flex: 1 1 18rem; min-width: 0; }
+.search-hero-row input { min-height: 52px; font-size: 1.1rem; }
+.search-hero-row .search-submit { min-height: 52px; padding-inline: 1.6rem; font-size: 1.05rem; }
+.search-location { margin: .4rem 0 0; font-size: .92rem; color: var(--ink-muted); }
+.bootstrap .link-button, .bootstrap .search-location .link-button { min-height: auto; padding: 0 .1rem; color: var(--emerald-dark); background: none; border: 0; font-weight: 700; text-decoration: underline; }
+.bootstrap .link-button:hover:not(:disabled) { background: none; color: var(--ink); }
+.search-toolbar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .75rem 1rem; margin-top: .9rem; }
+.quick-order, .search-view-toggle { display: flex; gap: .5rem; flex-wrap: wrap; }
+.bootstrap .quick-order button, .bootstrap .search-view-toggle button { color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); }
+.bootstrap .quick-order button[aria-pressed="true"], .bootstrap .search-view-toggle button[aria-pressed="true"] { color: var(--emerald-dark); background: var(--mint); border-color: var(--emerald-dark); }
+.bootstrap .quick-order button:hover:not(:disabled), .bootstrap .search-view-toggle button:hover:not(:disabled) { background: var(--mint); color: var(--emerald-dark); }
+.search-simple .search-filter-panel { flex: 1 1 16rem; }
+.results-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem 1rem; }
+.results-head p { margin: 0; color: var(--ink-muted); }
+.results-layout.view-mapa { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 1rem; align-items: start; }
+.results-layout.view-mapa .results-list { grid-template-columns: 1fr; max-height: 75vh; overflow-y: auto; padding-right: .25rem !important; }
+.results-map-column { position: sticky; top: 1rem; min-width: 0; }
+.results-map { height: min(70vh, 34rem); }
+.map-privacy { font-size: .85rem; color: var(--ink-muted); margin: 0 0 .5rem; }
+.offer.is-selected { border-color: var(--emerald-dark); box-shadow: 0 0 0 3px var(--mint); }
+.offer-pharmacy { font-size: 1.15rem; }
+.offer-price { font-size: 1.5rem; font-weight: 800; color: var(--emerald-dark); margin: .2rem 0; }
+.offer-facts { list-style: none; padding: 0; margin: .3rem 0; display: grid; gap: .15rem; }
+.offer-unverified { color: var(--ink-muted); font-style: italic; }
+.offer-meta { font-size: .85rem; color: var(--ink-muted); }
+.offer-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; margin-top: .5rem; }
+.button-link { display: inline-flex; align-items: center; min-height: 44px; padding: .5rem 1rem; border-radius: 8px; background: var(--emerald); color: var(--on-accent); font-weight: 700; text-decoration: none; }
+.button-link:hover { background: var(--emerald-dark); }
+.bootstrap .offer-actions button { color: var(--ink); background: var(--surface); border: 1px solid var(--control-border); }
+.compare-select { font-size: .9rem; color: var(--ink-muted); }
+.where-dialog { width: min(calc(100% - 2rem), 34rem); max-height: calc(100vh - 2rem); overflow-y: auto; padding: 1.5rem; border: 0; border-radius: 14px; background: var(--surface); color: var(--ink); box-shadow: 0 20px 70px rgba(0, 0, 0, .25); }
+.where-dialog::backdrop { background: rgba(0, 0, 0, .45); }
+.where-dialog .where-option { display: block; width: 100%; margin: .6rem 0; min-height: 44px; border-radius: 8px; border: 1px solid var(--control-border); background: var(--mint); color: var(--emerald-dark); font-weight: 700; }
+.where-dialog .where-city button[type="submit"], .where-dialog .where-map > button { min-height: 44px; border-radius: 8px; border: 1px solid var(--emerald); background: var(--emerald); color: var(--on-accent); font-weight: 700; padding: .5rem 1rem; }
+.where-dialog .dialog-actions button { min-height: 44px; border-radius: 8px; border: 1px solid var(--control-border); background: var(--surface); color: var(--ink); padding: .5rem 1rem; }
+.where-dialog input[type="text"], .where-dialog input:not([type]) { width: 100%; min-height: 44px; }
+/* Marcador propio FarmaFind: cruz verde con el precio encima (CSS original, sin imágenes de terceros). */
+.ff-marker { background: none; border: 0; }
+.ff-marker:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
+.ff-marker-price { display: block; width: max-content; margin: 0 auto 2px; padding: 2px 7px; border-radius: 999px; background: #ffffff; color: #0f4d3c; border: 2px solid #176b52; font: 800 12px/1.3 system-ui, sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.ff-marker-cross { position: relative; display: block; width: 22px; height: 22px; margin: 0 auto; border-radius: 6px; background: #176b52; box-shadow: 0 2px 6px rgba(0,0,0,.3); }
+.ff-marker-cross::before, .ff-marker-cross::after { content: ""; position: absolute; background: #ffffff; border-radius: 1px; }
+.ff-marker-cross::before { left: 9px; top: 4px; width: 4px; height: 14px; }
+.ff-marker-cross::after { left: 4px; top: 9px; width: 14px; height: 4px; }
+.ff-marker.is-selected .ff-marker-price { background: #176b52; color: #ffffff; }
+.ff-marker.is-selected .ff-marker-cross { background: #0b3d30; transform: scale(1.15); }
+.map-card { display: grid; gap: .2rem; min-width: 12rem; }
+.map-card p { margin: 0; }
+.map-card .button-link { justify-content: center; margin-top: .3rem; color: #ffffff; }
+@media (max-width: 700px) {
+  .results-layout.view-mapa { display: block; }
+  .results-layout.view-mapa .results-list { display: none; }
+  .results-map { height: 65vh; }
+  .search-hero-row .search-submit { width: 100%; }
+}
+/* F03.1: contraste (axe) de la tarjeta del mapa y de los botones de la tarjeta en hover/pulsado. */
+.results-map .leaflet-popup-content-wrapper, .results-map .leaflet-popup-tip { background: var(--surface); color: var(--ink); }
+.results-map .leaflet-popup-content .map-card strong, .results-map .leaflet-popup-content .map-card p { color: var(--ink); }
+.results-map .map-card .button-link, .results-map .map-card .button-link:visited { color: var(--on-accent); background: var(--emerald-dark); }
+.bootstrap .offer-actions button:hover:not(:disabled), .bootstrap .offer-actions button[aria-pressed="true"] { color: var(--emerald-dark); background: var(--mint); border-color: var(--emerald-dark); }
+/* F03.1 (revisión de Andre): casilla del diálogo alineada con su texto y de tamaño normal. */
+.where-dialog .check-field { display: flex; align-items: center; gap: .55rem; font-weight: 500; }
+.where-dialog .check-field input[type="checkbox"] { flex: none; width: 1.15rem; height: 1.15rem; min-height: 0; margin: 0; padding: 0; }
+.where-dialog .suggest-box ul[role='listbox'] { max-height: 14rem; }
+.where-dialog li[role='option'] { padding: .5rem .6rem; border-radius: 6px; cursor: pointer; }
+.where-dialog li[role='option'][aria-selected='true'], .where-dialog li[role='option']:hover { background: var(--mint); color: var(--emerald-dark); }
+/* F03.1 E-01: aviso sin coincidencias sobre la lista de distritos. */
+.where-dialog .suggest-box { position: relative; }
+.where-dialog .place-no-match { position: absolute; z-index: 21; left: 0; right: 0; top: 100%; margin: 2px 0 0; padding: .45rem .6rem; background: var(--surface); color: var(--ink); border: 1px solid var(--control-border); border-bottom: 0; border-radius: 8px 8px 0 0; font-weight: 600; }
+.where-dialog .place-no-match + ul[role='listbox'] { top: calc(100% + 2.3rem); margin-top: 0; border-radius: 0 0 8px 8px; }
+/* F03.2: aviso de coincidencia aproximada (reutiliza .notice). */
+.match-notice { margin: .5rem 0 .75rem; font-weight: 600; }

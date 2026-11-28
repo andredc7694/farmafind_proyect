@@ -319,3 +319,66 @@ Ensayo automático con Playwright Linux (`mcr.microsoft.com/playwright:v1.65.0-n
 - **Salvedad:** las 583 filas excluidas quedan pendientes hasta implementar la spec 020.
 - Sustituye al «NO APROBADA» anterior del mismo día. **F02.5 sigue SIN ACEPTAR:** T057 y T063 pendientes (solo Andre); F025-RF23 aplazada.
 - Resultado registrado por la verificación humana; las cifras de la importación son las del historial que describe Andre.
+
+## Enmienda F025-FR-029 · 2026-11-26 (rama `fix/f025-propietario-gestiona-personal`)
+- SQL `f025/016` (hash `2667F61535861CB30852A3ACE1A867015A7AE68245EF254F9AFEBADCC7DF27AE`) aplicado solo a la base TEST técnica `farmafind_f01_test_0e5a2f669e60`; la base de la DEMO sigue sin la 016 (comprobado en `f025.schema_migrations`).
+- T066: `verify-application-commands` 41/41. Casos nuevos: la activación concede `membership.manage` al dueño; el trabajador y el administrador global no la tienen; el insert directo del ejecutor para un trabajador se rechaza (42501); la reparación restaura lo que falta, respeta la revocación, atribuye al revisor, deja 2 auditorías y la segunda ejecución no añade nada. `verify-rls` 46, `verify-private-profile` 12/12, `check-f04-rls` correcto (incluye la matriz de la spec 017).
+- T067: navegador (`browser-five`, `F025_BROWSER_STAFF=1`, 2 farmacias): solicitud → aprobación → «Personal» → crear trabajador → clave temporal → cambio obligatorio. El trabajador tiene su permiso, no tiene `membership.manage` y recibe 403/404 en `/staff`. Aislamiento cruzado entre ambas farmacias (inventario 404, reservas 403/404). 23 comprobaciones, salida 0.
+- T068: F01 unitarias 114, API 128, RLS 142; F02 RLS correcto; F02.5 unitarias 33; `check` correcto.
+
+## 2026-11-26 · T057: omisión conocida (decisión de Andre, opción A)
+- **Ubicación en mapa pendiente de F07.1** (`specs/021-f071-mi-farmacia`). Las farmacias dadas de alta en el recorrido de T057 no tendrán ubicación verificada ni aparecerán en el mapa público, aunque sí en la búsqueda. Andre hace T057 sin el mapa. T057 sigue sin marcar.
+
+## T057 · Recorrido humano de cinco farmacias · 2026-11-27 (hecho por Andre)
+
+**Quién y cómo:** Andre, a mano, desde el navegador en su DEMO (5173), sin scripts de alta. Resultado declarado por Andre: **sin errores**; quedan detalles de mejora que enviará después.
+**Cómo se comprobó:** lectura de la base de la DEMO en transacciones de solo lectura, revertidas (2026-11-27, última a las 22:26). No se modificó nada. Horas en America/Lima. No se copian usuarios, correos, contactos, representantes, RUC, motivos de texto libre ni credenciales.
+
+### Solicitudes y decisiones
+| Solicitud | Enviada | Decisión | Quién decide |
+|---|---|---|---|
+| HUAMANFAR | 2026-11-21 16:54 | Aprobada 2026-11-21 17:20 | usuario distinto del solicitante |
+| STUART-FAR | 2026-11-27 17:28 | Aprobada 2026-11-27 17:29 | usuario distinto del solicitante |
+| RHFARMA | 2026-11-27 21:31 | Aprobada 2026-11-27 21:32 | usuario distinto del solicitante |
+| FARMAPIO | 2026-11-27 21:46 | Aprobada 2026-11-27 21:48 | usuario distinto del solicitante |
+| FARMAPOINT | 2026-11-27 21:59 | Aprobada 2026-11-27 22:00 | usuario distinto del solicitante |
+| HRFARMA (sexta) | 2026-11-27 22:24 | **Rechazada** 2026-11-27 22:24 | usuario distinto del solicitante |
+
+- Cada solicitud tiene sus pasos ENVIAR → INICIAR_REVISION → APROBAR/RECHAZAR. La rechazada **no creó farmacia**. «HRFARMA» es la solicitud rechazada; no es «RHFARMA».
+- La base tiene **5 farmacias, las 5 ACTIVAS**.
+
+### Inventario importado (importaciones confirmadas)
+| Farmacia | Confirmada | Filas del archivo | Importadas | Excluidas: fila duplicada | Excluidas: referencia no conciliada | Excluidas total | Productos hoy en inventario | Con stock publicable |
+|---|---|---|---|---|---|---|---|---|
+| HUAMANFAR | 2026-11-25 22:36 | 1100 | 517 | 583 | 0 | **583** | 518 | 475 |
+| STUART-FAR | 2026-11-27 17:31 | 1020 | 497 | 516 | 7 | **523** | 497 | 467 |
+| RHFARMA | 2026-11-27 21:32 | 1060 | 510 | 544 | 6 | **550** | 510 | 475 |
+| FARMAPIO | 2026-11-27 21:56 | 1130 | 515 | 609 | 6 | **615** | 515 | 483 |
+| FARMAPOINT | 2026-11-27 22:02 | 1040 | 505 | 528 | 7 | **535** | 505 | 481 |
+
+- Códigos registrados: `FILA_DUPLICADA` y `REFERENCIA_NO_CONCILIADA` (ambos sobre el campo nombre). No hay otros.
+- **Aclaración:** que las filas duplicadas sean «el mismo producto con distinto laboratorio» es **la explicación de Andre**; la base no guarda el laboratorio de la fila excluida y no se comprobó.
+- HUAMANFAR tiene 518 productos y su importación confirmada aportó 517; la diferencia de 1 no proviene de esa importación. Tiene además 3 vistas previas sin confirmar (21–25/11), que no cambiaron el inventario.
+
+### Ubicaciones verificadas (publicadas)
+| Farmacia | Dirección publicada | Latitud | Longitud | Verificada | Horario |
+|---|---|---|---|---|---|
+| HUAMANFAR | URB. PRIMAVERA 103 | -13.162744 | -74.202336 | 2026-11-27 22:21 | 7 días |
+| STUART-FAR | Av. Ramon Castilla | -13.165375 | -74.216319 | 2026-11-27 17:34 | 7 días |
+| RHFARMA | Venezuela 432 | -13.156401 | -74.231189 | 2026-11-27 21:39 | **sin cargar** |
+| FARMAPIO | Av. Los Incas 718, JESUS NAZARENO | -13.151737 | -74.214058 | 2026-11-27 21:52 | 7 días |
+| FARMAPOINT | Los Primaverales | -13.171577 | -74.219610 | 2026-11-27 22:02 | **sin cargar** |
+
+- En las cinco, quien verificó es distinto de quien propuso.
+- **Prueba adicional (rechazo de ubicación):** HUAMANFAR tenía publicada una ubicación aprobada el 27/11 17:06 (-17.194986, -70.935827, lejos de Ayacucho). Andre rechazó una propuesta nueva a las **22:17**; la anterior **siguió publicada**. Después envió y aprobó la correcta a las 22:21. Aclaración de Andre: ese primer rechazo lo hizo creyendo que era el rechazo de T057.
+
+### Reserva de un cliente
+- HUAMANFAR · ibuprofeno 100 mg/5 ml · 1 unidad · creada 2026-11-27 17:06 · **ENTREGADA** 17:09.
+
+### Declarado por Andre (no deja rastro en la base)
+- **Búsqueda con varias ofertas, en lista y en mapa:** funcionó.
+- **Prueba de seguridad entre farmacias:** sin acceso a datos ajenos.
+
+### Omisiones y pendientes
+- **Omisión acordada:** la ubicación en mapa se probó con F07.1 (spec 021) y F07.2 (spec 024), ya integradas. (Sustituye la omisión «mapa pendiente de F07.1» del 26/11.)
+- **Pendiente opcional:** cargar el horario de RHFARMA y FARMAPOINT.

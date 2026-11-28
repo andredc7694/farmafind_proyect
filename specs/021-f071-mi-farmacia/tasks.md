@@ -1,0 +1,51 @@
+# Tasks: F07.1 — Mi farmacia (casilla solo con evidencia real en `evidence.md`)
+
+**Estado:** aprobado por Andre el 2026-11-26 («apruebo»). Leyenda: **[PUERTO]** = necesita PostgreSQL, API o el navegador en los puertos de la DEMO; se hace **solo después de que Andre termine T057** (o en un rato libre que él indique). **[PUERTA]** = me detengo a esperar su aprobación.
+
+## Fase 1 · SQL para revisión (sin puertos)
+- [X] T001 Redactar el SQL completo de `f07/007_platform_location_review.sql` en `specs/021-f071-mi-farmacia/sql-review/` (fuera de la carpeta de migraciones, para que no se aplique solo): concesión de plataforma, funciones SECURITY DEFINER, políticas nuevas y la función de lista para el revisor con solo datos públicos. Incluir la **matriz de pruebas** que demuestra que el revisor no lee inventario, reservas, personal, contacto ni documentos (FR-005, FR-010). Si exige tocar políticas de F07 o la restricción de F025: detenerse y avisar.
+- [X] T002 Redactar el SQL de `f07/008_opening_hours.sql` (horario, RLS y proyección pública) en la misma carpeta, con su matriz (FR-008, FR-010).
+- [X] T003 **[PUERTA]** Revisión y aprobación de Andre del SQL de T001 y T002 (hashes). Después, mover los archivos aprobados a `backend/migrations/f07/` sin cambiarlos.
+
+## Fase 2 · Servidor (sin puertos: unitarias y API con dobles)
+- [X] T004 Casos de uso, repositorio y router de revisión de plataforma: lista y decisión (aprobar o rechazar con motivo, evidencia y versión; solo la última pendiente; 403 para miembros o autores; 409 ante versión obsoleta). Pruebas unitarias y de API (FR-005, D-04).
+- [X] T005 Estado e historial de ubicación de la propia farmacia (`GET /farmacias/:id/ubicacion`), con «Reemplazada» calculada y autores mostrados sin identificadores internos. Pruebas (FR-006).
+- [X] T006 Validación de límites del Perú en la propuesta (servidor). Pruebas (FR-004).
+- [X] T007 Horario: casos de uso, routers privado y público, caché Redis con invalidación al guardar. Pruebas (FR-008).
+
+## Fase 3 · Pantalla (sin puertos: pruebas de componentes)
+- [X] T008 Pestaña «Mi farmacia» que sustituye a «Farmacia y ubicación»: contacto (sale de `/inventory`), dirección y ubicación (pin, una sola lectura del dispositivo con permiso, coordenadas), estado e historial. Pruebas (FR-001 a FR-004, FR-006).
+- [X] T009 Pantalla «Revisar ubicaciones» para el administrador de plataforma y enlace en el menú solo si el servidor lo permite. Pruebas (FR-005).
+- [X] T010 Editor de horario y su muestra en la búsqueda y el mapa públicos (escritorio y 390 px). Pruebas (FR-008).
+- [X] T011 Página `/mi-perfil` y enlace «Mi perfil» en «Mi cuenta», sin cambiar las reglas del perfil. Pruebas (FR-009).
+
+## Fase 4 · Base de datos y navegador [PUERTO]
+- [X] T012 [PUERTO] Pruebas SQL de `f025/017` en la base TEST técnica: solo el dueño recibe el permiso; trabajador y administrador global no; insert directo rechazado; reparación idempotente que respeta revocaciones y atribuye al revisor (FR-007).
+- [X] T013 [PUERTO] Matriz RLS de la revisión de plataforma en una base efímera (la de T001), con conexión reutilizada Alfa → Beta (SC-002).
+- [X] T014 [PUERTO] Matriz RLS del horario y su proyección pública (SC-004).
+- [X] T015 [PUERTO] E2E: el propietario propone, el administrador aprueba y aparece «Verificada» en el mapa; un rechazo no cambia lo publicado; horario visible; «Mi perfil» desde «Mi cuenta»; escritorio y 390 px (SC-001, SC-003, SC-004).
+- [X] T016 [PUERTO] Regresión: F07 completo, F02.5, F01.1, F03 y F08; `check`, build y contratos (SC-005).
+
+## Fase 5 · Cierre
+- [X] T017 Revisión de seguridad de las migraciones; `evidence.md`, `convergence.md`, `traceability.md` y `ESTADO.md`.
+- [X] T018 **[PUERTA]** Aplicación a la DEMO en un único reinicio con todo el SQL aprobado (`f025/017`, `f07/007`, `f07/008`). Incluye conceder la revisión de ubicaciones al revisor TEST de la DEMO (alta de datos, con autorización expresa de Andre). Reporte de HUAMANFAR antes y después, con inventario, importaciones y reservas intactos.
+- [X] T019 **[PUERTA]** `acceptance.md`: aceptación humana de Andre (nunca autoaprobar). Con su ACEPTO: PR y fusión con merge commit solo si está MERGEABLE y CLEAN, con CI en verde, sin secretos y con la regresión aplicable aprobada.
+
+## Dependencias
+T001–T002 → T003 → T013, T014 (y el código de T004 y T007 se ajusta al SQL aprobado). T004–T011 pueden avanzar en paralelo con T057 de Andre (sin puertos). T012–T016 después de T057. T018 después de T016. T019 al final.
+
+## Enmienda 2026-11-26 · Sugerencia de dirección y ubicación (FR-013 a FR-016)
+- [X] T020 Servidor: puerto `AddressSuggestions`, caso de uso con límite de 1/s, caché de 24 h y 500 entradas, tiempo máximo e interruptor apagado por defecto; adaptador Nominatim (Perú, sesgo por ciudad, User-Agent genérico, sin registros de direcciones). Pruebas con un `fetch` simulado (FR-013, FR-016).
+- [X] T021 Rutas `POST /farmacias/:id/ubicacion/sugerencias/buscar` y `/inversa` con sesión, CSRF y `GEO_LOCATION_PROPOSE`. Interruptor encendido solo en la composición TEST/DEMO. Pruebas HTTP (FR-013, FR-014, FR-016).
+- [X] T022 Lista interna de ciudades y distritos del Perú y centrado del mapa al escribir la ciudad, sin servicio externo. Pruebas (FR-015).
+- [X] T023 Formulario: «Buscar en el mapa», marcador arrastrable con búsqueda inversa y aviso, fuente automática, evidencia opcional con advertencia, «Opciones avanzadas», etiquetas encima y espacio para la burbuja. Pruebas con servicio simulado (FR-013 a FR-015).
+- [X] T024 Copia temporal (3001 y 5174) con el interruptor encendido y revisión manual de Andre con pocas consultas reales. No se toca la DEMO ni su Redis.
+- [X] T025 Registro de la decisión (servicio nuevo, gratuito, límites, datos que salen y revisión en F09), evidencia y ESTADO.
+
+## Enmienda 2026-11-26 · Historial de ubicaciones (FR-017, FR-018)
+- [X] T026 Aprobación de Andre de la enmienda, D-06 A y el SQL 009 (`21B8A3F6445C9DDA1DDD756663D5AE27631E11827DF859749A849297555845BF`).
+- [X] T027 Copiar la 009 sin cambios a `backend/migrations/f07/` y añadirla a la lista cerrada con su hash.
+- [X] T028 Servidor: `GET /api/v1/platform/location-proposals/historial` (filtro, 20 por página, solo los campos aprobados). Pruebas unitarias y HTTP.
+- [X] T029 Pantalla: filtro, historial paginado y formulario de decisión ordenado. Pruebas.
+- [X] T030 [PUERTO] Matriz H1 a H8 en una base efímera (la de la copia temporal, nunca la DEMO).
+- [X] T031 Resultado en la copia temporal (3001 y 5174), sin tocar la DEMO, su base ni su Redis.

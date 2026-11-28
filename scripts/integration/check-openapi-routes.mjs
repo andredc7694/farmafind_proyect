@@ -8,11 +8,13 @@ const contracts=[
   ['specs/001-f00-bootstrap-proyecto/contracts/bootstrap.openapi.yaml',''],
   ['specs/002-f01-identidad-multitenant/contracts/identity.openapi.yaml','/api/v1'],
   ['specs/003-f02-catalogo-inventario/contracts/inventory.openapi.yaml','/api/v1'],
-  ['specs/004-f03-consultas-publicas/contracts/public-search.openapi.yaml','/api/v1'],
+  // F03.1 (spec 022): versión enmendada del contrato F03 (la carpeta 004 aprobada no se edita).
+  ['specs/023-f032-busqueda-texto-completo/contracts/public-search.openapi.yaml','/api/v1'],
   ['specs/005-f04-reservas/contracts/reservations.openapi.yaml',''],
   ['specs/006-f05-notificaciones/contracts/notifications.openapi.yaml',''],
   ['specs/007-f06-asistente-ia/contracts/assistant.openapi.yaml',''],
-  ['specs/009-f061-asistente-conversacional/contracts/conversation.openapi.yaml',''],
+  // F06.2 (spec 025): contrato de conversación 2.0.0 (la carpeta 009 aprobada no se edita).
+  ['specs/025-f062-asistente-mejorado/contracts/conversation.openapi.yaml',''],
 ];
 const routeFiles=[
   ['backend/src/bootstrap/health.ts',''],
